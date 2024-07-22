@@ -15,19 +15,24 @@ class GameScene: SKScene {
     
     override func didMove(to view: SKView) {
         self.physicsWorld.gravity = CGVector(dx: 0, dy: -1.0)
-        self.mermaid = Mermaid()
+        //self.mermaid = Mermaid()
         
-        if let head = mermaid?.headNode {
-            self.addChild(head)
-        }
+//        if let head = mermaid?.headNode {
+//            self.addChild(head)
+//        }
         
-        self.mermaid?.startWaveAnimation()
-        self.mermaid?.applyMainForm()
+        let animatedSprite = FrameAnimationManager.shared.createAnimatedSprite(for: .ester)
+        // Posiciona o sprite no centro da tela
+        animatedSprite.position = CGPoint(x: frame.midX, y: frame.midY)
+        addChild(animatedSprite)
+        
+        //self.mermaid?.startWaveAnimation()
+        //self.mermaid?.applyMainForm()
         setUpCamera()
         self.currentZone = .mid
         self.backgroundColor = ColorManager.shared.waters["mid"]!
         
-        startMermaidRandomMovement()
+        //startMermaidRandomMovement()
     }
     
     func setUpCamera() {
@@ -36,15 +41,15 @@ class GameScene: SKScene {
         self.addChild(cameraNode)
         self.cameraNode = cameraNode
         
-        if let headNode = mermaid?.headNode {
-        //    cameraNode.position = headNode.position
-        }
+//        if let headNode = mermaid?.headNode {
+//        //    cameraNode.position = headNode.position
+//        }
         
         self.cameraNode?.setScale(7.0)
     }
     
     override func update(_ currentTime: TimeInterval) {
-        guard let headNode = mermaid?.headNode, let cameraNode = cameraNode else { return }
+//        guard let headNode = mermaid?.headNode, let cameraNode = cameraNode else { return }
         //cameraNode.position = headNode.position
         updateBackgroundColor()
     }

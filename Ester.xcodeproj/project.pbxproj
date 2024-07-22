@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		72334A7E2C4EF1E100D24502 /* FrameAnimationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72334A7D2C4EF1E100D24502 /* FrameAnimationManager.swift */; };
 		7271E5662C41BA89008CE3C8 /* MermaidEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */; };
 		7271E5682C41BBD6008CE3C8 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7271E5672C41BBD5008CE3C8 /* Model.swift */; };
 		72D0207A2C1905F9002F11FC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D020792C1905F9002F11FC /* AppDelegate.swift */; };
@@ -20,6 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		72334A7D2C4EF1E100D24502 /* FrameAnimationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameAnimationManager.swift; sourceTree = "<group>"; };
 		7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEntity.swift; sourceTree = "<group>"; };
 		7271E5672C41BBD5008CE3C8 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		72D020762C1905F9002F11FC /* Ester.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ester.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -44,6 +46,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		72334A7C2C4EF12D00D24502 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				72334A7D2C4EF1E100D24502 /* FrameAnimationManager.swift */,
+				72D1A7AD2C1BD681005213A4 /* ColorManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
 		7271E5642C41BA6E008CE3C8 /* Entitys */ = {
 			isa = PBXGroup;
 			children = (
@@ -72,6 +83,7 @@
 		72D020782C1905F9002F11FC /* Ester */ = {
 			isa = PBXGroup;
 			children = (
+				72334A7C2C4EF12D00D24502 /* Managers */,
 				7271E5642C41BA6E008CE3C8 /* Entitys */,
 				72D020792C1905F9002F11FC /* AppDelegate.swift */,
 				72D0207F2C1905F9002F11FC /* GameScene.swift */,
@@ -80,7 +92,6 @@
 				72D020832C1905F9002F11FC /* Main.storyboard */,
 				72D020862C1905FC002F11FC /* Assets.xcassets */,
 				72D020882C1905FC002F11FC /* LaunchScreen.storyboard */,
-				72D1A7AD2C1BD681005213A4 /* ColorManager.swift */,
 			);
 			path = Ester;
 			sourceTree = "<group>";
@@ -164,6 +175,7 @@
 				72D020802C1905F9002F11FC /* GameScene.swift in Sources */,
 				72D1A7AE2C1BD681005213A4 /* ColorManager.swift in Sources */,
 				72D020822C1905F9002F11FC /* GameViewController.swift in Sources */,
+				72334A7E2C4EF1E100D24502 /* FrameAnimationManager.swift in Sources */,
 				72D0207A2C1905F9002F11FC /* AppDelegate.swift in Sources */,
 				7271E5662C41BA89008CE3C8 /* MermaidEntity.swift in Sources */,
 				72D1A7AC2C1BC239005213A4 /* Mermaid.swift in Sources */,
@@ -324,7 +336,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -333,6 +345,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = owl.Ester;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -352,7 +368,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -361,6 +377,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = owl.Ester;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
