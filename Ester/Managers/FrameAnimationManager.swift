@@ -12,16 +12,23 @@ class FrameAnimationManager {
     static let shared = FrameAnimationManager()
     
     enum AnimationType: String {
-        case ester = "Ester"
+        case MermBody = "MermMain"
+        case MermFin = "MermFin"
+        case MermScale = "MermScale"
         
         var textures: [SKTexture] {
             return FrameAnimationManager.loadTextures(for: self)
         }
         
         var frameTime: TimeInterval {
+            let mermIdle = 0.03
             switch self {
-            case .ester:
-                return 0.05
+            case .MermBody:
+                return mermIdle
+            case .MermFin:
+                return mermIdle
+            case .MermScale:
+                return mermIdle
             }
         }
     }

@@ -21,10 +21,26 @@ class GameScene: SKScene {
 //            self.addChild(head)
 //        }
         
-        let animatedSprite = FrameAnimationManager.shared.createAnimatedSprite(for: .ester)
-        // Posiciona o sprite no centro da tela
-        animatedSprite.position = CGPoint(x: frame.midX, y: frame.midY)
-        addChild(animatedSprite)
+        let mermbody = FrameAnimationManager.shared.createAnimatedSprite(for: .MermBody)
+        let mermFin = FrameAnimationManager.shared.createAnimatedSprite(for: .MermFin)
+        mermFin.zPosition = 1
+        let mermScale = FrameAnimationManager.shared.createAnimatedSprite(for: .MermScale)
+        mermScale.zPosition = 2
+        
+        mermbody.addChild(mermFin)
+        mermbody.addChild(mermScale)
+        
+        mermbody.position = CGPoint(x: 0, y: 0)
+        mermbody.color = ColorManager.shared.upper["skinColor"]!
+        mermbody.colorBlendFactor = 1.0
+        
+        mermFin.color = ColorManager.shared.upper["vibrant2"]!
+        mermFin.colorBlendFactor = 1.0
+        
+        mermScale.color = ColorManager.shared.upper["vibrant1"]!
+        mermScale.colorBlendFactor = 1.0
+        
+        addChild(mermbody)
         
         //self.mermaid?.startWaveAnimation()
         //self.mermaid?.applyMainForm()
