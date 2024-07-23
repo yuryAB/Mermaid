@@ -4,6 +4,7 @@ class GameScene: SKScene {
     var cameraNode: SKCameraNode?
     var mermaid: Mermaid?
     var currentZone: DepthZone?
+    let mermHead = MermaidHead()
     
     enum DepthZone: String {
         case surface
@@ -21,6 +22,43 @@ class GameScene: SKScene {
 //            self.addChild(head)
 //        }
         
+
+        
+        //self.mermaid?.startWaveAnimation()
+        //self.mermaid?.applyMainForm()
+        
+        
+        //setupNewMermaid()
+        setupNewMermHead()
+        setupCamera()
+        self.currentZone = .mid
+        self.backgroundColor = ColorManager.shared.waters["mid"]!
+        
+        //startMermaidRandomMovement()
+    }
+    
+    func setupNewMermHead() {
+        self.addChild(self.mermHead.headNode)
+//        let mermHead = SKSpriteNode(texture: SKTexture(imageNamed: "MermHead"))
+//        mermHead.color = ColorManager.shared.upper["skinColor"]!
+//        mermHead.colorBlendFactor = 1.0
+//        self.addChild(mermHead)
+//        
+//        
+//        let mermHairFront = SKSpriteNode(texture: SKTexture(imageNamed: "MermHairFront"))
+//        mermHairFront.zPosition = 1
+//        mermHairFront.color = ColorManager.shared.upper["hairColor"]!
+//        mermHairFront.colorBlendFactor = 1.0
+//        mermHead.addChild(mermHairFront)
+//        
+//        let mermHairBack = SKSpriteNode(texture: SKTexture(imageNamed: "MermHairBack"))
+//        mermHairBack.zPosition = -1
+//        mermHairBack.color = ColorManager.shared.upper["hairColor"]!
+//        mermHairBack.colorBlendFactor = 1.0
+//        mermHead.addChild(mermHairBack)
+    }
+    
+    func setupNewMermaid() {
         let mermbody = FrameAnimationManager.shared.createAnimatedSprite(for: .MermBody)
         let mermFin = FrameAnimationManager.shared.createAnimatedSprite(for: .MermFin)
         mermFin.zPosition = 1
@@ -41,17 +79,9 @@ class GameScene: SKScene {
         mermScale.colorBlendFactor = 1.0
         
         addChild(mermbody)
-        
-        //self.mermaid?.startWaveAnimation()
-        //self.mermaid?.applyMainForm()
-        setUpCamera()
-        self.currentZone = .mid
-        self.backgroundColor = ColorManager.shared.waters["mid"]!
-        
-        //startMermaidRandomMovement()
     }
     
-    func setUpCamera() {
+    func setupCamera() {
         let cameraNode = SKCameraNode()
         self.camera = cameraNode
         self.addChild(cameraNode)
@@ -61,7 +91,7 @@ class GameScene: SKScene {
 //        //    cameraNode.position = headNode.position
 //        }
         
-        self.cameraNode?.setScale(7.0)
+        self.cameraNode?.setScale(4.0)
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -136,7 +166,8 @@ class GameScene: SKScene {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         mermaid?.updateAttributesForTouchBegan()
-        zoomOutCamera()
+        self.mermHead.setPositionForTest()
+        //zoomOutCamera()
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -161,7 +192,7 @@ class GameScene: SKScene {
     }
     
     func resetCameraZoom() {
-        let resetZoomAction = SKAction.scale(to: 7.0, duration: 2.0)
+        let resetZoomAction = SKAction.scale(to: 4.0, duration: 2.0)
         cameraNode?.run(resetZoomAction)
     }
 }
