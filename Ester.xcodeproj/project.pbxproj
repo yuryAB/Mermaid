@@ -10,6 +10,10 @@
 		72334A7E2C4EF1E100D24502 /* FrameAnimationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72334A7D2C4EF1E100D24502 /* FrameAnimationManager.swift */; };
 		72334A812C503BBA00D24502 /* MermaidHead.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72334A802C503BBA00D24502 /* MermaidHead.swift */; };
 		72334A842C50415300D24502 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72334A832C50415300D24502 /* Extensions.swift */; };
+		72334A862C5060BA00D24502 /* MermaidBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72334A852C5060BA00D24502 /* MermaidBody.swift */; };
+		72334A882C5061B600D24502 /* Mermaid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72334A872C5061B600D24502 /* Mermaid.swift */; };
+		72334A8A2C5068A600D24502 /* MermaidArms.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72334A892C5068A600D24502 /* MermaidArms.swift */; };
+		72334A8C2C507C9500D24502 /* MermaidMoveModeProtocol .swift in Sources */ = {isa = PBXBuildFile; fileRef = 72334A8B2C507C9500D24502 /* MermaidMoveModeProtocol .swift */; };
 		7271E5662C41BA89008CE3C8 /* MermaidEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */; };
 		7271E5682C41BBD6008CE3C8 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7271E5672C41BBD5008CE3C8 /* Model.swift */; };
 		72D0207A2C1905F9002F11FC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D020792C1905F9002F11FC /* AppDelegate.swift */; };
@@ -18,7 +22,6 @@
 		72D020852C1905F9002F11FC /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 72D020842C1905F9002F11FC /* Base */; };
 		72D020872C1905FC002F11FC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D020862C1905FC002F11FC /* Assets.xcassets */; };
 		72D0208A2C1905FC002F11FC /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 72D020892C1905FC002F11FC /* Base */; };
-		72D1A7AC2C1BC239005213A4 /* Mermaid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D1A7AB2C1BC239005213A4 /* Mermaid.swift */; };
 		72D1A7AE2C1BD681005213A4 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D1A7AD2C1BD681005213A4 /* ColorManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -26,6 +29,10 @@
 		72334A7D2C4EF1E100D24502 /* FrameAnimationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameAnimationManager.swift; sourceTree = "<group>"; };
 		72334A802C503BBA00D24502 /* MermaidHead.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidHead.swift; sourceTree = "<group>"; };
 		72334A832C50415300D24502 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		72334A852C5060BA00D24502 /* MermaidBody.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidBody.swift; sourceTree = "<group>"; };
+		72334A872C5061B600D24502 /* Mermaid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mermaid.swift; sourceTree = "<group>"; };
+		72334A892C5068A600D24502 /* MermaidArms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidArms.swift; sourceTree = "<group>"; };
+		72334A8B2C507C9500D24502 /* MermaidMoveModeProtocol .swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MermaidMoveModeProtocol .swift"; sourceTree = "<group>"; };
 		7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEntity.swift; sourceTree = "<group>"; };
 		7271E5672C41BBD5008CE3C8 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		72D020762C1905F9002F11FC /* Ester.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ester.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -35,7 +42,6 @@
 		72D020842C1905F9002F11FC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		72D020862C1905FC002F11FC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		72D020892C1905FC002F11FC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		72D1A7AB2C1BC239005213A4 /* Mermaid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mermaid.swift; sourceTree = "<group>"; };
 		72D1A7AD2C1BD681005213A4 /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -64,6 +70,10 @@
 			isa = PBXGroup;
 			children = (
 				72334A802C503BBA00D24502 /* MermaidHead.swift */,
+				72334A852C5060BA00D24502 /* MermaidBody.swift */,
+				72334A892C5068A600D24502 /* MermaidArms.swift */,
+				72334A872C5061B600D24502 /* Mermaid.swift */,
+				72334A8B2C507C9500D24502 /* MermaidMoveModeProtocol .swift */,
 			);
 			path = MermaidClasses;
 			sourceTree = "<group>";
@@ -110,7 +120,6 @@
 				72D020792C1905F9002F11FC /* AppDelegate.swift */,
 				72D0207F2C1905F9002F11FC /* GameScene.swift */,
 				72D020812C1905F9002F11FC /* GameViewController.swift */,
-				72D1A7AB2C1BC239005213A4 /* Mermaid.swift */,
 				72D020832C1905F9002F11FC /* Main.storyboard */,
 				72D020862C1905FC002F11FC /* Assets.xcassets */,
 				72D020882C1905FC002F11FC /* LaunchScreen.storyboard */,
@@ -193,16 +202,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				72334A862C5060BA00D24502 /* MermaidBody.swift in Sources */,
 				7271E5682C41BBD6008CE3C8 /* Model.swift in Sources */,
+				72334A8A2C5068A600D24502 /* MermaidArms.swift in Sources */,
 				72D020802C1905F9002F11FC /* GameScene.swift in Sources */,
+				72334A882C5061B600D24502 /* Mermaid.swift in Sources */,
 				72D1A7AE2C1BD681005213A4 /* ColorManager.swift in Sources */,
 				72D020822C1905F9002F11FC /* GameViewController.swift in Sources */,
 				72334A7E2C4EF1E100D24502 /* FrameAnimationManager.swift in Sources */,
+				72334A8C2C507C9500D24502 /* MermaidMoveModeProtocol .swift in Sources */,
 				72334A842C50415300D24502 /* Extensions.swift in Sources */,
 				72D0207A2C1905F9002F11FC /* AppDelegate.swift in Sources */,
 				72334A812C503BBA00D24502 /* MermaidHead.swift in Sources */,
 				7271E5662C41BA89008CE3C8 /* MermaidEntity.swift in Sources */,
-				72D1A7AC2C1BC239005213A4 /* Mermaid.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

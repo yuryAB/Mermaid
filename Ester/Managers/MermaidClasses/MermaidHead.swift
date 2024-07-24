@@ -12,8 +12,8 @@ class MermaidHead {
     var headNode: SKSpriteNode
     
     private var hairFrontNode: SKSpriteNode
-    private var hairBackNode: SKSpriteNode
-    private var headpositon: HeadPosition = .idle
+    var hairBackNode: SKSpriteNode
+    private var headpositon: MermaidMoveMode = .idle
     
     
     init() {
@@ -34,7 +34,7 @@ class MermaidHead {
         headNode.addChild(hairBackNode)
     }
     
-    func setIdlePosition() {
+    func setIdleMoveMode() {
         if self.headpositon != .idle {
             let rotateAction = SKAction.rotate(toDegrees: 0, duration: 1)
             let posAction = SKAction.move(to: CGPoint.zero, duration: 1)
@@ -46,7 +46,7 @@ class MermaidHead {
         
     }
     
-    func setRightPosition() {
+    func setRightMoveMode() {
         if self.headpositon != .right {
             
             let rotateAction = SKAction.rotate(toDegrees: -90, duration: 1)
@@ -62,7 +62,7 @@ class MermaidHead {
         }
     }
     
-    func setLeftPosition() {
+    func setLeftMoveMode() {
         if self.headpositon != .left {
             
             let rotateAction = SKAction.rotate(toDegrees: 90, duration: 1)
@@ -78,7 +78,7 @@ class MermaidHead {
         }
     }
     
-    func setDownPosition() {
+    func setDownMoveMode() {
         if self.headpositon != .down {
             var degree:CGFloat = 0
             
@@ -99,7 +99,7 @@ class MermaidHead {
         }
     }
     
-    func setUpPosition() {
+    func setUpMoveMode() {
         if self.headpositon != .up {
             let rotateAction = SKAction.rotate(toDegrees: 0, duration: 1)
             let posAction = SKAction.move(to: CGPoint(x: 0, y: -25), duration: 1)
@@ -116,25 +116,24 @@ class MermaidHead {
     func setPositionForTest() {
         switch self.headpositon {
         case .idle:
-            self.setRightPosition()
+            self.setRightMoveMode()
         case .up:
-            self.setLeftPosition()
+            self.setLeftMoveMode()
         case .down:
-            self.setIdlePosition()
+            self.setIdleMoveMode()
         case .right:
-            setUpPosition()
+            setUpMoveMode()
         case .left:
-            setDownPosition()
+            setDownMoveMode()
         }
     }
 }
 
-extension MermaidHead {
-    enum HeadPosition {
-        case idle
-        case right
-        case left
-        case up
-        case down
-    }
+
+enum MermaidMoveMode {
+    case idle
+    case right
+    case left
+    case up
+    case down
 }
