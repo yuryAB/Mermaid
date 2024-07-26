@@ -8,33 +8,21 @@
 import SpriteKit
 
 protocol MermaidMoveModeProtocol {
-    var armMoveMode: MermaidMoveMode { get set }
-    var right: SKSpriteNode { get }
-    var left: SKSpriteNode { get }
-    var rPosition: CGPoint { get }
-    var lPosition: CGPoint { get }
-    
     func setIdleMoveMode()
+    func setSwingMoveMode()
+    func setFastMoveMode()
+    func setUpMoveMode()
+    func setDownMoveMode()
     func setRightMoveMode()
     func setLeftMoveMode()
-    func setDownMoveMode()
-    func setUpMoveMode()
-    func setPositionForTest()
 }
 
-extension MermaidMoveModeProtocol {
-    func setPositionForTest() {
-        switch self.armMoveMode {
-        case .idle:
-            self.setRightMoveMode()
-        case .up:
-            self.setLeftMoveMode()
-        case .down:
-            self.setIdleMoveMode()
-        case .right:
-            setUpMoveMode()
-        case .left:
-            setDownMoveMode()
-        }
-    }
+enum MermaidMoveMode {
+    case idle
+    case swing
+    case fast
+    case up
+    case down
+    case right
+    case left
 }

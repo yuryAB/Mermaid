@@ -8,32 +8,32 @@
 import Foundation
 import SpriteKit
 
+enum AnimationType: String {
+    case MermBody = "MermMain"
+    case MermFin = "MermFin"
+    case MermScale = "MermScale"
+    
+    var textures: [SKTexture] {
+        return FrameAnimationManager.loadTextures(for: self)
+    }
+    
+    var frameTime: TimeInterval {
+        let mermIdle = 0.03
+        switch self {
+        case .MermBody:
+            return mermIdle
+        case .MermFin:
+            return mermIdle
+        case .MermScale:
+            return mermIdle
+        }
+    }
+}
+
 class FrameAnimationManager {
     static let shared = FrameAnimationManager()
     
-    enum AnimationType: String {
-        case MermBody = "MermMain"
-        case MermFin = "MermFin"
-        case MermScale = "MermScale"
-        
-        var textures: [SKTexture] {
-            return FrameAnimationManager.loadTextures(for: self)
-        }
-        
-        var frameTime: TimeInterval {
-            let mermIdle = 0.03
-            switch self {
-            case .MermBody:
-                return mermIdle
-            case .MermFin:
-                return mermIdle
-            case .MermScale:
-                return mermIdle
-            }
-        }
-    }
-    
-    private static func loadTextures(for animationType: AnimationType) -> [SKTexture] {
+    static func loadTextures(for animationType: AnimationType) -> [SKTexture] {
         let folderName = animationType.rawValue
         let baseFileName = "\(folderName)_frame_"
         var textures: [SKTexture] = []
@@ -65,7 +65,7 @@ class FrameAnimationManager {
         
         let animation = SKAction.animate(with: textures, timePerFrame: frameTime)
         
-        sprite.run(SKAction.repeatForever(animation))
+        sprite.run(SKAction.repeatForever(animation), withKey: animationType.rawValue)
         
         return sprite
     }
