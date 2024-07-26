@@ -44,18 +44,6 @@ extension Mermaid: MermaidMoveModeProtocol {
         body.setIdleMoveMode()
     }
     
-    func setRightMoveMode() {
-        arms.setRightMoveMode()
-        head.setRightMoveMode()
-        body.setRightMoveMode()
-    }
-    
-    func setLeftMoveMode() {
-        arms.setLeftMoveMode()
-        head.setLeftMoveMode()
-        body.setLeftMoveMode()
-    }
-    
     func setUpMoveMode() {
         arms.setUpMoveMode()
         head.setUpMoveMode()
@@ -66,5 +54,17 @@ extension Mermaid: MermaidMoveModeProtocol {
         arms.setDownMoveMode()
         head.setDownMoveMode()
         body.setDownMoveMode()
+    }
+    
+    func setRightMoveMode() {
+        arms.setRightMoveMode()
+        head.setRightMoveMode()
+        body.setRightMoveMode()
+    }
+    
+    func setLeftMoveMode() {
+        arms.setLeftMoveMode()
+        head.setLeftMoveMode()
+        body.setLeftMoveMode()
     }
 }
