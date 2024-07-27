@@ -13,7 +13,7 @@ class MermaidHead {
     
     private var hairFrontNode: SKSpriteNode
     var hairBackNode: SKSpriteNode
-    var headPoint: SKSpriteNode
+    var headBase: SKSpriteNode
     private var headpositon: MermaidMoveMode = .idle
     
     init() {
@@ -32,13 +32,13 @@ class MermaidHead {
         hairBackNode.color = ColorManager.shared.upper["hairColor"]!
         hairBackNode.colorBlendFactor = 1.0
         
-        headPoint = SKSpriteNode(texture: SKTexture(imageNamed: "MermHairBack"))
-        headPoint.zPosition = -1
-        headPoint.color = .clear
-        headPoint.colorBlendFactor = 1.0
-        headPoint.addChild(hairBackNode)
+        headBase = SKSpriteNode(texture: SKTexture(imageNamed: "MermHairBack"))
+        headBase.zPosition = -1
+        headBase.color = .clear
+        headBase.colorBlendFactor = 1.0
+        headBase.addChild(hairBackNode)
         
-        headNode.addChild(headPoint)
+        headNode.addChild(headBase)
     }
     
     private func hairBackAnimation() {
@@ -65,7 +65,7 @@ extension MermaidHead: MermaidMoveModeProtocol {
         
         idleAction.eaeInEaseOut()
         
-        self.headPoint.run(idleAction)
+        self.headBase.run(idleAction)
         self.hairFrontNode.run(idleAction)
     }
     
@@ -78,7 +78,7 @@ extension MermaidHead: MermaidMoveModeProtocol {
         upActionForHairBack.eaeInEaseOut()
         upActionForHairFront.eaeInEaseOut()
         
-        self.headPoint.run(upActionForHairBack)
+        self.headBase.run(upActionForHairBack)
         self.hairFrontNode.run(upActionForHairFront)
     }
     
@@ -93,7 +93,7 @@ extension MermaidHead: MermaidMoveModeProtocol {
         downActionForHairBack.eaeInEaseOut()
         downActionForHairfront.eaeInEaseOut()
         
-        self.headPoint.run(downActionForHairBack)
+        self.headBase.run(downActionForHairBack)
         self.hairFrontNode.run(downActionForHairfront)
     }
     
@@ -106,7 +106,7 @@ extension MermaidHead: MermaidMoveModeProtocol {
         rightActionForHairBack.eaeInEaseOut()
         rightActionForHairFront.eaeInEaseOut()
         
-        self.headPoint.run(rightActionForHairBack)
+        self.headBase.run(rightActionForHairBack)
         self.hairFrontNode.run(rightActionForHairFront)
     }
     
@@ -119,7 +119,7 @@ extension MermaidHead: MermaidMoveModeProtocol {
         leftActionForHairBack.eaeInEaseOut()
         leftActionForHairFront.eaeInEaseOut()
         
-        self.headPoint.run(leftActionForHairBack)
+        self.headBase.run(leftActionForHairBack)
         self.hairFrontNode.run(leftActionForHairFront)
     }
 }

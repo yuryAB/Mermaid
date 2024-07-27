@@ -13,13 +13,17 @@ class Mermaid {
     var head = MermaidHead()
     var body = MermaidBody()
     var arms = MermaidArms()
+    var face = MermaidFace()
     
     init() {
         mermaid = SKSpriteNode()
         
         body.body.position.y = -220
         body.body.zPosition = 1
-        head.headPoint.addChild(body.body)
+        head.headBase.addChild(body.body)
+        
+        face.base.zPosition = 3
+        head.headNode.addChild(face.base)
         
         body.body.addChild(arms.left)
         body.body.addChild(arms.right)
