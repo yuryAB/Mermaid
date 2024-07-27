@@ -41,6 +41,55 @@ class MermaidArms {
         left.zPosition = 3
         left.position = lPosition
     }
+    
+    
+    private func moveArms(to position: Orientation) {
+        var increment:CGFloat = 45
+        
+        if position == .vertical {
+            increment = 0
+        }
+        
+        let moveRightArm = SKAction.move(to: CGPoint(x: rPosition.x - increment, y: rPosition.y),
+                                         duration: 1.0)
+        let moveLeftArm = SKAction.move(to: CGPoint(x: lPosition.x + increment, y: lPosition.y),
+                                        duration: 1.0)
+        
+        right.run(moveRightArm)
+        left.run(moveLeftArm)
+    }
+    
+    private func leftArmRotationAction(to rotation: Rotation = .up) -> SKAction {
+        var degree: CGFloat = 0
+        var zpos: CGFloat = 3
+        
+        if rotation == .down {
+            degree = 180
+            zpos = -1
+        }
+        
+        right.zPosition = zpos
+        
+        return .rotate(toDegrees: -degree, duration: 1)
+    }
+    
+    private func rightArmRotationAction(to rotation: Rotation = .up) -> SKAction {
+        var degree: CGFloat = 0
+        var zpos: CGFloat = 3
+        
+        if rotation == .down {
+            degree = 180
+            zpos = -3
+        }
+        right.zPosition = zpos
+        
+        return .rotate(toDegrees: degree, duration: 1)
+    }
+    
+    private func removeAllAnimations() {
+        self.right.removeAllActions()
+        self.left.removeAllActions()
+    }
 }
 
 //MARK: - MermaidMoveModeProtocol
@@ -70,33 +119,45 @@ extension MermaidArms: MermaidMoveModeProtocol {
     func setDownMoveMode() {
         removeAllAnimations()
         moveArms(to: .vertical)
-        rotateArms(to: .down)
-        right.zPosition = 0
-        left.zPosition = 0
         
-        let moveRightArm = SKAction.move(to: CGPoint(x: rPosition.x, y: rPosition.y+200),
-                                         duration: 1.0)
-        let moveLeftArm = SKAction.move(to: CGPoint(x: lPosition.x, y: lPosition.y+200),
-                                        duration: 1.0)
+        let movedown:SKAction = .moveTo(y: rPosition.y+200, duration: 1.0)
+        let moveup:SKAction = .moveTo(y: rPosition.y, duration: 0.5)
         
-        right.run(moveRightArm)
-        left.run(moveLeftArm)
+        let rArmDown:SKAction = .group([rightArmRotationAction(to: .down),movedown])
+        
+        let lArmDown:SKAction = .group([leftArmRotationAction(to: .down),movedown])
+        
+        let wait:SKAction = .wait(forDuration: 3)
+        
+        let rArmUp:SKAction = .group([rightArmRotationAction(),moveup])
+        let lArmUp:SKAction = .group([leftArmRotationAction(),moveup])
+        
+        let swing:SKAction = .repeatForever(.sequence([
+            .rotate(toDegrees: 6, duration: 1),
+            .rotate(toDegrees: -6, duration: 1)]))
+        
+        let rArmDownUp:SKAction = .sequence([rArmDown, wait, rArmUp, swing])
+        let lArmDownUp:SKAction = .sequence([lArmDown, wait, lArmUp, swing])
+        
+        right.run(rArmDownUp)
+        left.run(lArmDownUp)
     }
     
     func setUpMoveMode() {
         removeAllAnimations()
         moveArms(to: .vertical)
-        rotateArms()
         
         let duration: Double = 0.5
         let firstDegree: CGFloat = 7
         let lastDegree: CGFloat = -7
         
         let sequenceR = SKAction.repeatForever(.sequence([
+            rightArmRotationAction(),
             .rotate(toDegrees: firstDegree, duration: duration),
             .rotate(toDegrees: lastDegree, duration: duration+1)]))
         
         let sequenceL = SKAction.repeatForever(.sequence([
+            leftArmRotationAction(),
             .rotate(toDegrees: -firstDegree, duration: duration),
             .rotate(toDegrees: -lastDegree, duration: duration+1)]))
         
@@ -112,56 +173,44 @@ extension MermaidArms: MermaidMoveModeProtocol {
     func setRightMoveMode() {
         removeAllAnimations()
         moveArms(to: .horizontal)
-        rotateArms()
-        right.zPosition = 0
+        right.zPosition = -1
         
+        let duration: Double = 1
+        let firstDegree: CGFloat = 5
+        let lastDegree: CGFloat = -12
+        
+        let rightMoveModeAction = SKAction.repeatForever(.sequence([
+            .rotate(toDegrees: -firstDegree, duration: duration),
+            .rotate(toDegrees: -lastDegree, duration: duration+1)]))
+        
+        rightMoveModeAction.timingMode = .easeInEaseOut
+        
+        right.run(rightArmRotationAction())
+        right.run(rightMoveModeAction)
+        
+        left.run(leftArmRotationAction())
+        left.run(rightMoveModeAction)
     }
     
     func setLeftMoveMode() {
         removeAllAnimations()
         moveArms(to: .horizontal)
-        rotateArms()
-        right.zPosition = 0
+        right.zPosition = -1
         
-    }
-    
-    private func moveArms(to position: Orientation) {
-        var increment:CGFloat = 40
+        let duration: Double = 1
+        let firstDegree: CGFloat = 5
+        let lastDegree: CGFloat = -12
         
-        if position == .vertical {
-            increment = 0
-        }
+        let rightMoveModeAction = SKAction.repeatForever(.sequence([
+            .rotate(toDegrees: firstDegree, duration: duration),
+            .rotate(toDegrees: lastDegree, duration: duration+1)]))
         
-        let moveRightArm = SKAction.move(to: CGPoint(x: rPosition.x - increment, y: rPosition.y), 
-                                         duration: 1.0)
-        let moveLeftArm = SKAction.move(to: CGPoint(x: lPosition.x + increment, y: lPosition.y), 
-                                        duration: 1.0)
+        rightMoveModeAction.timingMode = .easeInEaseOut
         
-        right.run(moveRightArm)
-        left.run(moveLeftArm)
-    }
-    
-    private func rotateArms(to rotation: Rotation = .up) {
-        var degree:CGFloat = 0
-        var zpos:CGFloat = 3
+        right.run(rightArmRotationAction())
+        right.run(rightMoveModeAction)
         
-        if rotation == .down {
-            degree = 180
-            zpos = 0
-        }
-        
-        let rotationRAction = SKAction.rotate(toDegrees: degree, duration: 1)
-        let rotationLAction = SKAction.rotate(toDegrees: degree, duration: 1)
-        
-        right.zPosition = zpos
-        left.zPosition = zpos
-        
-        right.run(rotationRAction)
-        left.run(rotationLAction)
-    }
-    
-    private func removeAllAnimations() {
-        self.right.removeAllActions()
-        self.left.removeAllActions()
+        left.run(leftArmRotationAction())
+        left.run(rightMoveModeAction)
     }
 }
