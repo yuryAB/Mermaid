@@ -13,8 +13,8 @@ class MermaidHead {
     
     private var hairFrontNode: SKSpriteNode
     var hairBackNode: SKSpriteNode
+    var headPoint: SKSpriteNode
     private var headpositon: MermaidMoveMode = .idle
-    
     
     init() {
         headNode = SKSpriteNode(texture: SKTexture(imageNamed: "MermHead"))
@@ -31,7 +31,24 @@ class MermaidHead {
         hairBackNode.zPosition = -1
         hairBackNode.color = ColorManager.shared.upper["hairColor"]!
         hairBackNode.colorBlendFactor = 1.0
-        headNode.addChild(hairBackNode)
+        
+        headPoint = SKSpriteNode(texture: SKTexture(imageNamed: "MermHairBack"))
+        headPoint.zPosition = -1
+        headPoint.color = .clear
+        headPoint.colorBlendFactor = 1.0
+        headPoint.addChild(hairBackNode)
+        
+        headNode.addChild(headPoint)
+    }
+    
+    private func hairBackAnimation() {
+        let fill: SKAction = .scale(to: 1.07, duration: 0.8)
+        let dry: SKAction = .scale(to: 1, duration: 0.8)
+        
+        let hairbackAnimation:SKAction = .repeatForever(.sequence([fill,dry]))
+        hairbackAnimation.eaeInEaseOut()
+        
+        hairBackNode.run(hairbackAnimation)
     }
 }
 
@@ -41,13 +58,14 @@ extension MermaidHead: MermaidMoveModeProtocol {
     func setFastMoveMode() { }
     
     func setIdleMoveMode() {
+        hairBackAnimation()
         let idleAction = SKAction.group([
             .rotate(toDegrees: 0, duration: 0.5),
             .move(to: CGPoint.zero, duration: 0.5)])
         
-        idleAction.timingMode = .easeInEaseOut
+        idleAction.eaeInEaseOut()
         
-        self.hairBackNode.run(idleAction)
+        self.headPoint.run(idleAction)
         self.hairFrontNode.run(idleAction)
     }
     
@@ -57,10 +75,10 @@ extension MermaidHead: MermaidMoveModeProtocol {
             .move(to: CGPoint(x: 0, y: -25), duration: 0.5)])
         let upActionForHairFront = SKAction.move(to: CGPoint(x: 0, y: 15), duration: 0.5)
         
-        upActionForHairBack.timingMode = .easeInEaseOut
-        upActionForHairFront.timingMode = .easeInEaseOut
+        upActionForHairBack.eaeInEaseOut()
+        upActionForHairFront.eaeInEaseOut()
         
-        self.hairBackNode.run(upActionForHairBack)
+        self.headPoint.run(upActionForHairBack)
         self.hairFrontNode.run(upActionForHairFront)
     }
     
@@ -72,10 +90,10 @@ extension MermaidHead: MermaidMoveModeProtocol {
             .move(to: CGPoint(x: 0, y: 150), duration: 1)])
         let downActionForHairfront = SKAction.move(to: CGPoint.zero, duration: 1)
         
-        downActionForHairBack.timingMode = .easeInEaseOut
-        downActionForHairfront.timingMode = .easeInEaseOut
+        downActionForHairBack.eaeInEaseOut()
+        downActionForHairfront.eaeInEaseOut()
         
-        self.hairBackNode.run(downActionForHairBack)
+        self.headPoint.run(downActionForHairBack)
         self.hairFrontNode.run(downActionForHairfront)
     }
     
@@ -85,10 +103,10 @@ extension MermaidHead: MermaidMoveModeProtocol {
             .move(to: CGPoint(x: -55, y: 55), duration: 1)])
         let rightActionForHairFront = SKAction.move(to: CGPoint.zero, duration: 1)
         
-        rightActionForHairBack.timingMode = .easeInEaseOut
-        rightActionForHairFront.timingMode = .easeInEaseOut
+        rightActionForHairBack.eaeInEaseOut()
+        rightActionForHairFront.eaeInEaseOut()
         
-        self.hairBackNode.run(rightActionForHairBack)
+        self.headPoint.run(rightActionForHairBack)
         self.hairFrontNode.run(rightActionForHairFront)
     }
     
@@ -98,10 +116,10 @@ extension MermaidHead: MermaidMoveModeProtocol {
             .move(to: CGPoint(x: 55, y: 55), duration: 1)])
         let leftActionForHairFront = SKAction.move(to: CGPoint.zero, duration: 1)
         
-        leftActionForHairBack.timingMode = .easeInEaseOut
-        leftActionForHairFront.timingMode = .easeInEaseOut
+        leftActionForHairBack.eaeInEaseOut()
+        leftActionForHairFront.eaeInEaseOut()
         
-        self.hairBackNode.run(leftActionForHairBack)
+        self.headPoint.run(leftActionForHairBack)
         self.hairFrontNode.run(leftActionForHairFront)
     }
 }

@@ -40,24 +40,11 @@ class GameScene: SKScene {
         addChild(button7)
         
         self.physicsWorld.gravity = CGVector(dx: 0, dy: -1.0)
-        //self.mermaid = Mermaid()
-        
-        //        if let head = mermaid?.headNode {
-        //            self.addChild(head)
-        //        }
-        
-        
-        
-        //self.mermaid?.startWaveAnimation()
-        //self.mermaid?.applyMainForm()
-        
         
         setupNewMermaid()
         setupCamera()
         self.currentZone = .mid
         self.backgroundColor = ColorManager.shared.waters["mid"]!
-        
-        //startMermaidRandomMovement()
     }
     
     func createButton(name: String, text: String, position: CGPoint) -> SKSpriteNode {
@@ -160,7 +147,7 @@ class GameScene: SKScene {
                 }
             }
         }
-        //zoomOutCamera()
+        zoomOutCamera()
     }
         
     
@@ -178,13 +165,13 @@ class GameScene: SKScene {
     }
     
     func zoomOutCamera() {
-        let zoomOutAction = SKAction.scale(to: 10.0, duration: 2.0)
-        cameraNode?.run(zoomOutAction)
+//        let zoomOutAction = SKAction.scale(to: 10.0, duration: 2.0)
+//        cameraNode?.run(zoomOutAction)
     }
     
     func resetCameraZoom() {
-        let resetZoomAction = SKAction.scale(to: 7.0, duration: 2.0)
-        cameraNode?.run(resetZoomAction)
+//        let resetZoomAction = SKAction.scale(to: 7.0, duration: 2.0)
+//        cameraNode?.run(resetZoomAction)
     }
 }
 

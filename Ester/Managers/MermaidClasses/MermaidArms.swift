@@ -42,48 +42,40 @@ class MermaidArms {
         left.position = lPosition
     }
     
-    
     private func moveArms(to position: Orientation) {
-        var increment:CGFloat = 45
-        
-        if position == .vertical {
-            increment = 0
-        }
+        let increment:CGFloat = (position == .vertical) ? 0 : 45
         
         let moveRightArm = SKAction.move(to: CGPoint(x: rPosition.x - increment, y: rPosition.y),
                                          duration: 1.0)
         let moveLeftArm = SKAction.move(to: CGPoint(x: lPosition.x + increment, y: lPosition.y),
                                         duration: 1.0)
         
+        moveRightArm.eaeInEaseOut()
+        moveLeftArm.eaeInEaseOut()
+        
         right.run(moveRightArm)
         left.run(moveLeftArm)
     }
     
     private func leftArmRotationAction(to rotation: Rotation = .up) -> SKAction {
-        var degree: CGFloat = 0
-        var zpos: CGFloat = 3
+        let degree: CGFloat = (rotation == .down) ? 180 : 0
+        let rotate:SKAction = .rotate(toDegrees: -degree, duration: 1)
+        rotate.eaeInEaseOut()
         
-        if rotation == .down {
-            degree = 180
-            zpos = -1
-        }
-        
-        right.zPosition = zpos
-        
-        return .rotate(toDegrees: -degree, duration: 1)
+        return rotate
     }
     
     private func rightArmRotationAction(to rotation: Rotation = .up) -> SKAction {
-        var degree: CGFloat = 0
-        var zpos: CGFloat = 3
+        let degree: CGFloat = (rotation == .down) ? 180 : 0
+        let rotate:SKAction = .rotate(toDegrees: degree, duration: 1)
+        rotate.eaeInEaseOut()
         
-        if rotation == .down {
-            degree = 180
-            zpos = -3
-        }
-        right.zPosition = zpos
-        
-        return .rotate(toDegrees: degree, duration: 1)
+        return rotate
+    }
+    
+    func armZposition(rightZ:CGFloat, leftZ:CGFloat) {
+        right.zPosition = rightZ
+        left.zPosition = leftZ
     }
     
     private func removeAllAnimations() {
@@ -105,12 +97,13 @@ extension MermaidArms: MermaidMoveModeProtocol {
     func setIdleMoveMode() {
         removeAllAnimations()
         moveArms(to: .vertical)
+        armZposition(rightZ: -1, leftZ: 3)
         
         let armIdleAction = SKAction.repeatForever(.sequence([
             .rotate(toDegrees: 5, duration: 3),
             .rotate(toDegrees: -5, duration: 3)]))
         
-        right.zPosition = 0
+        armIdleAction.eaeInEaseOut()
         
         self.right.run(armIdleAction)
         self.left.run(armIdleAction)
@@ -119,6 +112,7 @@ extension MermaidArms: MermaidMoveModeProtocol {
     func setDownMoveMode() {
         removeAllAnimations()
         moveArms(to: .vertical)
+        armZposition(rightZ: -3, leftZ: -3)
         
         let movedown:SKAction = .moveTo(y: rPosition.y+200, duration: 1.0)
         let moveup:SKAction = .moveTo(y: rPosition.y, duration: 0.5)
@@ -146,6 +140,7 @@ extension MermaidArms: MermaidMoveModeProtocol {
     func setUpMoveMode() {
         removeAllAnimations()
         moveArms(to: .vertical)
+        armZposition(rightZ: 3, leftZ: 3)
         
         let duration: Double = 0.5
         let firstDegree: CGFloat = 7
@@ -161,10 +156,8 @@ extension MermaidArms: MermaidMoveModeProtocol {
             .rotate(toDegrees: -firstDegree, duration: duration),
             .rotate(toDegrees: -lastDegree, duration: duration+1)]))
         
-        sequenceR.timingMode = .easeInEaseOut
-        sequenceL.timingMode = .easeInEaseOut
-        
-        right.zPosition = 3
+        sequenceR.eaeInEaseOut()
+        sequenceL.eaeInEaseOut()
         
         right.run(sequenceR)
         left.run(sequenceL)
@@ -173,7 +166,7 @@ extension MermaidArms: MermaidMoveModeProtocol {
     func setRightMoveMode() {
         removeAllAnimations()
         moveArms(to: .horizontal)
-        right.zPosition = -1
+        armZposition(rightZ: -1, leftZ: 3)
         
         let duration: Double = 1
         let firstDegree: CGFloat = 5
@@ -183,7 +176,7 @@ extension MermaidArms: MermaidMoveModeProtocol {
             .rotate(toDegrees: -firstDegree, duration: duration),
             .rotate(toDegrees: -lastDegree, duration: duration+1)]))
         
-        rightMoveModeAction.timingMode = .easeInEaseOut
+        rightMoveModeAction.eaeInEaseOut()
         
         right.run(rightArmRotationAction())
         right.run(rightMoveModeAction)
@@ -195,7 +188,7 @@ extension MermaidArms: MermaidMoveModeProtocol {
     func setLeftMoveMode() {
         removeAllAnimations()
         moveArms(to: .horizontal)
-        right.zPosition = -1
+        armZposition(rightZ: -1, leftZ: 3)
         
         let duration: Double = 1
         let firstDegree: CGFloat = 5
@@ -205,7 +198,7 @@ extension MermaidArms: MermaidMoveModeProtocol {
             .rotate(toDegrees: firstDegree, duration: duration),
             .rotate(toDegrees: lastDegree, duration: duration+1)]))
         
-        rightMoveModeAction.timingMode = .easeInEaseOut
+        rightMoveModeAction.eaeInEaseOut()
         
         right.run(rightArmRotationAction())
         right.run(rightMoveModeAction)

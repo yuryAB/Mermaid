@@ -84,7 +84,7 @@ class MermaidBody {
         let rotateL = SKAction.rotate(toDegrees: degrees, duration: duration)
         let rotateR = SKAction.rotate(toDegrees: -degrees, duration: duration)
         let swing = SKAction.repeatForever(.sequence([rotateL,rotateR]))
-        swing.timingMode = .easeInEaseOut
+        swing.eaeInEaseOut()
         
         return swing
     }
@@ -109,12 +109,17 @@ class MermaidBody {
     }
     
     func bodyZPosition(isDownMoveMode: Bool = false) -> SKAction {
-        let position = isDownMoveMode ?  CGFloat(-1) : CGFloat(1)
+        let position = isDownMoveMode ?  CGFloat(-2) : CGFloat(1)
         let wait = SKAction.wait(forDuration: 0.5)
         let changeZPositionAction = SKAction.run {
             self.body.zPosition = position
         }
-        return SKAction.sequence([wait,changeZPositionAction])
+        
+        let sequence = SKAction.sequence([wait,changeZPositionAction])
+        
+        sequence.eaeInEaseOut()
+        
+        return sequence
     }
 }
 

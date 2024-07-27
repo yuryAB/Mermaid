@@ -17,9 +17,9 @@ class Mermaid {
     init() {
         mermaid = SKSpriteNode()
         
-        body.body.position.y = -210
+        body.body.position.y = -220
         body.body.zPosition = 1
-        head.hairBackNode.addChild(body.body)
+        head.headPoint.addChild(body.body)
         
         body.body.addChild(arms.left)
         body.body.addChild(arms.right)
