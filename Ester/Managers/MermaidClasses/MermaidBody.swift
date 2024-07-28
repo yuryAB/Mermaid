@@ -123,7 +123,16 @@ class MermaidBody {
     }
 }
 
-extension MermaidBody: MermaidMoveModeProtocol {
+extension MermaidBody: MovementTypeProtocol {
+    func setIdleMoveMode() {
+        removeAllAnimations()
+        body.run(bodyZPosition())
+        runSwingAnimation(bodyDegree: 5, bodyDuration: 2,
+                          waistDegree: 5.5, waistDuration: 2,
+                          articulationDegree: 6, articulationDuration: 2,
+                          finDegree: 6.5, finDuration: 2)
+    }
+    
     func setSwingMoveMode() {
         removeAllAnimations()
         runSwingAnimation(bodyDegree: 5, bodyDuration: 0.5,
@@ -140,14 +149,15 @@ extension MermaidBody: MermaidMoveModeProtocol {
                           finDegree: 6, finDuration: 0.1)
         
     }
-    
-    func setIdleMoveMode() {
-        removeAllAnimations()
+}
+
+extension MermaidBody: MovementDirectionProtocol {
+    func setUpMoveMode() {
         body.run(bodyZPosition())
-        runSwingAnimation(bodyDegree: 5, bodyDuration: 2,
-                          waistDegree: 5.5, waistDuration: 2,
-                          articulationDegree: 6, articulationDuration: 2,
-                          finDegree: 6.5, finDuration: 2)
+    }
+    
+    func setDownMoveMode() {
+        body.run(bodyZPosition(isDownMoveMode: true))
     }
     
     func setRightMoveMode() {
@@ -156,13 +166,5 @@ extension MermaidBody: MermaidMoveModeProtocol {
     
     func setLeftMoveMode() {
         body.run(bodyZPosition())
-    }
-    
-    func setUpMoveMode() {
-        body.run(bodyZPosition())
-    }
-    
-    func setDownMoveMode() {
-        body.run(bodyZPosition(isDownMoveMode: true))
     }
 }

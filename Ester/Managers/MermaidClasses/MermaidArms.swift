@@ -25,8 +25,6 @@ class MermaidArms {
         case down
     }
     
-    internal var armMoveMode: MermaidMoveMode = .right
-    
     init() {
         right = SKSpriteNode(texture: SKTexture(imageNamed: "hand1"))
         right.color = ColorManager.shared.upper["skinColor"]!
@@ -57,17 +55,17 @@ class MermaidArms {
         left.run(moveLeftArm)
     }
     
-    private func leftArmRotationAction(to rotation: Rotation = .up) -> SKAction {
+    private func rightArmRotationAction(to rotation: Rotation = .up) -> SKAction {
         let degree: CGFloat = (rotation == .down) ? 180 : 0
-        let rotate:SKAction = .rotate(toDegrees: -degree, duration: 1)
+        let rotate:SKAction = .rotate(toDegrees: degree, duration: 1)
         rotate.eaeInEaseOut()
         
         return rotate
     }
     
-    private func rightArmRotationAction(to rotation: Rotation = .up) -> SKAction {
+    private func leftArmRotationAction(to rotation: Rotation = .up) -> SKAction {
         let degree: CGFloat = (rotation == .down) ? 180 : 0
-        let rotate:SKAction = .rotate(toDegrees: degree, duration: 1)
+        let rotate:SKAction = .rotate(toDegrees: -degree, duration: 1)
         rotate.eaeInEaseOut()
         
         return rotate
@@ -84,16 +82,7 @@ class MermaidArms {
     }
 }
 
-//MARK: - MermaidMoveModeProtocol
-extension MermaidArms: MermaidMoveModeProtocol {
-    func setSwingMoveMode() {
-        
-    }
-    
-    func setFastMoveMode() {
-        
-    }
-    
+extension MermaidArms: MovementTypeProtocol {
     func setIdleMoveMode() {
         removeAllAnimations()
         moveArms(to: .vertical)
@@ -107,6 +96,38 @@ extension MermaidArms: MermaidMoveModeProtocol {
         
         self.right.run(armIdleAction)
         self.left.run(armIdleAction)
+    }
+    
+    func setSwingMoveMode() { }
+    
+    func setFastMoveMode() { }
+}
+
+extension MermaidArms: MovementDirectionProtocol {
+    func setUpMoveMode() {
+        removeAllAnimations()
+        moveArms(to: .vertical)
+        armZposition(rightZ: 3, leftZ: 3)
+        
+        let duration: Double = 0.5
+        let firstDegree: CGFloat = 7
+        let lastDegree: CGFloat = -7
+        
+        let sequenceR = SKAction.repeatForever(.sequence([
+            rightArmRotationAction(),
+            .rotate(toDegrees: firstDegree, duration: duration),
+            .rotate(toDegrees: lastDegree, duration: duration+1)]))
+        
+        let sequenceL = SKAction.repeatForever(.sequence([
+            leftArmRotationAction(),
+            .rotate(toDegrees: -firstDegree, duration: duration),
+            .rotate(toDegrees: -lastDegree, duration: duration+1)]))
+        
+        sequenceR.eaeInEaseOut()
+        sequenceL.eaeInEaseOut()
+        
+        right.run(sequenceR)
+        left.run(sequenceL)
     }
     
     func setDownMoveMode() {
@@ -135,32 +156,6 @@ extension MermaidArms: MermaidMoveModeProtocol {
         
         right.run(rArmDownUp)
         left.run(lArmDownUp)
-    }
-    
-    func setUpMoveMode() {
-        removeAllAnimations()
-        moveArms(to: .vertical)
-        armZposition(rightZ: 3, leftZ: 3)
-        
-        let duration: Double = 0.5
-        let firstDegree: CGFloat = 7
-        let lastDegree: CGFloat = -7
-        
-        let sequenceR = SKAction.repeatForever(.sequence([
-            rightArmRotationAction(),
-            .rotate(toDegrees: firstDegree, duration: duration),
-            .rotate(toDegrees: lastDegree, duration: duration+1)]))
-        
-        let sequenceL = SKAction.repeatForever(.sequence([
-            leftArmRotationAction(),
-            .rotate(toDegrees: -firstDegree, duration: duration),
-            .rotate(toDegrees: -lastDegree, duration: duration+1)]))
-        
-        sequenceR.eaeInEaseOut()
-        sequenceL.eaeInEaseOut()
-        
-        right.run(sequenceR)
-        left.run(sequenceL)
     }
     
     func setRightMoveMode() {

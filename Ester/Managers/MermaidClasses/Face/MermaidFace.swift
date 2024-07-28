@@ -29,7 +29,7 @@ class MermaidFace {
     }
 }
 
-extension MermaidFace: MermaidMoveModeProtocol {
+extension MermaidFace: MovementTypeProtocol {
     func setIdleMoveMode() {
         let moveto:SKAction = .move(to: CGPoint(x: 0, y: 0), duration: 0.5)
         moveto.eaeInEaseOut()
@@ -39,30 +39,30 @@ extension MermaidFace: MermaidMoveModeProtocol {
     func setSwingMoveMode() { }
     
     func setFastMoveMode() { }
-    
-    func setUpMoveMode() { 
+}
+
+extension MermaidFace: MovementDirectionProtocol {
+    func setUpMoveMode() {
         let moveto:SKAction = .move(to: CGPoint(x: 0, y: 40), duration: 0.5)
         moveto.eaeInEaseOut()
         base.run(moveto)
     }
     
-    func setDownMoveMode() { 
+    func setDownMoveMode() {
         let moveto:SKAction = .move(to: CGPoint(x: 0, y: -10), duration: 0.5)
         moveto.eaeInEaseOut()
         base.run(moveto)
     }
     
-    func setRightMoveMode() { 
+    func setRightMoveMode() {
         let moveto:SKAction = .move(to: CGPoint(x: 20, y: 0), duration: 0.5)
         moveto.eaeInEaseOut()
         base.run(moveto)
     }
     
-    func setLeftMoveMode() { 
+    func setLeftMoveMode() {
         let moveto:SKAction = .move(to: CGPoint(x: -20, y: 0), duration: 0.5)
         moveto.eaeInEaseOut()
         base.run(moveto)
     }
-    
-    
 }

@@ -44,5 +44,4 @@ class MermaidEyebrows {
             eyebrow.colorBlendFactor = 1.0
         }
     }
-
 }

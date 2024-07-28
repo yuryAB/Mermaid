@@ -78,7 +78,7 @@ class GameScene: SKScene {
     }
     
     func setupNewMermaid() {
-        addChild(mermaid.mermaid)
+        addChild(mermaid.base)
     }
     
     func setupCamera() {

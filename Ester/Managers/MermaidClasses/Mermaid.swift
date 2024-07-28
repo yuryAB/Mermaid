@@ -9,18 +9,18 @@ import Foundation
 import SpriteKit
 
 class Mermaid {
-    var mermaid: SKSpriteNode
+    var base: SKSpriteNode
     var head = MermaidHead()
     var body = MermaidBody()
     var arms = MermaidArms()
     var face = MermaidFace()
     
     init() {
-        mermaid = SKSpriteNode()
+        base = SKSpriteNode()
         
         body.body.position.y = -220
         body.body.zPosition = 1
-        head.headBase.addChild(body.body)
+        head.base.addChild(body.body)
         
         face.base.zPosition = 3
         head.headNode.addChild(face.base)
@@ -28,20 +28,12 @@ class Mermaid {
         body.body.addChild(arms.left)
         body.body.addChild(arms.right)
         
-        self.mermaid.addChild(head.headNode)
+        self.base.addChild(head.headNode)
         
     }
 }
 
-extension Mermaid: MermaidMoveModeProtocol {
-    func setSwingMoveMode() {
-        body.setSwingMoveMode()
-    }
-    
-    func setFastMoveMode() {
-        body.setFastMoveMode()
-    }
-    
+extension Mermaid: MovementTypeProtocol {
     func setIdleMoveMode() {
         arms.setIdleMoveMode()
         head.setIdleMoveMode()
@@ -49,6 +41,16 @@ extension Mermaid: MermaidMoveModeProtocol {
         face.setIdleMoveMode()
     }
     
+    func setSwingMoveMode() {
+        body.setSwingMoveMode()
+    }
+    
+    func setFastMoveMode() {
+        body.setFastMoveMode()
+    }
+}
+
+extension Mermaid: MovementDirectionProtocol {
     func setUpMoveMode() {
         arms.setUpMoveMode()
         head.setUpMoveMode()
