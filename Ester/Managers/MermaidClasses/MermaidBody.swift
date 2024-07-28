@@ -124,7 +124,7 @@ class MermaidBody {
 }
 
 extension MermaidBody: MovementTypeProtocol {
-    func setIdleMoveMode() {
+    func applyIdleMoveMode() {
         removeAllAnimations()
         body.run(bodyZPosition())
         runSwingAnimation(bodyDegree: 5, bodyDuration: 2,
@@ -133,7 +133,7 @@ extension MermaidBody: MovementTypeProtocol {
                           finDegree: 6.5, finDuration: 2)
     }
     
-    func setSwingMoveMode() {
+    func applySwingMoveMode() {
         removeAllAnimations()
         runSwingAnimation(bodyDegree: 5, bodyDuration: 0.5,
                           waistDegree: 6, waistDuration: 0.5,
@@ -141,7 +141,7 @@ extension MermaidBody: MovementTypeProtocol {
                           finDegree: 8, finDuration: 0.5)
     }
     
-    func setFastMoveMode() {
+    func applyFastMoveMode() {
         removeAllAnimations()
         runSwingAnimation(bodyDegree: 5, bodyDuration: 0.2,
                           waistDegree: 5, waistDuration: 0.2,

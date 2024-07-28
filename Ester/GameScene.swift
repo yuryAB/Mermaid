@@ -1,9 +1,11 @@
 import SpriteKit
+import GameplayKit
 
 class GameScene: SKScene {
     var cameraNode: SKCameraNode?
     var currentZone: DepthZone?
-    let mermaid = Mermaid()
+    var mermaidEntity: MermaidEntity!
+    var entityManager: EntityManager!
     
     var button1: SKSpriteNode!
     var button2: SKSpriteNode!
@@ -39,6 +41,7 @@ class GameScene: SKScene {
         
         self.physicsWorld.gravity = CGVector(dx: 0, dy: -1.0)
         
+        entityManager = EntityManager()
         setupNewMermaid()
         setupCamera()
         
@@ -53,7 +56,7 @@ class GameScene: SKScene {
         cameraNode!.addChild(button9)
         cameraNode!.addChild(button10)
         
-        mermaid.setIdleMoveMode()
+        mermaidEntity.movementSM.enter(MermaidIdleState.self)
         
         self.currentZone = .mid
         self.backgroundColor = ColorManager.shared.waters["mid"]!
@@ -78,7 +81,8 @@ class GameScene: SKScene {
     }
     
     func setupNewMermaid() {
-        addChild(mermaid.base)
+        mermaidEntity = MermaidEntity()
+        entityManager.addEntity(mermaidEntity, to: self)
     }
     
     func setupCamera() {
@@ -93,42 +97,7 @@ class GameScene: SKScene {
     }
     
     func updateBackgroundColor() {
-        //        guard let headNode = mermaid?.headNode else { return }
-        //
-        //        let depth = headNode.position.y
-        //        let newZone: DepthZone
-        //
-        //        switch depth {
-        //        case let y where y >= 30000:
-        //            newZone = .surface
-        //        case let y where y < 30000 && y >= 10000:
-        //            newZone = .shallow
-        //        case let y where y < 10000 && y >= -10000:
-        //            newZone = .mid
-        //        case let y where y < -10000 && y >= -30000:
-        //            newZone = .deep
-        //        case let y where y < -30000:
-        //            newZone = .abyssal
-        //        default:
-        //            newZone = .surface
-        //        }
-        //
-        //        if newZone != currentZone {
-        //            self.currentZone = newZone
-        //            if let newColor = ColorManager.shared.waters[newZone.rawValue] {
-        //                self.backgroundColor = newColor
-        //                print(newZone.rawValue)
-        //
-        //                switch newZone {
-        //                case .surface:
-        //                    mermaid?.applySurfaceForm()
-        //                case .abyssal:
-        //                    mermaid?.applyAbyssForm()
-        //                default:
-        //                    mermaid?.applyMainForm()
-        //                }
-        //            }
-        //        }
+        // Implementar a lógica de mudança de cor de fundo com base na profundidade da sereia
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -140,19 +109,19 @@ class GameScene: SKScene {
             if let nodeName = node.name {
                 switch nodeName {
                 case "button1":
-                    mermaid.setUpMoveMode()
+                    mermaidEntity.directionSM.enter(MermaidUpState.self)
                 case "button2":
-                    mermaid.setDownMoveMode()
+                    mermaidEntity.directionSM.enter(MermaidDownState.self)
                 case "button3":
-                    mermaid.setRightMoveMode()
+                    mermaidEntity.directionSM.enter(MermaidRightState.self)
                 case "button4":
-                    mermaid.setLeftMoveMode()
+                    mermaidEntity.directionSM.enter(MermaidLeftState.self)
                 case "button5":
-                    mermaid.setIdleMoveMode()
+                    mermaidEntity.movementSM.enter(MermaidIdleState.self)
                 case "button6":
-                    mermaid.setSwingMoveMode()
+                    mermaidEntity.movementSM.enter(MermaidSwingState.self)
                 case "button7":
-                    mermaid.setFastMoveMode()
+                    mermaidEntity.movementSM.enter(MermaidFastState.self)
                 case "button8":
                     let resetZoomAction = SKAction.scale(to: 1.2, duration: 1.0)
                     cameraNode?.run(resetZoomAction)
@@ -168,29 +137,4 @@ class GameScene: SKScene {
             }
         }
     }
-        
-    
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        // Desabilitado para movimentos automáticos
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        resetCameraZoom()
-    }
-    
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        resetCameraZoom()
-    }
-    
-    func zoomOutCamera() {
-//        let zoomOutAction = SKAction.scale(to: 10.0, duration: 2.0)
-//        cameraNode?.run(zoomOutAction)
-    }
-    
-    func resetCameraZoom() {
-//        let resetZoomAction = SKAction.scale(to: 7.0, duration: 2.0)
-//        cameraNode?.run(resetZoomAction)
-    }
 }
-

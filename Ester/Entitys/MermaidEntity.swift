@@ -10,27 +10,53 @@ import GameplayKit
 import SpriteKit
 
 class MermaidEntity: GKEntity {
+    let mermaid: Mermaid
+    var directionSM: GKStateMachine
+    var movementSM: GKStateMachine
     
-    // Inicialização padrão da entidade
     override init() {
+        self.mermaid = Mermaid()
+        self.directionSM = GKStateMachine(states: [])
+        self.movementSM = GKStateMachine(states: [])
         super.init()
         setupComponents()
+        setupStateMachines()
     }
     
-    // Inicializador necessário para conformidade com NSCoding
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupComponents()
+        fatalError("init(coder:) has not been implemented")
     }
     
-    // Configura os componentes da entidade
+    private func setupStateMachines() {
+        let idleState = MermaidIdleState(entity: self)
+        let swingState = MermaidSwingState(entity: self)
+        let fastState = MermaidFastState(entity: self)
+        let upState = MermaidUpState(entity: self)
+        let downState = MermaidDownState(entity: self)
+        let rightState = MermaidRightState(entity: self)
+        let leftState = MermaidLeftState(entity: self)
+        
+        directionSM = GKStateMachine(states: [
+            upState,
+            downState,
+            rightState,
+            leftState
+        ])
+        
+        movementSM = GKStateMachine(states: [
+            idleState,
+            swingState,
+            fastState,
+        ])
+        
+        movementSM.enter(MermaidIdleState.self)
+    }
+    
     private func setupComponents() {
-        // Adiciona um componente de sprite
-        let spriteComponent = SpriteComponent(texture: SKTexture(imageNamed: "defaultTexture"))
+        let spriteComponent = BaseSpriteComponent(node: mermaid.base)
         self.addComponent(spriteComponent)
         
-        // Adiciona um componente de física
-        let physicsComponent = PhysicsComponent()
-        self.addComponent(physicsComponent)
+        let movementComponent = MovementComponent(baseClass: mermaid)
+        self.addComponent(movementComponent)
     }
 }

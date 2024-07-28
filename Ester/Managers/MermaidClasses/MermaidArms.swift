@@ -83,7 +83,7 @@ class MermaidArms {
 }
 
 extension MermaidArms: MovementTypeProtocol {
-    func setIdleMoveMode() {
+    func applyIdleMoveMode() {
         removeAllAnimations()
         moveArms(to: .vertical)
         armZposition(rightZ: -1, leftZ: 3)
@@ -98,9 +98,9 @@ extension MermaidArms: MovementTypeProtocol {
         self.left.run(armIdleAction)
     }
     
-    func setSwingMoveMode() { }
+    func applySwingMoveMode() { }
     
-    func setFastMoveMode() { }
+    func applyFastMoveMode() { }
 }
 
 extension MermaidArms: MovementDirectionProtocol {

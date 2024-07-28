@@ -30,15 +30,15 @@ class MermaidFace {
 }
 
 extension MermaidFace: MovementTypeProtocol {
-    func setIdleMoveMode() {
+    func applyIdleMoveMode() {
         let moveto:SKAction = .move(to: CGPoint(x: 0, y: 0), duration: 0.5)
         moveto.eaeInEaseOut()
         base.run(moveto)
     }
     
-    func setSwingMoveMode() { }
+    func applySwingMoveMode() { }
     
-    func setFastMoveMode() { }
+    func applyFastMoveMode() { }
 }
 
 extension MermaidFace: MovementDirectionProtocol {

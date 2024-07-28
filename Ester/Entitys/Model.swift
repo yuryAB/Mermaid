@@ -70,24 +70,3 @@ class PhysicsComponent: GKComponent {
         physicsBody.contactTestBitMask = 0x1 << 1
     }
 }
-
-// Exemplo de Estado
-class IdleState: GKState {
-    weak var entity: BaseEntity?
-    
-    init(entity: BaseEntity) {
-        self.entity = entity
-    }
-    
-    override func didEnter(from previousState: GKState?) {
-        // Configurações ao entrar no estado
-    }
-    
-    override func update(deltaTime seconds: TimeInterval) {
-        // Lógica de atualização do estado
-    }
-    
-    override func willExit(to nextState: GKState) {
-        // Configurações ao sair do estado
-    }
-}

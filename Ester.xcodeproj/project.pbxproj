@@ -14,6 +14,11 @@
 		7238142A2C56CA11007B3836 /* MovementTypeProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814292C56CA11007B3836 /* MovementTypeProtocol.swift */; };
 		7238142C2C56CA1D007B3836 /* MovementDirectionProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7238142B2C56CA1D007B3836 /* MovementDirectionProtocol.swift */; };
 		7238142E2C56CACA007B3836 /* MovementEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7238142D2C56CACA007B3836 /* MovementEnums.swift */; };
+		723814312C56E0D9007B3836 /* EntityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814302C56E0D9007B3836 /* EntityManager.swift */; };
+		723814332C56E18D007B3836 /* MovementComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814322C56E18D007B3836 /* MovementComponent.swift */; };
+		723814352C56E19A007B3836 /* BaseSpriteComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814342C56E19A007B3836 /* BaseSpriteComponent.swift */; };
+		723814382C56E419007B3836 /* MermaidMovementStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814372C56E419007B3836 /* MermaidMovementStates.swift */; };
+		7238143A2C56E84C007B3836 /* MermaidDirectionStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814392C56E84C007B3836 /* MermaidDirectionStates.swift */; };
 		724C618F2C5546A900A5885C /* MermaidFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 724C618E2C5546A900A5885C /* MermaidFace.swift */; };
 		7271E5662C41BA89008CE3C8 /* MermaidEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */; };
 		7271E5682C41BBD6008CE3C8 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7271E5672C41BBD5008CE3C8 /* Model.swift */; };
@@ -38,6 +43,11 @@
 		723814292C56CA11007B3836 /* MovementTypeProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementTypeProtocol.swift; sourceTree = "<group>"; };
 		7238142B2C56CA1D007B3836 /* MovementDirectionProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementDirectionProtocol.swift; sourceTree = "<group>"; };
 		7238142D2C56CACA007B3836 /* MovementEnums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementEnums.swift; sourceTree = "<group>"; };
+		723814302C56E0D9007B3836 /* EntityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityManager.swift; sourceTree = "<group>"; };
+		723814322C56E18D007B3836 /* MovementComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementComponent.swift; sourceTree = "<group>"; };
+		723814342C56E19A007B3836 /* BaseSpriteComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseSpriteComponent.swift; sourceTree = "<group>"; };
+		723814372C56E419007B3836 /* MermaidMovementStates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidMovementStates.swift; sourceTree = "<group>"; };
+		723814392C56E84C007B3836 /* MermaidDirectionStates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidDirectionStates.swift; sourceTree = "<group>"; };
 		724C618E2C5546A900A5885C /* MermaidFace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidFace.swift; sourceTree = "<group>"; };
 		7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEntity.swift; sourceTree = "<group>"; };
 		7271E5672C41BBD5008CE3C8 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
@@ -74,6 +84,7 @@
 				723814262C56C92A007B3836 /* Enums */,
 				72D1A7AD2C1BD681005213A4 /* ColorManager.swift */,
 				72334A832C50415300D24502 /* Extensions.swift */,
+				723814302C56E0D9007B3836 /* EntityManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -110,8 +121,19 @@
 		7238142F2C56D6F7007B3836 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				723814342C56E19A007B3836 /* BaseSpriteComponent.swift */,
+				723814322C56E18D007B3836 /* MovementComponent.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		723814362C56E3FB007B3836 /* States */ = {
+			isa = PBXGroup;
+			children = (
+				723814392C56E84C007B3836 /* MermaidDirectionStates.swift */,
+				723814372C56E419007B3836 /* MermaidMovementStates.swift */,
+			);
+			path = States;
 			sourceTree = "<group>";
 		};
 		724C61902C555B3900A5885C /* Face */ = {
@@ -156,6 +178,7 @@
 				72334A7C2C4EF12D00D24502 /* Managers */,
 				7271E5642C41BA6E008CE3C8 /* Entitys */,
 				7238142F2C56D6F7007B3836 /* Components */,
+				723814362C56E3FB007B3836 /* States */,
 				72D020792C1905F9002F11FC /* AppDelegate.swift */,
 				72D0207F2C1905F9002F11FC /* GameScene.swift */,
 				72D020812C1905F9002F11FC /* GameViewController.swift */,
@@ -241,14 +264,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				723814332C56E18D007B3836 /* MovementComponent.swift in Sources */,
 				7271E5682C41BBD6008CE3C8 /* Model.swift in Sources */,
 				7238142E2C56CACA007B3836 /* MovementEnums.swift in Sources */,
 				72A119592C55DB33003E827B /* MermaidEyes.swift in Sources */,
 				72334A8A2C5068A600D24502 /* MermaidArms.swift in Sources */,
 				7238142A2C56CA11007B3836 /* MovementTypeProtocol.swift in Sources */,
 				724C618F2C5546A900A5885C /* MermaidFace.swift in Sources */,
+				7238143A2C56E84C007B3836 /* MermaidDirectionStates.swift in Sources */,
 				72A119572C55DAF8003E827B /* MermaidEyebrows.swift in Sources */,
+				723814312C56E0D9007B3836 /* EntityManager.swift in Sources */,
+				723814352C56E19A007B3836 /* BaseSpriteComponent.swift in Sources */,
 				72D020802C1905F9002F11FC /* GameScene.swift in Sources */,
+				723814382C56E419007B3836 /* MermaidMovementStates.swift in Sources */,
 				72334A882C5061B600D24502 /* Mermaid.swift in Sources */,
 				72D1A7AE2C1BD681005213A4 /* ColorManager.swift in Sources */,
 				72D020822C1905F9002F11FC /* GameViewController.swift in Sources */,

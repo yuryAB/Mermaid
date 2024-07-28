@@ -6,7 +6,7 @@
 //
 
 protocol MovementTypeProtocol {
-    func setIdleMoveMode()
-    func setSwingMoveMode()
-    func setFastMoveMode()
+    func applyIdleMoveMode()
+    func applySwingMoveMode()
+    func applyFastMoveMode()
 }

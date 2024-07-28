@@ -51,7 +51,7 @@ class MermaidHead {
 }
 
 extension MermaidHead: MovementTypeProtocol {
-    func setIdleMoveMode() {
+    func applyIdleMoveMode() {
         hairBackAnimation()
         let idleAction = SKAction.group([
             .rotate(toDegrees: 0, duration: 0.5),
@@ -63,9 +63,9 @@ extension MermaidHead: MovementTypeProtocol {
         self.hairFrontNode.run(idleAction)
     }
     
-    func setSwingMoveMode() { }
+    func applySwingMoveMode() { }
     
-    func setFastMoveMode() { }
+    func applyFastMoveMode() { }
 }
 
 extension MermaidHead: MovementDirectionProtocol {

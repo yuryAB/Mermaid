@@ -14,6 +14,16 @@ class Mermaid {
     var body = MermaidBody()
     var arms = MermaidArms()
     var face = MermaidFace()
+    var movementSpeed: TimeInterval = 1.0
+    var currentDirection: Direction = .none
+    
+    enum Direction {
+        case up
+        case down
+        case right
+        case left
+        case none
+    }
     
     init() {
         base = SKSpriteNode()
@@ -29,29 +39,58 @@ class Mermaid {
         body.body.addChild(arms.right)
         
         self.base.addChild(head.headNode)
-        
     }
 }
 
 extension Mermaid: MovementTypeProtocol {
-    func setIdleMoveMode() {
-        arms.setIdleMoveMode()
-        head.setIdleMoveMode()
-        body.setIdleMoveMode()
-        face.setIdleMoveMode()
+    func applyIdleMoveMode() {
+        base.removeAllActions()
+        currentDirection = .none
+        arms.applyIdleMoveMode()
+        head.applyIdleMoveMode()
+        body.applyIdleMoveMode()
+        face.applyIdleMoveMode()
     }
     
-    func setSwingMoveMode() {
-        body.setSwingMoveMode()
+    func applySwingMoveMode() {
+        movementSpeed = 1.0
+        body.applySwingMoveMode()
+        updateMovement()
     }
     
-    func setFastMoveMode() {
-        body.setFastMoveMode()
+    func applyFastMoveMode() {
+        movementSpeed = 0.5
+        body.applyFastMoveMode()
+        updateMovement()
+    }
+    
+    private func updateMovement() {
+        base.removeAllActions()
+        switch currentDirection {
+        case .up:
+            let move = SKAction.moveBy(x: 0, y: 100, duration: movementSpeed)
+            base.run(SKAction.repeatForever(move), withKey: "moving")
+        case .down:
+            let move = SKAction.moveBy(x: 0, y: -100, duration: movementSpeed)
+            base.run(SKAction.repeatForever(move), withKey: "moving")
+        case .right:
+            let move = SKAction.moveBy(x: 100, y: 0, duration: movementSpeed)
+            base.run(SKAction.repeatForever(move), withKey: "moving")
+        case .left:
+            let move = SKAction.moveBy(x: -100, y: 0, duration: movementSpeed)
+            base.run(SKAction.repeatForever(move), withKey: "moving")
+        case .none:
+            break
+        }
     }
 }
 
 extension Mermaid: MovementDirectionProtocol {
     func setUpMoveMode() {
+        currentDirection = .up
+        let move = SKAction.moveBy(x: 0, y: 100, duration: movementSpeed)
+        base.run(SKAction.repeatForever(move), withKey: "moving")
+        
         arms.setUpMoveMode()
         head.setUpMoveMode()
         body.setUpMoveMode()
@@ -59,6 +98,10 @@ extension Mermaid: MovementDirectionProtocol {
     }
     
     func setDownMoveMode() {
+        currentDirection = .down
+        let move = SKAction.moveBy(x: 0, y: -100, duration: movementSpeed)
+        base.run(SKAction.repeatForever(move), withKey: "moving")
+        
         arms.setDownMoveMode()
         head.setDownMoveMode()
         body.setDownMoveMode()
@@ -66,6 +109,10 @@ extension Mermaid: MovementDirectionProtocol {
     }
     
     func setRightMoveMode() {
+        currentDirection = .right
+        let move = SKAction.moveBy(x: 100, y: 0, duration: movementSpeed)
+        base.run(SKAction.repeatForever(move), withKey: "moving")
+        
         arms.setRightMoveMode()
         head.setRightMoveMode()
         body.setRightMoveMode()
@@ -73,9 +120,14 @@ extension Mermaid: MovementDirectionProtocol {
     }
     
     func setLeftMoveMode() {
+        currentDirection = .left
+        let move = SKAction.moveBy(x: -100, y: 0, duration: movementSpeed)
+        base.run(SKAction.repeatForever(move), withKey: "moving")
+        
         arms.setLeftMoveMode()
         head.setLeftMoveMode()
         body.setLeftMoveMode()
         face.setLeftMoveMode()
     }
 }
+
