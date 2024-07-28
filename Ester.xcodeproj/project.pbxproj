@@ -17,6 +17,9 @@
 		7271E5662C41BA89008CE3C8 /* MermaidEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */; };
 		7271E5682C41BBD6008CE3C8 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7271E5672C41BBD5008CE3C8 /* Model.swift */; };
 		728C9C592C51CB01001B919C /* MermaidBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 728C9C582C51CB01001B919C /* MermaidBody.swift */; };
+		72A119572C55DAF8003E827B /* MermaidEyebrows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A119562C55DAF8003E827B /* MermaidEyebrows.swift */; };
+		72A119592C55DB33003E827B /* MermaidEyes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A119582C55DB33003E827B /* MermaidEyes.swift */; };
+		72A1195B2C55DB59003E827B /* MermaidMouth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A1195A2C55DB59003E827B /* MermaidMouth.swift */; };
 		72D0207A2C1905F9002F11FC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D020792C1905F9002F11FC /* AppDelegate.swift */; };
 		72D020802C1905F9002F11FC /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D0207F2C1905F9002F11FC /* GameScene.swift */; };
 		72D020822C1905F9002F11FC /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D020812C1905F9002F11FC /* GameViewController.swift */; };
@@ -37,6 +40,9 @@
 		7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEntity.swift; sourceTree = "<group>"; };
 		7271E5672C41BBD5008CE3C8 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		728C9C582C51CB01001B919C /* MermaidBody.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidBody.swift; sourceTree = "<group>"; };
+		72A119562C55DAF8003E827B /* MermaidEyebrows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEyebrows.swift; sourceTree = "<group>"; };
+		72A119582C55DB33003E827B /* MermaidEyes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEyes.swift; sourceTree = "<group>"; };
+		72A1195A2C55DB59003E827B /* MermaidMouth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidMouth.swift; sourceTree = "<group>"; };
 		72D020762C1905F9002F11FC /* Ester.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ester.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		72D020792C1905F9002F11FC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		72D0207F2C1905F9002F11FC /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -85,6 +91,9 @@
 			isa = PBXGroup;
 			children = (
 				724C618E2C5546A900A5885C /* MermaidFace.swift */,
+				72A119562C55DAF8003E827B /* MermaidEyebrows.swift */,
+				72A119582C55DB33003E827B /* MermaidEyes.swift */,
+				72A1195A2C55DB59003E827B /* MermaidMouth.swift */,
 			);
 			path = Face;
 			sourceTree = "<group>";
@@ -206,12 +215,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				7271E5682C41BBD6008CE3C8 /* Model.swift in Sources */,
+				72A119592C55DB33003E827B /* MermaidEyes.swift in Sources */,
 				72334A8A2C5068A600D24502 /* MermaidArms.swift in Sources */,
 				724C618F2C5546A900A5885C /* MermaidFace.swift in Sources */,
+				72A119572C55DAF8003E827B /* MermaidEyebrows.swift in Sources */,
 				72D020802C1905F9002F11FC /* GameScene.swift in Sources */,
 				72334A882C5061B600D24502 /* Mermaid.swift in Sources */,
 				72D1A7AE2C1BD681005213A4 /* ColorManager.swift in Sources */,
 				72D020822C1905F9002F11FC /* GameViewController.swift in Sources */,
+				72A1195B2C55DB59003E827B /* MermaidMouth.swift in Sources */,
 				72334A7E2C4EF1E100D24502 /* FrameAnimationManager.swift in Sources */,
 				72334A8C2C507C9500D24502 /* MermaidMoveModeProtocol .swift in Sources */,
 				72334A842C50415300D24502 /* Extensions.swift in Sources */,

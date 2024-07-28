@@ -121,7 +121,7 @@ extension MermaidArms: MermaidMoveModeProtocol {
         
         let lArmDown:SKAction = .group([leftArmRotationAction(to: .down),movedown])
         
-        let wait:SKAction = .wait(forDuration: 3)
+        let wait:SKAction = .wait(forDuration: 2)
         
         let rArmUp:SKAction = .group([rightArmRotationAction(),moveup])
         let lArmUp:SKAction = .group([leftArmRotationAction(),moveup])

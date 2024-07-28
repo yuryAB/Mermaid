@@ -29,72 +29,40 @@ class MermaidFace {
     }
 }
 
-class MermaidEyebrows {
-    let base:SKSpriteNode
-    let right:SKSpriteNode
-    let left:SKSpriteNode
-    
-    init() {
-        base = SKSpriteNode()
-        right = SKSpriteNode(texture: SKTexture(imageNamed: "eyeBrow"))
-        left = SKSpriteNode(texture: SKTexture(imageNamed: "eyeBrow"))
-        base.addChild(right)
-        base.addChild(left)
-        
-        setHairColor()
-        setPositions()
+extension MermaidFace: MermaidMoveModeProtocol {
+    func setIdleMoveMode() {
+        let moveto:SKAction = .move(to: CGPoint(x: 0, y: 0), duration: 0.5)
+        moveto.eaeInEaseOut()
+        base.run(moveto)
     }
     
-    func setPositions() {
-        let xpos:CGFloat = 40
-        right.position.x = xpos
-        left.position.x = -xpos
-        
-        let degree:CGFloat = 6
-        right.run(.rotate(toDegrees: -degree, duration: 0.5))
-        left.run(.rotate(toDegrees: degree, duration: 0.5))
+    func setSwingMoveMode() { }
+    
+    func setFastMoveMode() { }
+    
+    func setUpMoveMode() { 
+        let moveto:SKAction = .move(to: CGPoint(x: 0, y: 40), duration: 0.5)
+        moveto.eaeInEaseOut()
+        base.run(moveto)
     }
     
-    func setHairColor() {
-        let eyebrows = [right, left]
-        
-        let color = ColorManager.shared.upper["hairColor"]!
-        
-        for eyebrow in eyebrows {
-            eyebrow.color = color
-            eyebrow.colorBlendFactor = 1.0
-        }
-    }
-
-}
-
-class MermaidEyes {
-    let base:SKSpriteNode
-    let right:SKSpriteNode
-    let left:SKSpriteNode
-    
-    init() {
-        base = SKSpriteNode()
-        right = SKSpriteNode(texture: SKTexture(imageNamed: "eye"))
-        left = SKSpriteNode(texture: SKTexture(imageNamed: "eye"))
-        left.xScale = -1.0
-        
-        base.addChild(right)
-        base.addChild(left)
-        setPositions()
+    func setDownMoveMode() { 
+        let moveto:SKAction = .move(to: CGPoint(x: 0, y: -10), duration: 0.5)
+        moveto.eaeInEaseOut()
+        base.run(moveto)
     }
     
-    func setPositions() {
-        let xpos:CGFloat = 40
-        right.position.x = xpos
-        left.position.x = -xpos
+    func setRightMoveMode() { 
+        let moveto:SKAction = .move(to: CGPoint(x: 20, y: 0), duration: 0.5)
+        moveto.eaeInEaseOut()
+        base.run(moveto)
     }
-}
-
-class MermaidMouth {
-    let base:SKSpriteNode
     
-    init() {
-        base = SKSpriteNode(texture: SKTexture(imageNamed: "mouth"))
+    func setLeftMoveMode() { 
+        let moveto:SKAction = .move(to: CGPoint(x: -20, y: 0), duration: 0.5)
+        moveto.eaeInEaseOut()
+        base.run(moveto)
     }
+    
+    
 }
