@@ -1,3 +1,10 @@
+//
+//  GameScene.swift
+//  Ester
+//
+//  Created by yury antony on 11/06/24.
+//
+
 import SpriteKit
 import GameplayKit
 
@@ -11,13 +18,14 @@ class GameScene: SKScene {
     var button2: SKSpriteNode!
     var button3: SKSpriteNode!
     var button4: SKSpriteNode!
+    var button5: SKSpriteNode!
     var button6: SKSpriteNode!
     var button7: SKSpriteNode!
     var button8: SKSpriteNode!
     var button9: SKSpriteNode!
     var button10: SKSpriteNode!
     
-    var button5: SKSpriteNode!
+    var settingsButton: SKSpriteNode!
     
     enum DepthZone: String {
         case surface
@@ -39,22 +47,19 @@ class GameScene: SKScene {
         button9 = createButton(name: "button9", text: "zoom2", position: CGPoint(x: 140, y: -160), fontsize: 25)
         button10 = createButton(name: "button10", text: "zoom3", position: CGPoint(x: 140, y: -240), fontsize: 25)
         
+        settingsButton = createSettingsButton()
+        
         self.physicsWorld.gravity = CGVector(dx: 0, dy: -1.0)
         
         entityManager = EntityManager()
         setupNewMermaid()
         setupCamera()
         
-        cameraNode!.addChild(button1)
-        cameraNode!.addChild(button2)
-        cameraNode!.addChild(button3)
-        cameraNode!.addChild(button4)
-        cameraNode!.addChild(button5)
-        cameraNode!.addChild(button6)
-        cameraNode!.addChild(button7)
-        cameraNode!.addChild(button8)
-        cameraNode!.addChild(button9)
-        cameraNode!.addChild(button10)
+        let buttons = [button1, button2, button3, button4, button5, button6, button7, button8, button9, button10]
+        for button in buttons {
+            cameraNode!.addChild(button!)
+        }
+        cameraNode!.addChild(settingsButton)
         
         mermaidEntity.movementSM.enter(MermaidIdleState.self)
         
@@ -80,6 +85,16 @@ class GameScene: SKScene {
         return button
     }
     
+    func createSettingsButton() -> SKSpriteNode {
+        let button = SKSpriteNode(imageNamed: "settingsIcon")
+        button.name = "settingsButton"
+        button.size = CGSize(width: 30, height: 30)
+        button.position = CGPoint(x: -140, y: -340)
+        button.zPosition = 10
+        return button
+    }
+
+    
     func setupNewMermaid() {
         mermaidEntity = MermaidEntity()
         entityManager.addEntity(mermaidEntity, to: self)
@@ -94,10 +109,19 @@ class GameScene: SKScene {
     
     override func update(_ currentTime: TimeInterval) {
         updateBackgroundColor()
+        updateCameraPosition()
     }
     
     func updateBackgroundColor() {
         // Implementar a lógica de mudança de cor de fundo com base na profundidade da sereia
+    }
+    
+    func updateCameraPosition() {
+        guard let cameraNode = cameraNode else { return }
+        let targetPosition = mermaidEntity.mermaid.base.position
+        let moveAction = SKAction.move(to: targetPosition, duration: 0.5)
+        moveAction.timingMode = .easeInEaseOut
+        cameraNode.run(moveAction)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -131,10 +155,20 @@ class GameScene: SKScene {
                 case "button10":
                     let resetZoomAction = SKAction.scale(to: 9.0, duration: 1.0)
                     cameraNode?.run(resetZoomAction)
+                case "settingsButton":
+                    toggleButtonsVisibility()
                 default:
                     break
                 }
             }
         }
     }
+    
+    func toggleButtonsVisibility() {
+        let buttons = [button1, button2, button3, button4, button5, button6, button7, button8, button9, button10]
+        for button in buttons {
+            button!.isHidden.toggle()
+        }
+    }
 }
+

@@ -12,8 +12,8 @@ class MermaidArms {
     var right: SKSpriteNode
     var left: SKSpriteNode
     
-    var rPosition = CGPoint(x: 80, y: 0)
-    var lPosition = CGPoint(x: -80, y: 0)
+    var rPosition = CGPoint(x: 75, y: 0)
+    var lPosition = CGPoint(x: -75, y: 0)
     
     private enum Orientation {
         case horizontal
