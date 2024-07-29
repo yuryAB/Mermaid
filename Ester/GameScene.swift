@@ -119,8 +119,8 @@ class GameScene: SKScene {
     func updateCameraPosition() {
         guard let cameraNode = cameraNode else { return }
         let targetPosition = mermaidEntity.mermaid.base.position
-        let moveAction = SKAction.move(to: targetPosition, duration: 0.5)
-        moveAction.timingMode = .easeInEaseOut
+        let moveAction = SKAction.move(to: targetPosition, duration: 0.4)
+        moveAction.eaeInEaseOut()
         cameraNode.run(moveAction)
     }
     
@@ -144,8 +144,10 @@ class GameScene: SKScene {
                     mermaidEntity.movementSM.enter(MermaidIdleState.self)
                 case "button6":
                     mermaidEntity.movementSM.enter(MermaidSwingState.self)
+                    startRandomDirectionSelection()
                 case "button7":
                     mermaidEntity.movementSM.enter(MermaidFastState.self)
+                    startRandomDirectionSelection()
                 case "button8":
                     let resetZoomAction = SKAction.scale(to: 1.2, duration: 1.0)
                     cameraNode?.run(resetZoomAction)
@@ -170,5 +172,35 @@ class GameScene: SKScene {
             button!.isHidden.toggle()
         }
     }
-}
+    
+    func startRandomDirectionSelection() {
+        let action = SKAction.repeatForever(
+            SKAction.sequence([
+                SKAction.run { [weak self] in
+                    self?.triggerRandomDirectionState()
+                },
+                SKAction.wait(forDuration: TimeInterval(arc4random_uniform(31) + 10))
+            ])
+        )
+        self.run(action, withKey: "randomDirectionSelection")
+    }
 
+    func stopRandomDirectionSelection() {
+        self.removeAction(forKey: "randomDirectionSelection")
+    }
+
+    private func triggerRandomDirectionState() {
+        let directionStates: [GKState.Type] = [
+            MermaidUpState.self,
+            MermaidDownState.self,
+            MermaidRightState.self,
+            MermaidLeftState.self
+        ]
+        
+        let randomIndex = Int(arc4random_uniform(UInt32(directionStates.count)))
+        let randomState = directionStates[randomIndex]
+        
+        mermaidEntity.directionSM.enter(randomState)
+    }
+
+}
