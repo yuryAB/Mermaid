@@ -23,13 +23,16 @@ final class DepthSystem {
         let waters = ColorManager.shared.waters
         let reefColor = UIColor.lerp(waters["shallow"]!, waters["mid"]!, 0.5)
         let abyssFloor = UIColor.lerp(waters["abyssal"]!, .black, 0.45)
+        // Âncoras nos miolos das zonas: a cor muda devagar, sem denunciar
+        // a fronteira — só fica óbvia bem mais fundo ou bem mais raso.
         waterAnchors = [
             (World.surfaceTopY, waters["surface"]!),
-            (World.waterlineY, waters["shallow"]!),
-            (-1500, reefColor),
-            (-3000, waters["mid"]!),
-            (-4500, waters["deep"]!),
-            (-6000, waters["abyssal"]!),
+            (World.waterlineY, UIColor.lerp(waters["surface"]!, waters["shallow"]!, 0.65)),
+            (-1000, waters["shallow"]!),
+            (-3600, reefColor),
+            (-6000, waters["mid"]!),
+            (-8400, waters["deep"]!),
+            (-10800, waters["abyssal"]!),
             (World.floorY, abyssFloor)
         ]
     }
@@ -50,14 +53,18 @@ final class DepthSystem {
         return waterAnchors.last!.color
     }
 
-    /// Paleta do corpo: clara perto da superfície, escura no abismo.
+    /// Paleta do corpo: a adaptação só fica visível perto dos extremos —
+    /// clara junto à superfície, padrão na grande faixa do meio, escura no fundo.
     func mermaidPalette(atY y: CGFloat) -> MermaidPalette {
-        if y >= 0 { return .upper }
-        if y >= -2600 {
-            return .lerp(.upper, .main, -y / 2600)
+        if y >= -300 { return .upper }
+        if y >= -2000 {
+            return .lerp(.upper, .main, (-y - 300) / 1700)
         }
-        let t = ((-y - 2600) / 3400).clamped(to: 0...1)
-        return .lerp(.main, .abyss, t)
+        if y >= -8400 { return .main }
+        if y >= -11500 {
+            return .lerp(.main, .abyss, (-y - 8400) / 3100)
+        }
+        return .abyss
     }
 
     // MARK: - Atualização
@@ -127,6 +134,11 @@ final class DepthSystem {
 
     func unlockHint(_ zone: DepthZone) -> String {
         let stats = ctx.stats!
+        // A superfície tem mensagem própria: citar o abismo aqui soa como
+        // se o botão de subir estivesse invertido.
+        if zone == .surface && !stats.isUnlocked(.abyss) {
+            return "A superfície vem por último — primeiro ela precisa dominar as profundezas. 🌅"
+        }
         if let prerequisite = zone.prerequisiteZone, !stats.isUnlocked(prerequisite) {
             return "Primeiro preciso conhecer \(prerequisite.displayName)..."
         }

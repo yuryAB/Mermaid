@@ -12,7 +12,7 @@ import SpriteKit
 final class ShelterSystem {
     unowned let ctx: GameContext
 
-    let position = CGPoint(x: -380, y: -750)
+    let position = CGPoint(x: -380, y: -1600)
     private let node = SKNode()
     private var decorations: [SKNode] = []
     private var feedCooldown: CGFloat = 0
@@ -27,6 +27,7 @@ final class ShelterSystem {
         node.position = position
         node.zPosition = -10
         node.name = "shelter"
+        node.setScale(1.5)
         world.addChild(node)
         buildShell()
         rebuildDecorations()
@@ -86,7 +87,7 @@ final class ShelterSystem {
     }
 
     func isHome(_ point: CGPoint) -> Bool {
-        point.distance(to: position) < 260
+        point.distance(to: position) < 320
     }
 
     /// Guarda uma comida encontrada quando ela não está com fome.

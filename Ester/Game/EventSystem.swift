@@ -53,7 +53,7 @@ final class EventSystem {
            ctx.match3.puzzlePoint == nil {
             options.append((2, crystalCluster))
         }
-        if ctx.mermaidPosition.y > -700 {
+        if ctx.mermaidPosition.y > -1200 {
             options.append((2, boatPassing))
             if ctx.stats.isUnlocked(.surface) {
                 options.append((2, fallingObject))
@@ -190,7 +190,7 @@ final class EventSystem {
     private func fallingObject() {
         guard let world = worldNode else { return }
         let x = (ctx.mermaidPosition.x + .random(in: -250...250)).clamped(to: World.minX...World.maxX)
-        let landingY = max(ctx.mermaidPosition.y, -600) - .random(in: 0...150)
+        let landingY = max(ctx.mermaidPosition.y, -1200) - .random(in: 0...150)
 
         let object = SKShapeNode(rectOf: CGSize(width: 30, height: 30), cornerRadius: 6)
         object.fillColor = UIColor(red: 0.7, green: 0.72, blue: 0.78, alpha: 1)

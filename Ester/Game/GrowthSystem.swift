@@ -16,6 +16,10 @@ final class GrowthSystem {
 
     private(set) var eggNode: SKNode?
     private var checkTimer: CGFloat = 3
+    private var hatchRing: SKShapeNode?
+    private var lastRingProgress: CGFloat = -1
+    private var lastTapTime: TimeInterval = 0
+    private var tapCount = 0
 
     init(ctx: GameContext, worldNode: SKNode) {
         self.ctx = ctx
@@ -43,6 +47,7 @@ final class GrowthSystem {
 
     /// Progresso 0–1 até a próxima fase (menor critério domina).
     func progressToNext() -> CGFloat {
+        if ctx.stats.phase == .egg { return ctx.stats.hatchProgress }
         guard let next = ctx.stats.phase.next,
               let req = requirement(toReach: next) else { return 1 }
         var fractions: [CGFloat] = []
@@ -97,26 +102,106 @@ final class GrowthSystem {
             .scale(to: 1.0, duration: 1.4)
         ]))
         pulse.eaeInEaseOut()
-        egg.run(pulse)
+        shell.run(pulse)
+
+        // anel de progresso do choco ao redor do ovo
+        let ring = SKShapeNode()
+        ring.strokeColor = UIColor(red: 1, green: 0.92, blue: 0.7, alpha: 0.95)
+        ring.lineWidth = 6
+        ring.lineCap = .round
+        ring.glowWidth = 4
+        ring.fillColor = .clear
+        egg.addChild(ring)
+        hatchRing = ring
 
         world.addChild(egg)
         eggNode = egg
+        updateRing()
 
         // posiciona a sereia onde o ovo está, para nascer ali
         ctx.mermaidEntity.mermaid.base.position = egg.position
     }
 
+    // MARK: - Interação com o ovo
+
+    /// Toques aquecem o ovo: cada carinho adianta o choco.
+    func tapEgg() {
+        guard ctx.stats.phase == .egg, let egg = eggNode else { return }
+        let now = Date().timeIntervalSince1970
+        guard now - lastTapTime > 0.3 else { return }
+        lastTapTime = now
+        tapCount += 1
+
+        addHatchProgress(0.02)
+
+        if egg.action(forKey: "wiggle") == nil {
+            let wiggle = SKAction.sequence([
+                .rotate(toAngle: 0.12, duration: 0.08),
+                .rotate(toAngle: -0.12, duration: 0.12),
+                .rotate(toAngle: 0, duration: 0.08)
+            ])
+            egg.run(wiggle, withKey: "wiggle")
+        }
+
+        if let world = worldNode {
+            let spark = SKShapeNode(circleOfRadius: 5)
+            spark.fillColor = UIColor(red: 1, green: 0.9, blue: 0.6, alpha: 0.9)
+            spark.strokeColor = .clear
+            spark.glowWidth = 6
+            spark.position = egg.position + CGPoint(x: .random(in: -50...50), y: 60)
+            spark.zPosition = 12
+            world.addChild(spark)
+            spark.run(.sequence([
+                .group([.moveBy(x: 0, y: 70, duration: 0.8), .fadeOut(withDuration: 0.8)]),
+                .removeFromParent()
+            ]))
+        }
+
+        if tapCount % 8 == 0 {
+            let phrases = [
+                "O ovo se mexeu! 🥚",
+                "Algo respondeu lá de dentro... ✨",
+                "Está ficando quentinho! Continue 💛",
+                "Quase lá... ela sente seu carinho."
+            ]
+            ctx.say(phrases.randomElement()!)
+        }
+    }
+
+    /// Progresso de choco vindo de tempo, toques ou desafios Match-3.
+    func addHatchProgress(_ amount: CGFloat) {
+        guard ctx.stats.phase == .egg else { return }
+        ctx.stats.hatchProgress = min(1, ctx.stats.hatchProgress + amount)
+        updateRing()
+        if ctx.stats.hatchProgress >= 1 { hatch() }
+    }
+
+    private func updateRing() {
+        guard let ring = hatchRing else { return }
+        let progress = ctx.stats.hatchProgress
+        guard abs(progress - lastRingProgress) > 0.004 else { return }
+        lastRingProgress = progress
+        let start = CGFloat.pi / 2
+        let path = UIBezierPath(arcCenter: .zero, radius: 102,
+                                startAngle: start,
+                                endAngle: start + progress * 2 * .pi,
+                                clockwise: true)
+        ring.path = path.cgPath
+    }
+
     // MARK: - Atualização
 
     func update(dt: CGFloat) {
+        if ctx.stats.phase == .egg {
+            // não choca no meio de um puzzle aberto
+            guard ctx.scene?.isPuzzleOpen != true else { return }
+            // o tempo sozinho choca em ~4 min; interações aceleram muito
+            addHatchProgress(dt / 240)
+            return
+        }
         checkTimer -= dt
         guard checkTimer <= 0 else { return }
         checkTimer = 5
-
-        if ctx.stats.phase == .egg {
-            if canEvolve() { hatch() }
-            return
-        }
         if canEvolve() { evolve() }
     }
 
@@ -124,6 +209,7 @@ final class GrowthSystem {
         guard let egg = eggNode else { return }
         ctx.stats.phase = .baby
         eggNode = nil
+        hatchRing = nil
 
         let mermaid = ctx.mermaidEntity.mermaid
         mermaid.base.position = egg.position

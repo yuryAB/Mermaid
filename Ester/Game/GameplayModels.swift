@@ -15,7 +15,7 @@ enum World {
     static let maxX: CGFloat = 900
     static let surfaceTopY: CGFloat = 600
     static let waterlineY: CGFloat = 0
-    static let floorY: CGFloat = -7800
+    static let floorY: CGFloat = -12000
 }
 
 // MARK: - Zonas de profundidade
@@ -53,11 +53,11 @@ enum DepthZone: Int, Codable, CaseIterable {
     var yRange: ClosedRange<CGFloat> {
         switch self {
         case .surface: return World.waterlineY...World.surfaceTopY
-        case .shallow: return -1500 ... World.waterlineY
-        case .reef: return -3000 ... -1500
-        case .mid: return -4500 ... -3000
-        case .deep: return -6000 ... -4500
-        case .abyss: return World.floorY ... -6000
+        case .shallow: return -2400 ... World.waterlineY
+        case .reef: return -4800 ... -2400
+        case .mid: return -7200 ... -4800
+        case .deep: return -9600 ... -7200
+        case .abyss: return World.floorY ... -9600
         }
     }
 
@@ -160,12 +160,12 @@ enum MermaidPhase: Int, Codable, CaseIterable, Comparable {
 
     var scale: CGFloat {
         switch self {
-        case .egg: return 0.34
-        case .baby: return 0.4
-        case .child: return 0.52
-        case .teen: return 0.68
-        case .young: return 0.84
-        case .adult: return 1.0
+        case .egg: return 0.18
+        case .baby: return 0.2
+        case .child: return 0.3
+        case .teen: return 0.42
+        case .young: return 0.55
+        case .adult: return 0.7
         }
     }
 
@@ -201,6 +201,7 @@ enum PlayerCommand: String, CaseIterable {
         }
     }
 
+    /// Emoji usado apenas como fallback se o SF Symbol não existir no iOS instalado.
     var icon: String {
         switch self {
         case .explore: return "🧭"
@@ -211,6 +212,32 @@ enum PlayerCommand: String, CaseIterable {
         case .goDown: return "⬇️"
         case .challenge: return "💎"
         case .goHome: return "🏠"
+        }
+    }
+
+    var symbolName: String {
+        switch self {
+        case .explore: return "safari.fill"
+        case .seekFood: return "leaf.fill"
+        case .rest: return "moon.zzz.fill"
+        case .interact: return "heart.fill"
+        case .goUp: return "arrow.up.circle.fill"
+        case .goDown: return "arrow.down.circle.fill"
+        case .challenge: return "puzzlepiece.fill"
+        case .goHome: return "house.fill"
+        }
+    }
+
+    var tint: UIColor {
+        switch self {
+        case .explore: return UIColor(red: 0.4, green: 0.8, blue: 0.95, alpha: 1)
+        case .seekFood: return UIColor(red: 0.5, green: 0.85, blue: 0.5, alpha: 1)
+        case .rest: return UIColor(red: 0.72, green: 0.68, blue: 0.95, alpha: 1)
+        case .interact: return UIColor(red: 0.95, green: 0.55, blue: 0.68, alpha: 1)
+        case .goUp: return UIColor(red: 0.6, green: 0.88, blue: 0.95, alpha: 1)
+        case .goDown: return UIColor(red: 0.42, green: 0.6, blue: 0.95, alpha: 1)
+        case .challenge: return UIColor(red: 0.98, green: 0.8, blue: 0.4, alpha: 1)
+        case .goHome: return UIColor(red: 0.95, green: 0.7, blue: 0.45, alpha: 1)
         }
     }
 }

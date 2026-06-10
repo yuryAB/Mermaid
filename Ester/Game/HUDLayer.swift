@@ -2,8 +2,9 @@
 //  HUDLayer.swift
 //  Ester
 //
-//  Interface do cuidador: barras de fome/energia/humor, fase, idade,
-//  profundidade, pérolas, intenção atual e os botões de comando.
+//  Interface do cuidador: painel de status agrupado (fase, profundidade,
+//  pérolas e barras), bolha de mensagens, chip de intenção e botões de
+//  comando com SF Symbols. Respeita as safe areas (Dynamic Island).
 //
 
 import Foundation
@@ -13,29 +14,53 @@ final class HUDLayer: SKNode {
     var onCommand: ((PlayerCommand) -> Void)?
 
     private let sceneSize: CGSize
+    private let insets: UIEdgeInsets
 
     private var phaseLabel: SKLabelNode!
     private var depthLabel: SKLabelNode!
     private var pearlsLabel: SKLabelNode!
-    private var intentLabel: SKLabelNode!
     private var storedFoodLabel: SKLabelNode!
+    private var intentLabel: SKLabelNode!
     private var bars: [String: SKShapeNode] = [:]
+    private var buttons: [PlayerCommand: SKNode] = [:]
     private var messageContainer: SKNode!
     private var messageLabel: SKLabelNode!
+    private var lastEggMode = false
 
-    init(size: CGSize) {
+    init(size: CGSize, insets: UIEdgeInsets) {
         self.sceneSize = size
+        self.insets = insets
         super.init()
         isUserInteractionEnabled = true
-        buildTopInfo()
-        buildBars()
-        buildButtons()
+        buildTopPanel()
         buildMessageBubble()
+        buildIntentChip()
+        buildButtons()
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    // MARK: - Construção
+    // MARK: - SF Symbols (com fallback para emoji)
+
+    private static func symbolNode(_ name: String,
+                                   fallback: String,
+                                   pointSize: CGFloat,
+                                   color: UIColor) -> SKNode {
+        let config = UIImage.SymbolConfiguration(pointSize: pointSize, weight: .semibold)
+        if let image = UIImage(systemName: name, withConfiguration: config)?
+            .withTintColor(color, renderingMode: .alwaysOriginal) {
+            let renderer = UIGraphicsImageRenderer(size: image.size)
+            let flattened = renderer.image { _ in image.draw(at: .zero) }
+            let sprite = SKSpriteNode(texture: SKTexture(image: flattened))
+            sprite.size = image.size
+            return sprite
+        }
+        let label = SKLabelNode(text: fallback)
+        label.fontSize = pointSize
+        label.verticalAlignmentMode = .center
+        label.horizontalAlignmentMode = .center
+        return label
+    }
 
     private func makeLabel(fontSize: CGFloat, bold: Bool = false) -> SKLabelNode {
         let label = SKLabelNode(text: "")
@@ -45,145 +70,191 @@ final class HUDLayer: SKNode {
         return label
     }
 
-    private func buildTopInfo() {
-        let halfW = sceneSize.width / 2
-        let halfH = sceneSize.height / 2
+    // MARK: - Painel superior
+
+    private func buildTopPanel() {
+        let panelWidth = sceneSize.width - 24
+        let panelHeight: CGFloat = 122
+        let topEdge = sceneSize.height / 2 - insets.top
+
+        let panel = SKShapeNode(rectOf: CGSize(width: panelWidth, height: panelHeight),
+                                cornerRadius: 18)
+        panel.fillColor = UIColor(red: 0.02, green: 0.07, blue: 0.14, alpha: 0.45)
+        panel.strokeColor = UIColor(white: 1, alpha: 0.18)
+        panel.lineWidth = 1
+        panel.position = CGPoint(x: 0, y: topEdge - 8 - panelHeight / 2)
+        addChild(panel)
+
+        let halfW = panelWidth / 2
+        let row1Y = panelHeight / 2 - 24
+        let row2Y = panelHeight / 2 - 47
 
         phaseLabel = makeLabel(fontSize: 15, bold: true)
         phaseLabel.horizontalAlignmentMode = .left
-        phaseLabel.position = CGPoint(x: -halfW + 16, y: halfH - 52)
-        addChild(phaseLabel)
+        phaseLabel.verticalAlignmentMode = .center
+        phaseLabel.position = CGPoint(x: -halfW + 14, y: row1Y)
+        panel.addChild(phaseLabel)
 
-        depthLabel = makeLabel(fontSize: 15, bold: true)
-        depthLabel.horizontalAlignmentMode = .right
-        depthLabel.position = CGPoint(x: halfW - 16, y: halfH - 52)
-        addChild(depthLabel)
+        let pearlIcon = HUDLayer.symbolNode("sparkles", fallback: "💠", pointSize: 13,
+                                            color: UIColor(red: 0.7, green: 0.88, blue: 1, alpha: 1))
+        pearlIcon.position = CGPoint(x: halfW - 92, y: row1Y)
+        panel.addChild(pearlIcon)
 
-        pearlsLabel = makeLabel(fontSize: 15, bold: true)
-        pearlsLabel.horizontalAlignmentMode = .right
-        pearlsLabel.position = CGPoint(x: halfW - 16, y: halfH - 78)
-        addChild(pearlsLabel)
+        pearlsLabel = makeLabel(fontSize: 14, bold: true)
+        pearlsLabel.horizontalAlignmentMode = .left
+        pearlsLabel.verticalAlignmentMode = .center
+        pearlsLabel.position = CGPoint(x: halfW - 78, y: row1Y)
+        panel.addChild(pearlsLabel)
 
-        storedFoodLabel = makeLabel(fontSize: 13)
+        depthLabel = makeLabel(fontSize: 12)
+        depthLabel.fontColor = UIColor(white: 1, alpha: 0.75)
+        depthLabel.horizontalAlignmentMode = .left
+        depthLabel.verticalAlignmentMode = .center
+        depthLabel.position = CGPoint(x: -halfW + 14, y: row2Y)
+        panel.addChild(depthLabel)
+
+        storedFoodLabel = makeLabel(fontSize: 12)
+        storedFoodLabel.fontColor = UIColor(white: 1, alpha: 0.7)
         storedFoodLabel.horizontalAlignmentMode = .right
-        storedFoodLabel.position = CGPoint(x: halfW - 16, y: halfH - 102)
-        addChild(storedFoodLabel)
+        storedFoodLabel.verticalAlignmentMode = .center
+        storedFoodLabel.position = CGPoint(x: halfW - 14, y: row2Y)
+        panel.addChild(storedFoodLabel)
 
-        intentLabel = makeLabel(fontSize: 14)
-        intentLabel.fontColor = UIColor(white: 1, alpha: 0.85)
-        intentLabel.position = CGPoint(x: 0, y: -halfH + 152)
-        addChild(intentLabel)
-    }
-
-    private func buildBars() {
-        let barNames: [(key: String, icon: String, color: UIColor)] = [
-            ("satiety", "🍽", UIColor(red: 0.95, green: 0.6, blue: 0.3, alpha: 1)),
-            ("energy", "⚡️", UIColor(red: 0.95, green: 0.85, blue: 0.3, alpha: 1)),
-            ("mood", "😊", UIColor(red: 0.45, green: 0.85, blue: 0.55, alpha: 1)),
-            ("evolution", "⭐️", UIColor(red: 0.6, green: 0.75, blue: 1, alpha: 1))
+        // barras em duas colunas
+        let barConfigs: [(key: String, symbol: String, fallback: String, color: UIColor, column: Int, row: Int)] = [
+            ("satiety", "fork.knife", "🍽", UIColor(red: 0.95, green: 0.6, blue: 0.3, alpha: 1), 0, 0),
+            ("energy", "bolt.fill", "⚡️", UIColor(red: 0.95, green: 0.85, blue: 0.3, alpha: 1), 1, 0),
+            ("mood", "face.smiling", "😊", UIColor(red: 0.45, green: 0.85, blue: 0.55, alpha: 1), 0, 1),
+            ("evolution", "star.fill", "⭐️", UIColor(red: 0.6, green: 0.75, blue: 1, alpha: 1), 1, 1)
         ]
-        let halfW = sceneSize.width / 2
-        let halfH = sceneSize.height / 2
-        let barWidth: CGFloat = 92
+        let barWidth = panelWidth / 2 - 52
         let barHeight: CGFloat = 9
 
-        for (index, info) in barNames.enumerated() {
-            let y = halfH - 84 - CGFloat(index) * 23
+        for config in barConfigs {
+            let y = -panelHeight / 2 + 40 - CGFloat(config.row) * 24
+            let iconX: CGFloat = config.column == 0 ? -halfW + 22 : 14
+            let barX: CGFloat = config.column == 0 ? -halfW + 40 : 32
 
-            let icon = makeLabel(fontSize: 12)
-            icon.text = info.icon
-            icon.horizontalAlignmentMode = .left
-            icon.verticalAlignmentMode = .center
-            icon.position = CGPoint(x: -halfW + 16, y: y)
-            addChild(icon)
+            let icon = HUDLayer.symbolNode(config.symbol, fallback: config.fallback,
+                                           pointSize: 11, color: config.color)
+            icon.position = CGPoint(x: iconX, y: y)
+            panel.addChild(icon)
 
             let bg = SKShapeNode(rect: CGRect(x: 0, y: -barHeight / 2, width: barWidth, height: barHeight),
                                  cornerRadius: barHeight / 2)
-            bg.fillColor = UIColor(white: 0, alpha: 0.35)
-            bg.strokeColor = UIColor(white: 1, alpha: 0.3)
-            bg.position = CGPoint(x: -halfW + 42, y: y)
-            addChild(bg)
+            bg.fillColor = UIColor(white: 0, alpha: 0.4)
+            bg.strokeColor = UIColor(white: 1, alpha: 0.22)
+            bg.position = CGPoint(x: barX, y: y)
+            panel.addChild(bg)
 
             let fill = SKShapeNode(rect: CGRect(x: 0, y: -barHeight / 2 + 1.5, width: barWidth - 3, height: barHeight - 3),
                                    cornerRadius: (barHeight - 3) / 2)
-            fill.fillColor = info.color
+            fill.fillColor = config.color
             fill.strokeColor = .clear
             fill.position = CGPoint(x: 1.5, y: 0)
             bg.addChild(fill)
-            bars[info.key] = fill
+            bars[config.key] = fill
         }
     }
 
+    // MARK: - Mensagens
+
+    private func buildMessageBubble() {
+        let topEdge = sceneSize.height / 2 - insets.top
+        messageContainer = SKNode()
+        messageContainer.position = CGPoint(x: 0, y: topEdge - 8 - 122 - 36)
+        messageContainer.alpha = 0
+        messageContainer.zPosition = 5
+        addChild(messageContainer)
+
+        let bubble = SKShapeNode(rectOf: CGSize(width: sceneSize.width - 56, height: 48), cornerRadius: 14)
+        bubble.fillColor = UIColor(red: 0.02, green: 0.07, blue: 0.14, alpha: 0.62)
+        bubble.strokeColor = UIColor(white: 1, alpha: 0.32)
+        messageContainer.addChild(bubble)
+
+        messageLabel = makeLabel(fontSize: 13)
+        messageLabel.verticalAlignmentMode = .center
+        messageLabel.preferredMaxLayoutWidth = sceneSize.width - 88
+        messageLabel.numberOfLines = 2
+        messageContainer.addChild(messageLabel)
+    }
+
+    func showMessage(_ text: String, duration: TimeInterval = 0) {
+        let holdTime = duration > 0 ? duration : max(3.0, Double(text.count) * 0.07)
+        messageLabel.text = text
+        messageContainer.removeAllActions()
+        messageContainer.run(.sequence([
+            .fadeIn(withDuration: 0.2),
+            .wait(forDuration: holdTime),
+            .fadeOut(withDuration: 0.5)
+        ]))
+    }
+
+    // MARK: - Chip de intenção
+
+    private var intentChip: SKShapeNode!
+
+    private func buildIntentChip() {
+        let chipY = buttonRowY(0) + 50
+        intentChip = SKShapeNode(rectOf: CGSize(width: 250, height: 26), cornerRadius: 13)
+        intentChip.fillColor = UIColor(red: 0.02, green: 0.07, blue: 0.14, alpha: 0.4)
+        intentChip.strokeColor = UIColor(white: 1, alpha: 0.18)
+        intentChip.position = CGPoint(x: 0, y: chipY)
+        addChild(intentChip)
+
+        intentLabel = makeLabel(fontSize: 12)
+        intentLabel.fontColor = UIColor(white: 1, alpha: 0.9)
+        intentLabel.verticalAlignmentMode = .center
+        intentChip.addChild(intentLabel)
+    }
+
+    // MARK: - Botões de comando
+
+    private func buttonRowY(_ row: Int) -> CGFloat {
+        -sceneSize.height / 2 + insets.bottom + 134 - CGFloat(row) * 62
+    }
+
     private func buildButtons() {
-        let halfH = sceneSize.height / 2
         let commands: [[PlayerCommand]] = [
             [.explore, .seekFood, .rest, .interact],
             [.goUp, .goDown, .challenge, .goHome]
         ]
-        let buttonWidth = (sceneSize.width - 50) / 4
-        let buttonHeight: CGFloat = 48
+        let buttonWidth = (sceneSize.width - 60) / 4
+        let buttonHeight: CGFloat = 54
 
         for (rowIndex, row) in commands.enumerated() {
-            let y = -halfH + 110 - CGFloat(rowIndex) * 58
+            let y = buttonRowY(rowIndex)
             for (columnIndex, command) in row.enumerated() {
-                let x = -sceneSize.width / 2 + 25 + buttonWidth / 2 + CGFloat(columnIndex) * (buttonWidth + 0)
+                let x = -sceneSize.width / 2 + 18 + buttonWidth / 2 + CGFloat(columnIndex) * (buttonWidth + 8)
                 let button = SKNode()
                 button.name = "cmd_\(command.rawValue)"
                 button.position = CGPoint(x: x, y: y)
 
-                let bg = SKShapeNode(rectOf: CGSize(width: buttonWidth - 8, height: buttonHeight),
-                                     cornerRadius: 12)
-                bg.fillColor = UIColor(white: 1, alpha: 0.16)
-                bg.strokeColor = UIColor(white: 1, alpha: 0.45)
+                let bg = SKShapeNode(rectOf: CGSize(width: buttonWidth, height: buttonHeight),
+                                     cornerRadius: 14)
+                bg.fillColor = UIColor(red: 0.02, green: 0.07, blue: 0.14, alpha: 0.5)
+                bg.strokeColor = command.tint.withAlphaComponent(0.55)
+                bg.lineWidth = 1.5
                 bg.name = button.name
                 button.addChild(bg)
 
-                let icon = makeLabel(fontSize: 17)
-                icon.text = command.icon
-                icon.position = CGPoint(x: 0, y: 4)
+                let icon = HUDLayer.symbolNode(command.symbolName, fallback: command.icon,
+                                               pointSize: 17, color: command.tint)
+                icon.position = CGPoint(x: 0, y: 8)
                 icon.name = button.name
                 button.addChild(icon)
 
                 let text = makeLabel(fontSize: 10)
                 text.text = command.label
-                text.position = CGPoint(x: 0, y: -16)
+                text.fontColor = UIColor(white: 1, alpha: 0.92)
+                text.position = CGPoint(x: 0, y: -19)
                 text.name = button.name
                 button.addChild(text)
 
                 addChild(button)
+                buttons[command] = button
             }
         }
-    }
-
-    private func buildMessageBubble() {
-        messageContainer = SKNode()
-        messageContainer.position = CGPoint(x: 0, y: sceneSize.height / 2 - 180)
-        messageContainer.alpha = 0
-        messageContainer.zPosition = 5
-        addChild(messageContainer)
-
-        let bubble = SKShapeNode(rectOf: CGSize(width: sceneSize.width - 60, height: 46), cornerRadius: 14)
-        bubble.fillColor = UIColor(white: 0, alpha: 0.55)
-        bubble.strokeColor = UIColor(white: 1, alpha: 0.4)
-        messageContainer.addChild(bubble)
-
-        messageLabel = makeLabel(fontSize: 13)
-        messageLabel.verticalAlignmentMode = .center
-        messageLabel.preferredMaxLayoutWidth = sceneSize.width - 80
-        messageLabel.numberOfLines = 2
-        messageContainer.addChild(messageLabel)
-    }
-
-    // MARK: - Mensagens
-
-    func showMessage(_ text: String, duration: TimeInterval = 3.2) {
-        messageLabel.text = text
-        messageContainer.removeAllActions()
-        messageContainer.run(.sequence([
-            .fadeIn(withDuration: 0.2),
-            .wait(forDuration: duration),
-            .fadeOut(withDuration: 0.5)
-        ]))
     }
 
     // MARK: - Atualização
@@ -194,22 +265,38 @@ final class HUDLayer: SKNode {
                  depthMeters: CGFloat,
                  evolutionProgress: CGFloat,
                  shelterCapacity: Int) {
-        phaseLabel.text = "🧜‍♀️ \(stats.phase.displayName) · \(stats.ageText)"
+        let eggMode = stats.phase == .egg
+
+        if eggMode {
+            phaseLabel.text = "Ovo · \(Int(evolutionProgress * 100))% chocado"
+            intentLabel.text = "aquecendo o ovo..."
+        } else {
+            phaseLabel.text = "\(stats.phase.displayName) · \(stats.ageText)"
+            intentLabel.text = "• \(intent.displayName)"
+        }
         depthLabel.text = "\(zone.displayName) · \(Int(depthMeters))m"
-        pearlsLabel.text = "💠 \(stats.pearls)"
-        storedFoodLabel.text = stats.storedFood > 0 ? "🐚 comida: \(stats.storedFood)/\(shelterCapacity)" : ""
-        intentLabel.text = "✨ \(intent.displayName)"
+        pearlsLabel.text = "\(stats.pearls)"
+        storedFoodLabel.text = stats.storedFood > 0 ? "abrigo: \(stats.storedFood)/\(shelterCapacity)" : ""
 
         setBar("satiety", value: (100 - stats.hunger) / 100)
         setBar("energy", value: stats.energy / 100)
         setBar("mood", value: stats.mood / 100)
         setBar("evolution", value: evolutionProgress)
 
-        // satisfação fica vermelha quando a fome aperta
+        // saciedade fica vermelha quando a fome aperta
         if let satiety = bars["satiety"] {
             satiety.fillColor = stats.hunger > 75
                 ? UIColor(red: 0.9, green: 0.25, blue: 0.25, alpha: 1)
                 : UIColor(red: 0.95, green: 0.6, blue: 0.3, alpha: 1)
+        }
+
+        // durante o ovo, só o Desafio fica ativo
+        if eggMode != lastEggMode {
+            lastEggMode = eggMode
+            for (command, button) in buttons {
+                let active = !eggMode || command == .challenge
+                button.alpha = active ? 1 : 0.32
+            }
         }
     }
 
@@ -225,19 +312,17 @@ final class HUDLayer: SKNode {
         for node in nodes(at: location) {
             if let name = node.name, name.hasPrefix("cmd_"),
                let command = PlayerCommand(rawValue: String(name.dropFirst(4))) {
-                flashButton(named: name)
+                flashButton(command)
                 onCommand?(command)
                 return
             }
         }
     }
 
-    private func flashButton(named name: String) {
-        for child in children where child.name == name {
-            child.run(.sequence([
-                .scale(to: 0.88, duration: 0.08),
-                .scale(to: 1.0, duration: 0.12)
-            ]))
-        }
+    private func flashButton(_ command: PlayerCommand) {
+        buttons[command]?.run(.sequence([
+            .scale(to: 0.88, duration: 0.08),
+            .scale(to: 1.0, duration: 0.12)
+        ]))
     }
 }

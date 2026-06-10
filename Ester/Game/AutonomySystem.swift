@@ -156,17 +156,24 @@ final class AutonomySystem {
         case .seekingPuzzle:
             target = ctx.match3.ensurePuzzlePoint(near: position, zone: currentZone)
         case .goingDeeper:
-            if let zone = currentZone.deeper {
-                target = CGPoint(x: CGFloat.random(in: World.minX * 0.6...World.maxX * 0.6),
-                                 y: zone.midY + .random(in: -300...300))
+            // zona bloqueada: tenta mesmo assim e esbarra no limite permitido
+            let y: CGFloat
+            if let zone = currentZone.deeper, ctx.depth.isUnlocked(zone) {
+                y = zone.midY + .random(in: -300...300)
+            } else {
+                y = position.y - 800
             }
+            target = CGPoint(x: CGFloat.random(in: World.minX * 0.6...World.maxX * 0.6), y: y)
         case .goingUp:
-            if let zone = currentZone.shallower {
-                let y = zone == .surface
+            let y: CGFloat
+            if let zone = currentZone.shallower, ctx.depth.isUnlocked(zone) {
+                y = zone == .surface
                     ? CGFloat.random(in: 40...200)
                     : zone.midY + .random(in: -300...300)
-                target = CGPoint(x: CGFloat.random(in: World.minX * 0.6...World.maxX * 0.6), y: y)
+            } else {
+                y = position.y + 800
             }
+            target = CGPoint(x: CGFloat.random(in: World.minX * 0.6...World.maxX * 0.6), y: y)
         case .returningHome:
             target = ctx.shelter.position
         case .interactingWithFish:
@@ -313,7 +320,12 @@ final class AutonomySystem {
 
     func give(_ command: PlayerCommand) {
         guard stats.phase != .egg else {
-            ctx.say("O ovo ainda está repousando... 🥚")
+            // Durante o ovo só o desafio funciona — e abre na hora.
+            if command == .challenge {
+                ctx.scene?.openMatch3(zone: .shallow, special: false)
+            } else {
+                ctx.say("O ovo descansa... toque nele para aquecê-lo, ou toque em Desafio 💎")
+            }
             return
         }
         guard intent != .solvingPuzzle else { return }
@@ -339,10 +351,6 @@ final class AutonomySystem {
                 ctx.say("Já estamos no fundo do abismo.")
                 return
             }
-            guard ctx.depth.isUnlocked(next) else {
-                ctx.say(ctx.depth.unlockHint(next))
-                return
-            }
             guard stats.energy > 15 else {
                 refuseTired()
                 return
@@ -352,19 +360,22 @@ final class AutonomySystem {
                 stats.trust = max(0, stats.trust - 0.6)
                 return
             }
+            // zona fechada: explica o motivo, mas desce até onde dá
+            if !ctx.depth.isUnlocked(next) {
+                ctx.say(ctx.depth.unlockHint(next))
+            }
             desired = .goingDeeper
         case .goUp:
             if currentZone == .surface {
                 ctx.say("Já estou na superfície!")
                 return
             }
-            if currentZone == .shallow && !ctx.depth.isUnlocked(.surface) {
-                ctx.say(ctx.depth.unlockHint(.surface))
-                return
-            }
             guard stats.energy > 10 else {
                 refuseTired()
                 return
+            }
+            if currentZone == .shallow && !ctx.depth.isUnlocked(.surface) {
+                ctx.say(ctx.depth.unlockHint(.surface))
             }
             desired = .goingUp
         case .challenge:

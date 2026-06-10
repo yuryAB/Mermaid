@@ -29,6 +29,8 @@ final class MermaidStats: Codable {
     var mealsEaten: Int = 0
     var memories: [String] = []
     var lastSaved: Date = Date()
+    /// 0–1: progresso até o ovo chocar (tempo + carinho + desafios).
+    var hatchProgress: CGFloat = 0
 
     // Estado transitório, não persiste
     var moodBoost: CGFloat = 0
@@ -38,10 +40,35 @@ final class MermaidStats: Codable {
         case hunger, energy, mood, xp, courage, trust, curiosity, pearls
         case phase, birthDate, adaptationByZone, unlockedZoneKeys
         case shelterLevel, storedFood, maxDepthMeters
-        case puzzlesSolved, mealsEaten, memories, lastSaved
+        case puzzlesSolved, mealsEaten, memories, lastSaved, hatchProgress
     }
 
     init() {}
+
+    /// Decoder tolerante: campos novos ganham default em vez de invalidar o save.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        hunger = try c.decodeIfPresent(CGFloat.self, forKey: .hunger) ?? 25
+        energy = try c.decodeIfPresent(CGFloat.self, forKey: .energy) ?? 85
+        mood = try c.decodeIfPresent(CGFloat.self, forKey: .mood) ?? 70
+        xp = try c.decodeIfPresent(CGFloat.self, forKey: .xp) ?? 0
+        courage = try c.decodeIfPresent(CGFloat.self, forKey: .courage) ?? 12
+        trust = try c.decodeIfPresent(CGFloat.self, forKey: .trust) ?? 50
+        curiosity = try c.decodeIfPresent(CGFloat.self, forKey: .curiosity) ?? 60
+        pearls = try c.decodeIfPresent(Int.self, forKey: .pearls) ?? 20
+        phase = try c.decodeIfPresent(MermaidPhase.self, forKey: .phase) ?? .egg
+        birthDate = try c.decodeIfPresent(Date.self, forKey: .birthDate) ?? Date()
+        adaptationByZone = try c.decodeIfPresent([String: CGFloat].self, forKey: .adaptationByZone) ?? [DepthZone.shallow.storageKey: 30]
+        unlockedZoneKeys = try c.decodeIfPresent(Set<String>.self, forKey: .unlockedZoneKeys) ?? [DepthZone.shallow.storageKey]
+        shelterLevel = try c.decodeIfPresent(Int.self, forKey: .shelterLevel) ?? 1
+        storedFood = try c.decodeIfPresent(Int.self, forKey: .storedFood) ?? 0
+        maxDepthMeters = try c.decodeIfPresent(CGFloat.self, forKey: .maxDepthMeters) ?? 0
+        puzzlesSolved = try c.decodeIfPresent(Int.self, forKey: .puzzlesSolved) ?? 0
+        mealsEaten = try c.decodeIfPresent(Int.self, forKey: .mealsEaten) ?? 0
+        memories = try c.decodeIfPresent([String].self, forKey: .memories) ?? []
+        lastSaved = try c.decodeIfPresent(Date.self, forKey: .lastSaved) ?? Date()
+        hatchProgress = try c.decodeIfPresent(CGFloat.self, forKey: .hatchProgress) ?? 0
+    }
 
     // MARK: - Derivados
 

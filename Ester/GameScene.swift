@@ -59,9 +59,16 @@ class GameScene: SKScene {
             .run { [weak self] in
                 guard let self else { return }
                 if self.stats.phase == .egg {
-                    self.ctx.say("Um ovo misterioso repousa no abrigo... 🥚")
+                    self.ctx.say("Um ovo misterioso... Toque nele para aquecê-lo! 🥚")
                 } else {
                     self.ctx.say("Bem-vindo de volta! Ela sentiu sua falta. 🌊")
+                }
+            },
+            .wait(forDuration: 13),
+            .run { [weak self] in
+                guard let self else { return }
+                if self.stats.phase == .egg && self.stats.hatchProgress < 0.6 {
+                    self.ctx.say("Dica: desafios Match-3 também aquecem o ovo 💎")
                 }
             }
         ]))
@@ -76,7 +83,7 @@ class GameScene: SKScene {
         let mermaid = mermaidEntity.mermaid
         mermaid.base.zPosition = 10
         mermaid.base.setScale(stats.phase.scale)
-        mermaid.base.position = CGPoint(x: -180, y: -650)
+        mermaid.base.position = CGPoint(x: -200, y: -1450)
         mermaid.setAnimationMode(.idle)
     }
 
@@ -100,7 +107,8 @@ class GameScene: SKScene {
     }
 
     private func setupHUD() {
-        hud = HUDLayer(size: size)
+        let insets = view?.safeAreaInsets ?? .zero
+        hud = HUDLayer(size: size, insets: insets)
         hud.zPosition = 100
         hud.onCommand = { [weak self] command in
             self?.ctx.autonomy.give(command)
@@ -136,8 +144,8 @@ class GameScene: SKScene {
                 let path = UIBezierPath()
                 path.move(to: .zero)
                 path.addLine(to: CGPoint(x: 120, y: 0))
-                path.addLine(to: CGPoint(x: 320, y: -1100))
-                path.addLine(to: CGPoint(x: 80, y: -1100))
+                path.addLine(to: CGPoint(x: 380, y: -1800))
+                path.addLine(to: CGPoint(x: 100, y: -1800))
                 path.close()
                 return path.cgPath
             }())
@@ -235,6 +243,8 @@ class GameScene: SKScene {
 
     // MARK: - Match-3
 
+    var isPuzzleOpen: Bool { match3Overlay != nil }
+
     func openMatch3(zone: DepthZone, special: Bool) {
         guard match3Overlay == nil else { return }
         stats.energy = max(0, stats.energy - 8)
@@ -257,11 +267,20 @@ class GameScene: SKScene {
     private func closeMatch3(result: Match3Result, zone: DepthZone) {
         match3Overlay?.removeFromParent()
         match3Overlay = nil
-        ctx.autonomy.paused = false
-        ctx.autonomy.finishPuzzle()
 
         stats.pearls += result.pearls
         stats.gainXP(result.xp)
+
+        // Durante o ovo, o desafio serve para aquecer o choco
+        if stats.phase == .egg {
+            ctx.growth.addHatchProgress(CGFloat(result.score) / 900)
+            stats.save()
+            ctx.say("O desafio aqueceu o ovo! 🥚✨ 💠+\(result.pearls)")
+            return
+        }
+
+        ctx.autonomy.paused = false
+        ctx.autonomy.finishPuzzle()
         stats.boostMood(8)
         let adaptation = stats.adaptation(for: zone)
         stats.setAdaptation(adaptation + 3, for: zone)
@@ -282,7 +301,12 @@ class GameScene: SKScene {
         guard match3Overlay == nil, let touch = touches.first else { return }
         let location = touch.location(in: self)
 
-        if ctx.shelter.position.distance(to: location) < 260 {
+        if let egg = ctx.growth.eggNode,
+           egg.position.distance(to: location) < 180 {
+            ctx.growth.tapEgg()
+            return
+        }
+        if ctx.shelter.position.distance(to: location) < 320 {
             ctx.shelter.tryUpgrade()
             return
         }
