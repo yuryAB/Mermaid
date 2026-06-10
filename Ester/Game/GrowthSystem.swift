@@ -20,6 +20,9 @@ final class GrowthSystem {
     private var lastRingProgress: CGFloat = -1
     private var lastTapTime: TimeInterval = 0
     private var tapCount = 0
+    private var crackCount = 0
+    private var announcedAlmostBorn = false
+    private let crackThresholds: [CGFloat] = [0.35, 0.6, 0.82]
 
     init(ctx: GameContext, worldNode: SKNode) {
         self.ctx = ctx
@@ -83,7 +86,7 @@ final class GrowthSystem {
     private func spawnEgg() {
         guard let world = worldNode else { return }
         let egg = SKNode()
-        egg.position = ctx.shelter.position + CGPoint(x: 0, y: 40)
+        egg.position = World.startPosition + CGPoint(x: 0, y: 60)
         egg.zPosition = 10
 
         let shell = SKShapeNode(ellipseOf: CGSize(width: 110, height: 150))
@@ -168,12 +171,43 @@ final class GrowthSystem {
         }
     }
 
-    /// Progresso de choco vindo de tempo, toques ou desafios Match-3.
+    /// Progresso de choco vindo de tempo, toques ou da Trama das Marés.
     func addHatchProgress(_ amount: CGFloat) {
         guard ctx.stats.phase == .egg else { return }
         ctx.stats.hatchProgress = min(1, ctx.stats.hatchProgress + amount)
         updateRing()
+        updateCracks()
+        if ctx.stats.hatchProgress >= 0.82 && !announcedAlmostBorn {
+            announcedAlmostBorn = true
+            ctx.say("Ela está quase nascendo... 🥚✨")
+        }
         if ctx.stats.hatchProgress >= 1 { hatch() }
+    }
+
+    /// Rachaduras vão aparecendo conforme o choco avança.
+    private func updateCracks() {
+        guard let egg = eggNode else { return }
+        let progress = ctx.stats.hatchProgress
+        while crackCount < crackThresholds.count && progress >= crackThresholds[crackCount] {
+            crackCount += 1
+            let path = UIBezierPath()
+            let startX = CGFloat.random(in: -30...30)
+            let startY = CGFloat.random(in: -30...40)
+            path.move(to: CGPoint(x: startX, y: startY))
+            var point = CGPoint(x: startX, y: startY)
+            for _ in 0..<3 {
+                point.x += .random(in: -16...16)
+                point.y -= .random(in: 8...18)
+                path.addLine(to: point)
+            }
+            let crack = SKShapeNode(path: path.cgPath)
+            crack.strokeColor = UIColor(white: 1, alpha: 0.75)
+            crack.lineWidth = 2
+            crack.zPosition = 2
+            crack.alpha = 0
+            egg.addChild(crack)
+            crack.run(.fadeIn(withDuration: 0.4))
+        }
     }
 
     private func updateRing() {

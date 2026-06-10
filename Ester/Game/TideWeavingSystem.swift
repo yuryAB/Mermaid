@@ -1,55 +1,81 @@
 //
-//  Match3System.swift
+//  TideWeavingSystem.swift
 //  Ester
 //
-//  Único tipo de puzzle do jogo. Integrado ao mundo por "pontos mágicos":
-//  a sereia procura um cristal no ambiente e, ao alcançá-lo, o tabuleiro
-//  abre como camada modal. Temas e recompensas variam por bioma.
+//  Trama das Marés: o único tipo de puzzle do jogo (combinar 3+ peças).
+//  A fantasia é a sereia alinhando pérolas, conchas, cristais e correntes.
+//  Sessões: básica (sempre disponível), de região, de evento e de choco.
 //
 
 import Foundation
 import SpriteKit
 
-// MARK: - Tema por bioma
+// MARK: - Tipos de sessão
 
-struct Match3Theme {
+enum TideSessionType {
+    case basic
+    case region
+    case event
+    case hatching
+}
+
+// MARK: - Tema
+
+struct TideTheme {
     let icons: [String]
-    let title: String
+    let subtitle: String
 
-    static func theme(for zone: DepthZone, special: Bool) -> Match3Theme {
-        var theme: Match3Theme
+    static func theme(for zone: DepthZone,
+                      region: Region?,
+                      session: TideSessionType) -> TideTheme {
+        switch session {
+        case .hatching:
+            return TideTheme(icons: ["🫧", "✨", "💛", "🐚", "💙"],
+                             subtitle: "Energia de Nascimento")
+        case .region:
+            if let region {
+                return TideTheme(icons: region.tideIcons, subtitle: region.tideTitle)
+            }
+            return zoneTheme(for: zone)
+        case .basic:
+            return zoneTheme(for: zone)
+        case .event:
+            let base = region.map { TideTheme(icons: $0.tideIcons, subtitle: $0.tideTitle) }
+                ?? zoneTheme(for: zone)
+            return TideTheme(icons: base.icons + ["👑"],
+                             subtitle: "✨ " + base.subtitle + " ✨")
+        }
+    }
+
+    private static func zoneTheme(for zone: DepthZone) -> TideTheme {
         switch zone {
         case .clear:
-            theme = Match3Theme(icons: ["🫧", "☀️", "⭐️", "🌿", "🐚"], title: "Luzes da Camada Clara")
+            return TideTheme(icons: ["🫧", "☀️", "⭐️", "🌿", "🐚"], subtitle: "Luzes da Camada Clara")
         case .shallow:
-            theme = Match3Theme(icons: ["🐚", "🫧", "⭐️", "🌿", "🦀"], title: "Conchas da Camada Rasa")
+            return TideTheme(icons: ["🐚", "🫧", "⭐️", "🌿", "🦀"], subtitle: "Conchas da Camada Rasa")
         case .mid:
-            theme = Match3Theme(icons: ["💧", "🐟", "🌀", "⭐️", "🫧"], title: "Correntes da Camada Média")
+            return TideTheme(icons: ["💧", "🐟", "🌀", "⭐️", "🫧"], subtitle: "Correntes da Camada Média")
         case .blue:
-            theme = Match3Theme(icons: ["💧", "🌀", "🐟", "💎", "🫧"], title: "Marés da Camada Azul")
+            return TideTheme(icons: ["💧", "🌀", "🐟", "💎", "🫧"], subtitle: "Marés da Camada Azul")
         case .deep:
-            theme = Match3Theme(icons: ["💎", "✨", "🦑", "🔮", "🌟"], title: "Cristais da Camada Profunda")
+            return TideTheme(icons: ["💎", "✨", "🦑", "🔮", "🌟"], subtitle: "Cristais da Camada Profunda")
         case .abyss:
-            theme = Match3Theme(icons: ["💎", "🔮", "🦑", "✨", "🌑"], title: "Segredos da Camada Abissal")
+            return TideTheme(icons: ["💎", "🔮", "🦑", "✨", "🌑"], subtitle: "Segredos da Camada Abissal")
         case .surface:
-            theme = Match3Theme(icons: ["⚓️", "🫧", "☀️", "🛟", "🐬"], title: "Reflexos da Superfície")
+            return TideTheme(icons: ["⚓️", "🫧", "☀️", "🛟", "🐬"], subtitle: "Reflexos da Superfície")
         }
-        if special {
-            theme = Match3Theme(icons: theme.icons + ["👑"], title: "✨ " + theme.title + " ✨")
-        }
-        return theme
     }
 }
 
-struct Match3Result {
+struct TideResult {
     let score: Int
     let reachedTarget: Bool
     let pearls: Int
     let xp: CGFloat
-    let special: Bool
+    let session: TideSessionType
 }
 
-// MARK: - Ponto mágico no mundo
+// MARK: - Fio da Trama no mundo
 
 final class PuzzlePointNode: SKNode {
     let zone: DepthZone
@@ -92,9 +118,9 @@ final class PuzzlePointNode: SKNode {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
-// MARK: - Sistema (pontos no mundo)
+// MARK: - Sistema (fios no mundo)
 
-final class Match3System {
+final class TideWeavingSystem {
     unowned let ctx: GameContext
     private weak var worldNode: SKNode?
 
@@ -111,12 +137,12 @@ final class Match3System {
             specialExpiry -= dt
             if specialExpiry <= 0, let point = puzzlePoint, point.special {
                 clearPoint()
-                ctx.say("Os cristais especiais se apagaram...")
+                ctx.say("O brilho especial da Trama se desfez nas águas...")
             }
         }
     }
 
-    /// Garante um ponto de puzzle perto da sereia e devolve a posição dele.
+    /// Garante um fio da Trama perto da sereia e devolve a posição dele.
     @discardableResult
     func ensurePuzzlePoint(near point: CGPoint, zone: DepthZone) -> CGPoint {
         if let existing = puzzlePoint,
@@ -140,7 +166,7 @@ final class Match3System {
         return node.position
     }
 
-    /// Ponto especial criado por eventos (recompensas maiores, expira).
+    /// Fio especial criado por eventos (recompensas maiores, expira).
     func spawnSpecialPoint(near point: CGPoint, zone: DepthZone) {
         clearPoint()
         guard let world = worldNode else { return }
@@ -170,14 +196,14 @@ private struct GridPos: Hashable {
     let c: Int
 }
 
-final class Match3Overlay: SKNode {
+final class TideWeavingOverlay: SKNode {
     private let gridSize = 7
-    private let theme: Match3Theme
+    private let theme: TideTheme
     private let kindCount: Int
     private let target: Int
-    private let special: Bool
+    private let session: TideSessionType
     private let rewardMultiplier: CGFloat
-    private let onFinish: (Match3Result) -> Void
+    private let onFinish: (TideResult) -> Void
 
     private var board: [[Int]] = []
     private var pieces: [[SKNode?]] = []
@@ -197,14 +223,18 @@ final class Match3Overlay: SKNode {
 
     init(size: CGSize,
          zone: DepthZone,
-         special: Bool,
+         region: Region?,
+         session: TideSessionType,
          rewardMultiplier: CGFloat,
-         onFinish: @escaping (Match3Result) -> Void) {
-        self.theme = Match3Theme.theme(for: zone, special: special)
+         onFinish: @escaping (TideResult) -> Void) {
+        self.theme = TideTheme.theme(for: zone, region: region, session: session)
         self.kindCount = theme.icons.count
-        self.special = special
+        self.session = session
         self.rewardMultiplier = rewardMultiplier
-        self.target = 400 + zone.rawValue * 120 + (special ? 200 : 0)
+        var goal = 400 + zone.rawValue * 100
+        if session == .event { goal += 200 }
+        if session == .hatching { goal = 350 }
+        self.target = goal
         self.onFinish = onFinish
 
         let boardWidth = min(size.width - 36, 380)
@@ -227,7 +257,7 @@ final class Match3Overlay: SKNode {
         backdrop.strokeColor = .clear
         addChild(backdrop)
 
-        let panel = SKShapeNode(rectOf: CGSize(width: boardWidth + 28, height: boardWidth + 170),
+        let panel = SKShapeNode(rectOf: CGSize(width: boardWidth + 28, height: boardWidth + 190),
                                 cornerRadius: 22)
         panel.fillColor = UIColor(red: 0.06, green: 0.12, blue: 0.22, alpha: 0.95)
         panel.strokeColor = UIColor(white: 1, alpha: 0.25)
@@ -235,19 +265,26 @@ final class Match3Overlay: SKNode {
         panel.position = CGPoint(x: 0, y: -30)
         addChild(panel)
 
-        let title = SKLabelNode(text: theme.title)
+        let title = SKLabelNode(text: "Trama das Marés")
         title.fontName = "Helvetica-Bold"
-        title.fontSize = 17
+        title.fontSize = 19
         title.fontColor = .white
-        title.position = CGPoint(x: 0, y: boardWidth / 2 + 78)
+        title.position = CGPoint(x: 0, y: boardWidth / 2 + 96)
         addChild(title)
+
+        let subtitle = SKLabelNode(text: theme.subtitle)
+        subtitle.fontName = "Helvetica"
+        subtitle.fontSize = 13
+        subtitle.fontColor = UIColor(red: 0.65, green: 0.85, blue: 1, alpha: 1)
+        subtitle.position = CGPoint(x: 0, y: boardWidth / 2 + 74)
+        addChild(subtitle)
 
         scoreLabel = SKLabelNode(text: "0 / \(target)")
         scoreLabel.fontName = "Helvetica-Bold"
         scoreLabel.fontSize = 16
         scoreLabel.fontColor = UIColor(red: 0.6, green: 0.9, blue: 1, alpha: 1)
         scoreLabel.horizontalAlignmentMode = .left
-        scoreLabel.position = CGPoint(x: gridOrigin.x, y: boardWidth / 2 + 48)
+        scoreLabel.position = CGPoint(x: gridOrigin.x, y: boardWidth / 2 + 44)
         addChild(scoreLabel)
 
         movesLabel = SKLabelNode(text: "Jogadas: \(movesLeft)")
@@ -255,14 +292,14 @@ final class Match3Overlay: SKNode {
         movesLabel.fontSize = 16
         movesLabel.fontColor = .white
         movesLabel.horizontalAlignmentMode = .right
-        movesLabel.position = CGPoint(x: gridOrigin.x + boardWidth, y: boardWidth / 2 + 48)
+        movesLabel.position = CGPoint(x: gridOrigin.x + boardWidth, y: boardWidth / 2 + 44)
         addChild(movesLabel)
 
         let quit = SKLabelNode(text: "✕ Sair")
         quit.fontName = "Helvetica"
         quit.fontSize = 15
         quit.fontColor = UIColor(white: 1, alpha: 0.7)
-        quit.name = "m3_quit"
+        quit.name = "tide_quit"
         quit.position = CGPoint(x: 0, y: gridOrigin.y - 56)
         addChild(quit)
 
@@ -274,8 +311,7 @@ final class Match3Overlay: SKNode {
         selectionRing.glowWidth = 4
         selectionRing.isHidden = true
         selectionRing.zPosition = 5
-        let ringScale = cellSize / 24
-        selectionRing.setScale(ringScale)
+        selectionRing.setScale(cellSize / 24)
         boardNode.addChild(selectionRing)
     }
 
@@ -342,10 +378,9 @@ final class Match3Overlay: SKNode {
             return
         }
 
-        // sair antes do fim: encerra com a pontuação atual
         var node: SKNode? = atPoint(location)
         while let current = node {
-            if current.name == "m3_quit" {
+            if current.name == "tide_quit" {
                 finish()
                 return
             }
@@ -431,7 +466,6 @@ final class Match3Overlay: SKNode {
         animateSwap(a, b) { [weak self] in
             guard let self else { return }
             if self.findMatches().isEmpty {
-                // troca inválida: desfaz
                 self.swapData(a, b)
                 self.animateSwap(a, b) { [weak self] in
                     self?.busy = false
@@ -446,7 +480,6 @@ final class Match3Overlay: SKNode {
 
     private func findMatches() -> Set<GridPos> {
         var matches = Set<GridPos>()
-        // horizontais
         for r in 0..<gridSize {
             var run = 1
             for c in 1...gridSize {
@@ -460,7 +493,6 @@ final class Match3Overlay: SKNode {
                 }
             }
         }
-        // verticais
         for c in 0..<gridSize {
             var run = 1
             for r in 1...gridSize {
@@ -521,7 +553,6 @@ final class Match3Overlay: SKNode {
                 }
                 write += 1
             }
-            // novas peças caem de cima
             for r in write..<gridSize {
                 let kind = Int.random(in: 0..<kindCount)
                 board[r][c] = kind
@@ -596,7 +627,9 @@ final class Match3Overlay: SKNode {
         }
     }
 
-    // MARK: - Fim de jogo
+    // MARK: - Fim de sessão
+
+    private var pendingResult: TideResult?
 
     private func finish() {
         guard !finished else { return }
@@ -607,18 +640,25 @@ final class Match3Overlay: SKNode {
         let reached = score >= target
         var pearls = Int(CGFloat(score) / 12 * rewardMultiplier)
         if reached { pearls += 12 }
-        if special { pearls = Int(CGFloat(pearls) * 1.5) }
-        let xp = CGFloat(score) / 5 * (special ? 1.5 : 1)
+        if session == .event { pearls = Int(CGFloat(pearls) * 1.5) }
+        let xp = CGFloat(score) / 5 * (session == .event ? 1.5 : 1)
 
         let panel = SKShapeNode(rectOf: CGSize(width: 290, height: 220), cornerRadius: 20)
         panel.fillColor = UIColor(red: 0.08, green: 0.16, blue: 0.28, alpha: 0.98)
-        panel.strokeColor = reached ? UIColor(red: 0.6, green: 0.95, blue: 0.7, alpha: 1) : UIColor(white: 1, alpha: 0.4)
+        panel.strokeColor = reached
+            ? UIColor(red: 0.6, green: 0.95, blue: 0.7, alpha: 1)
+            : UIColor(white: 1, alpha: 0.4)
         panel.lineWidth = 2
         panel.zPosition = 10
-        panel.name = "m3_resultPanel"
         addChild(panel)
 
-        let titleLabel = SKLabelNode(text: reached ? "Desafio concluído! 🎉" : "Boa tentativa!")
+        let titleText: String
+        if session == .hatching {
+            titleText = reached ? "Energia reunida! 🥚✨" : "O ovo sentiu o carinho 💛"
+        } else {
+            titleText = reached ? "Trama concluída! 🎉" : "Boa tentativa!"
+        }
+        let titleLabel = SKLabelNode(text: titleText)
         titleLabel.fontName = "Helvetica-Bold"
         titleLabel.fontSize = 19
         titleLabel.fontColor = .white
@@ -642,7 +682,7 @@ final class Match3Overlay: SKNode {
         let continueButton = SKShapeNode(rectOf: CGSize(width: 170, height: 44), cornerRadius: 12)
         continueButton.fillColor = UIColor(red: 0.25, green: 0.55, blue: 0.85, alpha: 1)
         continueButton.strokeColor = .clear
-        continueButton.name = "m3_continue"
+        continueButton.name = "tide_continue"
         continueButton.position = CGPoint(x: 0, y: -68)
         panel.addChild(continueButton)
 
@@ -651,19 +691,17 @@ final class Match3Overlay: SKNode {
         continueLabel.fontSize = 16
         continueLabel.fontColor = .white
         continueLabel.verticalAlignmentMode = .center
-        continueLabel.name = "m3_continue"
+        continueLabel.name = "tide_continue"
         continueButton.addChild(continueLabel)
 
-        pendingResult = Match3Result(score: score, reachedTarget: reached,
-                                     pearls: pearls, xp: xp, special: special)
+        pendingResult = TideResult(score: score, reachedTarget: reached,
+                                   pearls: pearls, xp: xp, session: session)
     }
-
-    private var pendingResult: Match3Result?
 
     private func handleFinishedTap(at location: CGPoint) {
         var node: SKNode? = atPoint(location)
         while let current = node {
-            if current.name == "m3_continue", let result = pendingResult {
+            if current.name == "tide_continue", let result = pendingResult {
                 pendingResult = nil
                 onFinish(result)
                 return

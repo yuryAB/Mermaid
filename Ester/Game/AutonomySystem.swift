@@ -71,7 +71,7 @@ final class AutonomySystem {
         case .avoidingDanger: energyRate = -0.25
         case .solvingPuzzle: energyRate = -0.02
         case .resting:
-            energyRate = ctx.shelter.isHome(position) ? 1.6 : 0.8
+            energyRate = 1.0
         }
         if intent != .resting {
             energyRate -= ctx.depth.energyPenalty(atY: position.y)
@@ -98,10 +98,11 @@ final class AutonomySystem {
             scores[.resting] = (60 - stats.energy) * 1.6
         }
         if stats.energy < 18 {
-            scores[.returningHome] = (40 - stats.energy) * 2.2
+            scores[.resting, default: 0] += (40 - stats.energy) * 2.2
         }
         if stats.scaredTimer > 0 {
-            scores[.returningHome, default: 0] += 70
+            scores[.resting, default: 0] += 50
+            scores[.observing, default: 0] += 25
         }
         if interactCooldown <= 0,
            ctx.fish.nearestFish(to: position, maxDistance: 700) != nil {
@@ -115,7 +116,7 @@ final class AutonomySystem {
         if currentZone != .shallow && currentZone != .surface {
             scores[.goingUp] = 6 + (stats.energy < 50 ? 10 : 0)
         }
-        if ctx.match3.puzzlePoint != nil {
+        if ctx.tideWeaving.puzzlePoint != nil {
             scores[.seekingPuzzle] = 22 + stats.curiosity * 0.2
         }
         // viagem em andamento: prioridade alta, mas fome/cansaço interrompem
@@ -147,7 +148,7 @@ final class AutonomySystem {
         intent = newIntent
         intentTime = 0
         switch newIntent {
-        case .idle, .observing, .resting, .eating, .solvingPuzzle, .avoidingDanger:
+        case .idle, .observing, .resting, .eating, .solvingPuzzle, .avoidingDanger, .returningHome:
             if newIntent != .avoidingDanger { target = nil }
         case .wandering:
             target = randomWanderPoint()
@@ -159,7 +160,7 @@ final class AutonomySystem {
                 target = randomWanderPoint()
             }
         case .seekingPuzzle:
-            target = ctx.match3.ensurePuzzlePoint(near: position, zone: currentZone)
+            target = ctx.tideWeaving.ensurePuzzlePoint(near: position, zone: currentZone)
         case .goingDeeper:
             // camada bloqueada: tenta mesmo assim e esbarra no limite permitido
             let y: CGFloat
@@ -181,8 +182,6 @@ final class AutonomySystem {
             target = CGPoint(x: position.x + .random(in: -800...800), y: y)
         case .traveling:
             target = ctx.travel.targetPoint
-        case .returningHome:
-            target = ctx.shelter.position
         case .interactingWithFish:
             target = ctx.fish.nearestFish(to: position, maxDistance: 1200)?.position
         }
@@ -213,14 +212,14 @@ final class AutonomySystem {
                 decisionCooldown = min(decisionCooldown, 1.5)
             }
         case .seekingPuzzle:
-            if let point = ctx.match3.puzzlePoint {
+            if let point = ctx.tideWeaving.puzzlePoint {
                 target = point.position
                 if position.distance(to: point.position) < 150 {
                     enterPuzzle()
-                    ctx.scene?.openMatch3(zone: point.zone, special: point.special)
+                    ctx.scene?.openTideWeaving(zone: point.zone, special: point.special)
                 }
             } else {
-                target = ctx.match3.ensurePuzzlePoint(near: position, zone: currentZone)
+                target = ctx.tideWeaving.ensurePuzzlePoint(near: position, zone: currentZone)
             }
         case .interactingWithFish:
             if let fish = ctx.fish.nearestFish(to: position, maxDistance: 1200) {
@@ -248,8 +247,8 @@ final class AutonomySystem {
                 decisionCooldown = min(decisionCooldown, 1)
             }
         case .returningHome:
-            target = ctx.shelter.position
-            if ctx.shelter.isHome(position) { setIntent(.resting) }
+            // sem abrigo físico no mundo: ela se acomoda onde está
+            setIntent(.resting)
         case .resting:
             if stats.energy > 90 && stats.scaredTimer <= 0 {
                 decisionCooldown = min(decisionCooldown, 1)
@@ -261,7 +260,7 @@ final class AutonomySystem {
             }
         case .avoidingDanger:
             if intentTime > 3.5 {
-                setIntent(stats.scaredTimer > 0 ? .returningHome : .idle)
+                setIntent(stats.scaredTimer > 0 ? .resting : .idle)
             }
         case .observing:
             if intentTime > 5 {
@@ -287,7 +286,7 @@ final class AutonomySystem {
         // Satisfeita: guarda no abrigo em vez de comer
         if stats.hunger < 18, ctx.shelter.storeFood() {
             ctx.food.collect(food)
-            ctx.say("Ela guardou comida no abrigo 🐚")
+            ctx.say("Ela guardou comida no Refúgio das Marés 🐚")
             return
         }
         ctx.food.consume(food)
@@ -336,7 +335,7 @@ final class AutonomySystem {
         guard stats.phase != .egg else {
             // Durante o ovo só a Trama funciona — e abre na hora.
             if command == .tideWeave {
-                ctx.scene?.openMatch3(zone: .shallow, special: false)
+                ctx.scene?.openTideWeaving(zone: .mid, special: false)
             } else {
                 ctx.say("A pequena sereia ainda está dormindo no ovo... jogue Trama das Marés para reunir energia de nascimento 🌀")
             }
@@ -357,10 +356,8 @@ final class AutonomySystem {
             ctx.scene?.openRegionMenu()
             return
         case .refuge:
-            // o refúgio é dela: sempre aceita voltar
-            commandBias = (.returningHome, Date().addingTimeInterval(40))
-            setIntent(.returningHome)
-            decisionCooldown = .random(in: 8...12)
+            // o Refúgio é um espaço mágico: abre de qualquer lugar
+            ctx.scene?.openRefuge()
             return
         case .goDown:
             guard let next = currentZone.deeper else {

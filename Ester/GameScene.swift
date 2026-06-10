@@ -18,8 +18,9 @@ class GameScene: SKScene {
     private var entityManager: EntityManager!
     private var mermaidEntity: MermaidEntity!
     private var hud: HUDLayer!
-    private var match3Overlay: Match3Overlay?
+    private var tideOverlay: TideWeavingOverlay?
     private var regionMenu: RegionMenuOverlay?
+    private var refugeOverlay: RefugeOverlay?
 
     private let ctx = GameContext()
     private var stats: MermaidStats!
@@ -104,8 +105,7 @@ class GameScene: SKScene {
         ctx.food = FoodSystem(ctx: ctx, worldNode: worldNode)
         ctx.fish = FishSystem(ctx: ctx, worldNode: worldNode)
         ctx.shelter = ShelterSystem(ctx: ctx)
-        ctx.shelter.setup(in: worldNode)
-        ctx.match3 = Match3System(ctx: ctx, worldNode: worldNode)
+        ctx.tideWeaving = TideWeavingSystem(ctx: ctx, worldNode: worldNode)
         ctx.events = EventSystem(ctx: ctx, worldNode: worldNode)
         ctx.growth = GrowthSystem(ctx: ctx, worldNode: worldNode)
         ctx.regions = RegionDiscoverySystem(ctx: ctx)
@@ -210,10 +210,15 @@ class GameScene: SKScene {
         ctx.food.update(dt: dt)
         ctx.fish.update(dt: dt)
         ctx.events.update(dt: dt)
-        ctx.shelter.update(dt: dt)
-        ctx.match3.update(dt: dt)
+        ctx.tideWeaving.update(dt: dt)
         ctx.regions.update(dt: dt)
         ctx.travel.update(dt: dt)
+
+        // no Refúgio o tempo é gentil: descanso acelerado
+        if let refuge = refugeOverlay {
+            refuge.update(dt: dt)
+            stats.tick(dt: dt, energyDelta: 2.2)
+        }
 
         let mermaidPosition = ctx.mermaidPosition
         var water = ctx.depth.waterColor(atY: mermaidPosition.y)
@@ -270,7 +275,7 @@ class GameScene: SKScene {
     // MARK: - Menu de regiões
 
     func openRegionMenu() {
-        guard regionMenu == nil, match3Overlay == nil else { return }
+        guard regionMenu == nil, tideOverlay == nil, refugeOverlay == nil else { return }
         let menu = RegionMenuOverlay(size: size,
                                      stats: stats,
                                      currentRegionId: ctx.regions.currentRegion?.id,
@@ -292,42 +297,91 @@ class GameScene: SKScene {
         regionMenu = nil
     }
 
-    // MARK: - Match-3
+    // MARK: - Refúgio das Marés
 
-    var isPuzzleOpen: Bool { match3Overlay != nil }
-
-    func openMatch3(zone: DepthZone, special: Bool) {
-        guard match3Overlay == nil else { return }
+    func openRefuge() {
+        guard refugeOverlay == nil, tideOverlay == nil else { return }
         closeRegionMenu()
+        ctx.autonomy.paused = true
+        let overlay = RefugeOverlay(size: size,
+                                    insets: view?.safeAreaInsets ?? .zero,
+                                    ctx: ctx,
+                                    onTide: { [weak self] in
+                                        guard let self else { return }
+                                        self.closeRefuge(resume: false)
+                                        self.openTideWeaving(zone: self.ctx.depth.currentZone,
+                                                             special: false)
+                                    },
+                                    onClose: { [weak self] in
+                                        self?.closeRefuge(resume: true)
+                                    })
+        overlay.zPosition = 195
+        cameraNode.addChild(overlay)
+        refugeOverlay = overlay
+    }
+
+    private func closeRefuge(resume: Bool) {
+        guard refugeOverlay != nil else { return }
+        refugeOverlay?.removeFromParent()
+        refugeOverlay = nil
+        if resume {
+            if stats.phase != .egg {
+                ctx.autonomy.paused = false
+            }
+            persistAndSave()
+            ctx.say("De volta ao oceano, do mesmo lugar de antes 🌊")
+        }
+    }
+
+    // MARK: - Trama das Marés
+
+    var isPuzzleOpen: Bool { tideOverlay != nil }
+
+    func openTideWeaving(zone: DepthZone, special: Bool) {
+        guard tideOverlay == nil else { return }
+        closeRegionMenu()
+        closeRefuge(resume: false)
         stats.energy = max(0, stats.energy - 8)
         ctx.autonomy.paused = true
 
+        let session: TideSessionType
+        if stats.phase == .egg {
+            session = .hatching
+        } else if special {
+            session = .event
+        } else if ctx.regions.currentRegion != nil {
+            session = .region
+        } else {
+            session = .basic
+        }
+
         // bem-estar alto melhora as recompensas (0.7x – 1.1x)
         let multiplier = 0.7 + stats.wellbeing / 250
-        let overlay = Match3Overlay(size: size,
-                                    zone: zone,
-                                    special: special,
-                                    rewardMultiplier: multiplier) { [weak self] result in
-            self?.closeMatch3(result: result, zone: zone)
+        let overlay = TideWeavingOverlay(size: size,
+                                         zone: zone,
+                                         region: ctx.regions.currentRegion,
+                                         session: session,
+                                         rewardMultiplier: multiplier) { [weak self] result in
+            self?.closeTideWeaving(result: result, zone: zone)
         }
         overlay.zPosition = 200
         cameraNode.addChild(overlay)
-        match3Overlay = overlay
-        ctx.match3.clearPoint()
+        tideOverlay = overlay
+        ctx.tideWeaving.clearPoint()
     }
 
-    private func closeMatch3(result: Match3Result, zone: DepthZone) {
-        match3Overlay?.removeFromParent()
-        match3Overlay = nil
+    private func closeTideWeaving(result: TideResult, zone: DepthZone) {
+        tideOverlay?.removeFromParent()
+        tideOverlay = nil
 
         stats.pearls += result.pearls
         stats.gainXP(result.xp)
 
-        // Durante o ovo, o desafio serve para aquecer o choco
-        if stats.phase == .egg {
+        // Durante o ovo, a Trama reúne energia de nascimento
+        if result.session == .hatching || stats.phase == .egg {
             ctx.growth.addHatchProgress(CGFloat(result.score) / 900)
             stats.save()
-            ctx.say("O desafio aqueceu o ovo! 🥚✨ 💠+\(result.pearls)")
+            ctx.say("A Trama reuniu energia de nascimento! 🥚✨ 💠+\(result.pearls)")
             return
         }
 
@@ -336,21 +390,22 @@ class GameScene: SKScene {
         stats.boostMood(8)
         let adaptation = stats.adaptation(for: zone)
         stats.setAdaptation(adaptation + 3, for: zone)
-        stats.courage = min(100, stats.courage + (result.special ? 2 : 0.5))
+        stats.courage = min(100, stats.courage + (result.session == .event ? 2 : 0.5))
         if result.reachedTarget {
             stats.puzzlesSolved += 1
-            stats.addMemory("Resolveu um desafio em \(zone.displayName)")
+            stats.addMemory("Teceu a Trama das Marés em \(zone.displayName)")
         }
         stats.save()
         ctx.say(result.reachedTarget
-                ? "Ela adorou o desafio! 💠+\(result.pearls)"
+                ? "Ela adorou tecer a Trama! 💠+\(result.pearls)"
                 : "Quase! Ainda assim ganhou 💠+\(result.pearls)")
     }
 
     // MARK: - Toques no mundo
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard match3Overlay == nil, regionMenu == nil, let touch = touches.first else { return }
+        guard tideOverlay == nil, regionMenu == nil, refugeOverlay == nil,
+              let touch = touches.first else { return }
         let location = touch.location(in: self)
 
         if let egg = ctx.growth.eggNode,
@@ -358,11 +413,7 @@ class GameScene: SKScene {
             ctx.growth.tapEgg()
             return
         }
-        if ctx.shelter.position.distance(to: location) < 320 {
-            ctx.shelter.tryUpgrade()
-            return
-        }
-        if let point = ctx.match3.puzzlePoint,
+        if let point = ctx.tideWeaving.puzzlePoint,
            point.position.distance(to: location) < 200 {
             ctx.autonomy.give(.tideWeave)
             return

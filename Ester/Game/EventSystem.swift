@@ -50,7 +50,7 @@ final class EventSystem {
             options.append((3, bigShadow))
         }
         if zone != .surface && zone != .clear,
-           ctx.match3.puzzlePoint == nil {
+           ctx.tideWeaving.puzzlePoint == nil {
             options.append((2, crystalCluster))
         }
         if ctx.mermaidPosition.y > -2500 {
@@ -160,8 +160,8 @@ final class EventSystem {
 
     private func crystalCluster() {
         let zone = DepthZone.zone(atY: ctx.mermaidPosition.y)
-        ctx.match3.spawnSpecialPoint(near: ctx.mermaidPosition, zone: zone)
-        ctx.say("Cristais mágicos brilham por perto! 💎 (desafio especial)")
+        ctx.tideWeaving.spawnSpecialPoint(near: ctx.mermaidPosition, zone: zone)
+        ctx.say("Cristais mágicos brilham por perto! 💎 Uma Trama especial apareceu.")
     }
 
     private func boatPassing() {

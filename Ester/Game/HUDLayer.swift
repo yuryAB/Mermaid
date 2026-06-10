@@ -82,7 +82,8 @@ final class HUDLayer: SKNode {
         panel.fillColor = UIColor(red: 0.02, green: 0.07, blue: 0.14, alpha: 0.45)
         panel.strokeColor = UIColor(white: 1, alpha: 0.18)
         panel.lineWidth = 1
-        panel.position = CGPoint(x: 0, y: topEdge - 8 - panelHeight / 2)
+        // margem extra para ficar confortavelmente abaixo da Dynamic Island
+        panel.position = CGPoint(x: 0, y: topEdge - 20 - panelHeight / 2)
         addChild(panel)
 
         let halfW = panelWidth / 2
@@ -162,7 +163,7 @@ final class HUDLayer: SKNode {
     private func buildMessageBubble() {
         let topEdge = sceneSize.height / 2 - insets.top
         messageContainer = SKNode()
-        messageContainer.position = CGPoint(x: 0, y: topEdge - 8 - 122 - 36)
+        messageContainer.position = CGPoint(x: 0, y: topEdge - 20 - 122 - 36)
         messageContainer.alpha = 0
         messageContainer.zPosition = 5
         addChild(messageContainer)

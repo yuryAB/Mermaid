@@ -334,7 +334,7 @@ final class GameContext {
     var food: FoodSystem!
     var fish: FishSystem!
     var shelter: ShelterSystem!
-    var match3: Match3System!
+    var tideWeaving: TideWeavingSystem!
     var events: EventSystem!
     var growth: GrowthSystem!
     var regions: RegionDiscoverySystem!
