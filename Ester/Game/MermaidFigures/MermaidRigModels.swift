@@ -85,18 +85,13 @@ final class MermaidRigStore {
     static let shared = MermaidRigStore()
 
     private(set) var document: MermaidRigDocument
-    private let fileURL: URL
     #if DEBUG
     private let projectDefaultsURL = URL(fileURLWithPath: "/Users/yuryantony/Developer/Mermaid/Ester/Game/MermaidFigures/MermaidRigs.json")
     #endif
 
     private init() {
-        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        fileURL = documents.appendingPathComponent("MermaidRigs.json")
-
         #if DEBUG
-        document = Self.loadDocument(from: fileURL)
-            ?? Self.loadDocument(from: projectDefaultsURL)
+        document = Self.loadDocument(from: projectDefaultsURL)
             ?? Self.loadBundledDefaults()
             ?? MermaidRigDocument()
         #else
@@ -150,42 +145,13 @@ final class MermaidRigStore {
     }
 
     func save() {
-        guard let data = encodedDocumentData() else { return }
-        try? data.write(to: fileURL, options: [.atomic])
+        // RigTool edits are kept in memory. Use exportJSONString() to copy
+        // the canonical JSON and paste it into MermaidRigs.json.
     }
 
-    func saveExplicitly() -> Bool {
-        guard let data = encodedDocumentData() else { return false }
-        var didSave = false
-
-        do {
-            try data.write(to: fileURL, options: [.atomic])
-            didSave = true
-        } catch {
-            didSave = false
-        }
-
-        #if DEBUG
-        if (try? data.write(to: projectDefaultsURL, options: [.atomic])) != nil {
-            didSave = true
-        }
-        #endif
-
-        return didSave
-    }
-
-    func exportProjectDefaults() -> URL? {
+    func exportJSONString() -> String? {
         guard let data = encodedDocumentData() else { return nil }
-        #if DEBUG
-        do {
-            try data.write(to: projectDefaultsURL, options: [.atomic])
-            return projectDefaultsURL
-        } catch {
-            return nil
-        }
-        #else
-        return nil
-        #endif
+        return String(data: data, encoding: .utf8)
     }
 
     private func encodedDocumentData() -> Data? {

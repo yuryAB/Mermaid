@@ -5,6 +5,7 @@
 
 import Foundation
 import SpriteKit
+import UIKit
 
 final class MermaidRigDebugTool: SKNode {
     var onClose: (() -> Void)?
@@ -17,7 +18,7 @@ final class MermaidRigDebugTool: SKNode {
     private let valueLabel = SKLabelNode(fontNamed: "Helvetica-Bold")
     private var activeStepperName: String?
     private let stepperRepeatActionKey = "rig_stepper_repeat"
-    private var saveMessage: String?
+    private var exportMessage: String?
 
     init(size: CGSize, insets: UIEdgeInsets, initialForm: MermaidFormKind) {
         self.sceneSize = size
@@ -69,11 +70,11 @@ final class MermaidRigDebugTool: SKNode {
         title.position = CGPoint(x: leftX, y: topY)
         content.addChild(title)
 
-        addButton(id: "rig_save", text: "salvar", position: CGPoint(x: rightX - 42, y: topY), width: 92)
+        addButton(id: "rig_export", text: "exportar", position: CGPoint(x: rightX - 42, y: topY), width: 92)
         addButton(id: "rig_close", text: "fechar", position: CGPoint(x: rightX + 62, y: topY), width: 92)
 
-        if let saveMessage {
-            let message = label(saveMessage, size: 10, bold: false)
+        if let exportMessage {
+            let message = label(exportMessage, size: 10, bold: false)
             message.horizontalAlignmentMode = .right
             message.fontColor = UIColor(white: 1, alpha: 0.76)
             message.position = CGPoint(x: rightX + 108, y: topY - 28)
@@ -272,9 +273,14 @@ final class MermaidRigDebugTool: SKNode {
             return
         }
 
-        if name == "rig_save" {
+        if name == "rig_export" {
             stopStepperRepeat()
-            saveMessage = MermaidRigStore.shared.saveExplicitly() ? "JSON salvo" : "erro ao salvar"
+            if let json = MermaidRigStore.shared.exportJSONString() {
+                UIPasteboard.general.string = json
+                exportMessage = "JSON copiado"
+            } else {
+                exportMessage = "erro ao exportar"
+            }
             refresh()
             return
         }
