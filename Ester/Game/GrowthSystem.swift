@@ -242,10 +242,10 @@ final class GrowthSystem {
     private func hatch() {
         guard let egg = eggNode else { return }
         ctx.stats.phase = .baby
+        let mermaid = ctx.mermaidEntity.mermaid
+        mermaid.setForm(for: .baby)
         eggNode = nil
         hatchRing = nil
-
-        let mermaid = ctx.mermaidEntity.mermaid
         mermaid.base.position = egg.position
         mermaid.base.setScale(0.05)
         mermaid.base.alpha = 0
@@ -274,11 +274,11 @@ final class GrowthSystem {
     private func evolve() {
         guard let next = ctx.stats.phase.next else { return }
         ctx.stats.phase = next
+        let mermaid = ctx.mermaidEntity.mermaid
+        mermaid.setForm(for: next)
         ctx.stats.pearls += 20
         ctx.stats.courage = min(100, ctx.stats.courage + 5)
         ctx.stats.addMemory("Evoluiu para \(next.displayName)")
-
-        let mermaid = ctx.mermaidEntity.mermaid
         let grow = SKAction.scale(to: next.scale, duration: 1.5)
         grow.eaeInEaseOut()
         mermaid.base.run(grow)

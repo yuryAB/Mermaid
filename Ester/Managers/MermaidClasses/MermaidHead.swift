@@ -39,13 +39,27 @@ class MermaidHead {
         headNode.addChild(base)
     }
     
+    /// Forma adulta: cabelo de trás um pouco mais longo.
+    private var hairLengthScale: CGFloat = 1.0
+
+    func setLongHair(_ enabled: Bool) {
+        hairLengthScale = enabled ? 1.18 : 1.0
+        hairBackNode.yScale = hairLengthScale
+    }
+
     private func hairBackAnimation() {
-        let fill: SKAction = .scale(to: 1.07, duration: 0.8)
-        let dry: SKAction = .scale(to: 1, duration: 0.8)
-        
+        let fill: SKAction = .group([
+            .scaleX(to: 1.07, duration: 0.8),
+            .scaleY(to: 1.07 * hairLengthScale, duration: 0.8)
+        ])
+        let dry: SKAction = .group([
+            .scaleX(to: 1, duration: 0.8),
+            .scaleY(to: hairLengthScale, duration: 0.8)
+        ])
+
         let hairbackAnimation:SKAction = .repeatForever(.sequence([fill,dry]))
         hairbackAnimation.eaeInEaseOut()
-        
+
         hairBackNode.run(hairbackAnimation)
     }
 }

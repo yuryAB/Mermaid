@@ -22,6 +22,17 @@
 		724C618F2C5546A900A5885C /* MermaidFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 724C618E2C5546A900A5885C /* MermaidFace.swift */; };
 		7271E5662C41BA89008CE3C8 /* MermaidEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */; };
 		7271E5682C41BBD6008CE3C8 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7271E5672C41BBD5008CE3C8 /* Model.swift */; };
+		72C0A1012D8B000100A5885C /* BabyMermaidFigure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C0A0012D8B000100A5885C /* BabyMermaidFigure.swift */; };
+		72C0A1022D8B000200A5885C /* ChildMermaidFigure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C0A0022D8B000200A5885C /* ChildMermaidFigure.swift */; };
+		72C0A1032D8B000300A5885C /* YoungMermaidFigure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C0A0032D8B000300A5885C /* YoungMermaidFigure.swift */; };
+		72C0A1042D8B000400A5885C /* AdultMermaidFigure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C0A0042D8B000400A5885C /* AdultMermaidFigure.swift */; };
+		72C0A1052D8B000500A5885C /* BabyMermaidRig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C0A0052D8B000500A5885C /* BabyMermaidRig.swift */; };
+		72C0A1062D8B000600A5885C /* ChildMermaidRig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C0A0062D8B000600A5885C /* ChildMermaidRig.swift */; };
+		72C0A1072D8B000700A5885C /* YoungMermaidRig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C0A0072D8B000700A5885C /* YoungMermaidRig.swift */; };
+		72C0A1082D8B000800A5885C /* AdultMermaidRig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C0A0082D8B000800A5885C /* AdultMermaidRig.swift */; };
+		72C0A1092D8B000900A5885C /* MermaidRigModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C0A0092D8B000900A5885C /* MermaidRigModels.swift */; };
+		72C0A10A2D8B000A00A5885C /* MermaidRigDebugTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C0A00A2D8B000A00A5885C /* MermaidRigDebugTool.swift */; };
+		72C0A10B2D8B000B00A5885C /* MermaidRigs.json in Resources */ = {isa = PBXBuildFile; fileRef = 72C0A00B2D8B000B00A5885C /* MermaidRigs.json */; };
 		728C9C592C51CB01001B919C /* MermaidBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 728C9C582C51CB01001B919C /* MermaidBody.swift */; };
 		72A119572C55DAF8003E827B /* MermaidEyebrows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A119562C55DAF8003E827B /* MermaidEyebrows.swift */; };
 		72A119592C55DB33003E827B /* MermaidEyes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A119582C55DB33003E827B /* MermaidEyes.swift */; };
@@ -65,6 +76,17 @@
 		724C618E2C5546A900A5885C /* MermaidFace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidFace.swift; sourceTree = "<group>"; };
 		7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEntity.swift; sourceTree = "<group>"; };
 		7271E5672C41BBD5008CE3C8 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		72C0A0012D8B000100A5885C /* BabyMermaidFigure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BabyMermaidFigure.swift; sourceTree = "<group>"; };
+		72C0A0022D8B000200A5885C /* ChildMermaidFigure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChildMermaidFigure.swift; sourceTree = "<group>"; };
+		72C0A0032D8B000300A5885C /* YoungMermaidFigure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YoungMermaidFigure.swift; sourceTree = "<group>"; };
+		72C0A0042D8B000400A5885C /* AdultMermaidFigure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdultMermaidFigure.swift; sourceTree = "<group>"; };
+		72C0A0052D8B000500A5885C /* BabyMermaidRig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BabyMermaidRig.swift; sourceTree = "<group>"; };
+		72C0A0062D8B000600A5885C /* ChildMermaidRig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChildMermaidRig.swift; sourceTree = "<group>"; };
+		72C0A0072D8B000700A5885C /* YoungMermaidRig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YoungMermaidRig.swift; sourceTree = "<group>"; };
+		72C0A0082D8B000800A5885C /* AdultMermaidRig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdultMermaidRig.swift; sourceTree = "<group>"; };
+		72C0A0092D8B000900A5885C /* MermaidRigModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidRigModels.swift; sourceTree = "<group>"; };
+		72C0A00A2D8B000A00A5885C /* MermaidRigDebugTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidRigDebugTool.swift; sourceTree = "<group>"; };
+		72C0A00B2D8B000B00A5885C /* MermaidRigs.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MermaidRigs.json; sourceTree = "<group>"; };
 		728C9C582C51CB01001B919C /* MermaidBody.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidBody.swift; sourceTree = "<group>"; };
 		72A119562C55DAF8003E827B /* MermaidEyebrows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEyebrows.swift; sourceTree = "<group>"; };
 		72A119582C55DB33003E827B /* MermaidEyes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEyes.swift; sourceTree = "<group>"; };
@@ -200,9 +222,28 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		72C0A0002D8B000000A5885C /* MermaidFigures */ = {
+			isa = PBXGroup;
+			children = (
+				72C0A0092D8B000900A5885C /* MermaidRigModels.swift */,
+				72C0A00A2D8B000A00A5885C /* MermaidRigDebugTool.swift */,
+				72C0A00B2D8B000B00A5885C /* MermaidRigs.json */,
+				72C0A0052D8B000500A5885C /* BabyMermaidRig.swift */,
+				72C0A0012D8B000100A5885C /* BabyMermaidFigure.swift */,
+				72C0A0062D8B000600A5885C /* ChildMermaidRig.swift */,
+				72C0A0022D8B000200A5885C /* ChildMermaidFigure.swift */,
+				72C0A0072D8B000700A5885C /* YoungMermaidRig.swift */,
+				72C0A0032D8B000300A5885C /* YoungMermaidFigure.swift */,
+				72C0A0082D8B000800A5885C /* AdultMermaidRig.swift */,
+				72C0A0042D8B000400A5885C /* AdultMermaidFigure.swift */,
+			);
+			path = MermaidFigures;
+			sourceTree = "<group>";
+		};
 		FAB1E2010000000000000001 /* Game */ = {
 			isa = PBXGroup;
 			children = (
+				72C0A0002D8B000000A5885C /* MermaidFigures */,
 				FAB1E0010000000000000001 /* GameplayModels.swift */,
 				FAB1E0010000000000000002 /* MermaidStats.swift */,
 				FAB1E0010000000000000003 /* MermaidAppearance.swift */,
@@ -210,16 +251,16 @@
 				FAB1E0010000000000000005 /* AutonomySystem.swift */,
 				FAB1E0010000000000000006 /* FoodSystem.swift */,
 				FAB1E0010000000000000007 /* FishSystem.swift */,
-				FAB1E0010000000000000008 /* ShelterSystem.swift */,
-				FAB1E0010000000000000009 /* EventSystem.swift */,
-				FAB1E001000000000000000A /* GrowthSystem.swift */,
-				FAB1E001000000000000000B /* TideWeavingSystem.swift */,
-				FAB1E001000000000000000C /* HUDLayer.swift */,
-				FAB1E001000000000000000D /* RegionSystem.swift */,
-				FAB1E001000000000000000E /* OfflineProgressSystem.swift */,
-			);
-			path = Game;
-			sourceTree = "<group>";
+			FAB1E0010000000000000008 /* ShelterSystem.swift */,
+			FAB1E0010000000000000009 /* EventSystem.swift */,
+			FAB1E001000000000000000A /* GrowthSystem.swift */,
+			FAB1E001000000000000000B /* TideWeavingSystem.swift */,
+			FAB1E001000000000000000C /* HUDLayer.swift */,
+			FAB1E001000000000000000D /* RegionSystem.swift */,
+			FAB1E001000000000000000E /* OfflineProgressSystem.swift */,
+		);
+		path = Game;
+		sourceTree = "<group>";
 		};
 		72D020782C1905F9002F11FC /* Ester */ = {
 			isa = PBXGroup;
@@ -303,6 +344,7 @@
 			files = (
 				72D020852C1905F9002F11FC /* Base in Resources */,
 				72D020872C1905FC002F11FC /* Assets.xcassets in Resources */,
+				72C0A10B2D8B000B00A5885C /* MermaidRigs.json in Resources */,
 				72D0208A2C1905FC002F11FC /* Base in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -337,6 +379,16 @@
 				72334A812C503BBA00D24502 /* MermaidHead.swift in Sources */,
 				728C9C592C51CB01001B919C /* MermaidBody.swift in Sources */,
 				7271E5662C41BA89008CE3C8 /* MermaidEntity.swift in Sources */,
+				72C0A1012D8B000100A5885C /* BabyMermaidFigure.swift in Sources */,
+				72C0A1052D8B000500A5885C /* BabyMermaidRig.swift in Sources */,
+				72C0A1022D8B000200A5885C /* ChildMermaidFigure.swift in Sources */,
+				72C0A1062D8B000600A5885C /* ChildMermaidRig.swift in Sources */,
+				72C0A1032D8B000300A5885C /* YoungMermaidFigure.swift in Sources */,
+				72C0A1072D8B000700A5885C /* YoungMermaidRig.swift in Sources */,
+				72C0A1042D8B000400A5885C /* AdultMermaidFigure.swift in Sources */,
+				72C0A1082D8B000800A5885C /* AdultMermaidRig.swift in Sources */,
+				72C0A1092D8B000900A5885C /* MermaidRigModels.swift in Sources */,
+				72C0A10A2D8B000A00A5885C /* MermaidRigDebugTool.swift in Sources */,
 				FAB1E1010000000000000001 /* GameplayModels.swift in Sources */,
 				FAB1E1010000000000000002 /* MermaidStats.swift in Sources */,
 				FAB1E1010000000000000003 /* MermaidAppearance.swift in Sources */,

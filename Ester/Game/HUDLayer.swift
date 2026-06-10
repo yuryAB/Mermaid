@@ -12,6 +12,7 @@ import SpriteKit
 
 final class HUDLayer: SKNode {
     var onCommand: ((PlayerCommand) -> Void)?
+    var onDebugRigToolTap: (() -> Void)?
 
     private let sceneSize: CGSize
     private let insets: UIEdgeInsets
@@ -26,16 +27,20 @@ final class HUDLayer: SKNode {
     private var messageContainer: SKNode!
     private var messageLabel: SKLabelNode!
     private var lastEggMode = false
+    private let enableDebugRigToolButton: Bool
+    private var debugRigToolButton: SKNode?
 
-    init(size: CGSize, insets: UIEdgeInsets) {
+    init(size: CGSize, insets: UIEdgeInsets, enableDebugRigToolButton: Bool = false) {
         self.sceneSize = size
         self.insets = insets
+        self.enableDebugRigToolButton = enableDebugRigToolButton
         super.init()
         isUserInteractionEnabled = true
         buildTopPanel()
         buildMessageBubble()
         buildIntentChip()
         buildButtons()
+        buildDebugRigToolButton()
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -258,6 +263,41 @@ final class HUDLayer: SKNode {
         }
     }
 
+    private func buildDebugRigToolButton() {
+        guard enableDebugRigToolButton else { return }
+        let button = SKNode()
+        button.name = "cmd_debug_rig_tool"
+        button.position = CGPoint(
+            x: -sceneSize.width / 2 + 36 + insets.left,
+            y: 0
+        )
+
+        let background = SKShapeNode(circleOfRadius: 30)
+        background.fillColor = UIColor(red: 0.08, green: 0.16, blue: 0.26, alpha: 0.78)
+        background.strokeColor = UIColor(red: 0.9, green: 0.95, blue: 1, alpha: 0.8)
+        background.lineWidth = 1.8
+        background.name = button.name
+        button.addChild(background)
+
+        let icon = HUDLayer.symbolNode("arrow.clockwise.circle.fill",
+                                      fallback: "↻",
+                                      pointSize: 20,
+                                      color: UIColor(red: 0.95, green: 0.95, blue: 1, alpha: 0.95))
+        icon.position = CGPoint(x: 0, y: 1)
+        icon.name = button.name
+        button.addChild(icon)
+
+        let text = makeLabel(fontSize: 10)
+        text.text = "rig"
+        text.position = CGPoint(x: 0, y: -34)
+        text.fontColor = UIColor(white: 1, alpha: 0.9)
+        text.name = button.name
+        button.addChild(text)
+
+        addChild(button)
+        debugRigToolButton = button
+    }
+
     // MARK: - Atualização
 
     func refresh(stats: MermaidStats,
@@ -321,12 +361,24 @@ final class HUDLayer: SKNode {
                 onCommand?(command)
                 return
             }
+            if node.name == "cmd_debug_rig_tool" {
+                flashNode(debugRigToolButton)
+                onDebugRigToolTap?()
+                return
+            }
         }
     }
 
     private func flashButton(_ command: PlayerCommand) {
         buttons[command]?.run(.sequence([
             .scale(to: 0.88, duration: 0.08),
+            .scale(to: 1.0, duration: 0.12)
+        ]))
+    }
+
+    private func flashNode(_ node: SKNode?) {
+        node?.run(.sequence([
+            .scale(to: 0.9, duration: 0.08),
             .scale(to: 1.0, duration: 0.12)
         ]))
     }

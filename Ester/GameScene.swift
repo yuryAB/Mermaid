@@ -21,6 +21,14 @@ class GameScene: SKScene {
     private var tideOverlay: TideWeavingOverlay?
     private var regionMenu: RegionMenuOverlay?
     private var refugeOverlay: RefugeOverlay?
+    private var rigDebugTool: MermaidRigDebugTool?
+    private var showDebugControls: Bool {
+#if DEBUG || DEVELOPMENT || DEV
+        true
+#else
+        false
+#endif
+    }
 
     private let ctx = GameContext()
     private var stats: MermaidStats!
@@ -96,6 +104,9 @@ class GameScene: SKScene {
         mermaid.base.zPosition = 10
         mermaid.base.setScale(stats.phase.scale)
         mermaid.base.position = CGPoint(x: stats.posX, y: stats.posY)
+        if stats.phase != .egg {
+            mermaid.setForm(for: stats.phase)
+        }
         mermaid.setAnimationMode(.idle)
     }
 
@@ -121,13 +132,51 @@ class GameScene: SKScene {
 
     private func setupHUD() {
         let insets = view?.safeAreaInsets ?? .zero
-        hud = HUDLayer(size: size, insets: insets)
+        hud = HUDLayer(size: size, insets: insets, enableDebugRigToolButton: showDebugControls)
         hud.zPosition = 100
         hud.onCommand = { [weak self] command in
             self?.ctx.autonomy.give(command)
         }
+        if showDebugControls {
+            hud.onDebugRigToolTap = { [weak self] in
+                self?.openRigDebugTool()
+            }
+        }
         ctx.hud = hud
         cameraNode.addChild(hud)
+    }
+
+    private func openRigDebugTool() {
+        guard showDebugControls else { return }
+        if rigDebugTool != nil {
+            closeRigDebugTool()
+            return
+        }
+
+        closeRegionMenu()
+        closeRefuge(resume: false)
+        ctx.autonomy.paused = true
+
+        let tool = MermaidRigDebugTool(size: size,
+                                       insets: view?.safeAreaInsets ?? .zero,
+                                       initialForm: mermaidEntity.mermaid.formKind)
+        tool.zPosition = 260
+        tool.onClose = { [weak self] in
+            self?.closeRigDebugTool()
+        }
+        cameraNode.addChild(tool)
+        rigDebugTool = tool
+    }
+
+    private func closeRigDebugTool() {
+        rigDebugTool?.removeFromParent()
+        rigDebugTool = nil
+        if stats.phase != .egg {
+            ctx.autonomy.paused = false
+            mermaidEntity.mermaid.setForm(for: stats.phase)
+            mermaidEntity.mermaid.base.setScale(stats.phase.scale)
+            mermaidEntity.mermaid.applyIdleMoveMode()
+        }
     }
 
     private func setupEnvironmentDecor() {
@@ -404,7 +453,7 @@ class GameScene: SKScene {
     // MARK: - Toques no mundo
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard tideOverlay == nil, regionMenu == nil, refugeOverlay == nil,
+        guard tideOverlay == nil, regionMenu == nil, refugeOverlay == nil, rigDebugTool == nil,
               let touch = touches.first else { return }
         let location = touch.location(in: self)
 

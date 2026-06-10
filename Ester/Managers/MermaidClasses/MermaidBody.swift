@@ -15,6 +15,8 @@ class MermaidBody {
     let waistScale: SKSpriteNode
     let fin: SKSpriteNode
     let finScale: SKSpriteNode
+    /// Segmento adicional da cauda, exclusivo da forma adulta.
+    private(set) var extraSegment: SKSpriteNode?
     
     init() {
         body = SKSpriteNode(imageNamed: "roundPiece")
@@ -98,16 +100,44 @@ class MermaidBody {
         body.run(swingAnimation(degrees: bodyDegree, duration: bodyDuration))
         waist.run(.sequence([wait, swingAnimation(degrees: waistDegree, duration: waistDuration)]))
         articulation.run(.sequence([wait,swingAnimation(degrees: articulationDegree, duration: articulationDuration)]))
+        extraSegment?.run(.sequence([wait, swingAnimation(degrees: finDegree * 0.85, duration: finDuration)]))
         fin.run(.sequence([wait,swingAnimation(degrees: finDegree, duration: finDuration)]))
     }
-    
+
     private func removeAllAnimations() {
         body.removeAllActions()
         waist.removeAllActions()
         articulation.removeAllActions()
+        extraSegment?.removeAllActions()
         fin.removeAllActions()
     }
     
+    /// Forma adulta: um segmento arredondado a mais e cauda maior.
+    func setAdultExtension(_ enabled: Bool) {
+        if enabled {
+            guard extraSegment == nil else { return }
+            let segment = SKSpriteNode(imageNamed: "roundPiece")
+            segment.setScale(0.85)
+            segment.position.y = -200
+            segment.color = articulation.color
+            segment.colorBlendFactor = 1.0
+            articulation.addChild(segment)
+
+            fin.removeFromParent()
+            segment.addChild(fin)
+            fin.position.y = -140
+            fin.setScale(1.25)
+            extraSegment = segment
+        } else if let segment = extraSegment {
+            fin.removeFromParent()
+            articulation.addChild(fin)
+            fin.position.y = -150
+            fin.setScale(1.1)
+            segment.removeFromParent()
+            extraSegment = nil
+        }
+    }
+
     func bodyZPosition(isDownMoveMode: Bool = false) -> SKAction {
         let position = isDownMoveMode ?  CGFloat(-2) : CGFloat(1)
         let wait = SKAction.wait(forDuration: 0.5)

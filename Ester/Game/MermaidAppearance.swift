@@ -3,8 +3,7 @@
 //  Ester
 //
 //  Aplicação dinâmica de paleta (adaptação à profundidade) e variantes
-//  visuais de direção/animação que não movem o nó base — a posição agora
-//  é controlada pelo AutonomySystem.
+//  visuais de direção/animação que não movem o nó base.
 //
 
 import Foundation
@@ -13,19 +12,7 @@ import SpriteKit
 extension Mermaid {
     /// Tinge todas as partes do corpo com a paleta interpolada pela profundidade.
     func applyPalette(_ palette: MermaidPalette) {
-        head.headNode.color = palette.skin
-        head.hairFrontNode.color = palette.hair
-        head.hairBackNode.color = palette.hair
-
-        body.body.color = palette.skin
-        body.waist.color = palette.skin
-        body.articulation.color = palette.vibrant1
-        body.waistScale.color = palette.vibrant1
-        body.finScale.color = palette.vibrant1
-        body.fin.color = palette.vibrant2
-
-        arms.left.color = palette.skin
-        arms.right.color = palette.skin
+        figure.applyPalette(palette)
     }
 
     /// Atualiza apenas os visuais de direção (cabelo, braços, rosto),
@@ -34,25 +21,13 @@ extension Mermaid {
         currentDirection = direction
         switch direction {
         case .up:
-            arms.setUpMoveMode()
-            head.setUpMoveMode()
-            body.setUpMoveMode()
-            face.setUpMoveMode()
+            figure.applyDirection(.up)
         case .down:
-            arms.setDownMoveMode()
-            head.setDownMoveMode()
-            body.setDownMoveMode()
-            face.setDownMoveMode()
+            figure.applyDirection(.down)
         case .right:
-            arms.setRightMoveMode()
-            head.setRightMoveMode()
-            body.setRightMoveMode()
-            face.setRightMoveMode()
+            figure.applyDirection(.right)
         case .left:
-            arms.setLeftMoveMode()
-            head.setLeftMoveMode()
-            body.setLeftMoveMode()
-            face.setLeftMoveMode()
+            figure.applyDirection(.left)
         case .none:
             break
         }
@@ -63,14 +38,11 @@ extension Mermaid {
         switch mode {
         case .idle:
             currentDirection = .none
-            arms.applyIdleMoveMode()
-            head.applyIdleMoveMode()
-            body.applyIdleMoveMode()
-            face.applyIdleMoveMode()
+            figure.applyAnimationMode(.idle)
         case .swing:
-            body.applySwingMoveMode()
+            figure.applyAnimationMode(.swing)
         case .fast:
-            body.applyFastMoveMode()
+            figure.applyAnimationMode(.fast)
         }
     }
 }
