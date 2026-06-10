@@ -65,6 +65,7 @@ final class AutonomySystem {
         case .seekingFood, .seekingPuzzle: energyRate = -0.09
         case .eating: energyRate = 0
         case .goingDeeper, .goingUp: energyRate = -0.12
+        case .traveling: energyRate = -0.05
         case .returningHome: energyRate = -0.08
         case .interactingWithFish: energyRate = -0.05
         case .avoidingDanger: energyRate = -0.25
@@ -116,6 +117,10 @@ final class AutonomySystem {
         }
         if ctx.match3.puzzlePoint != nil {
             scores[.seekingPuzzle] = 22 + stats.curiosity * 0.2
+        }
+        // viagem em andamento: prioridade alta, mas fome/cansaço interrompem
+        if ctx.travel.destination != nil && stats.energy > 12 && stats.hunger < 88 {
+            scores[.traveling] = 70
         }
 
         // Comando do jogador pesa muito, mas não é absoluto
@@ -174,6 +179,8 @@ final class AutonomySystem {
                 y = position.y + 1600
             }
             target = CGPoint(x: position.x + .random(in: -800...800), y: y)
+        case .traveling:
+            target = ctx.travel.targetPoint
         case .returningHome:
             target = ctx.shelter.position
         case .interactingWithFish:
@@ -232,6 +239,13 @@ final class AutonomySystem {
                 }
             } else {
                 setIntent(.wandering)
+            }
+        case .traveling:
+            if let point = ctx.travel.targetPoint {
+                target = point
+            } else {
+                setIntent(.idle)
+                decisionCooldown = min(decisionCooldown, 1)
             }
         case .returningHome:
             target = ctx.shelter.position
@@ -320,11 +334,11 @@ final class AutonomySystem {
 
     func give(_ command: PlayerCommand) {
         guard stats.phase != .egg else {
-            // Durante o ovo só o desafio funciona — e abre na hora.
-            if command == .challenge {
+            // Durante o ovo só a Trama funciona — e abre na hora.
+            if command == .tideWeave {
                 ctx.scene?.openMatch3(zone: .shallow, special: false)
             } else {
-                ctx.say("O ovo descansa... toque nele para aquecê-lo, ou toque em Desafio 💎")
+                ctx.say("A pequena sereia ainda está dormindo no ovo... jogue Trama das Marés para reunir energia de nascimento 🌀")
             }
             return
         }
@@ -338,14 +352,16 @@ final class AutonomySystem {
             desired = .seekingFood
         case .rest:
             desired = .resting
-        case .goHome:
-            desired = .returningHome
-        case .interact:
-            guard ctx.fish.nearestFish(to: position, maxDistance: 1400) != nil else {
-                ctx.say("Nenhum peixe por perto agora...")
-                return
-            }
-            desired = .interactingWithFish
+        case .travel:
+            // o menu de regiões é interface, não depende de obediência
+            ctx.scene?.openRegionMenu()
+            return
+        case .refuge:
+            // o refúgio é dela: sempre aceita voltar
+            commandBias = (.returningHome, Date().addingTimeInterval(40))
+            setIntent(.returningHome)
+            decisionCooldown = .random(in: 8...12)
+            return
         case .goDown:
             guard let next = currentZone.deeper else {
                 ctx.say("Já estamos no fundo do abismo.")
@@ -378,20 +394,20 @@ final class AutonomySystem {
                 ctx.say(ctx.depth.ascentHint())
             }
             desired = .goingUp
-        case .challenge:
-            // Match-3 sempre acessível, com custo leve de contexto
+        case .tideWeave:
+            // A Trama das Marés está sempre acessível, com custo leve de contexto
             if stats.hunger >= 92 {
-                ctx.say("Faminta demais para desafios... me ajuda a comer algo?")
+                ctx.say("Faminta demais para tecer a Trama... me ajuda a comer algo?")
                 return
             }
             if stats.energy < 8 {
-                ctx.say("Preciso descansar antes de um desafio... 😴")
+                ctx.say("Preciso descansar antes de tecer a Trama... 😴")
                 return
             }
             commandBias = (.seekingPuzzle, Date().addingTimeInterval(40))
             setIntent(.seekingPuzzle)
             decisionCooldown = .random(in: 8...12)
-            ctx.say("Ela foi procurar um ponto mágico... ✨")
+            ctx.say("Ela foi procurar um fio da Trama das Marés... ✨")
             return
         }
 
@@ -434,6 +450,7 @@ final class AutonomySystem {
         case .wandering: return 130
         case .seekingFood, .seekingPuzzle: return 200
         case .goingDeeper, .goingUp: return 170
+        case .traveling: return 260
         case .returningHome: return 220
         case .interactingWithFish: return 150
         case .avoidingDanger: return 380

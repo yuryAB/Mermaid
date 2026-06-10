@@ -303,7 +303,10 @@ final class FoodSystem {
     }
 
     private func weightedKind(for zone: DepthZone) -> FoodKind {
-        let kinds = FoodSystem.kinds(for: zone)
+        var kinds = FoodSystem.kinds(for: zone)
+        if let region = ctx.regions.currentRegion {
+            kinds += RegionDiscoverySystem.extraFood(for: region.id)
+        }
         let total = kinds.reduce(CGFloat(0)) { $0 + $1.weight }
         var roll = CGFloat.random(in: 0..<total)
         for kind in kinds {

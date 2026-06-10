@@ -216,8 +216,8 @@ final class HUDLayer: SKNode {
 
     private func buildButtons() {
         let commands: [[PlayerCommand]] = [
-            [.explore, .seekFood, .rest, .interact],
-            [.goUp, .goDown, .challenge, .goHome]
+            [.explore, .seekFood, .tideWeave, .rest],
+            [.goUp, .goDown, .travel, .refuge]
         ]
         let buttonWidth = (sceneSize.width - 60) / 4
         let buttonHeight: CGFloat = 54
@@ -262,19 +262,23 @@ final class HUDLayer: SKNode {
     func refresh(stats: MermaidStats,
                  intent: MermaidIntent,
                  zone: DepthZone,
-                 depthMeters: CGFloat,
+                 regionName: String?,
                  evolutionProgress: CGFloat,
                  shelterCapacity: Int) {
         let eggMode = stats.phase == .egg
 
         if eggMode {
             phaseLabel.text = "Ovo · \(Int(evolutionProgress * 100))% chocado"
-            intentLabel.text = "aquecendo o ovo..."
+            intentLabel.text = "reunindo energia de nascimento..."
         } else {
             phaseLabel.text = "\(stats.phase.displayName) · \(stats.ageText)"
             intentLabel.text = "• \(intent.displayName)"
         }
-        depthLabel.text = zone.displayName
+        if let regionName {
+            depthLabel.text = "\(regionName) · \(zone.displayName)"
+        } else {
+            depthLabel.text = zone.displayName
+        }
         pearlsLabel.text = "\(stats.pearls)"
         storedFoodLabel.text = stats.storedFood > 0 ? "abrigo: \(stats.storedFood)/\(shelterCapacity)" : ""
 
@@ -290,11 +294,11 @@ final class HUDLayer: SKNode {
                 : UIColor(red: 0.95, green: 0.6, blue: 0.3, alpha: 1)
         }
 
-        // durante o ovo, só o Desafio fica ativo
+        // durante o ovo, só a Trama fica ativa
         if eggMode != lastEggMode {
             lastEggMode = eggMode
             for (command, button) in buttons {
-                let active = !eggMode || command == .challenge
+                let active = !eggMode || command == .tideWeave
                 button.alpha = active ? 1 : 0.32
             }
         }

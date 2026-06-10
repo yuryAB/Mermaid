@@ -190,23 +190,23 @@ enum MermaidPhase: Int, Codable, CaseIterable, Comparable {
 enum PlayerCommand: String, CaseIterable {
     case explore
     case seekFood
-    case rest
-    case interact
+    case tideWeave
     case goUp
     case goDown
-    case challenge
-    case goHome
+    case travel
+    case refuge
+    case rest
 
     var label: String {
         switch self {
         case .explore: return "Explorar"
         case .seekFood: return "Comida"
-        case .rest: return "Descansar"
-        case .interact: return "Interagir"
+        case .tideWeave: return "Trama"
         case .goUp: return "Subir"
         case .goDown: return "Descer"
-        case .challenge: return "Desafio"
-        case .goHome: return "Abrigo"
+        case .travel: return "Viajar"
+        case .refuge: return "Refúgio"
+        case .rest: return "Descansar"
         }
     }
 
@@ -215,12 +215,12 @@ enum PlayerCommand: String, CaseIterable {
         switch self {
         case .explore: return "🧭"
         case .seekFood: return "🍎"
-        case .rest: return "😴"
-        case .interact: return "🐠"
+        case .tideWeave: return "🌀"
         case .goUp: return "⬆️"
         case .goDown: return "⬇️"
-        case .challenge: return "💎"
-        case .goHome: return "🏠"
+        case .travel: return "🗺"
+        case .refuge: return "🐚"
+        case .rest: return "😴"
         }
     }
 
@@ -228,12 +228,12 @@ enum PlayerCommand: String, CaseIterable {
         switch self {
         case .explore: return "safari.fill"
         case .seekFood: return "leaf.fill"
-        case .rest: return "moon.zzz.fill"
-        case .interact: return "heart.fill"
+        case .tideWeave: return "circle.grid.3x3.fill"
         case .goUp: return "arrow.up.circle.fill"
         case .goDown: return "arrow.down.circle.fill"
-        case .challenge: return "puzzlepiece.fill"
-        case .goHome: return "house.fill"
+        case .travel: return "map.fill"
+        case .refuge: return "house.fill"
+        case .rest: return "moon.zzz.fill"
         }
     }
 
@@ -241,12 +241,12 @@ enum PlayerCommand: String, CaseIterable {
         switch self {
         case .explore: return UIColor(red: 0.4, green: 0.8, blue: 0.95, alpha: 1)
         case .seekFood: return UIColor(red: 0.5, green: 0.85, blue: 0.5, alpha: 1)
-        case .rest: return UIColor(red: 0.72, green: 0.68, blue: 0.95, alpha: 1)
-        case .interact: return UIColor(red: 0.95, green: 0.55, blue: 0.68, alpha: 1)
+        case .tideWeave: return UIColor(red: 0.98, green: 0.8, blue: 0.4, alpha: 1)
         case .goUp: return UIColor(red: 0.6, green: 0.88, blue: 0.95, alpha: 1)
         case .goDown: return UIColor(red: 0.42, green: 0.6, blue: 0.95, alpha: 1)
-        case .challenge: return UIColor(red: 0.98, green: 0.8, blue: 0.4, alpha: 1)
-        case .goHome: return UIColor(red: 0.95, green: 0.7, blue: 0.45, alpha: 1)
+        case .travel: return UIColor(red: 0.45, green: 0.9, blue: 0.75, alpha: 1)
+        case .refuge: return UIColor(red: 0.95, green: 0.7, blue: 0.45, alpha: 1)
+        case .rest: return UIColor(red: 0.72, green: 0.68, blue: 0.95, alpha: 1)
         }
     }
 }
@@ -262,6 +262,7 @@ enum MermaidIntent: String {
     case solvingPuzzle
     case goingDeeper
     case goingUp
+    case traveling
     case resting
     case returningHome
     case interactingWithFish
@@ -274,12 +275,13 @@ enum MermaidIntent: String {
         case .wandering: return "explorando"
         case .seekingFood: return "procurando comida"
         case .eating: return "comendo"
-        case .seekingPuzzle: return "procurando um desafio"
-        case .solvingPuzzle: return "resolvendo um desafio"
+        case .seekingPuzzle: return "procurando a Trama"
+        case .solvingPuzzle: return "tecendo a Trama das Marés"
         case .goingDeeper: return "descendo"
         case .goingUp: return "subindo"
+        case .traveling: return "viajando"
         case .resting: return "descansando"
-        case .returningHome: return "voltando ao abrigo"
+        case .returningHome: return "voltando ao refúgio"
         case .interactingWithFish: return "brincando com peixes"
         case .avoidingDanger: return "fugindo"
         case .observing: return "observando"
@@ -335,6 +337,8 @@ final class GameContext {
     var match3: Match3System!
     var events: EventSystem!
     var growth: GrowthSystem!
+    var regions: RegionDiscoverySystem!
+    var travel: TravelSystem!
     var hud: HUDLayer!
 
     var mermaidPosition: CGPoint { mermaidEntity.mermaid.base.position }

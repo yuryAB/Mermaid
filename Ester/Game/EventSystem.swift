@@ -59,6 +59,10 @@ final class EventSystem {
                 options.append((2, fallingObject))
             }
         }
+        // o Grande Delta é terra de correntes
+        if ctx.regions.currentRegion?.id == "delta" {
+            options.append((3, current))
+        }
 
         let total = options.reduce(0) { $0 + $1.weight }
         var roll = Int.random(in: 0..<total)

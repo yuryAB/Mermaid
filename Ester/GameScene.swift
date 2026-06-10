@@ -19,9 +19,11 @@ class GameScene: SKScene {
     private var mermaidEntity: MermaidEntity!
     private var hud: HUDLayer!
     private var match3Overlay: Match3Overlay?
+    private var regionMenu: RegionMenuOverlay?
 
     private let ctx = GameContext()
     private var stats: MermaidStats!
+    private var offlineSummary: String?
 
     private var lastUpdateTime: TimeInterval = 0
     private var saveTimer: CGFloat = 0
@@ -32,6 +34,7 @@ class GameScene: SKScene {
         physicsWorld.gravity = .zero
 
         stats = MermaidStats.load()
+        offlineSummary = OfflineProgressSystem.apply(stats: stats)
         ctx.stats = stats
         ctx.scene = self
 
@@ -64,11 +67,19 @@ class GameScene: SKScene {
                     self.ctx.say("Bem-vindo de volta! Ela sentiu sua falta. 🌊")
                 }
             },
-            .wait(forDuration: 13),
+            .wait(forDuration: 2.5),
+            .run { [weak self] in
+                guard let self else { return }
+                if let summary = self.offlineSummary {
+                    self.ctx.say(summary)
+                    self.offlineSummary = nil
+                }
+            },
+            .wait(forDuration: 11),
             .run { [weak self] in
                 guard let self else { return }
                 if self.stats.phase == .egg && self.stats.hatchProgress < 0.6 {
-                    self.ctx.say("Dica: desafios Match-3 também aquecem o ovo 💎")
+                    self.ctx.say("Jogue Trama das Marés para reunir energia de nascimento 🌀")
                 }
             }
         ]))
@@ -97,6 +108,8 @@ class GameScene: SKScene {
         ctx.match3 = Match3System(ctx: ctx, worldNode: worldNode)
         ctx.events = EventSystem(ctx: ctx, worldNode: worldNode)
         ctx.growth = GrowthSystem(ctx: ctx, worldNode: worldNode)
+        ctx.regions = RegionDiscoverySystem(ctx: ctx)
+        ctx.travel = TravelSystem(ctx: ctx)
     }
 
     private func setupCamera() {
@@ -199,14 +212,20 @@ class GameScene: SKScene {
         ctx.events.update(dt: dt)
         ctx.shelter.update(dt: dt)
         ctx.match3.update(dt: dt)
+        ctx.regions.update(dt: dt)
+        ctx.travel.update(dt: dt)
 
-        let mermaidY = ctx.mermaidPosition.y
-        backgroundColor = ctx.depth.waterColor(atY: mermaidY)
+        let mermaidPosition = ctx.mermaidPosition
+        var water = ctx.depth.waterColor(atY: mermaidPosition.y)
+        if let tint = ctx.regions.waterTint(at: mermaidPosition) {
+            water = .lerp(water, tint.color, tint.strength)
+        }
+        backgroundColor = water
 
         hud.refresh(stats: stats,
                     intent: ctx.autonomy.intent,
                     zone: ctx.depth.currentZone,
-                    depthMeters: max(0, -mermaidY / 10),
+                    regionName: ctx.regions.currentRegion?.name,
                     evolutionProgress: ctx.growth.progressToNext(),
                     shelterCapacity: ctx.shelter.capacity)
 
@@ -248,12 +267,38 @@ class GameScene: SKScene {
                 y: p.y.clamped(to: (World.floorY + 500)...500))
     }
 
+    // MARK: - Menu de regiões
+
+    func openRegionMenu() {
+        guard regionMenu == nil, match3Overlay == nil else { return }
+        let menu = RegionMenuOverlay(size: size,
+                                     stats: stats,
+                                     currentRegionId: ctx.regions.currentRegion?.id,
+                                     destinationId: stats.destinationRegionId,
+                                     onSelect: { [weak self] region in
+                                         self?.ctx.travel.setDestination(region)
+                                         self?.closeRegionMenu()
+                                     },
+                                     onClose: { [weak self] in
+                                         self?.closeRegionMenu()
+                                     })
+        menu.zPosition = 190
+        cameraNode.addChild(menu)
+        regionMenu = menu
+    }
+
+    private func closeRegionMenu() {
+        regionMenu?.removeFromParent()
+        regionMenu = nil
+    }
+
     // MARK: - Match-3
 
     var isPuzzleOpen: Bool { match3Overlay != nil }
 
     func openMatch3(zone: DepthZone, special: Bool) {
         guard match3Overlay == nil else { return }
+        closeRegionMenu()
         stats.energy = max(0, stats.energy - 8)
         ctx.autonomy.paused = true
 
@@ -305,7 +350,7 @@ class GameScene: SKScene {
     // MARK: - Toques no mundo
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard match3Overlay == nil, let touch = touches.first else { return }
+        guard match3Overlay == nil, regionMenu == nil, let touch = touches.first else { return }
         let location = touch.location(in: self)
 
         if let egg = ctx.growth.eggNode,
@@ -319,7 +364,7 @@ class GameScene: SKScene {
         }
         if let point = ctx.match3.puzzlePoint,
            point.position.distance(to: location) < 200 {
-            ctx.autonomy.give(.challenge)
+            ctx.autonomy.give(.tideWeave)
             return
         }
     }

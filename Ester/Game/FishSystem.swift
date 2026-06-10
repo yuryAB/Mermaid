@@ -23,12 +23,15 @@ final class FishNode: SKNode {
     private var fleeTimer: CGFloat = 0
     private let container = SKNode()
 
-    init(zone: DepthZone, rare: Bool = false) {
+    private let paletteOverride: [UIColor]?
+
+    init(zone: DepthZone, rare: Bool = false, palette: [UIColor]? = nil) {
         self.zone = zone
         self.heading = Bool.random() ? 0 : .pi
         self.baseSpeed = .random(in: 40...110)
         self.skittish = Bool.random()
         self.isRare = rare
+        self.paletteOverride = palette
         super.init()
         if rare {
             baseSpeed = .random(in: 120...170)
@@ -46,7 +49,7 @@ final class FishNode: SKNode {
         let height = length * CGFloat.random(in: 0.35...0.5)
         let color = isRare
             ? UIColor(red: 1, green: 0.85, blue: 0.4, alpha: 1)
-            : FishNode.palette(for: zone).randomElement()!
+            : (paletteOverride ?? FishNode.palette(for: zone)).randomElement()!
 
         let body = SKShapeNode(ellipseOf: CGSize(width: length, height: height))
         body.fillColor = color
@@ -211,7 +214,10 @@ final class FishSystem {
     @discardableResult
     func spawnFish(zone: DepthZone, near point: CGPoint, rare: Bool = false) -> FishNode? {
         guard let world = worldNode else { return nil }
-        let fish = FishNode(zone: zone, rare: rare)
+        let regionPalette = ctx.regions.currentRegion.flatMap {
+            RegionDiscoverySystem.fishPalette(for: $0.id)
+        }
+        let fish = FishNode(zone: zone, rare: rare, palette: regionPalette)
         let angle = CGFloat.random(in: 0...(2 * .pi))
         let distance = CGFloat.random(in: 900...1600)
         let range = zone.yRange
