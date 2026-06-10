@@ -4,203 +4,302 @@
 //
 //  Created by yury antony on 11/06/24.
 //
+//  Cena principal: mundo vertical de profundidade, sereia autônoma,
+//  sistemas de cuidado (fome/energia/humor), comida e peixes procedurais,
+//  eventos ambientais e puzzles Match-3 integrados ao mundo.
+//
 
 import SpriteKit
 import GameplayKit
 
 class GameScene: SKScene {
-    var cameraNode: SKCameraNode?
-    var currentZone: DepthZone?
-    var mermaidEntity: MermaidEntity!
-    var entityManager: EntityManager!
-    
-    var button1: SKSpriteNode!
-    var button2: SKSpriteNode!
-    var button3: SKSpriteNode!
-    var button4: SKSpriteNode!
-    var button5: SKSpriteNode!
-    var button6: SKSpriteNode!
-    var button7: SKSpriteNode!
-    var button8: SKSpriteNode!
-    var button9: SKSpriteNode!
-    var button10: SKSpriteNode!
-    
-    var settingsButton: SKSpriteNode!
-    
-    enum DepthZone: String {
-        case surface
-        case shallow
-        case mid
-        case deep
-        case abyssal
-    }
-    
-    override func didMove(to view: SKView) {
-        button1 = createButton(name: "button1", text: "Up", position: CGPoint(x: 0, y: -270))
-        button2 = createButton(name: "button2", text: "Down", position: CGPoint(x: 0, y: 220))
-        button3 = createButton(name: "button3", text: "Right", position: CGPoint(x: -140, y: 0))
-        button4 = createButton(name: "button4", text: "Left", position: CGPoint(x: 140, y: 0))
-        button5 = createButton(name: "button5", text: "Idle", position: CGPoint(x: 130, y: 340))
-        button6 = createButton(name: "button6", text: "Swing", position: CGPoint(x: 0, y: 340))
-        button7 = createButton(name: "button7", text: "Fast", position: CGPoint(x: -130, y: 340))
-        button8 = createButton(name: "button8", text: "zoom1", position: CGPoint(x: 140, y: -80), fontsize: 25)
-        button9 = createButton(name: "button9", text: "zoom2", position: CGPoint(x: 140, y: -160), fontsize: 25)
-        button10 = createButton(name: "button10", text: "zoom3", position: CGPoint(x: 140, y: -240), fontsize: 25)
-        
-        settingsButton = createSettingsButton()
-        
-        self.physicsWorld.gravity = CGVector(dx: 0, dy: -1.0)
-        
-        entityManager = EntityManager()
-        setupNewMermaid()
-        setupCamera()
-        
-        let buttons = [button1, button2, button3, button4, button5, button6, button7, button8, button9, button10]
-        for button in buttons {
-            cameraNode!.addChild(button!)
-        }
-        cameraNode!.addChild(settingsButton)
-        
-        mermaidEntity.movementSM.enter(MermaidIdleState.self)
-        
-        self.currentZone = .mid
-        self.backgroundColor = ColorManager.shared.waters["mid"]!
-    }
-    
-    func createButton(name: String, text: String, position: CGPoint, fontsize: CGFloat = 35) -> SKSpriteNode {
-        let button = SKSpriteNode(color: .clear, size: CGSize(width: 40, height: 30))
-        button.name = name
-        button.position = position
-        
-        let label = SKLabelNode(text: text)
-        label.fontName = "Helvetica"
-        label.fontSize = fontsize
-        label.fontColor = .black
-        label.position = CGPoint(x: 0, y: -10)
-        label.zPosition = 1
-        label.name = name
-        
-        button.addChild(label)
-        
-        return button
-    }
-    
-    func createSettingsButton() -> SKSpriteNode {
-        let button = SKSpriteNode(imageNamed: "settingsIcon")
-        button.name = "settingsButton"
-        button.size = CGSize(width: 30, height: 30)
-        button.position = CGPoint(x: -140, y: -340)
-        button.zPosition = 10
-        return button
-    }
+    private var cameraNode: SKCameraNode!
+    private var worldNode: SKNode!
+    private var entityManager: EntityManager!
+    private var mermaidEntity: MermaidEntity!
+    private var hud: HUDLayer!
+    private var match3Overlay: Match3Overlay?
 
-    
-    func setupNewMermaid() {
-        mermaidEntity = MermaidEntity()
-        entityManager.addEntity(mermaidEntity, to: self)
-    }
-    
-    func setupCamera() {
-        let cameraNode = SKCameraNode()
-        self.camera = cameraNode
-        self.addChild(cameraNode)
-        self.cameraNode = cameraNode
-    }
-    
-    override func update(_ currentTime: TimeInterval) {
-        updateBackgroundColor()
-        updateCameraPosition()
-    }
-    
-    func updateBackgroundColor() {
-        // Implementar a lógica de mudança de cor de fundo com base na profundidade da sereia
-    }
-    
-    func updateCameraPosition() {
-        guard let cameraNode = cameraNode else { return }
-        let targetPosition = mermaidEntity.mermaid.base.position
-        let moveAction = SKAction.move(to: targetPosition, duration: 0.4)
-        moveAction.eaeInEaseOut()
-        cameraNode.run(moveAction)
-    }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else { return }
-        let location = touch.location(in: self)
-        let nodesAtLocation = nodes(at: location)
-        
-        for node in nodesAtLocation {
-            if let nodeName = node.name {
-                switch nodeName {
-                case "button1":
-                    mermaidEntity.directionSM.enter(MermaidUpState.self)
-                case "button2":
-                    mermaidEntity.directionSM.enter(MermaidDownState.self)
-                case "button3":
-                    mermaidEntity.directionSM.enter(MermaidRightState.self)
-                case "button4":
-                    mermaidEntity.directionSM.enter(MermaidLeftState.self)
-                case "button5":
-                    mermaidEntity.movementSM.enter(MermaidIdleState.self)
-                case "button6":
-                    mermaidEntity.movementSM.enter(MermaidSwingState.self)
-                    startRandomDirectionSelection()
-                case "button7":
-                    mermaidEntity.movementSM.enter(MermaidFastState.self)
-                    startRandomDirectionSelection()
-                case "button8":
-                    let resetZoomAction = SKAction.scale(to: 1.2, duration: 1.0)
-                    cameraNode?.run(resetZoomAction)
-                case "button9":
-                    let resetZoomAction = SKAction.scale(to: 5.0, duration: 1.0)
-                    cameraNode?.run(resetZoomAction)
-                case "button10":
-                    let resetZoomAction = SKAction.scale(to: 9.0, duration: 1.0)
-                    cameraNode?.run(resetZoomAction)
-                case "settingsButton":
-                    toggleButtonsVisibility()
-                default:
-                    break
+    private let ctx = GameContext()
+    private var stats: MermaidStats!
+
+    private var lastUpdateTime: TimeInterval = 0
+    private var saveTimer: CGFloat = 0
+
+    // MARK: - Setup
+
+    override func didMove(to view: SKView) {
+        physicsWorld.gravity = .zero
+
+        stats = MermaidStats.load()
+        ctx.stats = stats
+        ctx.scene = self
+
+        worldNode = SKNode()
+        addChild(worldNode)
+        backgroundColor = ColorManager.shared.waters["shallow"]!
+        setupEnvironmentDecor()
+
+        setupMermaid()
+        setupSystems()
+        setupCamera()
+        setupHUD()
+        setupAmbientBubbles()
+
+        ctx.growth.setup()
+        snapCameraToTarget()
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(saveOnBackground),
+                                               name: UIApplication.didEnterBackgroundNotification,
+                                               object: nil)
+
+        run(.sequence([
+            .wait(forDuration: 1.0),
+            .run { [weak self] in
+                guard let self else { return }
+                if self.stats.phase == .egg {
+                    self.ctx.say("Um ovo misterioso repousa no abrigo... 🥚")
+                } else {
+                    self.ctx.say("Bem-vindo de volta! Ela sentiu sua falta. 🌊")
                 }
             }
+        ]))
+    }
+
+    private func setupMermaid() {
+        entityManager = EntityManager()
+        mermaidEntity = MermaidEntity()
+        entityManager.addEntity(mermaidEntity, to: worldNode)
+        ctx.mermaidEntity = mermaidEntity
+
+        let mermaid = mermaidEntity.mermaid
+        mermaid.base.zPosition = 10
+        mermaid.base.setScale(stats.phase.scale)
+        mermaid.base.position = CGPoint(x: -180, y: -650)
+        mermaid.setAnimationMode(.idle)
+    }
+
+    private func setupSystems() {
+        ctx.depth = DepthSystem(ctx: ctx)
+        ctx.autonomy = AutonomySystem(ctx: ctx)
+        ctx.food = FoodSystem(ctx: ctx, worldNode: worldNode)
+        ctx.fish = FishSystem(ctx: ctx, worldNode: worldNode)
+        ctx.shelter = ShelterSystem(ctx: ctx)
+        ctx.shelter.setup(in: worldNode)
+        ctx.match3 = Match3System(ctx: ctx, worldNode: worldNode)
+        ctx.events = EventSystem(ctx: ctx, worldNode: worldNode)
+        ctx.growth = GrowthSystem(ctx: ctx, worldNode: worldNode)
+    }
+
+    private func setupCamera() {
+        cameraNode = SKCameraNode()
+        cameraNode.setScale(2.4)
+        camera = cameraNode
+        addChild(cameraNode)
+    }
+
+    private func setupHUD() {
+        hud = HUDLayer(size: size)
+        hud.zPosition = 100
+        hud.onCommand = { [weak self] command in
+            self?.ctx.autonomy.give(command)
+        }
+        ctx.hud = hud
+        cameraNode.addChild(hud)
+    }
+
+    private func setupEnvironmentDecor() {
+        // céu acima da linha d'água
+        let sky = SKShapeNode(rect: CGRect(x: World.minX - 400, y: World.waterlineY,
+                                           width: (World.maxX - World.minX) + 800, height: 1200))
+        sky.fillColor = UIColor.lerp(ColorManager.shared.waters["surface"]!, .white, 0.45)
+        sky.strokeColor = .clear
+        sky.zPosition = -50
+        worldNode.addChild(sky)
+
+        // faixa cintilante na linha d'água
+        let waterline = SKShapeNode(rect: CGRect(x: World.minX - 400, y: World.waterlineY - 10,
+                                                 width: (World.maxX - World.minX) + 800, height: 20))
+        waterline.fillColor = UIColor(white: 1, alpha: 0.4)
+        waterline.strokeColor = .clear
+        waterline.zPosition = -40
+        worldNode.addChild(waterline)
+        waterline.run(.repeatForever(.sequence([
+            .fadeAlpha(to: 0.25, duration: 1.8),
+            .fadeAlpha(to: 0.5, duration: 1.8)
+        ])))
+
+        // raios de luz nas águas rasas
+        for i in 0..<4 {
+            let ray = SKShapeNode(path: {
+                let path = UIBezierPath()
+                path.move(to: .zero)
+                path.addLine(to: CGPoint(x: 120, y: 0))
+                path.addLine(to: CGPoint(x: 320, y: -1100))
+                path.addLine(to: CGPoint(x: 80, y: -1100))
+                path.close()
+                return path.cgPath
+            }())
+            ray.fillColor = UIColor(white: 1, alpha: 0.07)
+            ray.strokeColor = .clear
+            ray.zPosition = -30
+            ray.position = CGPoint(x: World.minX + CGFloat(i) * 450, y: World.waterlineY)
+            worldNode.addChild(ray)
+        }
+
+        // leito do abismo
+        let floor = SKShapeNode(rect: CGRect(x: World.minX - 400, y: World.floorY - 500,
+                                             width: (World.maxX - World.minX) + 800, height: 520))
+        floor.fillColor = UIColor(white: 0.02, alpha: 1)
+        floor.strokeColor = .clear
+        floor.zPosition = -40
+        worldNode.addChild(floor)
+    }
+
+    private func setupAmbientBubbles() {
+        let emitter = SKEmitterNode()
+        emitter.particleTexture = SKTexture(imageNamed: "bubble")
+        emitter.particleBirthRate = 1.5
+        emitter.particleLifetime = 7
+        emitter.particleLifetimeRange = 3
+        emitter.particleSpeed = 55
+        emitter.particleSpeedRange = 30
+        emitter.emissionAngle = .pi / 2
+        emitter.particleAlpha = 0.3
+        emitter.particleAlphaRange = 0.2
+        emitter.particleScale = 0.12
+        emitter.particleScaleRange = 0.08
+        emitter.particlePositionRange = CGVector(dx: size.width * 2.6, dy: size.height * 1.4)
+        emitter.zPosition = 2
+        emitter.targetNode = worldNode
+        cameraNode.addChild(emitter)
+    }
+
+    // MARK: - Loop principal
+
+    override func update(_ currentTime: TimeInterval) {
+        var dt: CGFloat = lastUpdateTime == 0 ? 0.016 : CGFloat(currentTime - lastUpdateTime)
+        lastUpdateTime = currentTime
+        dt = min(dt, 0.1)
+
+        ctx.growth.update(dt: dt)
+        ctx.autonomy.update(dt: dt)
+        ctx.depth.update(dt: dt)
+        ctx.food.update(dt: dt)
+        ctx.fish.update(dt: dt)
+        ctx.events.update(dt: dt)
+        ctx.shelter.update(dt: dt)
+        ctx.match3.update(dt: dt)
+
+        let mermaidY = ctx.mermaidPosition.y
+        backgroundColor = ctx.depth.waterColor(atY: mermaidY)
+
+        hud.refresh(stats: stats,
+                    intent: ctx.autonomy.intent,
+                    zone: ctx.depth.currentZone,
+                    depthMeters: max(0, -mermaidY / 10),
+                    evolutionProgress: ctx.growth.progressToNext(),
+                    shelterCapacity: ctx.shelter.capacity)
+
+        updateCamera(dt: dt)
+
+        saveTimer += dt
+        if saveTimer > 20 {
+            saveTimer = 0
+            stats.save()
         }
     }
-    
-    func toggleButtonsVisibility() {
-        let buttons = [button1, button2, button3, button4, button5, button6, button7, button8, button9, button10]
-        for button in buttons {
-            button!.isHidden.toggle()
-        }
+
+    private var cameraTarget: CGPoint {
+        ctx.growth.eggNode?.position ?? ctx.mermaidPosition
     }
-    
-    func startRandomDirectionSelection() {
-        let action = SKAction.repeatForever(
-            SKAction.sequence([
-                SKAction.run { [weak self] in
-                    self?.triggerRandomDirectionState()
-                },
-                SKAction.wait(forDuration: TimeInterval(arc4random_uniform(31) + 10))
-            ])
+
+    private func updateCamera(dt: CGFloat) {
+        let target = clampedCameraPosition(cameraTarget)
+        let blend = min(1, dt * 3)
+        cameraNode.position = CGPoint(
+            x: cameraNode.position.x + (target.x - cameraNode.position.x) * blend,
+            y: cameraNode.position.y + (target.y - cameraNode.position.y) * blend
         )
-        self.run(action, withKey: "randomDirectionSelection")
     }
 
-    func stopRandomDirectionSelection() {
-        self.removeAction(forKey: "randomDirectionSelection")
+    private func snapCameraToTarget() {
+        cameraNode.position = clampedCameraPosition(cameraTarget)
     }
 
-    private func triggerRandomDirectionState() {
-        let directionStates: [GKState.Type] = [
-            MermaidUpState.self,
-            MermaidDownState.self,
-            MermaidRightState.self,
-            MermaidLeftState.self
-        ]
-        
-        let randomIndex = Int(arc4random_uniform(UInt32(directionStates.count)))
-        let randomState = directionStates[randomIndex]
-        
-        mermaidEntity.directionSM.enter(randomState)
+    private func clampedCameraPosition(_ p: CGPoint) -> CGPoint {
+        CGPoint(x: p.x.clamped(to: -600...600),
+                y: p.y.clamped(to: (World.floorY + 500)...500))
     }
 
+    // MARK: - Match-3
+
+    func openMatch3(zone: DepthZone, special: Bool) {
+        guard match3Overlay == nil else { return }
+        stats.energy = max(0, stats.energy - 8)
+        ctx.autonomy.paused = true
+
+        // bem-estar alto melhora as recompensas (0.7x – 1.1x)
+        let multiplier = 0.7 + stats.wellbeing / 250
+        let overlay = Match3Overlay(size: size,
+                                    zone: zone,
+                                    special: special,
+                                    rewardMultiplier: multiplier) { [weak self] result in
+            self?.closeMatch3(result: result, zone: zone)
+        }
+        overlay.zPosition = 200
+        cameraNode.addChild(overlay)
+        match3Overlay = overlay
+        ctx.match3.clearPoint()
+    }
+
+    private func closeMatch3(result: Match3Result, zone: DepthZone) {
+        match3Overlay?.removeFromParent()
+        match3Overlay = nil
+        ctx.autonomy.paused = false
+        ctx.autonomy.finishPuzzle()
+
+        stats.pearls += result.pearls
+        stats.gainXP(result.xp)
+        stats.boostMood(8)
+        let adaptation = stats.adaptation(for: zone)
+        stats.setAdaptation(adaptation + 3, for: zone)
+        stats.courage = min(100, stats.courage + (result.special ? 2 : 0.5))
+        if result.reachedTarget {
+            stats.puzzlesSolved += 1
+            stats.addMemory("Resolveu um desafio em \(zone.displayName)")
+        }
+        stats.save()
+        ctx.say(result.reachedTarget
+                ? "Ela adorou o desafio! 💠+\(result.pearls)"
+                : "Quase! Ainda assim ganhou 💠+\(result.pearls)")
+    }
+
+    // MARK: - Toques no mundo
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard match3Overlay == nil, let touch = touches.first else { return }
+        let location = touch.location(in: self)
+
+        if ctx.shelter.position.distance(to: location) < 260 {
+            ctx.shelter.tryUpgrade()
+            return
+        }
+        if let point = ctx.match3.puzzlePoint,
+           point.position.distance(to: location) < 200 {
+            ctx.autonomy.give(.challenge)
+            return
+        }
+    }
+
+    // MARK: - Persistência
+
+    @objc private func saveOnBackground() {
+        stats.save()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
 }

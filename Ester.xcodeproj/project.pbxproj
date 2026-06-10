@@ -33,6 +33,18 @@
 		72D020872C1905FC002F11FC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D020862C1905FC002F11FC /* Assets.xcassets */; };
 		72D0208A2C1905FC002F11FC /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 72D020892C1905FC002F11FC /* Base */; };
 		72D1A7AE2C1BD681005213A4 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D1A7AD2C1BD681005213A4 /* ColorManager.swift */; };
+		FAB1E1010000000000000001 /* GameplayModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000001 /* GameplayModels.swift */; };
+		FAB1E1010000000000000002 /* MermaidStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000002 /* MermaidStats.swift */; };
+		FAB1E1010000000000000003 /* MermaidAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000003 /* MermaidAppearance.swift */; };
+		FAB1E1010000000000000004 /* DepthSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000004 /* DepthSystem.swift */; };
+		FAB1E1010000000000000005 /* AutonomySystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000005 /* AutonomySystem.swift */; };
+		FAB1E1010000000000000006 /* FoodSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000006 /* FoodSystem.swift */; };
+		FAB1E1010000000000000007 /* FishSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000007 /* FishSystem.swift */; };
+		FAB1E1010000000000000008 /* ShelterSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000008 /* ShelterSystem.swift */; };
+		FAB1E1010000000000000009 /* EventSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000009 /* EventSystem.swift */; };
+		FAB1E101000000000000000A /* GrowthSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000000A /* GrowthSystem.swift */; };
+		FAB1E101000000000000000B /* Match3System.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000000B /* Match3System.swift */; };
+		FAB1E101000000000000000C /* HUDLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000000C /* HUDLayer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -63,6 +75,18 @@
 		72D020862C1905FC002F11FC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		72D020892C1905FC002F11FC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		72D1A7AD2C1BD681005213A4 /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000001 /* GameplayModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameplayModels.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000002 /* MermaidStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidStats.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000003 /* MermaidAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidAppearance.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000004 /* DepthSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthSystem.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000005 /* AutonomySystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutonomySystem.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000006 /* FoodSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSystem.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000007 /* FishSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FishSystem.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000008 /* ShelterSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelterSystem.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000009 /* EventSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSystem.swift; sourceTree = "<group>"; };
+		FAB1E001000000000000000A /* GrowthSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrowthSystem.swift; sourceTree = "<group>"; };
+		FAB1E001000000000000000B /* Match3System.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Match3System.swift; sourceTree = "<group>"; };
+		FAB1E001000000000000000C /* HUDLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDLayer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -172,9 +196,29 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		FAB1E2010000000000000001 /* Game */ = {
+			isa = PBXGroup;
+			children = (
+				FAB1E0010000000000000001 /* GameplayModels.swift */,
+				FAB1E0010000000000000002 /* MermaidStats.swift */,
+				FAB1E0010000000000000003 /* MermaidAppearance.swift */,
+				FAB1E0010000000000000004 /* DepthSystem.swift */,
+				FAB1E0010000000000000005 /* AutonomySystem.swift */,
+				FAB1E0010000000000000006 /* FoodSystem.swift */,
+				FAB1E0010000000000000007 /* FishSystem.swift */,
+				FAB1E0010000000000000008 /* ShelterSystem.swift */,
+				FAB1E0010000000000000009 /* EventSystem.swift */,
+				FAB1E001000000000000000A /* GrowthSystem.swift */,
+				FAB1E001000000000000000B /* Match3System.swift */,
+				FAB1E001000000000000000C /* HUDLayer.swift */,
+			);
+			path = Game;
+			sourceTree = "<group>";
+		};
 		72D020782C1905F9002F11FC /* Ester */ = {
 			isa = PBXGroup;
 			children = (
+				FAB1E2010000000000000001 /* Game */,
 				72334A7C2C4EF12D00D24502 /* Managers */,
 				7271E5642C41BA6E008CE3C8 /* Entitys */,
 				7238142F2C56D6F7007B3836 /* Components */,
@@ -287,6 +331,18 @@
 				72334A812C503BBA00D24502 /* MermaidHead.swift in Sources */,
 				728C9C592C51CB01001B919C /* MermaidBody.swift in Sources */,
 				7271E5662C41BA89008CE3C8 /* MermaidEntity.swift in Sources */,
+				FAB1E1010000000000000001 /* GameplayModels.swift in Sources */,
+				FAB1E1010000000000000002 /* MermaidStats.swift in Sources */,
+				FAB1E1010000000000000003 /* MermaidAppearance.swift in Sources */,
+				FAB1E1010000000000000004 /* DepthSystem.swift in Sources */,
+				FAB1E1010000000000000005 /* AutonomySystem.swift in Sources */,
+				FAB1E1010000000000000006 /* FoodSystem.swift in Sources */,
+				FAB1E1010000000000000007 /* FishSystem.swift in Sources */,
+				FAB1E1010000000000000008 /* ShelterSystem.swift in Sources */,
+				FAB1E1010000000000000009 /* EventSystem.swift in Sources */,
+				FAB1E101000000000000000A /* GrowthSystem.swift in Sources */,
+				FAB1E101000000000000000B /* Match3System.swift in Sources */,
+				FAB1E101000000000000000C /* HUDLayer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
