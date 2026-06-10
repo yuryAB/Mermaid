@@ -20,8 +20,8 @@ final class MermaidStats: Codable {
     var pearls: Int = 20
     var phase: MermaidPhase = .egg
     var birthDate: Date = Date()
-    var adaptationByZone: [String: CGFloat] = [DepthZone.shallow.storageKey: 30]
-    var unlockedZoneKeys: Set<String> = [DepthZone.shallow.storageKey]
+    var adaptationByZone: [String: CGFloat] = [DepthZone.mid.storageKey: 30]
+    var unlockedZoneKeys: Set<String> = [DepthZone.shallow.storageKey, DepthZone.mid.storageKey]
     var shelterLevel: Int = 1
     var storedFood: Int = 0
     var maxDepthMeters: CGFloat = 0
@@ -31,6 +31,14 @@ final class MermaidStats: Codable {
     var lastSaved: Date = Date()
     /// 0–1: progresso até o ovo chocar (tempo + carinho + desafios).
     var hatchProgress: CGFloat = 0
+    /// Posição persistente no mundo (coordenadas reais).
+    var posX: CGFloat = World.startPosition.x
+    var posY: CGFloat = World.startPosition.y
+    /// Regiões descobertas e progresso de exploração por região.
+    var discoveredRegionIds: Set<String> = ["nascente"]
+    var regionProgress: [String: CGFloat] = [:]
+    /// Destino de viagem atual (id de região), se houver.
+    var destinationRegionId: String?
 
     // Estado transitório, não persiste
     var moodBoost: CGFloat = 0
@@ -41,6 +49,7 @@ final class MermaidStats: Codable {
         case phase, birthDate, adaptationByZone, unlockedZoneKeys
         case shelterLevel, storedFood, maxDepthMeters
         case puzzlesSolved, mealsEaten, memories, lastSaved, hatchProgress
+        case posX, posY, discoveredRegionIds, regionProgress, destinationRegionId
     }
 
     init() {}
@@ -68,6 +77,11 @@ final class MermaidStats: Codable {
         memories = try c.decodeIfPresent([String].self, forKey: .memories) ?? []
         lastSaved = try c.decodeIfPresent(Date.self, forKey: .lastSaved) ?? Date()
         hatchProgress = try c.decodeIfPresent(CGFloat.self, forKey: .hatchProgress) ?? 0
+        posX = try c.decodeIfPresent(CGFloat.self, forKey: .posX) ?? World.startPosition.x
+        posY = try c.decodeIfPresent(CGFloat.self, forKey: .posY) ?? World.startPosition.y
+        discoveredRegionIds = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredRegionIds) ?? ["nascente"]
+        regionProgress = try c.decodeIfPresent([String: CGFloat].self, forKey: .regionProgress) ?? [:]
+        destinationRegionId = try c.decodeIfPresent(String.self, forKey: .destinationRegionId)
     }
 
     // MARK: - Derivados
@@ -148,6 +162,15 @@ final class MermaidStats: Codable {
     static func load() -> MermaidStats {
         if let data = UserDefaults.standard.data(forKey: saveKey),
            let stats = try? JSONDecoder().decode(MermaidStats.self, from: data) {
+            // garantias de base após migrações de mundo
+            stats.unlock(.shallow)
+            stats.unlock(.mid)
+            stats.discoveredRegionIds.insert("nascente")
+            let range = World.floorY...World.surfaceTopY
+            if !range.contains(stats.posY) || !(World.minX...World.maxX).contains(stats.posX) {
+                stats.posX = World.startPosition.x
+                stats.posY = World.startPosition.y
+            }
             stats.applyOfflineProgress()
             return stats
         }

@@ -46,14 +46,14 @@ final class EventSystem {
             (3, glowingFood),
             (2, rareFish)
         ]
-        if zone == .mid || zone == .deep || zone == .abyss {
+        if zone == .blue || zone == .deep || zone == .abyss {
             options.append((3, bigShadow))
         }
-        if (zone == .reef || zone == .mid || zone == .deep || zone == .abyss),
+        if zone != .surface && zone != .clear,
            ctx.match3.puzzlePoint == nil {
             options.append((2, crystalCluster))
         }
-        if ctx.mermaidPosition.y > -1200 {
+        if ctx.mermaidPosition.y > -2500 {
             options.append((2, boatPassing))
             if ctx.stats.isUnlocked(.surface) {
                 options.append((2, fallingObject))
@@ -190,7 +190,7 @@ final class EventSystem {
     private func fallingObject() {
         guard let world = worldNode else { return }
         let x = (ctx.mermaidPosition.x + .random(in: -250...250)).clamped(to: World.minX...World.maxX)
-        let landingY = max(ctx.mermaidPosition.y, -1200) - .random(in: 0...150)
+        let landingY = max(ctx.mermaidPosition.y, -2200) - .random(in: 0...150)
 
         let object = SKShapeNode(rectOf: CGSize(width: 30, height: 30), cornerRadius: 6)
         object.fillColor = UIColor(red: 0.7, green: 0.72, blue: 0.78, alpha: 1)

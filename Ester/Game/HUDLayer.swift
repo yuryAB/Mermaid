@@ -274,7 +274,7 @@ final class HUDLayer: SKNode {
             phaseLabel.text = "\(stats.phase.displayName) · \(stats.ageText)"
             intentLabel.text = "• \(intent.displayName)"
         }
-        depthLabel.text = "\(zone.displayName) · \(Int(depthMeters))m"
+        depthLabel.text = zone.displayName
         pearlsLabel.text = "\(stats.pearls)"
         storedFoodLabel.text = stats.storedFood > 0 ? "abrigo: \(stats.storedFood)/\(shelterCapacity)" : ""
 

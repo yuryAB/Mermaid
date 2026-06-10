@@ -83,7 +83,7 @@ class GameScene: SKScene {
         let mermaid = mermaidEntity.mermaid
         mermaid.base.zPosition = 10
         mermaid.base.setScale(stats.phase.scale)
-        mermaid.base.position = CGPoint(x: -200, y: -1450)
+        mermaid.base.position = CGPoint(x: stats.posX, y: stats.posY)
         mermaid.setAnimationMode(.idle)
     }
 
@@ -101,7 +101,7 @@ class GameScene: SKScene {
 
     private func setupCamera() {
         cameraNode = SKCameraNode()
-        cameraNode.setScale(2.4)
+        cameraNode.setScale(2.0)
         camera = cameraNode
         addChild(cameraNode)
     }
@@ -138,8 +138,8 @@ class GameScene: SKScene {
             .fadeAlpha(to: 0.5, duration: 1.8)
         ])))
 
-        // raios de luz nas águas rasas
-        for i in 0..<4 {
+        // raios de luz perto da linha d'água (vistos só na Camada Clara)
+        for i in 0..<5 {
             let ray = SKShapeNode(path: {
                 let path = UIBezierPath()
                 path.move(to: .zero)
@@ -152,7 +152,7 @@ class GameScene: SKScene {
             ray.fillColor = UIColor(white: 1, alpha: 0.07)
             ray.strokeColor = .clear
             ray.zPosition = -30
-            ray.position = CGPoint(x: World.minX + CGFloat(i) * 450, y: World.waterlineY)
+            ray.position = CGPoint(x: -3000 + CGFloat(i) * 1500, y: World.waterlineY)
             worldNode.addChild(ray)
         }
 
@@ -215,8 +215,15 @@ class GameScene: SKScene {
         saveTimer += dt
         if saveTimer > 20 {
             saveTimer = 0
-            stats.save()
+            persistAndSave()
         }
+    }
+
+    private func persistAndSave() {
+        let position = ctx.mermaidPosition
+        stats.posX = position.x
+        stats.posY = position.y
+        stats.save()
     }
 
     private var cameraTarget: CGPoint {
@@ -237,7 +244,7 @@ class GameScene: SKScene {
     }
 
     private func clampedCameraPosition(_ p: CGPoint) -> CGPoint {
-        CGPoint(x: p.x.clamped(to: -600...600),
+        CGPoint(x: p.x.clamped(to: (World.minX + 700)...(World.maxX - 700)),
                 y: p.y.clamped(to: (World.floorY + 500)...500))
     }
 
@@ -320,7 +327,7 @@ class GameScene: SKScene {
     // MARK: - Persistência
 
     @objc private func saveOnBackground() {
-        stats.save()
+        persistAndSave()
     }
 
     deinit {

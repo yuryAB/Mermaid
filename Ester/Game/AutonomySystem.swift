@@ -156,24 +156,24 @@ final class AutonomySystem {
         case .seekingPuzzle:
             target = ctx.match3.ensurePuzzlePoint(near: position, zone: currentZone)
         case .goingDeeper:
-            // zona bloqueada: tenta mesmo assim e esbarra no limite permitido
+            // camada bloqueada: tenta mesmo assim e esbarra no limite permitido
             let y: CGFloat
             if let zone = currentZone.deeper, ctx.depth.isUnlocked(zone) {
-                y = zone.midY + .random(in: -300...300)
+                y = zone.midY + .random(in: -800...800)
             } else {
-                y = position.y - 800
+                y = position.y - 1600
             }
-            target = CGPoint(x: CGFloat.random(in: World.minX * 0.6...World.maxX * 0.6), y: y)
+            target = CGPoint(x: position.x + .random(in: -800...800), y: y)
         case .goingUp:
             let y: CGFloat
             if let zone = currentZone.shallower, ctx.depth.isUnlocked(zone) {
                 y = zone == .surface
                     ? CGFloat.random(in: 40...200)
-                    : zone.midY + .random(in: -300...300)
+                    : zone.midY + .random(in: -800...800)
             } else {
-                y = position.y + 800
+                y = position.y + 1600
             }
-            target = CGPoint(x: CGFloat.random(in: World.minX * 0.6...World.maxX * 0.6), y: y)
+            target = CGPoint(x: position.x + .random(in: -800...800), y: y)
         case .returningHome:
             target = ctx.shelter.position
         case .interactingWithFish:
@@ -183,8 +183,8 @@ final class AutonomySystem {
 
     private func randomWanderPoint() -> CGPoint {
         let range = ctx.depth.allowedYRange()
-        let x = (position.x + .random(in: -500...500)).clamped(to: World.minX...World.maxX)
-        let y = (position.y + .random(in: -350...350)).clamped(to: range)
+        let x = (position.x + .random(in: -1100...1100)).clamped(to: World.minX...World.maxX)
+        let y = (position.y + .random(in: -700...700)).clamped(to: range)
         return CGPoint(x: x, y: y)
     }
 
@@ -360,9 +360,9 @@ final class AutonomySystem {
                 stats.trust = max(0, stats.trust - 0.6)
                 return
             }
-            // zona fechada: explica o motivo, mas desce até onde dá
+            // camada fechada: explica o motivo, mas desce até onde dá
             if !ctx.depth.isUnlocked(next) {
-                ctx.say(ctx.depth.unlockHint(next))
+                ctx.say(ctx.depth.descentHint(for: next))
             }
             desired = .goingDeeper
         case .goUp:
@@ -374,8 +374,8 @@ final class AutonomySystem {
                 refuseTired()
                 return
             }
-            if currentZone == .shallow && !ctx.depth.isUnlocked(.surface) {
-                ctx.say(ctx.depth.unlockHint(.surface))
+            if let next = currentZone.shallower, !ctx.depth.isUnlocked(next) {
+                ctx.say(ctx.depth.ascentHint())
             }
             desired = .goingUp
         case .challenge:

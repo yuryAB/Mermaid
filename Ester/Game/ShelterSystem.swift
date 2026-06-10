@@ -12,7 +12,7 @@ import SpriteKit
 final class ShelterSystem {
     unowned let ctx: GameContext
 
-    let position = CGPoint(x: -380, y: -1600)
+    let position = CGPoint(x: -1200, y: -7400)
     private let node = SKNode()
     private var decorations: [SKNode] = []
     private var feedCooldown: CGFloat = 0

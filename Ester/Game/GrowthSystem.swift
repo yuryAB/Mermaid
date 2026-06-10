@@ -39,7 +39,7 @@ final class GrowthSystem {
         case .egg: return nil
         case .baby: return Requirement(ageDays: 0.002, xp: 0, zone: nil)          // ~3 min
         case .child: return Requirement(ageDays: 1, xp: 150, zone: nil)
-        case .teen: return Requirement(ageDays: 4, xp: 1000, zone: .reef)
+        case .teen: return Requirement(ageDays: 4, xp: 1000, zone: .blue)
         case .young: return Requirement(ageDays: 14, xp: 4000, zone: .deep)
         case .adult: return Requirement(ageDays: 60, xp: 16000, zone: .abyss)
         }

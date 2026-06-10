@@ -11,40 +11,45 @@ import SpriteKit
 // MARK: - Limites do mundo
 
 enum World {
-    static let minX: CGFloat = -900
-    static let maxX: CGFloat = 900
+    static let minX: CGFloat = -50000
+    static let maxX: CGFloat = 50000
     static let surfaceTopY: CGFloat = 600
     static let waterlineY: CGFloat = 0
-    static let floorY: CGFloat = -12000
+    static let floorY: CGFloat = -42000
+    /// Nascimento em águas seguras, longe da superfície e do abismo.
+    static let startPosition = CGPoint(x: 0, y: -7000)
 }
 
-// MARK: - Zonas de profundidade
+// MARK: - Camadas de profundidade
 
 enum DepthZone: Int, Codable, CaseIterable {
     case surface = 0
+    case clear
     case shallow
-    case reef
     case mid
+    case blue
     case deep
     case abyss
 
     var displayName: String {
         switch self {
         case .surface: return "Superfície"
-        case .shallow: return "Águas Rasas"
-        case .reef: return "Recife"
-        case .mid: return "Zona Média"
-        case .deep: return "Fundo Escuro"
-        case .abyss: return "Abismo"
+        case .clear: return "Camada Clara"
+        case .shallow: return "Camada Rasa"
+        case .mid: return "Camada Média"
+        case .blue: return "Camada Azul"
+        case .deep: return "Camada Profunda"
+        case .abyss: return "Camada Abissal"
         }
     }
 
     var storageKey: String {
         switch self {
         case .surface: return "surface"
+        case .clear: return "clear"
         case .shallow: return "shallow"
-        case .reef: return "reef"
         case .mid: return "mid"
+        case .blue: return "blue"
         case .deep: return "deep"
         case .abyss: return "abyss"
         }
@@ -53,11 +58,12 @@ enum DepthZone: Int, Codable, CaseIterable {
     var yRange: ClosedRange<CGFloat> {
         switch self {
         case .surface: return World.waterlineY...World.surfaceTopY
-        case .shallow: return -2400 ... World.waterlineY
-        case .reef: return -4800 ... -2400
-        case .mid: return -7200 ... -4800
-        case .deep: return -9600 ... -7200
-        case .abyss: return World.floorY ... -9600
+        case .clear: return -2000 ... World.waterlineY
+        case .shallow: return -6000 ... -2000
+        case .mid: return -12000 ... -6000
+        case .blue: return -20000 ... -12000
+        case .deep: return -30000 ... -20000
+        case .abyss: return World.floorY ... -30000
         }
     }
 
@@ -68,15 +74,16 @@ enum DepthZone: Int, Codable, CaseIterable {
         for zone in DepthZone.allCases where zone != .surface {
             if zone.yRange.contains(y) { return zone }
         }
-        return y < World.floorY ? .abyss : .shallow
+        return y < World.floorY ? .abyss : .mid
     }
 
     var deeper: DepthZone? {
         switch self {
-        case .surface: return .shallow
-        case .shallow: return .reef
-        case .reef: return .mid
-        case .mid: return .deep
+        case .surface: return .clear
+        case .clear: return .shallow
+        case .shallow: return .mid
+        case .mid: return .blue
+        case .blue: return .deep
         case .deep: return .abyss
         case .abyss: return nil
         }
@@ -85,54 +92,56 @@ enum DepthZone: Int, Codable, CaseIterable {
     var shallower: DepthZone? {
         switch self {
         case .surface: return nil
-        case .shallow: return .surface
-        case .reef: return .shallow
-        case .mid: return .reef
-        case .deep: return .mid
+        case .clear: return .surface
+        case .shallow: return .clear
+        case .mid: return .shallow
+        case .blue: return .mid
+        case .deep: return .blue
         case .abyss: return .deep
         }
     }
 
     var courageRequired: CGFloat {
         switch self {
-        case .shallow: return 0
-        case .reef: return 15
-        case .mid: return 30
+        case .shallow, .mid: return 0
+        case .clear: return 12
+        case .blue: return 30
         case .deep: return 50
         case .abyss: return 70
-        case .surface: return 80
+        case .surface: return 85
         }
     }
 
-    /// A adaptação desta zona precisa amadurecer antes de liberar a próxima.
+    /// A adaptação desta camada precisa amadurecer antes de liberar a próxima.
     var adaptationGate: (zone: DepthZone, value: CGFloat)? {
         switch self {
-        case .shallow: return nil
-        case .reef: return (.shallow, 20)
-        case .mid: return (.reef, 30)
-        case .deep: return (.mid, 40)
+        case .shallow, .mid: return nil
+        case .clear: return (.shallow, 15)
+        case .blue: return (.mid, 30)
+        case .deep: return (.blue, 40)
         case .abyss: return (.deep, 55)
-        case .surface: return (.shallow, 60)
+        case .surface: return (.clear, 50)
         }
     }
 
     var minPhase: MermaidPhase {
         switch self {
-        case .shallow: return .baby
-        case .reef: return .child
-        case .mid: return .child
+        case .shallow, .mid: return .baby
+        case .clear, .blue: return .child
         case .deep: return .teen
-        case .abyss: return .young
-        case .surface: return .young
+        case .abyss, .surface: return .young
         }
     }
 
-    /// A superfície só abre depois do abismo; as demais dependem da zona acima.
+    /// A superfície só abre depois do abismo; as demais dependem da camada vizinha.
     var prerequisiteZone: DepthZone? {
         switch self {
-        case .shallow: return nil
+        case .shallow, .mid: return nil
         case .surface: return .abyss
-        default: return shallower
+        case .clear: return .shallow
+        case .blue: return .mid
+        case .deep: return .blue
+        case .abyss: return .deep
         }
     }
 }
@@ -160,12 +169,12 @@ enum MermaidPhase: Int, Codable, CaseIterable, Comparable {
 
     var scale: CGFloat {
         switch self {
-        case .egg: return 0.18
-        case .baby: return 0.2
-        case .child: return 0.3
-        case .teen: return 0.42
-        case .young: return 0.55
-        case .adult: return 0.7
+        case .egg: return 0.12
+        case .baby: return 0.12
+        case .child: return 0.18
+        case .teen: return 0.28
+        case .young: return 0.4
+        case .adult: return 0.52
         }
     }
 

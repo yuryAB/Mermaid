@@ -19,16 +19,18 @@ struct Match3Theme {
     static func theme(for zone: DepthZone, special: Bool) -> Match3Theme {
         var theme: Match3Theme
         switch zone {
+        case .clear:
+            theme = Match3Theme(icons: ["🫧", "☀️", "⭐️", "🌿", "🐚"], title: "Luzes da Camada Clara")
         case .shallow:
-            theme = Match3Theme(icons: ["🐚", "🫧", "⭐️", "🌿", "🦀"], title: "Conchas das Águas Rasas")
-        case .reef:
-            theme = Match3Theme(icons: ["🐚", "🪸", "⭐️", "🐠", "🌺"], title: "Corais do Recife")
+            theme = Match3Theme(icons: ["🐚", "🫧", "⭐️", "🌿", "🦀"], title: "Conchas da Camada Rasa")
         case .mid:
-            theme = Match3Theme(icons: ["💧", "🐟", "🌀", "⭐️", "🫧"], title: "Correntes da Zona Média")
+            theme = Match3Theme(icons: ["💧", "🐟", "🌀", "⭐️", "🫧"], title: "Correntes da Camada Média")
+        case .blue:
+            theme = Match3Theme(icons: ["💧", "🌀", "🐟", "💎", "🫧"], title: "Marés da Camada Azul")
         case .deep:
-            theme = Match3Theme(icons: ["💎", "✨", "🦑", "🔮", "🌟"], title: "Cristais do Fundo Escuro")
+            theme = Match3Theme(icons: ["💎", "✨", "🦑", "🔮", "🌟"], title: "Cristais da Camada Profunda")
         case .abyss:
-            theme = Match3Theme(icons: ["💎", "🔮", "🦑", "✨", "🌑"], title: "Segredos do Abismo")
+            theme = Match3Theme(icons: ["💎", "🔮", "🦑", "✨", "🌑"], title: "Segredos da Camada Abissal")
         case .surface:
             theme = Match3Theme(icons: ["⚓️", "🫧", "☀️", "🛟", "🐬"], title: "Reflexos da Superfície")
         }

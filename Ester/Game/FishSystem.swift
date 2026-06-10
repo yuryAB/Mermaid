@@ -42,7 +42,7 @@ final class FishNode: SKNode {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     private func buildShape() {
-        let length = isRare ? CGFloat.random(in: 110...150) : CGFloat.random(in: 50...110)
+        let length = isRare ? CGFloat.random(in: 80...110) : CGFloat.random(in: 28...64)
         let height = length * CGFloat.random(in: 0.35...0.5)
         let color = isRare
             ? UIColor(red: 1, green: 0.85, blue: 0.4, alpha: 1)
@@ -98,18 +98,21 @@ final class FishNode: SKNode {
         case .surface:
             return [UIColor(red: 0.75, green: 0.8, blue: 0.85, alpha: 1),
                     UIColor(red: 0.6, green: 0.7, blue: 0.8, alpha: 1)]
+        case .clear:
+            return [UIColor(red: 0.95, green: 0.85, blue: 0.5, alpha: 1),
+                    UIColor(red: 0.75, green: 0.9, blue: 0.95, alpha: 1),
+                    UIColor(red: 0.6, green: 0.85, blue: 0.7, alpha: 1)]
         case .shallow:
             return [UIColor(red: 0.95, green: 0.8, blue: 0.4, alpha: 1),
                     UIColor(red: 0.7, green: 0.85, blue: 0.9, alpha: 1),
                     UIColor(red: 0.55, green: 0.8, blue: 0.6, alpha: 1)]
-        case .reef:
-            return [UIColor(red: 0.95, green: 0.5, blue: 0.25, alpha: 1),
-                    UIColor(red: 0.7, green: 0.4, blue: 0.85, alpha: 1),
-                    UIColor(red: 0.3, green: 0.8, blue: 0.85, alpha: 1),
-                    UIColor(red: 0.95, green: 0.75, blue: 0.3, alpha: 1)]
         case .mid:
             return [UIColor(red: 0.4, green: 0.55, blue: 0.8, alpha: 1),
-                    UIColor(red: 0.6, green: 0.65, blue: 0.75, alpha: 1)]
+                    UIColor(red: 0.6, green: 0.65, blue: 0.75, alpha: 1),
+                    UIColor(red: 0.5, green: 0.75, blue: 0.85, alpha: 1)]
+        case .blue:
+            return [UIColor(red: 0.35, green: 0.5, blue: 0.85, alpha: 1),
+                    UIColor(red: 0.45, green: 0.6, blue: 0.8, alpha: 1)]
         case .deep:
             return [UIColor(red: 0.35, green: 0.45, blue: 0.7, alpha: 1),
                     UIColor(red: 0.45, green: 0.7, blue: 0.75, alpha: 1)]
@@ -168,9 +171,10 @@ final class FishSystem {
     private func desiredCount(for zone: DepthZone) -> Int {
         switch zone {
         case .surface: return 4
+        case .clear: return 6
         case .shallow: return 6
-        case .reef: return 10
         case .mid: return 6
+        case .blue: return 5
         case .deep: return 4
         case .abyss: return 3
         }
@@ -182,7 +186,7 @@ final class FishSystem {
             fish.update(dt: dt, mermaidPosition: mermaidPos)
         }
         fishes.removeAll { fish in
-            if fish.position.distance(to: mermaidPos) > 2400 {
+            if fish.position.distance(to: mermaidPos) > 3200 {
                 fish.removeFromParent()
                 return true
             }
@@ -209,7 +213,7 @@ final class FishSystem {
         guard let world = worldNode else { return nil }
         let fish = FishNode(zone: zone, rare: rare)
         let angle = CGFloat.random(in: 0...(2 * .pi))
-        let distance = CGFloat.random(in: 700...1200)
+        let distance = CGFloat.random(in: 900...1600)
         let range = zone.yRange
         fish.position = CGPoint(
             x: (point.x + cos(angle) * distance).clamped(to: World.minX...World.maxX),

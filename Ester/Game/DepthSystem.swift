@@ -2,8 +2,10 @@
 //  DepthSystem.swift
 //  Ester
 //
-//  Conecta a posição vertical da sereia à cor da água, à paleta do corpo,
-//  à adaptação por camada e ao desbloqueio progressivo das zonas.
+//  Profundidade como coordenada real: cor da água, paleta do corpo,
+//  adaptação por camada, custo de energia e desbloqueio progressivo.
+//  As transições visuais são lentas — só ficam fortes entre camadas
+//  realmente distantes.
 //
 
 import Foundation
@@ -12,7 +14,7 @@ import SpriteKit
 final class DepthSystem {
     unowned let ctx: GameContext
 
-    private(set) var currentZone: DepthZone = .shallow
+    private(set) var currentZone: DepthZone = .mid
     private var paletteTimer: CGFloat = 0
     private var unlockTimer: CGFloat = 2
 
@@ -21,18 +23,17 @@ final class DepthSystem {
     init(ctx: GameContext) {
         self.ctx = ctx
         let waters = ColorManager.shared.waters
-        let reefColor = UIColor.lerp(waters["shallow"]!, waters["mid"]!, 0.5)
         let abyssFloor = UIColor.lerp(waters["abyssal"]!, .black, 0.45)
-        // Âncoras nos miolos das zonas: a cor muda devagar, sem denunciar
-        // a fronteira — só fica óbvia bem mais fundo ou bem mais raso.
+        // Âncoras nos miolos das camadas: a cor muda devagar ao longo
+        // de milhares de pontos, nunca de repente.
         waterAnchors = [
             (World.surfaceTopY, waters["surface"]!),
-            (World.waterlineY, UIColor.lerp(waters["surface"]!, waters["shallow"]!, 0.65)),
-            (-1000, waters["shallow"]!),
-            (-3600, reefColor),
-            (-6000, waters["mid"]!),
-            (-8400, waters["deep"]!),
-            (-10800, waters["abyssal"]!),
+            (World.waterlineY, UIColor.lerp(waters["surface"]!, waters["shallow"]!, 0.55)),
+            (-4000, waters["shallow"]!),
+            (-9000, UIColor.lerp(waters["shallow"]!, waters["mid"]!, 0.55)),
+            (-16000, waters["mid"]!),
+            (-25000, waters["deep"]!),
+            (-36000, waters["abyssal"]!),
             (World.floorY, abyssFloor)
         ]
     }
@@ -53,16 +54,16 @@ final class DepthSystem {
         return waterAnchors.last!.color
     }
 
-    /// Paleta do corpo: a adaptação só fica visível perto dos extremos —
-    /// clara junto à superfície, padrão na grande faixa do meio, escura no fundo.
+    /// Paleta do corpo: clara só junto à superfície, padrão na imensa
+    /// faixa do meio, escura apenas nas camadas realmente profundas.
     func mermaidPalette(atY y: CGFloat) -> MermaidPalette {
-        if y >= -300 { return .upper }
-        if y >= -2000 {
-            return .lerp(.upper, .main, (-y - 300) / 1700)
+        if y >= -1500 { return .upper }
+        if y >= -5000 {
+            return .lerp(.upper, .main, (-y - 1500) / 3500)
         }
-        if y >= -8400 { return .main }
-        if y >= -11500 {
-            return .lerp(.main, .abyss, (-y - 8400) / 3100)
+        if y >= -24000 { return .main }
+        if y >= -34000 {
+            return .lerp(.main, .abyss, (-y - 24000) / 10000)
         }
         return .abyss
     }
@@ -78,21 +79,20 @@ final class DepthSystem {
         }
 
         // Adaptação cresce na camada onde ela está
-        let rate: CGFloat = (zone == .shallow || zone == .surface) ? 0.5 : 0.35
+        let rate: CGFloat = (zone == .shallow || zone == .mid || zone == .surface) ? 0.5 : 0.35
         let current = ctx.stats.adaptation(for: zone)
         ctx.stats.setAdaptation(current + dt * rate * (1 - current / 100), for: zone)
 
         // Recorde de profundidade vira recompensa
         let meters = max(0, -y / 10)
-        if meters > ctx.stats.maxDepthMeters + 25 {
+        if meters > ctx.stats.maxDepthMeters + 100 {
             ctx.stats.maxDepthMeters = meters
             ctx.stats.pearls += 2
             ctx.stats.gainXP(10)
             ctx.stats.courage = min(100, ctx.stats.courage + 0.5)
-            ctx.say("Nova profundidade: \(Int(meters))m! 💠+2")
+            ctx.say("Ela nadou mais fundo do que nunca! 💠+2")
         }
 
-        // Paleta do corpo (com folga para não recolorir todo frame)
         paletteTimer -= dt
         if paletteTimer <= 0 {
             paletteTimer = 0.25
@@ -106,7 +106,7 @@ final class DepthSystem {
         }
     }
 
-    // MARK: - Desbloqueio de zonas
+    // MARK: - Desbloqueio de camadas
 
     func isUnlocked(_ zone: DepthZone) -> Bool {
         ctx.stats.isUnlocked(zone)
@@ -118,8 +118,8 @@ final class DepthSystem {
             ctx.stats.unlock(zone)
             ctx.stats.pearls += 10
             ctx.stats.gainXP(30)
-            ctx.stats.addMemory("Desbloqueou \(zone.displayName)")
-            ctx.say("🌊 Nova área desbloqueada: \(zone.displayName)! 💠+10")
+            ctx.stats.addMemory("Alcançou a \(zone.displayName)")
+            ctx.say("🌊 Nova camada alcançável: \(zone.displayName)! 💠+10")
         }
     }
 
@@ -132,42 +132,47 @@ final class DepthSystem {
         return true
     }
 
-    func unlockHint(_ zone: DepthZone) -> String {
-        let stats = ctx.stats!
-        // A superfície tem mensagem própria: citar o abismo aqui soa como
-        // se o botão de subir estivesse invertido.
-        if zone == .surface && !stats.isUnlocked(.abyss) {
-            return "A superfície vem por último — primeiro ela precisa dominar as profundezas. 🌅"
-        }
-        if let prerequisite = zone.prerequisiteZone, !stats.isUnlocked(prerequisite) {
-            return "Primeiro preciso conhecer \(prerequisite.displayName)..."
-        }
-        if stats.phase < zone.minPhase {
-            return "Ainda sou muito nova para \(zone.displayName)..."
-        }
-        if stats.courage < zone.courageRequired {
-            return "Não tenho coragem para \(zone.displayName) ainda... 😟"
-        }
-        if let gate = zone.adaptationGate, stats.adaptation(for: gate.zone) < gate.value {
-            return "Preciso me adaptar mais a \(gate.zone.displayName) primeiro."
-        }
-        return "Ainda não consigo ir para \(zone.displayName)."
+    /// Mensagem para quando o jogador manda subir além do permitido.
+    func ascentHint() -> String {
+        "Ela ainda não está pronta para chegar tão perto da superfície. 🌅"
     }
 
-    /// Faixa vertical onde a sereia pode nadar, baseada nas zonas liberadas.
+    /// Mensagem para quando o jogador manda descer além do permitido.
+    func descentHint(for zone: DepthZone) -> String {
+        let stats = ctx.stats!
+        if stats.phase < zone.minPhase {
+            return "Ela ainda é muito nova para ir tão fundo..."
+        }
+        if stats.courage < zone.courageRequired {
+            return "Ela ainda não tem coragem para ir tão fundo. 😟"
+        }
+        if let gate = zone.adaptationGate, stats.adaptation(for: gate.zone) < gate.value {
+            return "Ela precisa se adaptar melhor à \(gate.zone.displayName) antes de descer mais."
+        }
+        return "Ela ainda não consegue descer até a \(zone.displayName)."
+    }
+
+    /// Faixa vertical onde a sereia pode nadar, baseada nas camadas liberadas.
+    /// As fronteiras têm folga para ela nunca encostar em área bloqueada.
     func allowedYRange() -> ClosedRange<CGFloat> {
-        var deepest: CGFloat = DepthZone.shallow.yRange.lowerBound
+        var top: CGFloat = DepthZone.shallow.yRange.upperBound - 80
+        if ctx.stats.isUnlocked(.surface) {
+            top = 280
+        } else if ctx.stats.isUnlocked(.clear) {
+            top = -150
+        }
+
+        var deepest = DepthZone.mid.yRange.lowerBound
         for zone in DepthZone.allCases where zone != .surface && ctx.stats.isUnlocked(zone) {
             deepest = min(deepest, zone.yRange.lowerBound)
         }
-        let top: CGFloat = ctx.stats.isUnlocked(.surface) ? 280 : -30
-        return (deepest + 50)...top
+        return (deepest + 80)...top
     }
 
-    /// Dreno extra de energia em zonas pouco adaptadas.
+    /// Dreno extra de energia em camadas pouco adaptadas.
     func energyPenalty(atY y: CGFloat) -> CGFloat {
         let zone = DepthZone.zone(atY: y)
-        guard zone != .shallow else { return 0 }
+        guard zone != .shallow && zone != .mid else { return 0 }
         let adaptation = ctx.stats.adaptation(for: zone)
         return (1 - adaptation / 100) * 0.15
     }
