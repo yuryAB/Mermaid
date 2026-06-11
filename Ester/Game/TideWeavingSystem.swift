@@ -572,7 +572,7 @@ final class TideWeavingOverlay: SKNode {
         scoreLine.position = CGPoint(x: 0, y: 24)
         panelContent.addChild(scoreLine)
 
-        let rewardLine = SKLabelNode(text: "Brilhos +\(pearls)   XP +\(Int(xp))")
+        let rewardLine = SKLabelNode(text: "Conchas +\(pearls)   XP +\(Int(xp))")
         rewardLine.fontName = "AvenirNext-DemiBold"
         rewardLine.fontSize = 17
         rewardLine.fontColor = GameUI.gold

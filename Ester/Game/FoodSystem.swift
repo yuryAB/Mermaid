@@ -15,7 +15,7 @@ enum FoodStyle {
     case leaf       // alga
     case glow       // plâncton brilhante
     case fruit      // fruta caída
-    case pearl      // pérola
+    case pearl      // concha
     case critter    // crustáceo abstrato
     case crystal    // fruto-cristal / objeto raro
 }
@@ -233,7 +233,7 @@ final class FoodSystem {
         }
         if food.kind.pearls > 0 {
             stats.pearls += food.kind.pearls
-            ctx.say("Ela achou \(food.kind.name)! 💠+\(food.kind.pearls)")
+            ctx.say("Ela achou \(food.kind.name)! 🐚+\(food.kind.pearls)")
         } else if Int.random(in: 0..<4) == 0 {
             ctx.say("Nham... \(food.kind.name) 😋")
         }
@@ -267,14 +267,14 @@ final class FoodSystem {
                 FoodKind(name: "alga macia", weight: 5, nutrition: 14, xp: 2, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.3, green: 0.75, blue: 0.45, alpha: 1)),
                 FoodKind(name: "plâncton brilhante", weight: 3, nutrition: 10, xp: 4, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.65, green: 0.95, blue: 0.85, alpha: 1)),
                 FoodKind(name: "semente aquática", weight: 2, nutrition: 12, xp: 2, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.85, green: 0.75, blue: 0.4, alpha: 1)),
-                FoodKind(name: "uma pérola pequena", weight: 1, nutrition: 6, xp: 8, pearls: 3, courage: 0.5, style: .pearl, color: UIColor(white: 0.95, alpha: 1))
+                FoodKind(name: "uma concha pequena", weight: 1, nutrition: 6, xp: 8, pearls: 3, courage: 0.5, style: .pearl, color: UIColor(white: 0.95, alpha: 1))
             ]
         case .mid:
             return [
                 FoodKind(name: "plâncton azul", weight: 4, nutrition: 12, xp: 4, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.45, green: 0.65, blue: 0.95, alpha: 1)),
                 FoodKind(name: "crustáceo das águas", weight: 3, nutrition: 20, xp: 5, pearls: 0, courage: 0.3, style: .critter, color: UIColor(red: 0.55, green: 0.55, blue: 0.75, alpha: 1)),
                 FoodKind(name: "alga da meia-água", weight: 3, nutrition: 16, xp: 3, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.25, green: 0.55, blue: 0.5, alpha: 1)),
-                FoodKind(name: "uma pérola nutritiva", weight: 1, nutrition: 10, xp: 10, pearls: 4, courage: 0.6, style: .pearl, color: UIColor(white: 0.95, alpha: 1))
+                FoodKind(name: "uma concha nutritiva", weight: 1, nutrition: 10, xp: 10, pearls: 4, courage: 0.6, style: .pearl, color: UIColor(white: 0.95, alpha: 1))
             ]
         case .blue:
             return [
@@ -286,13 +286,13 @@ final class FoodSystem {
             return [
                 FoodKind(name: "plâncton luminoso", weight: 4, nutrition: 16, xp: 6, pearls: 0, courage: 0.3, style: .glow, color: UIColor(red: 0.55, green: 0.95, blue: 0.9, alpha: 1)),
                 FoodKind(name: "crustáceo das fendas", weight: 3, nutrition: 22, xp: 6, pearls: 0, courage: 0.4, style: .critter, color: UIColor(red: 0.4, green: 0.35, blue: 0.6, alpha: 1)),
-                FoodKind(name: "uma pérola mágica", weight: 1, nutrition: 8, xp: 14, pearls: 6, courage: 1, style: .pearl, color: UIColor(red: 0.8, green: 0.85, blue: 1, alpha: 1))
+                FoodKind(name: "uma concha mágica", weight: 1, nutrition: 8, xp: 14, pearls: 6, courage: 1, style: .pearl, color: UIColor(red: 0.8, green: 0.85, blue: 1, alpha: 1))
             ]
         case .abyss:
             return [
                 FoodKind(name: "plâncton abissal", weight: 4, nutrition: 18, xp: 8, pearls: 0, courage: 0.5, style: .glow, color: UIColor(red: 0.75, green: 0.55, blue: 0.95, alpha: 1)),
                 FoodKind(name: "fruto-cristal", weight: 2, nutrition: 26, xp: 12, pearls: 2, courage: 1, style: .crystal, color: UIColor(red: 0.6, green: 0.8, blue: 1, alpha: 1)),
-                FoodKind(name: "uma pérola do abismo", weight: 1, nutrition: 8, xp: 18, pearls: 8, courage: 1.5, style: .pearl, color: UIColor(red: 0.9, green: 0.8, blue: 1, alpha: 1))
+                FoodKind(name: "uma concha do abismo", weight: 1, nutrition: 8, xp: 18, pearls: 8, courage: 1.5, style: .pearl, color: UIColor(red: 0.9, green: 0.8, blue: 1, alpha: 1))
             ]
         case .surface:
             return [

@@ -63,7 +63,7 @@ enum OfflineProgressSystem {
         let pearlGain = Int(min(6, hours))
         if pearlGain > 0 {
             stats.pearls += pearlGain
-            lines.append("juntou 💠\(pearlGain)")
+            lines.append("juntou 🐚\(pearlGain)")
         }
         if hours >= 3 && Int.random(in: 0..<3) == 0 {
             stats.addMemory("Viu um cardume raro enquanto você estava fora")

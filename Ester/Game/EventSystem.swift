@@ -197,7 +197,7 @@ final class EventSystem {
                     self.ctx.stats.gainXP(15)
                     self.ctx.stats.pearls += 2
                     self.ctx.stats.addMemory("Viu um peixe raro em \(zone.displayName)")
-                    self.ctx.say("Ela observou o peixe raro de pertinho! ✨ 💠+2")
+                    self.ctx.say("Ela observou o peixe raro de pertinho! ✨ 🐚+2")
                 }
             }
         ]))

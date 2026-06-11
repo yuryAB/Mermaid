@@ -14,6 +14,7 @@ import UIKit
 final class HUDLayer: SKNode {
     var onCommand: ((PlayerCommand) -> Void)?
     var onDebugRigToolTap: (() -> Void)?
+    var onNameEditTap: (() -> Void)?
 
     private let sceneSize: CGSize
     private let insets: UIEdgeInsets
@@ -23,6 +24,7 @@ final class HUDLayer: SKNode {
     private var topInset: CGFloat { max(insets.top, 44) }
 
     private var phaseLabel: SKLabelNode!
+    private var titleLabel: SKLabelNode!
     private var depthLabel: SKLabelNode!
     private var growthLabel: SKLabelNode!
     private var pearlsLabel: SKLabelNode!
@@ -31,7 +33,9 @@ final class HUDLayer: SKNode {
     private var barLabels: [String: SKLabelNode] = [:]
     private var bars: [String: SKShapeNode] = [:]
     private var buttons: [PlayerCommand: SKNode] = [:]
+    private var buttonHighlights: [PlayerCommand: SKShapeNode] = [:]
     private var buttonStamps: [PlayerCommand: SKNode] = [:]
+    private var disabledCommands: Set<PlayerCommand> = []
     private var messageContainer: SKNode!
     private var messageTitleLabel: SKLabelNode!
     private var messageLabel: SKLabelNode!
@@ -39,6 +43,7 @@ final class HUDLayer: SKNode {
     private var lastObjectiveAvailable: Bool?
     private let enableDebugRigToolButton: Bool
     private var debugRigToolButton: SKNode?
+    private var nameEditButton: SKNode?
 
     init(size: CGSize, insets: UIEdgeInsets, enableDebugRigToolButton: Bool = false) {
         self.sceneSize = size
@@ -287,13 +292,38 @@ final class HUDLayer: SKNode {
         clip.zPosition = 7
         panelContent.addChild(clip)
 
-        let title = makeLabel(text: "Registro da Criatura",
-                              fontSize: 16,
-                              style: .noteBold,
-                              color: HUDPalette.ink)
-        title.horizontalAlignmentMode = .left
-        title.position = CGPoint(x: -halfW + 22, y: panelHeight / 2 - 25)
-        panelContent.addChild(title)
+        titleLabel = makeLabel(text: "Registro da Eistrelinha",
+                               fontSize: 16,
+                               style: .noteBold,
+                               color: HUDPalette.ink)
+        titleLabel.horizontalAlignmentMode = .left
+        titleLabel.position = CGPoint(x: -halfW + 22, y: panelHeight / 2 - 25)
+        panelContent.addChild(titleLabel)
+
+        let editButton = SKNode()
+        editButton.name = "cmd_edit_mermaid_name"
+        editButton.position = CGPoint(x: -halfW + 204, y: panelHeight / 2 - 25)
+        editButton.zPosition = 8
+        let editHit = SKShapeNode(circleOfRadius: 14)
+        editHit.fillColor = HUDPalette.palePaper.withAlphaComponent(0.82)
+        editHit.strokeColor = HUDPalette.teal.withAlphaComponent(0.52)
+        editHit.lineWidth = 1
+        editHit.name = editButton.name
+        editButton.addChild(editHit)
+        let pen = HUDLayer.pathNode(points: [
+            CGPoint(x: -5, y: -5),
+            CGPoint(x: 4, y: 4)
+        ], color: HUDPalette.teal, width: 2)
+        pen.name = editButton.name
+        editButton.addChild(pen)
+        let nib = HUDLayer.pathNode(points: [
+            CGPoint(x: 4, y: 4),
+            CGPoint(x: 7, y: 7)
+        ], color: HUDPalette.gold, width: 2.2)
+        nib.name = editButton.name
+        editButton.addChild(nib)
+        panelContent.addChild(editButton)
+        nameEditButton = editButton
 
         let stamp = makeStamp(text: "CAMPO", color: HUDPalette.teal)
         stamp.position = CGPoint(x: halfW - 45, y: panelHeight / 2 - 26)
@@ -320,7 +350,7 @@ final class HUDLayer: SKNode {
         growthLabel.numberOfLines = 1
         panelContent.addChild(growthLabel)
 
-        let planktonIcon = HUDLayer.iconNode(kind: .plankton, color: HUDPalette.gold)
+        let planktonIcon = HUDLayer.iconNode(kind: .shell, color: HUDPalette.gold)
         planktonIcon.position = CGPoint(x: halfW - 126, y: panelHeight / 2 - 52)
         planktonIcon.zPosition = 8
         panelContent.addChild(planktonIcon)
@@ -343,7 +373,7 @@ final class HUDLayer: SKNode {
         panelContent.addChild(divider)
 
         let barConfigs: [(key: String, label: String, color: UIColor, column: Int, row: Int)] = [
-            ("hunger", "Fome", HUDPalette.coral, 0, 0),
+            ("hunger", "Alimentação", HUDPalette.algae, 0, 0),
             ("energy", "Energia", HUDPalette.gold, 1, 0),
             ("mood", "Ânimo", HUDPalette.algae, 0, 1),
             ("bond", "Vínculo", HUDPalette.teal, 1, 1)
@@ -499,7 +529,7 @@ final class HUDLayer: SKNode {
     private func cleanFieldText(_ text: String) -> String {
         var result = text
         let removals = [
-            "🌊", "🥚", "🌀", "✨", "💠", "👀", "😨", "💪", "💎", "🏆",
+            "🌊", "🥚", "🌀", "✨", "👀", "😨", "💪", "💎", "🏆",
             "⛵️", "📦", "🐚", "😴", "🍽", "😋", "🧜‍♀️", "⚡️", "😊", "⭐️"
         ]
         removals.forEach { result = result.replacingOccurrences(of: $0, with: "") }
@@ -545,71 +575,116 @@ final class HUDLayer: SKNode {
     // MARK: - Botoes de comando
 
     private func buttonRowY(_ row: Int) -> CGFloat {
-        -sceneSize.height / 2 + insets.bottom + 190 - CGFloat(row) * 60
+        -sceneSize.height / 2 + insets.bottom + 72 - CGFloat(row) * 60
     }
 
     private func buildButtons() {
-        let commands: [[PlayerCommand]] = [
-            [.explore, .seekFood, .rest],
-            [.challenge, .objective, .refuge],
-            [.goUp, .goDown, .travel]
-        ]
-        let buttonWidth = (sceneSize.width - 52) / 3
-
-        for (rowIndex, row) in commands.enumerated() {
-            let y = buttonRowY(rowIndex)
-            let primary = rowIndex == 0
-            let buttonHeight: CGFloat = primary ? 58 : 50
-            for (columnIndex, command) in row.enumerated() {
-                let x = -sceneSize.width / 2 + 18 + buttonWidth / 2 + CGFloat(columnIndex) * (buttonWidth + 8)
-                let button = SKNode()
-                button.name = "cmd_\(command.rawValue)"
-                button.position = CGPoint(x: x, y: y)
-                button.zRotation = buttonTilt(row: rowIndex, column: columnIndex)
-
-                let card = makeActionCard(size: CGSize(width: buttonWidth, height: buttonHeight),
-                                          accent: command.tint,
-                                          primary: primary)
-                button.addChild(card)
-
-                let icon = HUDLayer.iconNode(for: command, color: command.tint)
-                icon.position = CGPoint(x: 0, y: primary ? 11 : 8)
-                icon.zPosition = 5
-                button.addChild(icon)
-
-                let text = makeLabel(text: command.label,
-                                     fontSize: primary ? 11 : 9.5,
-                                     style: .bodyBold,
-                                     color: HUDPalette.ink)
-                text.horizontalAlignmentMode = .center
-                text.position = CGPoint(x: 0, y: primary ? -20 : -17)
-                text.preferredMaxLayoutWidth = buttonWidth - 10
-                text.numberOfLines = 1
-                text.zPosition = 5
-                button.addChild(text)
-
-                if command == .objective {
-                    let stamp = makeStamp(text: "Sem reg.", color: HUDPalette.mutedInk)
-                    stamp.position = CGPoint(x: buttonWidth / 2 - 34, y: buttonHeight / 2 - 13)
-                    stamp.zPosition = 7
-                    stamp.isHidden = true
-                    button.addChild(stamp)
-                    buttonStamps[command] = stamp
-                }
-
-                addChild(button)
-                buttons[command] = button
-            }
+        let bottomCommands: [PlayerCommand] = [.seekFood, .rest, .challenge, .objective, .refuge]
+        let bottomWidth = min(CGFloat(68), (sceneSize.width - 36) / CGFloat(bottomCommands.count))
+        let bottomSpacing = max(CGFloat(4), (sceneSize.width - bottomWidth * CGFloat(bottomCommands.count) - 24) / CGFloat(bottomCommands.count - 1))
+        let bottomStartX = -sceneSize.width / 2 + 12 + bottomWidth / 2
+        for (index, command) in bottomCommands.enumerated() {
+            let x = bottomStartX + CGFloat(index) * (bottomWidth + bottomSpacing)
+            addCommandButton(command,
+                             size: CGSize(width: bottomWidth, height: 54),
+                             position: CGPoint(x: x, y: buttonRowY(0)),
+                             tilt: buttonTilt(seed: index),
+                             primary: true,
+                             showsLabel: true)
         }
+
+        let sideSize = CGSize(width: 56, height: 56)
+        let sideOffset: CGFloat = 33
+        let sideY: CGFloat = -6
+        let leftX = -sceneSize.width / 2 + insets.left + 38
+        addCommandButton(.goUp,
+                         size: sideSize,
+                         position: CGPoint(x: leftX, y: sideY + sideOffset),
+                         tilt: -0.008,
+                         primary: false,
+                         showsLabel: false)
+        addCommandButton(.goDown,
+                         size: sideSize,
+                         position: CGPoint(x: leftX, y: sideY - sideOffset),
+                         tilt: 0.010,
+                         primary: false,
+                         showsLabel: false)
+
+        let rightX = sceneSize.width / 2 - insets.right - 38
+        addCommandButton(.explore,
+                         size: sideSize,
+                         position: CGPoint(x: rightX, y: sideY + sideOffset),
+                         tilt: 0.006,
+                         primary: false,
+                         showsLabel: false)
+        addCommandButton(.travel,
+                         size: sideSize,
+                         position: CGPoint(x: rightX, y: sideY - sideOffset),
+                         tilt: -0.008,
+                         primary: false,
+                         showsLabel: false)
     }
 
-    private func buttonTilt(row: Int, column: Int) -> CGFloat {
-        let tilts: [[CGFloat]] = [
-            [-0.012, 0.006, -0.004],
-            [0.008, -0.010, 0.012],
-            [-0.006, 0.010, -0.008]
-        ]
-        return tilts[row][column]
+    private func buttonTilt(seed: Int) -> CGFloat {
+        [-0.012, 0.006, -0.004, 0.008, -0.010][seed % 5]
+    }
+
+    private func addCommandButton(_ command: PlayerCommand,
+                                  size: CGSize,
+                                  position: CGPoint,
+                                  tilt: CGFloat,
+                                  primary: Bool,
+                                  showsLabel: Bool) {
+        let button = SKNode()
+        button.name = "cmd_\(command.rawValue)"
+        button.position = position
+        button.zRotation = tilt
+
+        let card = makeActionCard(size: size,
+                                  accent: command.tint,
+                                  primary: primary)
+        button.addChild(card)
+
+        let highlight = SKShapeNode(rectOf: CGSize(width: size.width - 4, height: size.height - 4),
+                                    cornerRadius: 7)
+        highlight.fillColor = command.tint.withAlphaComponent(0.10)
+        highlight.strokeColor = command.tint.withAlphaComponent(0.72)
+        highlight.lineWidth = 1.5
+        highlight.glowWidth = 1.5
+        highlight.zPosition = 4
+        highlight.isHidden = true
+        button.addChild(highlight)
+        buttonHighlights[command] = highlight
+
+        let icon = HUDLayer.iconNode(for: command, color: command.tint)
+        icon.position = CGPoint(x: 0, y: showsLabel ? 10 : 0)
+        icon.zPosition = 5
+        button.addChild(icon)
+
+        if showsLabel {
+            let text = makeLabel(text: command.label,
+                                 fontSize: 9.2,
+                                 style: .bodyBold,
+                                 color: HUDPalette.ink)
+            text.horizontalAlignmentMode = .center
+            text.position = CGPoint(x: 0, y: -18)
+            text.preferredMaxLayoutWidth = size.width - 8
+            text.numberOfLines = 1
+            text.zPosition = 5
+            button.addChild(text)
+        }
+
+        if command == .objective {
+            let stamp = makeStamp(text: "Sem reg.", color: HUDPalette.mutedInk)
+            stamp.position = CGPoint(x: size.width / 2 - 32, y: size.height / 2 - 13)
+            stamp.zPosition = 7
+            stamp.isHidden = true
+            button.addChild(stamp)
+            buttonStamps[command] = stamp
+        }
+
+        addChild(button)
+        buttons[command] = button
     }
 
     private func makeActionCard(size: CGSize, accent: UIColor, primary: Bool) -> SKNode {
@@ -642,25 +717,25 @@ final class HUDLayer: SKNode {
         let button = SKNode()
         button.name = "cmd_debug_rig_tool"
         button.position = CGPoint(
-            x: -sceneSize.width / 2 + 36 + insets.left,
-            y: 0
+            x: -sceneSize.width / 2 + 31 + insets.left,
+            y: buttonRowY(0) + 118
         )
 
-        let background = SKShapeNode(circleOfRadius: 30)
-        background.fillTexture = HUDTexture.paper(size: CGSize(width: 60, height: 60), base: HUDPalette.paper)
+        let background = SKShapeNode(circleOfRadius: 22)
+        background.fillTexture = HUDTexture.paper(size: CGSize(width: 44, height: 44), base: HUDPalette.paper)
         background.fillColor = .white
         background.strokeColor = HUDPalette.blueInk.withAlphaComponent(0.62)
         background.lineWidth = 1.4
         background.name = button.name
         button.addChild(background)
 
-        let icon = makeLabel(text: "↻", fontSize: 22, style: .bodyBold, color: HUDPalette.blueInk)
+        let icon = makeLabel(text: "↻", fontSize: 17, style: .bodyBold, color: HUDPalette.blueInk)
         icon.position = CGPoint(x: 0, y: 2)
         icon.name = button.name
         button.addChild(icon)
 
-        let text = makeLabel(text: "rig", fontSize: 10, style: .bodyBold, color: HUDPalette.ink)
-        text.position = CGPoint(x: 0, y: -34)
+        let text = makeLabel(text: "rig", fontSize: 8, style: .bodyBold, color: HUDPalette.ink)
+        text.position = CGPoint(x: 0, y: -26)
         text.name = button.name
         button.addChild(text)
 
@@ -677,8 +752,11 @@ final class HUDLayer: SKNode {
                  evolutionProgress: CGFloat,
                  evolutionNote: String,
                  shelterCapacity: Int,
-                 objectiveAvailable: Bool) {
+                 objectiveAvailable: Bool,
+                 commandCooldowns: [PlayerCommand: TimeInterval]) {
         let eggMode = stats.phase == .egg
+        titleLabel.text = "Registro da \(stats.mermaidName)"
+        updateNameEditPosition()
 
         if eggMode {
             phaseLabel.text = "Ovo misterioso · \(Int(evolutionProgress * 100))% chocado"
@@ -698,32 +776,36 @@ final class HUDLayer: SKNode {
         } else {
             depthLabel.text = "Camada atual: \(zoneText)"
         }
-        pearlsLabel.text = "Brilhos \(stats.pearls)"
+        pearlsLabel.text = "Conchas \(stats.pearls)"
         storedFoodLabel.text = "Abrigo \(stats.storedFood)/\(shelterCapacity)"
 
-        setBar("hunger", value: stats.hunger / 100)
+        let nourishment = 1 - stats.hunger / 100
+        setBar("hunger", value: nourishment)
         setBar("energy", value: stats.energy / 100)
         setBar("mood", value: stats.mood / 100)
         setBar("bond", value: eggMode ? evolutionProgress : stats.trust / 100)
 
         if let hunger = bars["hunger"] {
-            hunger.fillColor = stats.hunger > 75
+            hunger.fillColor = nourishment < 0.28
                 ? HUDPalette.coral.withAlphaComponent(0.86)
-                : HUDPalette.gold.withAlphaComponent(0.58)
+                : HUDPalette.algae.withAlphaComponent(0.70)
         }
 
-        if eggMode != lastEggMode || objectiveAvailable != lastObjectiveAvailable {
-            lastEggMode = eggMode
-            lastObjectiveAvailable = objectiveAvailable
-            for (command, button) in buttons {
-                var active = !eggMode || command == .challenge
-                if command == .objective {
-                    active = active && objectiveAvailable
-                    buttonStamps[command]?.isHidden = active
-                }
-                button.alpha = active ? 1 : (command == .objective ? 0.82 : 0.42)
+        disabledCommands = Set(commandCooldowns.keys.filter { (commandCooldowns[$0] ?? 0) > 0 })
+        let stateChanged = eggMode != lastEggMode || objectiveAvailable != lastObjectiveAvailable
+        lastEggMode = eggMode
+        lastObjectiveAvailable = objectiveAvailable
+        for (command, button) in buttons {
+            var active = !eggMode || command == .challenge
+            if command == .objective {
+                active = active && objectiveAvailable
+                buttonStamps[command]?.isHidden = active
             }
+            if disabledCommands.contains(command) { active = false }
+            button.alpha = active ? 1 : (command == .objective ? 0.82 : 0.42)
+        }
 
+        if stateChanged {
             if objectiveAvailable, !eggMode, let button = buttons[.objective] {
                 button.removeAllActions()
                 button.run(.sequence([
@@ -732,10 +814,47 @@ final class HUDLayer: SKNode {
                 ]))
             }
         }
+
+        let activeCommand = highlightedCommand(for: intent)
+        for (command, highlight) in buttonHighlights {
+            highlight.isHidden = command != activeCommand || disabledCommands.contains(command)
+        }
     }
 
     private func setBar(_ key: String, value: CGFloat) {
         bars[key]?.xScale = value.clamped(to: 0.02...1)
+    }
+
+    private func updateNameEditPosition() {
+        guard let nameEditButton else { return }
+        let frame = titleLabel.calculateAccumulatedFrame()
+        let maxX = sceneSize.width / 2 - 74
+        nameEditButton.position.x = min(frame.maxX + 18, maxX)
+    }
+
+    private func highlightedCommand(for intent: MermaidIntent) -> PlayerCommand? {
+        switch intent {
+        case .wandering, .observing:
+            return .explore
+        case .seekingFood, .eating:
+            return .seekFood
+        case .resting:
+            return .rest
+        case .seekingChallenge, .inChallenge:
+            return .challenge
+        case .goingToObjective:
+            return .objective
+        case .goingDeeper:
+            return .goDown
+        case .goingUp:
+            return .goUp
+        case .traveling:
+            return .travel
+        case .enteringRefuge, .returningHome:
+            return .refuge
+        default:
+            return nil
+        }
     }
 
     // MARK: - Toques
@@ -746,8 +865,14 @@ final class HUDLayer: SKNode {
         var node: SKNode? = atPoint(location)
         while let current = node {
             if let name = current.name {
+                if name == "cmd_edit_mermaid_name" {
+                    flashNode(nameEditButton)
+                    onNameEditTap?()
+                    return
+                }
                 if name.hasPrefix("cmd_"),
                    let command = PlayerCommand(rawValue: String(name.dropFirst(4))) {
+                    guard !disabledCommands.contains(command) else { return }
                     flashButton(command)
                     onCommand?(command)
                     return
@@ -780,6 +905,7 @@ final class HUDLayer: SKNode {
 
     private enum IconKind {
         case plankton
+        case shell
         case wave
     }
 
@@ -799,6 +925,12 @@ final class HUDLayer: SKNode {
             node.addChild(shape)
             addDot(to: node, at: CGPoint(x: 10, y: 4), radius: 1.4, color: color)
             addDot(to: node, at: CGPoint(x: -9, y: -5), radius: 1.1, color: color)
+        case .shell:
+            if let symbol = sfSymbolNode(name: "fossil.shell.fill", color: color, size: 22) {
+                node.addChild(symbol)
+                return node
+            }
+            addShellDrawing(to: node, color: color)
         case .wave:
             let path = UIBezierPath()
             path.move(to: CGPoint(x: -11, y: -2))
@@ -813,6 +945,32 @@ final class HUDLayer: SKNode {
             addDot(to: node, at: CGPoint(x: -8, y: 7), radius: 1.0, color: color)
         }
         return node
+    }
+
+    private static func sfSymbolNode(name: String, color: UIColor, size: CGFloat) -> SKNode? {
+        let config = UIImage.SymbolConfiguration(pointSize: size, weight: .semibold)
+        guard let image = UIImage(systemName: name, withConfiguration: config)?
+            .withTintColor(color, renderingMode: .alwaysOriginal) else { return nil }
+        let sprite = SKSpriteNode(texture: SKTexture(image: image))
+        sprite.size = image.size
+        return sprite
+    }
+
+    private static func addShellDrawing(to node: SKNode, color: UIColor) {
+        let shell = UIBezierPath()
+        shell.move(to: CGPoint(x: -9, y: -7))
+        shell.addCurve(to: CGPoint(x: 9, y: -7),
+                       controlPoint1: CGPoint(x: -7, y: 9),
+                       controlPoint2: CGPoint(x: 7, y: 9))
+        shell.addCurve(to: CGPoint(x: -9, y: -7),
+                       controlPoint1: CGPoint(x: 5, y: -10),
+                       controlPoint2: CGPoint(x: -5, y: -10))
+        node.addChild(pathNode(path: shell, color: color, width: 1.8))
+        for x in [CGFloat(-5), 0, 5] {
+            node.addChild(pathNode(points: [CGPoint(x: 0, y: -7), CGPoint(x: x, y: 7)],
+                                  color: color.withAlphaComponent(0.78),
+                                  width: 1.1))
+        }
     }
 
     private static func iconNode(for command: PlayerCommand, color: UIColor) -> SKNode {
@@ -872,20 +1030,7 @@ final class HUDLayer: SKNode {
                                   color: color,
                                   width: 1.4))
         case .refuge:
-            let shell = UIBezierPath()
-            shell.move(to: CGPoint(x: -9, y: -7))
-            shell.addCurve(to: CGPoint(x: 9, y: -7),
-                           controlPoint1: CGPoint(x: -7, y: 9),
-                           controlPoint2: CGPoint(x: 7, y: 9))
-            shell.addCurve(to: CGPoint(x: -9, y: -7),
-                           controlPoint1: CGPoint(x: 5, y: -10),
-                           controlPoint2: CGPoint(x: -5, y: -10))
-            node.addChild(pathNode(path: shell, color: color, width: 1.8))
-            for x in [CGFloat(-5), 0, 5] {
-                node.addChild(pathNode(points: [CGPoint(x: 0, y: -7), CGPoint(x: x, y: 7)],
-                                      color: color.withAlphaComponent(0.78),
-                                      width: 1.1))
-            }
+            addShellDrawing(to: node, color: color)
         case .goUp:
             node.addChild(pathNode(points: [CGPoint(x: 0, y: -9), CGPoint(x: 0, y: 9)],
                                   color: color,

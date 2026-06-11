@@ -97,7 +97,7 @@ final class RegionDiscoverySystem {
             ctx.stats.gainXP(40)
             ctx.stats.courage = min(100, ctx.stats.courage + 2)
             ctx.stats.addMemory("Descobriu \(region.name)")
-            ctx.say("Nova região catalogada: \(region.name). Brilhos +15")
+            ctx.say("Nova região catalogada: \(region.name). Conchas +15")
         }
 
         // progresso de exploração lento (0–100% em ~20 min na região)
@@ -203,7 +203,7 @@ final class TravelSystem {
             ctx.stats.pearls += 5
             ctx.stats.boostMood(8)
             ctx.stats.addMemory("Viajou até \(destination.name)")
-            ctx.say("Chegada registrada: \(destination.name). Brilhos +5")
+            ctx.say("Chegada registrada: \(destination.name). Conchas +5")
         }
     }
 }

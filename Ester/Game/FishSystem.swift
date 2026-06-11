@@ -10,6 +10,49 @@
 import Foundation
 import SpriteKit
 
+fileprivate enum FishSilhouette: CaseIterable {
+    case oval
+    case needle
+    case diamond
+    case moon
+    case ray
+
+    static func random(for zone: DepthZone, rare: Bool) -> FishSilhouette {
+        if rare {
+            return [.moon, .ray, .diamond].randomElement()!
+        }
+        switch zone {
+        case .surface, .clear:
+            return [.needle, .oval, .diamond].randomElement()!
+        case .shallow:
+            return [.oval, .diamond, .moon].randomElement()!
+        case .mid, .blue:
+            return allCases.randomElement()!
+        case .deep, .abyss:
+            return [.needle, .ray, .moon, .diamond].randomElement()!
+        }
+    }
+}
+
+fileprivate enum FishPattern: CaseIterable {
+    case plain
+    case stripes
+    case spots
+    case glowDots
+
+    static func random(for zone: DepthZone, rare: Bool) -> FishPattern {
+        if rare { return .glowDots }
+        switch zone {
+        case .surface, .clear:
+            return [.plain, .stripes, .spots].randomElement()!
+        case .shallow, .mid:
+            return allCases.randomElement()!
+        case .blue, .deep, .abyss:
+            return [.plain, .spots, .glowDots].randomElement()!
+        }
+    }
+}
+
 // MARK: - Nó de peixe
 
 final class FishNode: SKNode, ChallengeGiver {
@@ -37,6 +80,8 @@ final class FishNode: SKNode, ChallengeGiver {
     private var bodyColor: UIColor = .white
 
     private let paletteOverride: [UIColor]?
+    private let silhouette: FishSilhouette
+    private let pattern: FishPattern
 
     init(zone: DepthZone, rare: Bool = false, palette: [UIColor]? = nil) {
         self.zone = zone
@@ -45,6 +90,8 @@ final class FishNode: SKNode, ChallengeGiver {
         self.skittish = Bool.random()
         self.isRare = rare
         self.paletteOverride = palette
+        self.silhouette = FishSilhouette.random(for: zone, rare: rare)
+        self.pattern = FishPattern.random(for: zone, rare: rare)
         super.init()
         if rare {
             baseSpeed = .random(in: 120...170)
@@ -58,8 +105,8 @@ final class FishNode: SKNode, ChallengeGiver {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     private func buildShape() {
-        let length = isRare ? CGFloat.random(in: 80...110) : CGFloat.random(in: 28...64)
-        let height = length * CGFloat.random(in: 0.35...0.5)
+        let length = FishNode.bodyLength(for: silhouette, rare: isRare)
+        let height = FishNode.bodyHeight(for: silhouette, length: length)
         let color = isRare
             ? UIColor(red: 1, green: 0.85, blue: 0.4, alpha: 1)
             : (paletteOverride ?? FishNode.palette(for: zone)).randomElement()!
@@ -69,7 +116,9 @@ final class FishNode: SKNode, ChallengeGiver {
         bodyColor = color
 
         let drawing = FishNode.fishDrawing(length: length, height: height, color: color,
-                                           animateTail: true)
+                                           animateTail: true,
+                                           silhouette: silhouette,
+                                           pattern: pattern)
         container.addChild(drawing)
 
         // brilho nas zonas escuras
@@ -88,55 +137,242 @@ final class FishNode: SKNode, ChallengeGiver {
 
     /// Desenho do peixe (corpo, cauda, olho) reaproveitável para a cópia
     /// que fica em destaque no topo de um desafio.
-    static func fishDrawing(length: CGFloat,
-                            height: CGFloat,
-                            color: UIColor,
-                            animateTail: Bool) -> SKNode {
+    fileprivate static func fishDrawing(length: CGFloat,
+                                        height: CGFloat,
+                                        color: UIColor,
+                                        animateTail: Bool,
+                                        silhouette: FishSilhouette = .oval,
+                                        pattern: FishPattern = .plain) -> SKNode {
         let node = SKNode()
 
-        let body = SKShapeNode(ellipseOf: CGSize(width: length, height: height))
+        let body = bodyShape(length: length, height: height, silhouette: silhouette)
         body.fillColor = color
         body.strokeColor = color.withAlphaComponent(0.4)
         body.name = "fish_body"
         node.addChild(body)
 
-        let tail = UIBezierPath()
-        tail.move(to: CGPoint(x: -length * 0.45, y: 0))
-        tail.addLine(to: CGPoint(x: -length * 0.75, y: height * 0.55))
-        tail.addLine(to: CGPoint(x: -length * 0.75, y: -height * 0.55))
-        tail.close()
-        let tailNode = SKShapeNode(path: tail.cgPath)
-        tailNode.fillColor = color.withAlphaComponent(0.85)
-        tailNode.strokeColor = .clear
+        let tailNode = tailShape(length: length, height: height, color: color, silhouette: silhouette)
         node.addChild(tailNode)
 
         if animateTail {
+            let tight = silhouette == .needle ? 0.82 : 0.7
             let tailSwing = SKAction.repeatForever(.sequence([
-                .scaleX(to: 0.7, duration: 0.35),
-                .scaleX(to: 1.0, duration: 0.35)
+                .scaleX(to: tight, duration: 0.28),
+                .scaleX(to: 1.0, duration: 0.28)
             ]))
             tailSwing.eaeInEaseOut()
             tailNode.run(tailSwing)
         }
 
-        let eye = SKShapeNode(circleOfRadius: max(2.5, height * 0.1))
+        addFins(to: node, length: length, height: height, color: color, silhouette: silhouette)
+        addPattern(pattern, to: node, length: length, height: height, color: color, silhouette: silhouette)
+        addEye(to: node, length: length, height: height, silhouette: silhouette)
+
+        return node
+    }
+
+    private static func bodyLength(for silhouette: FishSilhouette, rare: Bool) -> CGFloat {
+        let base: ClosedRange<CGFloat> = rare ? 80...118 : 30...70
+        switch silhouette {
+        case .oval:
+            return CGFloat.random(in: base)
+        case .needle:
+            return CGFloat.random(in: rare ? 95...140 : 58...96)
+        case .diamond:
+            return CGFloat.random(in: rare ? 86...118 : 42...76)
+        case .moon:
+            return CGFloat.random(in: rare ? 88...120 : 44...78)
+        case .ray:
+            return CGFloat.random(in: rare ? 105...145 : 72...112)
+        }
+    }
+
+    private static func bodyHeight(for silhouette: FishSilhouette, length: CGFloat) -> CGFloat {
+        switch silhouette {
+        case .oval:
+            return length * CGFloat.random(in: 0.34...0.5)
+        case .needle:
+            return length * CGFloat.random(in: 0.16...0.24)
+        case .diamond:
+            return length * CGFloat.random(in: 0.55...0.72)
+        case .moon:
+            return length * CGFloat.random(in: 0.58...0.78)
+        case .ray:
+            return length * CGFloat.random(in: 0.34...0.46)
+        }
+    }
+
+    private static func bodyShape(length: CGFloat,
+                                  height: CGFloat,
+                                  silhouette: FishSilhouette) -> SKShapeNode {
+        switch silhouette {
+        case .oval, .needle, .moon:
+            return SKShapeNode(ellipseOf: CGSize(width: length, height: height))
+        case .diamond:
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: -length * 0.5, y: 0))
+            path.addLine(to: CGPoint(x: 0, y: height * 0.54))
+            path.addLine(to: CGPoint(x: length * 0.5, y: 0))
+            path.addLine(to: CGPoint(x: 0, y: -height * 0.54))
+            path.close()
+            return SKShapeNode(path: path.cgPath)
+        case .ray:
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: -length * 0.5, y: 0))
+            path.addCurve(to: CGPoint(x: length * 0.5, y: 0),
+                          controlPoint1: CGPoint(x: -length * 0.22, y: height * 0.84),
+                          controlPoint2: CGPoint(x: length * 0.22, y: height * 0.84))
+            path.addCurve(to: CGPoint(x: -length * 0.5, y: 0),
+                          controlPoint1: CGPoint(x: length * 0.20, y: -height * 0.56),
+                          controlPoint2: CGPoint(x: -length * 0.20, y: -height * 0.56))
+            return SKShapeNode(path: path.cgPath)
+        }
+    }
+
+    private static func tailShape(length: CGFloat,
+                                  height: CGFloat,
+                                  color: UIColor,
+                                  silhouette: FishSilhouette) -> SKNode {
+        let node = SKNode()
+        switch silhouette {
+        case .ray:
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: -length * 0.45, y: -height * 0.03))
+            path.addLine(to: CGPoint(x: -length * 0.92, y: -height * 0.2))
+            let tail = SKShapeNode(path: path.cgPath)
+            tail.strokeColor = color.withAlphaComponent(0.68)
+            tail.lineWidth = max(2, height * 0.08)
+            tail.fillColor = .clear
+            node.addChild(tail)
+        case .needle:
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: -length * 0.45, y: 0))
+            path.addLine(to: CGPoint(x: -length * 0.75, y: height * 0.75))
+            path.addLine(to: CGPoint(x: -length * 0.65, y: 0))
+            path.addLine(to: CGPoint(x: -length * 0.75, y: -height * 0.75))
+            path.close()
+            let tail = SKShapeNode(path: path.cgPath)
+            tail.fillColor = color.withAlphaComponent(0.82)
+            tail.strokeColor = .clear
+            node.addChild(tail)
+        default:
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: -length * 0.45, y: 0))
+            path.addLine(to: CGPoint(x: -length * 0.75, y: height * 0.55))
+            path.addLine(to: CGPoint(x: -length * 0.75, y: -height * 0.55))
+            path.close()
+            let tail = SKShapeNode(path: path.cgPath)
+            tail.fillColor = color.withAlphaComponent(0.85)
+            tail.strokeColor = .clear
+            node.addChild(tail)
+        }
+        return node
+    }
+
+    private static func addFins(to node: SKNode,
+                                length: CGFloat,
+                                height: CGFloat,
+                                color: UIColor,
+                                silhouette: FishSilhouette) {
+        guard silhouette != .ray else { return }
+
+        let finPath = UIBezierPath()
+        finPath.move(to: CGPoint(x: -length * 0.08, y: height * 0.36))
+        finPath.addLine(to: CGPoint(x: length * 0.1, y: height * 0.74))
+        finPath.addLine(to: CGPoint(x: length * 0.22, y: height * 0.24))
+        finPath.close()
+        let topFin = SKShapeNode(path: finPath.cgPath)
+        topFin.fillColor = color.withAlphaComponent(0.54)
+        topFin.strokeColor = .clear
+        topFin.zPosition = -0.5
+        node.addChild(topFin)
+
+        let lower = SKShapeNode(ellipseOf: CGSize(width: length * 0.28, height: height * 0.28))
+        lower.fillColor = color.withAlphaComponent(0.44)
+        lower.strokeColor = .clear
+        lower.position = CGPoint(x: length * 0.04, y: -height * 0.34)
+        lower.zRotation = -0.35
+        lower.zPosition = -0.4
+        node.addChild(lower)
+    }
+
+    private static func addPattern(_ pattern: FishPattern,
+                                   to node: SKNode,
+                                   length: CGFloat,
+                                   height: CGFloat,
+                                   color: UIColor,
+                                   silhouette: FishSilhouette) {
+        switch pattern {
+        case .plain:
+            return
+        case .stripes:
+            for i in 0..<3 {
+                let x = -length * 0.16 + CGFloat(i) * length * 0.13
+                let path = UIBezierPath()
+                path.move(to: CGPoint(x: x, y: height * 0.34))
+                path.addLine(to: CGPoint(x: x - length * 0.05, y: -height * 0.34))
+                let stripe = SKShapeNode(path: path.cgPath)
+                stripe.strokeColor = UIColor.lerp(color, .white, 0.45).withAlphaComponent(0.42)
+                stripe.lineWidth = max(1.2, height * 0.08)
+                stripe.fillColor = .clear
+                node.addChild(stripe)
+            }
+        case .spots:
+            for _ in 0..<Int.random(in: 3...6) {
+                let spot = SKShapeNode(circleOfRadius: max(1.8, height * CGFloat.random(in: 0.055...0.095)))
+                spot.fillColor = UIColor.lerp(color, .white, 0.5).withAlphaComponent(0.52)
+                spot.strokeColor = .clear
+                spot.position = CGPoint(x: CGFloat.random(in: -length * 0.2...length * 0.25),
+                                        y: CGFloat.random(in: -height * 0.22...height * 0.22))
+                node.addChild(spot)
+            }
+        case .glowDots:
+            for _ in 0..<Int.random(in: 3...7) {
+                let dot = SKShapeNode(circleOfRadius: max(2, height * CGFloat.random(in: 0.045...0.075)))
+                dot.fillColor = UIColor.lerp(color, .white, 0.72).withAlphaComponent(0.72)
+                dot.strokeColor = .clear
+                dot.glowWidth = 5
+                dot.position = CGPoint(x: CGFloat.random(in: -length * 0.24...length * 0.32),
+                                       y: CGFloat.random(in: -height * 0.24...height * 0.24))
+                node.addChild(dot)
+            }
+        }
+
+        if silhouette == .moon {
+            let ring = SKShapeNode(ellipseOf: CGSize(width: length * 0.62, height: height * 0.82))
+            ring.fillColor = .clear
+            ring.strokeColor = UIColor.lerp(color, .white, 0.35).withAlphaComponent(0.26)
+            ring.lineWidth = max(1.4, height * 0.04)
+            node.addChild(ring)
+        }
+    }
+
+    private static func addEye(to node: SKNode,
+                               length: CGFloat,
+                               height: CGFloat,
+                               silhouette: FishSilhouette) {
+        let eyeRadius = max(2.5, height * 0.1)
+        let eye = SKShapeNode(circleOfRadius: eyeRadius)
         eye.fillColor = .white
         eye.strokeColor = .clear
-        eye.position = CGPoint(x: length * 0.3, y: height * 0.12)
+        eye.position = silhouette == .ray
+            ? CGPoint(x: length * 0.12, y: height * 0.16)
+            : CGPoint(x: length * 0.3, y: height * 0.12)
         node.addChild(eye)
-        let pupil = SKShapeNode(circleOfRadius: max(1.2, height * 0.05))
+        let pupil = SKShapeNode(circleOfRadius: max(1.2, eyeRadius * 0.5))
         pupil.fillColor = .black
         pupil.strokeColor = .clear
         pupil.position = eye.position
         node.addChild(pupil)
-
-        return node
     }
 
     /// Cópia visual estática deste peixe, para o cabeçalho do desafio.
     func makeGiverDisplayNode() -> SKNode {
         FishNode.fishDrawing(length: bodyLength, height: bodyHeight,
-                             color: bodyColor, animateTail: true)
+                             color: bodyColor,
+                             animateTail: true,
+                             silhouette: silhouette,
+                             pattern: pattern)
     }
 
     /// Anel dourado pulsante indicando que este peixe oferece um desafio.
@@ -245,13 +481,13 @@ final class FishSystem {
 
     private func desiredCount(for zone: DepthZone) -> Int {
         switch zone {
-        case .surface: return 4
-        case .clear: return 6
-        case .shallow: return 6
-        case .mid: return 6
-        case .blue: return 5
-        case .deep: return 4
-        case .abyss: return 3
+        case .surface: return 5
+        case .clear: return 8
+        case .shallow: return 9
+        case .mid: return 8
+        case .blue: return 7
+        case .deep: return 5
+        case .abyss: return 4
         }
     }
 
@@ -261,7 +497,7 @@ final class FishSystem {
             fish.update(dt: dt, mermaidPosition: mermaidPos)
         }
         fishes.removeAll { fish in
-            if fish.position.distance(to: mermaidPos) > 3200 {
+            if fish.position.distance(to: mermaidPos) > 3600 {
                 fish.removeFromParent()
                 return true
             }
@@ -270,11 +506,11 @@ final class FishSystem {
 
         spawnTimer -= dt
         if spawnTimer <= 0 {
-            spawnTimer = .random(in: 2...5)
+            spawnTimer = .random(in: 1.4...3.4)
             let zone = DepthZone.zone(atY: mermaidPos.y)
             let nearby = fishes.filter { $0.zone == zone }.count
             if nearby < desiredCount(for: zone) {
-                if Int.random(in: 0..<10) < 3 {
+                if Int.random(in: 0..<10) < 4 {
                     spawnSchool(zone: zone, near: mermaidPos)
                 } else {
                     spawnFish(zone: zone, near: mermaidPos)
@@ -291,7 +527,7 @@ final class FishSystem {
         }
         let fish = FishNode(zone: zone, rare: rare, palette: regionPalette)
         let angle = CGFloat.random(in: 0...(2 * .pi))
-        let distance = CGFloat.random(in: 900...1600)
+        let distance = CGFloat.random(in: 780...1500)
         let range = zone.yRange
         fish.position = CGPoint(
             x: (point.x + cos(angle) * distance).clamped(to: World.minX...World.maxX),
@@ -307,7 +543,7 @@ final class FishSystem {
 
     private func spawnSchool(zone: DepthZone, near point: CGPoint) {
         guard let leader = spawnFish(zone: zone, near: point) else { return }
-        let count = Int.random(in: 2...4)
+        let count = Int.random(in: 3...6)
         for _ in 0..<count {
             guard let member = spawnFish(zone: zone, near: point) else { continue }
             member.position = leader.position + CGPoint(x: .random(in: -120...120),

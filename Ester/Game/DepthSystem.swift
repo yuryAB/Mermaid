@@ -90,7 +90,7 @@ final class DepthSystem {
             ctx.stats.pearls += 2
             ctx.stats.gainXP(10)
             ctx.stats.courage = min(100, ctx.stats.courage + 0.5)
-            ctx.say("Ela nadou mais fundo do que nunca! 💠+2")
+            ctx.say("Ela nadou mais fundo do que nunca! 🐚+2")
         }
 
         paletteTimer -= dt
@@ -119,7 +119,7 @@ final class DepthSystem {
             ctx.stats.pearls += 10
             ctx.stats.gainXP(30)
             ctx.stats.addMemory("Alcançou a \(zone.displayName)")
-            ctx.say("🌊 Nova camada alcançável: \(zone.displayName)! 💠+10")
+            ctx.say("🌊 Nova camada alcançável: \(zone.displayName)! 🐚+10")
         }
     }
 

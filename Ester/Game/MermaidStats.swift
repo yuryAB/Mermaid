@@ -9,6 +9,7 @@ import Foundation
 import CoreGraphics
 
 final class MermaidStats: Codable {
+    var mermaidName: String = "Eistrelinha"
     // 0 = satisfeita, 100 = faminta
     var hunger: CGFloat = 25
     var energy: CGFloat = 85
@@ -46,7 +47,7 @@ final class MermaidStats: Codable {
     var scaredTimer: CGFloat = 0
 
     enum CodingKeys: String, CodingKey {
-        case hunger, energy, mood, xp, courage, trust, curiosity, pearls
+        case mermaidName, hunger, energy, mood, xp, courage, trust, curiosity, pearls
         case phase, birthDate, phaseStartedAt, adaptationByZone, unlockedZoneKeys
         case shelterLevel, storedFood, maxDepthMeters
         case puzzlesSolved, mealsEaten, memories, lastSaved, hatchProgress
@@ -58,6 +59,7 @@ final class MermaidStats: Codable {
     /// Decoder tolerante: campos novos ganham default em vez de invalidar o save.
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
+        mermaidName = try c.decodeIfPresent(String.self, forKey: .mermaidName) ?? "Eistrelinha"
         hunger = try c.decodeIfPresent(CGFloat.self, forKey: .hunger) ?? 25
         energy = try c.decodeIfPresent(CGFloat.self, forKey: .energy) ?? 85
         mood = try c.decodeIfPresent(CGFloat.self, forKey: .mood) ?? 70

@@ -30,7 +30,7 @@ final class ShelterSystem {
     }
 
     var upgradeLabelText: String {
-        if let cost = upgradeCost { return "Melhorar · \(cost) brilhos" }
+        if let cost = upgradeCost { return "Melhorar · \(cost) conchas" }
         return "Nível máximo"
     }
 
@@ -65,7 +65,7 @@ final class ShelterSystem {
             return
         }
         guard ctx.stats.pearls >= cost else {
-            ctx.say("Melhorar o Refúgio custa \(cost) brilhos. Faltam \(cost - ctx.stats.pearls).")
+            ctx.say("Melhorar o Refúgio custa \(cost) conchas. Faltam \(cost - ctx.stats.pearls).")
             return
         }
         ctx.stats.pearls -= cost
@@ -308,11 +308,11 @@ final class RefugeOverlay: SKNode {
         memoriesLabel.position = CGPoint(x: 0, y: -64)
         card.addChild(memoriesLabel)
 
-        // botões: melhorar abrigo, gastar brilhos no crescimento e voltar
+        // botões: melhorar abrigo, reduzir tempo de crescimento e voltar
         let buttonWidth = (size.width - 80) / 3
         let actions: [(name: String, text: String, color: UIColor, column: Int)] = [
             ("refuge_upgrade", "Melhorar", GameUI.gold, 0),
-            ("refuge_growth", "Crescer", GameUI.coral, 1),
+            ("refuge_growth", "Reduzir tempo", GameUI.coral, 1),
             ("refuge_close", "Voltar", GameUI.accent, 2)
         ]
         for action in actions {
@@ -370,10 +370,10 @@ final class RefugeOverlay: SKNode {
         let stats = ctx.stats!
         statusLabel.text = "\(stats.phase.displayName) · \(stats.ageText) · repouso observado"
         foodLabel.text = ctx.growth.evolutionNote()
-        careLabel.text = "Energia \(Int(stats.energy))% · Fome \(Int(stats.hunger))% · Alimento \(stats.storedFood)/\(ctx.shelter.capacity)"
-        pearlsLabel.text = "Brilhos \(stats.pearls) · Refúgio nível \(stats.shelterLevel)"
+        careLabel.text = "Energia \(Int(stats.energy))% · Alimentação \(Int(100 - stats.hunger))% · Alimento \(stats.storedFood)/\(ctx.shelter.capacity)"
+        pearlsLabel.text = "Conchas \(stats.pearls) · Refúgio nível \(stats.shelterLevel)"
         upgradeLabel.text = ctx.shelter.upgradeLabelText
-        growthLabel.text = ctx.growth.growthSparkleLabelText()
+        growthLabel.text = ctx.growth.growthShellLabelText()
     }
 
     // MARK: - Toques
@@ -388,7 +388,7 @@ final class RefugeOverlay: SKNode {
                 refreshLabels()
                 return
             case "refuge_growth":
-                ctx.growth.spendSparklesForGrowth()
+                ctx.growth.spendShellsForGrowth()
                 refreshLabels()
                 return
             case "refuge_close":

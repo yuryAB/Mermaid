@@ -19,6 +19,8 @@ final class AutonomySystem {
     private var decisionCooldown: CGFloat = 1.5
     private var intentTime: CGFloat = 0
     private var commandBias: (intent: MermaidIntent, until: Date)?
+    private var commandCooldownUntil: [PlayerCommand: Date] = [:]
+    private let refusalCooldownSeconds: TimeInterval = 40
     private var lastAnimation: MovementType = .idle
     private var lastFacing: Mermaid.Direction = .none
     private var eatCooldown: CGFloat = 0
@@ -34,6 +36,13 @@ final class AutonomySystem {
     private var stats: MermaidStats { ctx.stats }
     private var position: CGPoint { mermaid.base.position }
     private var currentZone: DepthZone { DepthZone.zone(atY: position.y) }
+    var commandCooldownsRemaining: [PlayerCommand: TimeInterval] {
+        let now = Date()
+        return commandCooldownUntil.reduce(into: [:]) { result, item in
+            let remaining = item.value.timeIntervalSince(now)
+            if remaining > 0 { result[item.key] = remaining }
+        }
+    }
 
     init(ctx: GameContext) {
         self.ctx = ctx
@@ -275,7 +284,7 @@ final class AutonomySystem {
                     stats.gainXP(3)
                     if Int.random(in: 0..<12) == 0 {
                         stats.pearls += 1
-                        ctx.say("O peixinho deixou uma pérola! 💠")
+                        ctx.say("O peixinho deixou uma concha! 🐚")
                     }
                     setIntent(.observing)
                     decisionCooldown = 4
@@ -396,12 +405,17 @@ final class AutonomySystem {
     // MARK: - Comandos do jogador
 
     func give(_ command: PlayerCommand) {
+        clearExpiredCommandCooldowns()
+        if let until = commandCooldownUntil[command], until > Date() {
+            return
+        }
+
         guard stats.phase != .egg else {
             // Durante o ovo só o Desafio: Trama funciona — e abre na hora.
             if command == .challenge {
                 ctx.scene?.openHatchingChallenge()
             } else {
-                ctx.say("A pequena sereia ainda está dormindo no ovo... jogue o Desafio: Trama para reunir energia de nascimento 🌀")
+                refuse(command, saying: "A pequena sereia ainda está dormindo no ovo... jogue o Desafio: Trama para reunir energia de nascimento 🌀")
             }
             return
         }
@@ -422,7 +436,7 @@ final class AutonomySystem {
                     "Ela fez bico: \"depois...\"",
                     "Hmpf! Ela fingiu não estar com fome."
                 ]
-                ctx.say(excuses.randomElement()!)
+                refuse(command, saying: excuses.randomElement()!)
                 return
             }
             desired = .seekingFood
@@ -438,37 +452,37 @@ final class AutonomySystem {
             return
         case .challenge:
             if stats.hunger >= 92 {
-                ctx.say("Faminta demais para um desafio... me ajuda a comer algo?")
+                refuse(command, saying: "Faminta demais para um desafio... me ajuda a comer algo?")
                 return
             }
             if stats.energy < 8 {
-                ctx.say("Preciso descansar antes de um desafio... 😴")
+                refuse(command, saying: "Preciso descansar antes de um desafio... 😴")
                 return
             }
             guard ctx.challenges.ensureGiver(near: position) != nil else {
-                ctx.say("Nenhum peixe com desafio por perto agora...")
+                refuse(command, saying: "Nenhum peixe com desafio por perto agora...")
                 return
             }
             desired = .seekingChallenge
         case .objective:
             guard let objective = ctx.events.currentObjective,
                   objective.position() != nil else {
-                ctx.say("Nada acontecendo por perto agora... 👀")
+                refuse(command, saying: "Nada acontecendo por perto agora... 👀")
                 return
             }
             desired = .goingToObjective
         case .goDown:
             guard let next = currentZone.deeper else {
-                ctx.say("Já estamos no fundo do abismo.")
+                refuse(command, saying: "Já estamos no fundo do abismo.")
                 return
             }
             guard stats.energy > 15 else {
-                refuseTired()
+                refuseTired(command)
                 return
             }
             if stats.hunger > 80 {
-                ctx.say("Com essa fome eu não desço... 🍽")
                 stats.trust = max(0, stats.trust - 0.6)
+                refuse(command, saying: "Com essa fome eu não desço... 🍽")
                 return
             }
             // camada fechada: explica o motivo, mas desce até onde dá
@@ -478,11 +492,11 @@ final class AutonomySystem {
             desired = .goingDeeper
         case .goUp:
             if currentZone == .surface {
-                ctx.say("Já estou na superfície!")
+                refuse(command, saying: "Já estou na superfície!")
                 return
             }
             guard stats.energy > 10 else {
-                refuseTired()
+                refuseTired(command)
                 return
             }
             if let next = currentZone.shallower, !ctx.depth.isUnlocked(next) {
@@ -513,8 +527,18 @@ final class AutonomySystem {
                 "Ela fingiu que não ouviu...",
                 "Ela balançou a cabeça, sem vontade."
             ]
-            ctx.say(excuses.randomElement()!)
+            refuse(command, saying: excuses.randomElement()!)
         }
+    }
+
+    private func refuse(_ command: PlayerCommand, saying message: String) {
+        commandCooldownUntil[command] = Date().addingTimeInterval(refusalCooldownSeconds)
+        ctx.say(message)
+    }
+
+    private func clearExpiredCommandCooldowns() {
+        let now = Date()
+        commandCooldownUntil = commandCooldownUntil.filter { $0.value > now }
     }
 
     /// Quanto mais nova, mais teimosa para comer quando mandam.
@@ -529,14 +553,14 @@ final class AutonomySystem {
         }
     }
 
-    private func refuseTired() {
+    private func refuseTired(_ command: PlayerCommand) {
         stats.trust = max(0, stats.trust - 1)
         let excuses = [
             "Estou sem energia... preciso descansar. 😮‍💨",
             "Cansada demais para isso agora...",
             "Ela olhou para você, exausta."
         ]
-        ctx.say(excuses.randomElement()!)
+        refuse(command, saying: excuses.randomElement()!)
     }
 
     // MARK: - Locomoção orgânica

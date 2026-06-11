@@ -4,8 +4,7 @@
 //
 //  Evolução por fases: ovo → bebê → criança → adolescente → jovem → adulta.
 //  Progresso lento, pensado para acompanhamento real: 1 mês da bebê para
-//  criança, 2 meses para a próxima fase, e assim por diante. No Refúgio,
-//  1000 brilhos podem ser gastos para apagar 1 hora de espera.
+//  criança, 2 meses para a próxima fase, e assim por diante.
 //
 
 import Foundation
@@ -25,8 +24,8 @@ final class GrowthSystem {
     private var announcedAlmostBorn = false
     private let crackThresholds: [CGFloat] = [0.35, 0.6, 0.82]
     private let daysPerGrowthMonth: Double = 30
-    private let sparkleGrowthCost = 1_000
-    private let sparkleGrowthSkipSeconds: TimeInterval = 3_600
+    private let shellGrowthCost = 1_000
+    private let shellGrowthSkipSeconds: TimeInterval = 3_600
 
     init(ctx: GameContext, worldNode: SKNode) {
         self.ctx = ctx
@@ -82,7 +81,7 @@ final class GrowthSystem {
         let remaining = remainingWaitSeconds(for: req)
         if remaining > 0 {
             let waitText = GrowthSystem.formatDuration(remaining)
-            return "Cresce em \(waitText) · 1000 brilhos apagam 1h"
+            return "Cresce em \(waitText)"
         }
 
         if ctx.stats.xp < req.xp {
@@ -115,7 +114,7 @@ final class GrowthSystem {
         max(0, req.waitSeconds - effectivePhaseSeconds())
     }
 
-    func growthSparkleLabelText() -> String {
+    func growthShellLabelText() -> String {
         if ctx.stats.phase == .egg { return "Crescer após nascer" }
         guard let next = ctx.stats.phase.next,
               let req = requirement(toReach: next) else {
@@ -124,21 +123,21 @@ final class GrowthSystem {
         if remainingWaitSeconds(for: req) <= 0 {
             return "Tempo já aberto"
         }
-        if ctx.stats.pearls < sparkleGrowthCost {
-            return "Faltam \(sparkleGrowthCost - ctx.stats.pearls) brilhos"
+        if ctx.stats.pearls < shellGrowthCost {
+            return "Faltam \(shellGrowthCost - ctx.stats.pearls) conchas"
         }
-        return "Crescer · 1000 brilhos"
+        return "Reduzir tempo\n1.000 conchas"
     }
 
     @discardableResult
-    func spendSparklesForGrowth() -> Bool {
+    func spendShellsForGrowth() -> Bool {
         if ctx.stats.phase == .egg {
             ctx.say("O ovo ainda precisa nascer antes de crescer.")
             return false
         }
         guard let next = ctx.stats.phase.next,
               let req = requirement(toReach: next) else {
-            ctx.say("Ciclo adulto completo. Os brilhos ficam para o Refúgio.")
+            ctx.say("Ciclo adulto completo. As conchas ficam para o Refúgio.")
             return false
         }
         let remaining = remainingWaitSeconds(for: req)
@@ -146,16 +145,16 @@ final class GrowthSystem {
             ctx.say("A espera já abriu. Agora faltam os outros sinais do mar.")
             return false
         }
-        guard ctx.stats.pearls >= sparkleGrowthCost else {
-            ctx.say("Crescer custa 1000 brilhos. Faltam \(sparkleGrowthCost - ctx.stats.pearls).")
+        guard ctx.stats.pearls >= shellGrowthCost else {
+            ctx.say("Reduzir tempo custa 1.000 conchas. Faltam \(shellGrowthCost - ctx.stats.pearls).")
             return false
         }
 
-        let skipped = min(sparkleGrowthSkipSeconds, remaining)
-        ctx.stats.pearls -= sparkleGrowthCost
+        let skipped = min(shellGrowthSkipSeconds, remaining)
+        ctx.stats.pearls -= shellGrowthCost
         ctx.stats.phaseStartedAt = ctx.stats.phaseStartedAt.addingTimeInterval(-skipped)
-        ctx.stats.addMemory("Brilhos apagaram \(GrowthSystem.formatDuration(skipped)) da espera de crescimento")
-        ctx.say("Brilhos acenderam o crescimento. Espera reduzida em \(GrowthSystem.formatDuration(skipped)).")
+        ctx.stats.addMemory("Conchas reduziram \(GrowthSystem.formatDuration(skipped)) da espera de crescimento")
+        ctx.say("Tempo da sereia reduzido em \(GrowthSystem.formatDuration(skipped)).")
         if canEvolve() { evolve() } else { ctx.stats.save() }
         return true
     }
@@ -411,7 +410,7 @@ final class GrowthSystem {
             ]))
         }
 
-        ctx.say("✨ Ela evoluiu: agora é \(next.displayName)! 💠+20")
+        ctx.say("✨ Ela evoluiu: agora é \(next.displayName)! 🐚+20")
         ctx.stats.save()
     }
 }
