@@ -223,14 +223,8 @@ final class AutonomySystem {
                 target = food.position
                 if position.distance(to: food.position) < 130 { eat(food) }
             } else if intentTime > 6 {
-                // sem comida por perto: recorre ao estoque do Refúgio
-                if stats.storedFood > 0, stats.hunger > 45, ctx.shelter.feedFromStorage() {
-                    setIntent(.idle)
-                    decisionCooldown = min(decisionCooldown, 2)
-                } else {
-                    ctx.food.requestSpawn(near: position)
-                    intentTime = 0
-                }
+                ctx.food.requestSpawn(near: position)
+                intentTime = 0
             }
         case .eating:
             if intentTime > 1.6 {
@@ -337,12 +331,6 @@ final class AutonomySystem {
     private func eat(_ food: FoodNode) {
         guard eatCooldown <= 0 else { return }
         eatCooldown = 1.2
-        // Satisfeita: guarda no abrigo em vez de comer
-        if stats.hunger < 18, ctx.shelter.storeFood() {
-            ctx.food.collect(food)
-            ctx.say("Ela guardou comida no Refúgio das Marés 🐚")
-            return
-        }
         ctx.food.consume(food)
         intent = .eating
         target = nil

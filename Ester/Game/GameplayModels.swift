@@ -342,7 +342,6 @@ final class GameContext {
     var autonomy: AutonomySystem!
     var food: FoodSystem!
     var fish: FishSystem!
-    var shelter: ShelterSystem!
     var challenges: ChallengeSystem!
     var events: EventSystem!
     var growth: GrowthSystem!

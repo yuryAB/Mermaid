@@ -25,8 +25,6 @@ final class MermaidStats: Codable {
     var phaseStartedAt: Date = Date()
     var adaptationByZone: [String: CGFloat] = [DepthZone.mid.storageKey: 30]
     var unlockedZoneKeys: Set<String> = [DepthZone.shallow.storageKey, DepthZone.mid.storageKey]
-    var shelterLevel: Int = 1
-    var storedFood: Int = 0
     var maxDepthMeters: CGFloat = 0
     var puzzlesSolved: Int = 0
     var mealsEaten: Int = 0
@@ -55,7 +53,7 @@ final class MermaidStats: Codable {
     enum CodingKeys: String, CodingKey {
         case mermaidName, hunger, energy, mood, xp, courage, trust, curiosity, pearls
         case phase, birthDate, phaseStartedAt, adaptationByZone, unlockedZoneKeys
-        case shelterLevel, storedFood, maxDepthMeters
+        case maxDepthMeters
         case puzzlesSolved, mealsEaten, memories, lastSaved, hatchProgress
         case posX, posY, discoveredRegionIds, regionProgress, destinationRegionId
         case speedUpgradeLevel, shellGainUpgradeLevel, feedingUpgradeLevel
@@ -82,8 +80,6 @@ final class MermaidStats: Codable {
             ?? MermaidStats.estimatedPhaseStartedAt(for: phase, birthDate: birthDate)
         adaptationByZone = try c.decodeIfPresent([String: CGFloat].self, forKey: .adaptationByZone) ?? [DepthZone.shallow.storageKey: 30]
         unlockedZoneKeys = try c.decodeIfPresent(Set<String>.self, forKey: .unlockedZoneKeys) ?? [DepthZone.shallow.storageKey]
-        shelterLevel = try c.decodeIfPresent(Int.self, forKey: .shelterLevel) ?? 1
-        storedFood = try c.decodeIfPresent(Int.self, forKey: .storedFood) ?? 0
         maxDepthMeters = try c.decodeIfPresent(CGFloat.self, forKey: .maxDepthMeters) ?? 0
         puzzlesSolved = try c.decodeIfPresent(Int.self, forKey: .puzzlesSolved) ?? 0
         mealsEaten = try c.decodeIfPresent(Int.self, forKey: .mealsEaten) ?? 0

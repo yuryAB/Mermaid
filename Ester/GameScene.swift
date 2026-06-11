@@ -121,7 +121,6 @@ class GameScene: SKScene {
         ctx.autonomy = AutonomySystem(ctx: ctx)
         ctx.food = FoodSystem(ctx: ctx, worldNode: worldNode)
         ctx.fish = FishSystem(ctx: ctx, worldNode: worldNode)
-        ctx.shelter = ShelterSystem(ctx: ctx)
         ctx.challenges = ChallengeSystem(ctx: ctx)
         ctx.events = EventSystem(ctx: ctx, worldNode: worldNode)
         ctx.growth = GrowthSystem(ctx: ctx, worldNode: worldNode)
@@ -601,7 +600,6 @@ class GameScene: SKScene {
                     regionName: ctx.regions.currentRegion?.name,
                     evolutionProgress: ctx.growth.progressToNext(),
                     evolutionNote: ctx.growth.evolutionNote(),
-                    shelterCapacity: ctx.shelter.capacity,
                     objectiveAvailable: ctx.events.currentObjective != nil,
                     commandCooldowns: ctx.autonomy.commandCooldownsRemaining)
 

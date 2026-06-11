@@ -28,7 +28,6 @@ final class HUDLayer: SKNode {
     private var depthLabel: SKLabelNode!
     private var growthLabel: SKLabelNode!
     private var pearlsLabel: SKLabelNode!
-    private var storedFoodLabel: SKLabelNode!
     private var intentLabel: SKLabelNode!
     private var barLabels: [String: SKLabelNode] = [:]
     private var bars: [String: SKShapeNode] = [:]
@@ -365,11 +364,6 @@ final class HUDLayer: SKNode {
         pearlsTag.node.position = CGPoint(x: halfW - 64, y: panelHeight / 2 - 52)
         panelContent.addChild(pearlsTag.node)
         pearlsLabel = pearlsTag.label
-
-        let shelterTag = makeTag(size: CGSize(width: 104, height: 24), accent: HUDPalette.coral)
-        shelterTag.node.position = CGPoint(x: halfW - 64, y: panelHeight / 2 - 82)
-        panelContent.addChild(shelterTag.node)
-        storedFoodLabel = shelterTag.label
 
         let divider = HUDLayer.pathNode(points: [
             CGPoint(x: -halfW + 18, y: -22),
@@ -798,7 +792,6 @@ final class HUDLayer: SKNode {
                  regionName: String?,
                  evolutionProgress: CGFloat,
                  evolutionNote: String,
-                 shelterCapacity: Int,
                  objectiveAvailable: Bool,
                  commandCooldowns: [PlayerCommand: TimeInterval]) {
         let eggMode = stats.phase == .egg
@@ -824,7 +817,6 @@ final class HUDLayer: SKNode {
             depthLabel.text = "Camada atual: \(zoneText)"
         }
         pearlsLabel.text = "Conchas \(stats.pearls)"
-        storedFoodLabel.text = "Abrigo \(stats.storedFood)/\(shelterCapacity)"
 
         let nourishment = 1 - stats.hunger / 100
         setBar("hunger", value: nourishment)

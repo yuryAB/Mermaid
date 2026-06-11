@@ -4,76 +4,12 @@
 //
 //  Refúgio das Marés: um espaço pessoal mágico acessível de qualquer
 //  lugar do oceano (dimensão de bolso, não um ponto físico do mundo).
-//  Lá a sereia descansa, come do estoque, evolui o refúgio e mostra
-//  suas memórias. Ao sair, ela continua de onde estava.
+//  Lá a sereia descansa e mostra suas memórias. Ao sair, ela continua
+//  de onde estava.
 //
 
 import Foundation
 import SpriteKit
-
-// MARK: - Sistema (estoque e melhorias)
-
-final class ShelterSystem {
-    unowned let ctx: GameContext
-
-    init(ctx: GameContext) {
-        self.ctx = ctx
-    }
-
-    var capacity: Int { ctx.stats.shelterLevel * 3 }
-
-    private var maximumLevel: Int { MermaidPhase.adult.rawValue }
-
-    var upgradeCost: Int? {
-        guard ctx.stats.shelterLevel < maximumLevel else { return nil }
-        return ctx.stats.shelterLevel * 40
-    }
-
-    var upgradeLabelText: String {
-        if let cost = upgradeCost { return "Melhorar · \(cost) conchas" }
-        return "Nível máximo"
-    }
-
-    /// Guarda uma comida encontrada quando ela não está com fome.
-    func storeFood() -> Bool {
-        guard ctx.stats.storedFood < capacity else { return false }
-        ctx.stats.storedFood += 1
-        return true
-    }
-
-    /// Alimenta a sereia com o estoque do refúgio.
-    @discardableResult
-    func feedFromStorage() -> Bool {
-        guard ctx.stats.storedFood > 0 else {
-            ctx.say("O estoque do Refúgio está vazio... ela guarda comida quando está satisfeita.")
-            return false
-        }
-        guard ctx.stats.hunger > 10 else {
-            ctx.say("Ela não está com fome agora.")
-            return false
-        }
-        ctx.stats.storedFood -= 1
-        ctx.stats.hunger = max(0, ctx.stats.hunger - 28)
-        ctx.stats.boostMood(5)
-        ctx.say("Alimentação registrada com estoque do Refúgio.")
-        return true
-    }
-
-    func tryUpgrade() {
-        guard let cost = upgradeCost else {
-            ctx.say("Refúgio já catalogado no nível máximo.")
-            return
-        }
-        guard ctx.stats.pearls >= cost else {
-            ctx.say("Melhorar o Refúgio custa \(cost) conchas. Faltam \(cost - ctx.stats.pearls).")
-            return
-        }
-        ctx.stats.pearls -= cost
-        ctx.stats.shelterLevel += 1
-        ctx.stats.gainXP(20)
-        ctx.say("Refúgio melhorado para o nível \(ctx.stats.shelterLevel). Capacidade ampliada.")
-    }
-}
 
 // MARK: - Portal do Refúgio (nó no mundo)
 
@@ -373,8 +309,8 @@ final class RefugeOverlay: SKNode {
         let stats = ctx.stats!
         statusLabel.text = "\(stats.phase.displayName) · \(stats.ageText) · repouso observado"
         foodLabel.text = ctx.growth.evolutionNote()
-        careLabel.text = "Energia \(Int(stats.energy))% · Alimentação \(Int(100 - stats.hunger))% · Alimento \(stats.storedFood)/\(ctx.shelter.capacity)"
-        pearlsLabel.text = "Conchas \(stats.pearls) · Refúgio nível \(stats.shelterLevel)"
+        careLabel.text = "Energia \(Int(stats.energy))% · Alimentação \(Int(100 - stats.hunger))%"
+        pearlsLabel.text = "Conchas \(stats.pearls)"
         upgradeLabel.text = "Cuidados"
         growthLabel.text = ctx.growth.growthShellLabelText()
     }
