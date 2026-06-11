@@ -85,9 +85,9 @@ final class DepthSystem {
 
         // Recorde de profundidade vira recompensa
         let meters = max(0, -y / 10)
-        if meters > ctx.stats.maxDepthMeters + 100 {
+        if meters > ctx.stats.maxDepthMeters + 200 {
             ctx.stats.maxDepthMeters = meters
-            let gained = ctx.stats.awardPearls(2)
+            let gained = ctx.stats.awardPearls(1)
             ctx.stats.gainXP(10)
             ctx.stats.courage = min(100, ctx.stats.courage + 0.5)
             ctx.say("Ela nadou mais fundo do que nunca! 🐚+\(gained)")
@@ -116,7 +116,7 @@ final class DepthSystem {
         for zone in DepthZone.allCases where !ctx.stats.isUnlocked(zone) {
             guard meetsRequirements(zone) else { continue }
             ctx.stats.unlock(zone)
-            let gained = ctx.stats.awardPearls(10)
+            let gained = ctx.stats.awardPearls(8)
             ctx.stats.gainXP(30)
             ctx.stats.addMemory("Alcançou a \(zone.displayName)")
             ctx.say("🌊 Nova camada alcançável: \(zone.displayName)! 🐚+\(gained)")

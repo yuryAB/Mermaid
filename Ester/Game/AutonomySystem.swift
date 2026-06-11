@@ -20,7 +20,6 @@ final class AutonomySystem {
     private var intentTime: CGFloat = 0
     private var commandBias: (intent: MermaidIntent, until: Date)?
     private var commandCooldownUntil: [PlayerCommand: Date] = [:]
-    private let refusalCooldownSeconds: TimeInterval = 10
     private var lastAnimation: MovementType = .idle
     private var lastFacing: Mermaid.Direction = .none
     private var eatCooldown: CGFloat = 0
@@ -104,7 +103,7 @@ final class AutonomySystem {
         scores[.wandering] = 16 + stats.curiosity * 0.25 + .random(in: 0...10)
         scores[.observing] = 4 + stats.curiosity * 0.1
 
-        if stats.hunger > 30 {
+        if stats.hunger > GameBalance.requestFoodHungerThreshold(for: stats.phase) {
             var foodScore = stats.hunger * 1.1
             if ctx.food.nearestFood(to: position, maxDistance: 900) != nil { foodScore += 20 }
             scores[.seekingFood] = foodScore
@@ -133,7 +132,8 @@ final class AutonomySystem {
         }
         // peixes com desafio por perto despertam interesse próprio
         if ctx.challenges.nearestGiver(to: position, maxDistance: 1400) != nil,
-           stats.energy > 25 {
+           stats.energy > (stats.phase == .baby ? 35 : 25),
+           stats.hunger < (stats.phase == .baby ? 65 : 85) {
             scores[.seekingChallenge] = 18 + stats.curiosity * 0.2
         }
         // viagem em andamento: prioridade alta, mas fome/cansaço interrompem
@@ -242,6 +242,10 @@ final class AutonomySystem {
                 }
             } else if intentTime > 4 {
                 target = ctx.challenges.ensureGiver(near: position)?.position
+                if target == nil {
+                    setIntent(.idle)
+                    decisionCooldown = 2
+                }
                 intentTime = 0
             }
         case .goingToObjective:
@@ -324,7 +328,8 @@ final class AutonomySystem {
 
     private func autoEat() {
         guard intent != .inChallenge, intent != .enteringRefuge,
-              stats.hunger > 25, eatCooldown <= 0 else { return }
+              stats.hunger >= GameBalance.autoEatHungerThreshold(for: stats.phase),
+              eatCooldown <= 0 else { return }
         if let food = ctx.food.nearestFood(to: position, maxDistance: 120) {
             eat(food)
         }
@@ -420,6 +425,10 @@ final class AutonomySystem {
         case .explore:
             desired = .wandering
         case .seekFood:
+            if stats.hunger < 35 {
+                refuse(command, saying: "Ela ainda está saciada e virou o rostinho.")
+                return
+            }
             // teimosia de criança: quanto mais nova, mais recusa comer
             if CGFloat.random(in: 0...1) < eatRefusalChance() {
                 stats.trust = max(0, stats.trust - 0.2)
@@ -444,11 +453,13 @@ final class AutonomySystem {
             ctx.scene?.beginRefugeEntry()
             return
         case .challenge:
-            if stats.hunger >= 92 {
+            let hungerLimit: CGFloat = stats.phase == .baby ? 65 : 92
+            let energyLimit: CGFloat = stats.phase == .baby ? 35 : 8
+            if stats.hunger > hungerLimit {
                 refuse(command, saying: "Faminta demais para um desafio... me ajuda a comer algo?")
                 return
             }
-            if stats.energy < 8 {
+            if stats.energy < energyLimit {
                 refuse(command, saying: "Preciso descansar antes de um desafio... 😴")
                 return
             }
@@ -499,13 +510,14 @@ final class AutonomySystem {
         }
 
         // Disposição: cresce com vínculo e bem-estar, cai com fome e medo.
-        var chance = 0.34
+        var chance = (stats.phase == .baby ? 0.25 : 0.34)
             + stats.trust * 0.0024
             + stats.disposition * 0.001
             - stats.hunger * 0.0014
             + stats.dispositionAcceptanceBonus
+        if stats.phase == .baby && desired == .seekingChallenge { chance -= 0.08 }
         if stats.scaredTimer > 0 { chance -= 0.2 }
-        chance = chance.clamped(to: 0.18...0.90)
+        chance = chance.clamped(to: stats.phase == .baby ? 0.12...0.78 : 0.18...0.90)
 
         if CGFloat.random(in: 0...1) <= chance {
             stats.trust = min(100, stats.trust + 0.4)
@@ -529,7 +541,10 @@ final class AutonomySystem {
     }
 
     private func refuse(_ command: PlayerCommand, saying message: String) {
-        commandCooldownUntil[command] = Date().addingTimeInterval(refusalCooldownSeconds)
+        let cooldown: TimeInterval = command == .challenge
+            ? GameBalance.challengeCommandCooldown(for: stats.phase)
+            : 10
+        commandCooldownUntil[command] = Date().addingTimeInterval(cooldown)
         showEmotion(.stubborn, duration: 1.8)
         ctx.say(message)
     }
@@ -544,7 +559,7 @@ final class AutonomySystem {
         let reduction = CGFloat(stats.dispositionUpgradeLevel) * 0.0028
         switch stats.phase {
         case .egg: return 0
-        case .baby: return (0.45 - reduction).clamped(to: 0.17...0.45)
+        case .baby: return (0.55 - reduction).clamped(to: 0.22...0.55)
         case .child: return (0.34 - reduction).clamped(to: 0.12...0.34)
         case .teen: return (0.23 - reduction).clamped(to: 0.08...0.23)
         case .young: return (0.14 - reduction).clamped(to: 0.05...0.14)

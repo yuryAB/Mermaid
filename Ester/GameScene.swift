@@ -800,6 +800,8 @@ class GameScene: SKScene {
                                              zone: zone,
                                              region: ctx.regions.currentRegion,
                                              session: session,
+                                             phase: stats.phase,
+                                             shellRewardMultiplier: stats.shellRewardMultiplier,
                                              giverDisplay: giverDisplay) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
             }
@@ -813,6 +815,7 @@ class GameScene: SKScene {
                                              phase: stats.phase,
                                              palette: ctx.depth.mermaidPalette(atY: ctx.mermaidPosition.y),
                                              special: special,
+                                             shellRewardMultiplier: stats.shellRewardMultiplier,
                                              giverDisplay: giverDisplay) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
             }
@@ -829,18 +832,17 @@ class GameScene: SKScene {
         climbOverlay?.removeFromParent()
         climbOverlay = nil
 
-        let gainedPearls = max(0, result.pearls)
-        stats.pearls += gainedPearls
-        stats.gainXP(result.xp)
+        let gainedPearls = result.isHatching ? 0 : stats.awardPearls(result.pearls)
 
         // Durante o ovo, o desafio reúne energia de nascimento
         if result.isHatching || stats.phase == .egg {
             ctx.growth.addHatchProgress(CGFloat(result.score) / 900)
             stats.save()
-            ctx.say("O desafio reuniu energia de nascimento! 🥚✨ 🐚+\(gainedPearls)")
+            ctx.say("O desafio reuniu energia de nascimento! 🥚✨")
             return
         }
 
+        stats.gainXP(result.xp)
         ctx.autonomy.paused = false
         ctx.autonomy.finishChallenge()
         stats.boostMood(8)
@@ -1069,27 +1071,42 @@ private final class OceanParallaxBackdrop: SKNode {
     }
 
     private func buildDistantRidges() {
-        let width = sceneSize.width * 3.0
-        let height = sceneSize.height
-        for row in 0..<3 {
-            let baseline = -height * 0.64 + CGFloat(row) * height * 0.12
+        let width = sceneSize.width * 4.4
+        let height = sceneSize.height * 2.6
+        for row in 0..<8 {
+            let baseline = -height * 0.42 + CGFloat(row) * height * 0.12
             let path = UIBezierPath()
-            path.move(to: CGPoint(x: -width / 2, y: -height))
-            path.addLine(to: CGPoint(x: -width / 2, y: baseline))
-            let segments = 14
+            path.move(to: CGPoint(x: -width / 2, y: baseline))
+            let segments = 22
             for step in 0...segments {
                 let x = -width / 2 + width * CGFloat(step) / CGFloat(segments)
-                let y = baseline + CGFloat.random(in: -50...120) + sin(CGFloat(step) * 0.8) * 40
+                let y = baseline
+                    + CGFloat.random(in: -38...52)
+                    + sin(CGFloat(step) * 0.62 + CGFloat(row)) * 52
                 path.addLine(to: CGPoint(x: x, y: y))
             }
-            path.addLine(to: CGPoint(x: width / 2, y: -height))
-            path.close()
 
-            let ridge = SKShapeNode(path: path.cgPath)
-            ridge.fillColor = UIColor(red: 0.01, green: 0.05, blue: 0.10, alpha: 0.20 - CGFloat(row) * 0.045)
-            ridge.strokeColor = .clear
-            ridge.zPosition = CGFloat(row)
-            farLayer.addChild(ridge)
+            let haze = SKShapeNode(path: path.cgPath)
+            haze.strokeColor = UIColor(red: 0.01,
+                                       green: 0.05 + CGFloat(row) * 0.006,
+                                       blue: 0.10 + CGFloat(row) * 0.008,
+                                       alpha: max(0.04, 0.18 - CGFloat(row) * 0.015))
+            haze.fillColor = .clear
+            haze.lineWidth = CGFloat.random(in: 22...52)
+            haze.glowWidth = CGFloat.random(in: 18...46)
+            haze.zPosition = CGFloat(row)
+            farLayer.addChild(haze)
+        }
+
+        for i in 0..<18 {
+            let hazeRock = SKShapeNode(ellipseOf: CGSize(width: CGFloat.random(in: 160...420),
+                                                         height: CGFloat.random(in: 42...130)))
+            hazeRock.fillColor = UIColor(red: 0.0, green: 0.035, blue: 0.075, alpha: CGFloat.random(in: 0.04...0.10))
+            hazeRock.strokeColor = .clear
+            hazeRock.position = CGPoint(x: CGFloat.random(in: -width / 2...width / 2),
+                                        y: -height * 0.42 + CGFloat(i % 6) * height * 0.15)
+            hazeRock.zPosition = -1
+            farLayer.addChild(hazeRock)
         }
     }
 
@@ -1251,7 +1268,13 @@ private final class OceanParallaxBackdrop: SKNode {
 
     private func wrapped(_ value: CGFloat, span: CGFloat) -> CGFloat {
         guard span > 0 else { return value }
-        return value.truncatingRemainder(dividingBy: span)
+        var result = value.truncatingRemainder(dividingBy: span)
+        if result > span / 2 {
+            result -= span
+        } else if result < -span / 2 {
+            result += span
+        }
+        return result
     }
 }
 

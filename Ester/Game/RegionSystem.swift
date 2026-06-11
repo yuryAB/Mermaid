@@ -93,7 +93,7 @@ final class RegionDiscoverySystem {
         // descoberta permanente
         if !ctx.stats.discoveredRegionIds.contains(region.id) {
             ctx.stats.discoveredRegionIds.insert(region.id)
-            let gained = ctx.stats.awardPearls(15)
+            let gained = ctx.stats.awardPearls(8)
             ctx.stats.gainXP(40)
             ctx.stats.courage = min(100, ctx.stats.courage + 2)
             ctx.stats.addMemory("Descobriu \(region.name)")
@@ -200,7 +200,7 @@ final class TravelSystem {
         if destination.contains(ctx.mermaidPosition) {
             clearDestination()
             ctx.stats.gainXP(20)
-            let gained = ctx.stats.awardPearls(5)
+            let gained = ctx.stats.awardPearls(4)
             ctx.stats.boostMood(8)
             ctx.stats.addMemory("Viajou até \(destination.name)")
             ctx.say("Chegada registrada: \(destination.name). Conchas +\(gained)")
@@ -214,6 +214,17 @@ final class RegionMenuOverlay: SKNode {
     private let onSelect: (Region) -> Void
     private let onClose: () -> Void
     private var rowRegions: [String: Region] = [:]
+    private var listNode = SKNode()
+    private var listViewportRect: CGRect = .zero
+    private var listViewportHeight: CGFloat = 0
+    private var listContentHeight: CGFloat = 0
+    private var listCenterY: CGFloat = 0
+    private var listScrollOffset: CGFloat = 0
+    private var scrollThumb: SKShapeNode?
+    private var scrollThumbHeight: CGFloat = 0
+    private var touchStartLocation: CGPoint = .zero
+    private var lastTouchLocation: CGPoint = .zero
+    private var didScrollDuringTouch = false
 
     init(size: CGSize,
          stats: MermaidStats,
@@ -233,10 +244,17 @@ final class RegionMenuOverlay: SKNode {
 
         let discovered = RegionDiscoverySystem.all.filter { stats.discoveredRegionIds.contains($0.id) }
         let unknownCount = RegionDiscoverySystem.all.count - discovered.count
-        let rowHeight: CGFloat = 86
+        let rowCardHeight: CGFloat = 78
+        let rowSpacing: CGFloat = 10
+        let rowStep = rowCardHeight + rowSpacing
+        let headerHeight: CGFloat = 84
+        let footerHeight: CGFloat = unknownCount > 0 ? 104 : 72
         // painel mais estreito, encostado no lado direito da tela
-        let panelWidth = min(size.width * 0.74, 300)
-        let panelHeight = CGFloat(discovered.count) * rowHeight + 140
+        let panelWidth = min(size.width - 28, 336)
+        let desiredPanelHeight = CGFloat(discovered.count) * rowStep + headerHeight + footerHeight
+        let maxPanelHeight = max(280, size.height - 72)
+        let minPanelHeight = min(maxPanelHeight, 320)
+        let panelHeight = min(maxPanelHeight, max(minPanelHeight, desiredPanelHeight))
 
         // container deslocado para a direita (o backdrop continua centralizado)
         let content = SKNode()
@@ -263,27 +281,49 @@ final class RegionMenuOverlay: SKNode {
         title.position = CGPoint(x: 0, y: panelHeight / 2 - 38)
         panelContent.addChild(title)
 
+        let listWidth = panelWidth - 28
+        let listTopY = panelHeight / 2 - headerHeight
+        let listBottomY = -panelHeight / 2 + footerHeight
+        listCenterY = (listTopY + listBottomY) / 2
+        listViewportHeight = max(96, listTopY - listBottomY)
+        listContentHeight = max(0, CGFloat(discovered.count) * rowStep - rowSpacing)
+        listViewportRect = CGRect(x: content.position.x - listWidth / 2,
+                                  y: listCenterY - listViewportHeight / 2,
+                                  width: listWidth,
+                                  height: listViewportHeight)
+
+        let listCrop = SKCropNode()
+        listCrop.position = CGPoint(x: 0, y: listCenterY)
+        listCrop.zPosition = 4
+        let listMask = SKShapeNode(rectOf: CGSize(width: listWidth, height: listViewportHeight),
+                                   cornerRadius: 18)
+        listMask.fillColor = .white
+        listMask.strokeColor = .clear
+        listCrop.maskNode = listMask
+        listCrop.addChild(listNode)
+        panelContent.addChild(listCrop)
+
         for (index, region) in discovered.enumerated() {
-            let y = panelHeight / 2 - 92 - CGFloat(index) * rowHeight
+            let y = listViewportHeight / 2 - rowCardHeight / 2 - CGFloat(index) * rowStep
             let isCurrent = region.id == currentRegionId
             let isDestination = region.id == destinationId
 
             let rowTint = isDestination
                 ? UIColor(red: 0.5, green: 0.85, blue: 1, alpha: 1)
                 : region.tint
-            let row = GameUI.card(size: CGSize(width: panelWidth - 28, height: rowHeight - 12),
+            let row = GameUI.card(size: CGSize(width: listWidth, height: rowCardHeight),
                                   cornerRadius: 16,
                                   tint: rowTint.withAlphaComponent(isCurrent ? 0.9 : 0.6),
                                   baseColors: GameUI.tintedColors(region.tint))
             row.position = CGPoint(x: 0, y: y)
             row.name = "region_\(region.id)"
-            panelContent.addChild(row)
+            listNode.addChild(row)
             rowRegions[region.id] = region
 
             let rowContent = SKNode()
             rowContent.zPosition = 5
             row.addChild(rowContent)
-            let leftX = -(panelWidth - 28) / 2 + 18
+            let leftX = -listWidth / 2 + 18
 
             let name = SKLabelNode(text: region.name)
             name.fontName = "AvenirNext-DemiBold"
@@ -299,7 +339,7 @@ final class RegionMenuOverlay: SKNode {
             blurb.fontColor = GameUI.mutedInk
             blurb.horizontalAlignmentMode = .left
             blurb.verticalAlignmentMode = .center
-            blurb.preferredMaxLayoutWidth = panelWidth - 64
+            blurb.preferredMaxLayoutWidth = listWidth - 36
             blurb.numberOfLines = 2
             blurb.position = CGPoint(x: leftX, y: -8)
             rowContent.addChild(blurb)
@@ -317,6 +357,27 @@ final class RegionMenuOverlay: SKNode {
             status.position = CGPoint(x: leftX, y: -28)
             rowContent.addChild(status)
         }
+
+        if listContentHeight > listViewportHeight + 1 {
+            let track = SKShapeNode(rectOf: CGSize(width: 3, height: listViewportHeight - 10),
+                                    cornerRadius: 1.5)
+            track.fillColor = GameUI.line.withAlphaComponent(0.18)
+            track.strokeColor = .clear
+            track.position = CGPoint(x: listWidth / 2 + 7, y: listCenterY)
+            track.zPosition = 6
+            panelContent.addChild(track)
+
+            scrollThumbHeight = max(30, (listViewportHeight / max(1, listContentHeight)) * (listViewportHeight - 10))
+            let thumb = SKShapeNode(rectOf: CGSize(width: 4, height: scrollThumbHeight),
+                                    cornerRadius: 2)
+            thumb.fillColor = GameUI.accent.withAlphaComponent(0.55)
+            thumb.strokeColor = .clear
+            thumb.zPosition = 7
+            thumb.position.x = track.position.x
+            panelContent.addChild(thumb)
+            scrollThumb = thumb
+        }
+        updateListScroll(0)
 
         if unknownCount > 0 {
             let hint = SKLabelNode(text: "Águas desconhecidas seguem além.")
@@ -344,7 +405,32 @@ final class RegionMenuOverlay: SKNode {
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
-        var node: SKNode? = atPoint(touch.location(in: self))
+        touchStartLocation = touch.location(in: self)
+        lastTouchLocation = touchStartLocation
+        didScrollDuringTouch = false
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        let location = touch.location(in: self)
+        let dy = location.y - lastTouchLocation.y
+        let totalDrag = hypot(location.x - touchStartLocation.x,
+                              location.y - touchStartLocation.y)
+
+        if listViewportRect.contains(touchStartLocation), listContentHeight > listViewportHeight {
+            updateListScroll(listScrollOffset + dy)
+            if totalDrag > 6 {
+                didScrollDuringTouch = true
+            }
+        }
+
+        lastTouchLocation = location
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first, !didScrollDuringTouch else { return }
+        let location = touch.location(in: self)
+        var node: SKNode? = atPoint(location)
         while let current = node {
             if let name = current.name {
                 if name == "region_close" {
@@ -352,6 +438,7 @@ final class RegionMenuOverlay: SKNode {
                     return
                 }
                 if name.hasPrefix("region_"),
+                   listViewportRect.contains(location),
                    let region = rowRegions[String(name.dropFirst(7))] {
                     onSelect(region)
                     return
@@ -359,5 +446,21 @@ final class RegionMenuOverlay: SKNode {
             }
             node = current.parent
         }
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        didScrollDuringTouch = false
+    }
+
+    private func updateListScroll(_ offset: CGFloat) {
+        let maxOffset = max(0, listContentHeight - listViewportHeight)
+        listScrollOffset = offset.clamped(to: 0...maxOffset)
+        listNode.position.y = listScrollOffset
+
+        guard let scrollThumb, maxOffset > 0 else { return }
+        let progress = listScrollOffset / maxOffset
+        let topY = listCenterY + listViewportHeight / 2 - scrollThumbHeight / 2 - 5
+        let bottomY = listCenterY - listViewportHeight / 2 + scrollThumbHeight / 2 + 5
+        scrollThumb.position.y = topY + (bottomY - topY) * progress
     }
 }

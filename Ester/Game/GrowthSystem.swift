@@ -24,7 +24,6 @@ final class GrowthSystem {
     private var announcedAlmostBorn = false
     private let crackThresholds: [CGFloat] = [0.35, 0.6, 0.82]
     private let daysPerGrowthMonth: Double = 30
-    private let shellGrowthCost = 1_000
     private let shellGrowthSkipSeconds: TimeInterval = 3_600
 
     init(ctx: GameContext, worldNode: SKNode) {
@@ -123,10 +122,11 @@ final class GrowthSystem {
         if remainingWaitSeconds(for: req) <= 0 {
             return "Tempo já aberto"
         }
+        let shellGrowthCost = GameBalance.growthShellCost(for: ctx.stats.phase)
         if ctx.stats.pearls < shellGrowthCost {
             return "Faltam \(shellGrowthCost - ctx.stats.pearls) conchas"
         }
-        return "Reduzir tempo\n1.000 conchas"
+        return "Reduzir tempo\n\(shellGrowthCost) conchas"
     }
 
     @discardableResult
@@ -145,8 +145,9 @@ final class GrowthSystem {
             ctx.say("A espera já abriu. Agora faltam os outros sinais do mar.")
             return false
         }
+        let shellGrowthCost = GameBalance.growthShellCost(for: ctx.stats.phase)
         guard ctx.stats.pearls >= shellGrowthCost else {
-            ctx.say("Reduzir tempo custa 1.000 conchas. Faltam \(shellGrowthCost - ctx.stats.pearls).")
+            ctx.say("Reduzir tempo custa \(shellGrowthCost) conchas. Faltam \(shellGrowthCost - ctx.stats.pearls).")
             return false
         }
 
@@ -353,6 +354,12 @@ final class GrowthSystem {
         ctx.stats.phase = .baby
         ctx.stats.birthDate = now
         ctx.stats.phaseStartedAt = now
+        ctx.stats.balanceVersion = GameBalance.currentVersion
+        ctx.stats.pearls = GameBalance.babyStartingPearls
+        ctx.stats.hunger = GameBalance.babyStartingHunger
+        ctx.stats.energy = GameBalance.babyStartingEnergy
+        ctx.stats.disposition = GameBalance.babyStartingDisposition
+        ctx.stats.xp = GameBalance.babyStartingXP
         let mermaid = ctx.mermaidEntity.mermaid
         mermaid.setForm(for: .baby)
         eggNode = nil
@@ -376,7 +383,6 @@ final class GrowthSystem {
                 self?.ctx.autonomy.paused = false
             }
         ]))
-        ctx.stats.gainXP(10)
         ctx.stats.addMemory("Nasceu! 🌊")
         ctx.say("Ela nasceu! 🧜‍♀️🌊")
         ctx.stats.save()

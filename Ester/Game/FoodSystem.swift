@@ -8,6 +8,7 @@
 
 import Foundation
 import SpriteKit
+import UIKit
 
 // MARK: - Tipos de comida
 
@@ -78,17 +79,22 @@ final class FoodNode: SKNode {
             stem.strokeColor = .clear
             addChild(stem)
         case .pearl:
-            let pearl = SKShapeNode(circleOfRadius: 16)
-            pearl.fillColor = kind.color
-            pearl.strokeColor = .white
-            pearl.glowWidth = 6
-            addChild(pearl)
-            let shine = SKShapeNode(circleOfRadius: 5)
-            shine.fillColor = .white
-            shine.strokeColor = .clear
-            shine.position = CGPoint(x: -5, y: 6)
-            shine.alpha = 0.8
-            addChild(shine)
+            let glow = SKShapeNode(circleOfRadius: 18)
+            glow.fillColor = kind.color.withAlphaComponent(0.18)
+            glow.strokeColor = .clear
+            glow.glowWidth = 7
+            addChild(glow)
+
+            let shell: SKSpriteNode
+            if let texture = FoodNode.tintedIconTexture(named: "conch",
+                                                        color: kind.color,
+                                                        pointSize: 34) {
+                shell = SKSpriteNode(texture: texture)
+            } else {
+                shell = SKSpriteNode(imageNamed: "conch")
+            }
+            shell.size = CGSize(width: 34, height: 34)
+            addChild(shell)
         case .critter:
             let body = SKShapeNode(ellipseOf: CGSize(width: 44, height: 26))
             body.fillColor = kind.color
@@ -123,6 +129,23 @@ final class FoodNode: SKNode {
         bob.eaeInEaseOut()
         run(bob)
     }
+
+    private static func tintedIconTexture(named name: String,
+                                          color: UIColor,
+                                          pointSize: CGFloat) -> SKTexture? {
+        guard let source = UIImage(named: name) else { return nil }
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = UIScreen.main.scale
+        format.opaque = false
+        let image = UIGraphicsImageRenderer(size: CGSize(width: pointSize, height: pointSize),
+                                            format: format).image { context in
+            let rect = CGRect(x: 0, y: 0, width: pointSize, height: pointSize)
+            color.setFill()
+            context.cgContext.fill(rect)
+            source.draw(in: rect, blendMode: .destinationIn, alpha: 1)
+        }
+        return SKTexture(image: image)
+    }
 }
 
 // MARK: - Sistema
@@ -141,10 +164,19 @@ final class FoodSystem {
     }
 
     func update(dt: CGFloat) {
+        // remove comida muito distante
+        foods.removeAll { food in
+            if food.position.distance(to: ctx.mermaidPosition) > 4000 {
+                food.removeFromParent()
+                return true
+            }
+            return false
+        }
+
         spawnTimer -= dt
         if spawnTimer <= 0 {
-            spawnTimer = .random(in: 7...14)
-            if foods.count < 7 {
+            spawnTimer = .random(in: GameBalance.foodSpawnInterval(for: ctx.stats.phase))
+            if foods.count < GameBalance.maxFoodCount(for: ctx.stats.phase) {
                 spawn(near: ctx.mermaidPosition)
             }
         }
@@ -154,20 +186,14 @@ final class FoodSystem {
                 spawn(near: ctx.mermaidPosition, maxDistance: 500)
             }
         }
-        // remove comida muito distante
-        foods.removeAll { food in
-            if food.position.distance(to: ctx.mermaidPosition) > 4000 {
-                food.removeFromParent()
-                return true
-            }
-            return false
-        }
     }
 
     /// A sereia "fareja": garante que algo aparece perto em instantes.
     func requestSpawn(near point: CGPoint) {
+        guard ctx.stats.hunger >= GameBalance.requestFoodHungerThreshold(for: ctx.stats.phase),
+              foods.count < GameBalance.maxFoodCount(for: ctx.stats.phase) else { return }
         if pendingSpawn <= 0 {
-            pendingSpawn = .random(in: 1.5...3)
+            pendingSpawn = ctx.stats.phase == .baby ? .random(in: 2.5...5) : .random(in: 1.5...3)
         }
     }
 
@@ -258,23 +284,23 @@ final class FoodSystem {
         switch zone {
         case .clear:
             return [
-                FoodKind(name: "alga doce", weight: 5, nutrition: 14, xp: 2, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.4, green: 0.8, blue: 0.5, alpha: 1)),
-                FoodKind(name: "plâncton brilhante", weight: 3, nutrition: 10, xp: 4, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.65, green: 0.95, blue: 0.85, alpha: 1)),
-                FoodKind(name: "fruta caída na água", weight: 2, nutrition: 22, xp: 3, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.95, green: 0.45, blue: 0.4, alpha: 1))
+                FoodKind(name: "alga doce", weight: 5, nutrition: 8, xp: 2, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.4, green: 0.8, blue: 0.5, alpha: 1)),
+                FoodKind(name: "plâncton brilhante", weight: 3, nutrition: 6, xp: 4, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.65, green: 0.95, blue: 0.85, alpha: 1)),
+                FoodKind(name: "fruta caída na água", weight: 2, nutrition: 10, xp: 3, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.95, green: 0.45, blue: 0.4, alpha: 1))
             ]
         case .shallow:
             return [
-                FoodKind(name: "alga macia", weight: 5, nutrition: 14, xp: 2, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.3, green: 0.75, blue: 0.45, alpha: 1)),
-                FoodKind(name: "plâncton brilhante", weight: 3, nutrition: 10, xp: 4, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.65, green: 0.95, blue: 0.85, alpha: 1)),
-                FoodKind(name: "semente aquática", weight: 2, nutrition: 12, xp: 2, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.85, green: 0.75, blue: 0.4, alpha: 1)),
-                FoodKind(name: "uma concha pequena", weight: 1, nutrition: 6, xp: 8, pearls: 3, courage: 0.5, style: .pearl, color: UIColor(white: 0.95, alpha: 1))
+                FoodKind(name: "alga macia", weight: 5, nutrition: 8, xp: 2, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.3, green: 0.75, blue: 0.45, alpha: 1)),
+                FoodKind(name: "plâncton brilhante", weight: 3, nutrition: 6, xp: 4, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.65, green: 0.95, blue: 0.85, alpha: 1)),
+                FoodKind(name: "semente aquática", weight: 2, nutrition: 7, xp: 2, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.85, green: 0.75, blue: 0.4, alpha: 1)),
+                FoodKind(name: "uma concha pequena", weight: 1, nutrition: 1, xp: 5, pearls: 1, courage: 0.3, style: .pearl, color: UIColor(white: 0.95, alpha: 1))
             ]
         case .mid:
             return [
-                FoodKind(name: "plâncton azul", weight: 4, nutrition: 12, xp: 4, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.45, green: 0.65, blue: 0.95, alpha: 1)),
-                FoodKind(name: "crustáceo das águas", weight: 3, nutrition: 20, xp: 5, pearls: 0, courage: 0.3, style: .critter, color: UIColor(red: 0.55, green: 0.55, blue: 0.75, alpha: 1)),
-                FoodKind(name: "alga da meia-água", weight: 3, nutrition: 16, xp: 3, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.25, green: 0.55, blue: 0.5, alpha: 1)),
-                FoodKind(name: "uma concha nutritiva", weight: 1, nutrition: 10, xp: 10, pearls: 4, courage: 0.6, style: .pearl, color: UIColor(white: 0.95, alpha: 1))
+                FoodKind(name: "plâncton azul", weight: 4, nutrition: 8, xp: 4, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.45, green: 0.65, blue: 0.95, alpha: 1)),
+                FoodKind(name: "crustáceo das águas", weight: 3, nutrition: 10, xp: 5, pearls: 0, courage: 0.3, style: .critter, color: UIColor(red: 0.55, green: 0.55, blue: 0.75, alpha: 1)),
+                FoodKind(name: "alga da meia-água", weight: 3, nutrition: 9, xp: 3, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.25, green: 0.55, blue: 0.5, alpha: 1)),
+                FoodKind(name: "uma concha nutritiva", weight: 1, nutrition: 2, xp: 8, pearls: 1, courage: 0.4, style: .pearl, color: UIColor(white: 0.95, alpha: 1))
             ]
         case .blue:
             return [

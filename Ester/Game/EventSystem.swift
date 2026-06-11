@@ -29,8 +29,8 @@ struct WorldObjective {
 final class EventSystem {
     unowned let ctx: GameContext
     private weak var worldNode: SKNode?
-    private let objectivePearlReward = 100
-    private let maxObjectivePearlReward = 1_000
+    private let objectivePearlReward = 12
+    private let maxObjectivePearlReward = 40
 
     private var timer: CGFloat = 20
     private var driftResetTimer: CGFloat = -1
@@ -82,7 +82,7 @@ final class EventSystem {
     private func setObjective(label: String,
                               duration: CGFloat,
                               position: @escaping () -> CGPoint?,
-                              pearlReward: Int = 100,
+                              pearlReward: Int = 12,
                               onReach: (() -> Void)? = nil) {
         currentObjective = WorldObjective(label: label,
                                           position: position,
@@ -95,8 +95,8 @@ final class EventSystem {
     func completeObjective() {
         guard let objective = currentObjective else { return }
         currentObjective = nil
-        let gainedPearls = min(max(objective.pearlReward, objectivePearlReward), maxObjectivePearlReward)
-        ctx.stats.pearls += gainedPearls
+        let basePearls = min(max(objective.pearlReward, objectivePearlReward), maxObjectivePearlReward)
+        let gainedPearls = ctx.stats.awardPearls(basePearls)
         ctx.stats.boostMood(6)
         ctx.stats.gainXP(10)
         ctx.stats.curiosity = min(100, ctx.stats.curiosity + 1)

@@ -657,7 +657,7 @@ final class HUDLayer: SKNode {
         buttonHighlights[command] = highlight
 
         let icon = HUDLayer.iconNode(for: command, color: command.tint)
-        icon.position = CGPoint(x: 0, y: showsLabel ? 10 : 0)
+        icon.position = CGPoint(x: 0, y: showsLabel ? 4 : 0)
         icon.zPosition = 5
         button.addChild(icon)
 
@@ -1001,11 +1001,7 @@ final class HUDLayer: SKNode {
             addDot(to: node, at: CGPoint(x: 10, y: 4), radius: 1.4, color: color)
             addDot(to: node, at: CGPoint(x: -9, y: -5), radius: 1.1, color: color)
         case .shell:
-            if let symbol = sfSymbolNode(name: "fossil.shell.fill", color: color, size: 22) {
-                node.addChild(symbol)
-                return node
-            }
-            addShellDrawing(to: node, color: color)
+            node.addChild(assetIconNode(named: "conch", color: color, size: 22))
         case .wave:
             let path = UIBezierPath()
             path.move(to: CGPoint(x: -11, y: -2))
@@ -1022,90 +1018,51 @@ final class HUDLayer: SKNode {
         return node
     }
 
-    private static func sfSymbolNode(name: String, color: UIColor, size: CGFloat) -> SKNode? {
-        let config = UIImage.SymbolConfiguration(pointSize: size, weight: .semibold)
-        guard let image = UIImage(systemName: name, withConfiguration: config)?
-            .withTintColor(color, renderingMode: .alwaysOriginal) else { return nil }
-        let sprite = SKSpriteNode(texture: SKTexture(image: image))
-        sprite.size = image.size
+    private static func assetIconNode(named name: String,
+                                      color: UIColor,
+                                      size: CGFloat) -> SKSpriteNode {
+        let sprite: SKSpriteNode
+        if let texture = tintedIconTexture(named: name, color: color, pointSize: size) {
+            sprite = SKSpriteNode(texture: texture)
+        } else {
+            sprite = SKSpriteNode(imageNamed: name)
+        }
+        sprite.size = CGSize(width: size, height: size)
         return sprite
     }
 
-    private static func addShellDrawing(to node: SKNode, color: UIColor) {
-        let shell = UIBezierPath()
-        shell.move(to: CGPoint(x: -9, y: -7))
-        shell.addCurve(to: CGPoint(x: 9, y: -7),
-                       controlPoint1: CGPoint(x: -7, y: 9),
-                       controlPoint2: CGPoint(x: 7, y: 9))
-        shell.addCurve(to: CGPoint(x: -9, y: -7),
-                       controlPoint1: CGPoint(x: 5, y: -10),
-                       controlPoint2: CGPoint(x: -5, y: -10))
-        node.addChild(pathNode(path: shell, color: color, width: 1.8))
-        for x in [CGFloat(-5), 0, 5] {
-            node.addChild(pathNode(points: [CGPoint(x: 0, y: -7), CGPoint(x: x, y: 7)],
-                                  color: color.withAlphaComponent(0.78),
-                                  width: 1.1))
+    private static func tintedIconTexture(named name: String,
+                                          color: UIColor,
+                                          pointSize: CGFloat) -> SKTexture? {
+        guard let source = UIImage(named: name) else { return nil }
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = UIScreen.main.scale
+        format.opaque = false
+        let image = UIGraphicsImageRenderer(size: CGSize(width: pointSize, height: pointSize),
+                                            format: format).image { context in
+            let rect = CGRect(x: 0, y: 0, width: pointSize, height: pointSize)
+            color.setFill()
+            context.cgContext.fill(rect)
+            source.draw(in: rect, blendMode: .destinationIn, alpha: 1)
         }
+        return SKTexture(image: image)
     }
 
     private static func iconNode(for command: PlayerCommand, color: UIColor) -> SKNode {
         let node = SKNode()
         switch command {
         case .explore:
-            let circle = SKShapeNode(circleOfRadius: 10)
-            circle.fillColor = .clear
-            circle.strokeColor = color
-            circle.lineWidth = 1.8
-            node.addChild(circle)
-            node.addChild(pathNode(points: [CGPoint(x: -3, y: -5), CGPoint(x: 4, y: 7), CGPoint(x: 1, y: -2)],
-                                  color: color,
-                                  width: 1.8))
+            node.addChild(assetIconNode(named: "compass", color: color, size: 24))
         case .seekFood:
-            node.addChild(pathNode(points: [CGPoint(x: 0, y: -10), CGPoint(x: 0, y: 10)],
-                                  color: color,
-                                  width: 1.8))
-            node.addChild(pathNode(points: [CGPoint(x: 0, y: -2), CGPoint(x: -8, y: 4), CGPoint(x: -3, y: 7)],
-                                  color: color,
-                                  width: 1.7))
-            node.addChild(pathNode(points: [CGPoint(x: 0, y: 2), CGPoint(x: 8, y: 6), CGPoint(x: 4, y: 9)],
-                                  color: color,
-                                  width: 1.7))
+            node.addChild(assetIconNode(named: "eat", color: color, size: 24))
         case .rest:
-            let moon = UIBezierPath()
-            moon.move(to: CGPoint(x: 5, y: 9))
-            moon.addCurve(to: CGPoint(x: 3, y: -9),
-                          controlPoint1: CGPoint(x: -5, y: 6),
-                          controlPoint2: CGPoint(x: -6, y: -5))
-            moon.addCurve(to: CGPoint(x: 9, y: 5),
-                          controlPoint1: CGPoint(x: -1, y: -4),
-                          controlPoint2: CGPoint(x: 2, y: 4))
-            node.addChild(pathNode(path: moon, color: color, width: 1.9))
-            addDot(to: node, at: CGPoint(x: -8, y: -5), radius: 1.4, color: color)
-            addDot(to: node, at: CGPoint(x: -10, y: 5), radius: 1.1, color: color)
+            node.addChild(assetIconNode(named: "sleep", color: color, size: 30))
         case .challenge:
-            let star = UIBezierPath()
-            for i in 0..<10 {
-                let angle = -CGFloat.pi / 2 + CGFloat(i) * CGFloat.pi / 5
-                let radius: CGFloat = i.isMultiple(of: 2) ? 10 : 5
-                let p = CGPoint(x: cos(angle) * radius, y: sin(angle) * radius)
-                i == 0 ? star.move(to: p) : star.addLine(to: p)
-            }
-            star.close()
-            node.addChild(pathNode(path: star, color: color, width: 1.7))
+            node.addChild(assetIconNode(named: "challenge", color: color, size: 24))
         case .objective:
-            let box = SKShapeNode(rectOf: CGSize(width: 17, height: 19), cornerRadius: 3)
-            box.fillColor = .clear
-            box.strokeColor = color
-            box.lineWidth = 1.6
-            node.addChild(box)
-            node.addChild(pathNode(points: [CGPoint(x: -5, y: 3), CGPoint(x: -2, y: 0), CGPoint(x: 5, y: 6)],
-                                  color: color,
-                                  width: 1.7))
-            node.addChild(pathNode(points: [CGPoint(x: -5, y: -5), CGPoint(x: 6, y: -5)],
-                                  color: color,
-                                  width: 1.4))
+            node.addChild(assetIconNode(named: "objective", color: color, size: 24))
         case .refuge:
-            addShellDrawing(to: node, color: color)
+            node.addChild(assetIconNode(named: "refuge", color: color, size: 27))
         case .goUp:
             node.addChild(pathNode(points: [CGPoint(x: 0, y: -9), CGPoint(x: 0, y: 9)],
                                   color: color,
@@ -1125,23 +1082,7 @@ final class HUDLayer: SKNode {
             addDot(to: node, at: CGPoint(x: -8, y: 4), radius: 1.2, color: color)
             addDot(to: node, at: CGPoint(x: 8, y: -1), radius: 1.0, color: color)
         case .travel:
-            let map = UIBezierPath()
-            map.move(to: CGPoint(x: -10, y: -8))
-            map.addLine(to: CGPoint(x: -3, y: -5))
-            map.addLine(to: CGPoint(x: 4, y: -8))
-            map.addLine(to: CGPoint(x: 10, y: -5))
-            map.addLine(to: CGPoint(x: 10, y: 8))
-            map.addLine(to: CGPoint(x: 4, y: 5))
-            map.addLine(to: CGPoint(x: -3, y: 8))
-            map.addLine(to: CGPoint(x: -10, y: 5))
-            map.close()
-            node.addChild(pathNode(path: map, color: color, width: 1.6))
-            node.addChild(pathNode(points: [CGPoint(x: -3, y: -5), CGPoint(x: -3, y: 8)],
-                                  color: color.withAlphaComponent(0.70),
-                                  width: 1.1))
-            node.addChild(pathNode(points: [CGPoint(x: 4, y: -8), CGPoint(x: 4, y: 5)],
-                                  color: color.withAlphaComponent(0.70),
-                                  width: 1.1))
+            node.addChild(assetIconNode(named: "roadmap", color: color, size: 24))
         }
         return node
     }

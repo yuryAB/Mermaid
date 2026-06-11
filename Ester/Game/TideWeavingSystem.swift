@@ -82,6 +82,8 @@ final class TideWeavingOverlay: SKNode {
     private let challengeGoal: Int
     private let challengeBonus: Int
     private let session: TideSessionType
+    private let phase: MermaidPhase
+    private let shellRewardMultiplier: CGFloat
     private let onFinish: (ChallengeResult) -> Void
 
     private var board: [[Int]] = []
@@ -106,16 +108,23 @@ final class TideWeavingOverlay: SKNode {
          zone: DepthZone,
          region: Region?,
          session: TideSessionType,
+         phase: MermaidPhase,
+         shellRewardMultiplier: CGFloat,
          giverDisplay: SKNode?,
          onFinish: @escaping (ChallengeResult) -> Void) {
         self.theme = TideTheme.theme(for: zone, region: region, session: session)
         self.kindCount = theme.icons.count
         self.session = session
+        self.phase = phase
+        self.shellRewardMultiplier = shellRewardMultiplier
         var goal = 18 + zone.rawValue * 4
-        var bonus = 400 + zone.rawValue * 100
+        var bonus = GameBalance.challengeBaseReward(score: 0,
+                                                    reachedTarget: true,
+                                                    phase: phase,
+                                                    special: session == .event,
+                                                    isHatching: session == .hatching)
         if session == .event {
             goal += 10
-            bonus += 200
         }
         if session == .hatching {
             goal = 35
@@ -531,7 +540,7 @@ final class TideWeavingOverlay: SKNode {
 
     private func scoreText() -> String {
         if challengeCompleted {
-            return "Conchas \(score) · Bônus pronto"
+            return "Pontos \(score) · Bônus pronto"
         }
         if challengeBonus > 0 {
             return "Meta \(score)/\(challengeGoal) · +\(challengeBonus)"
@@ -558,7 +567,13 @@ final class TideWeavingOverlay: SKNode {
         selectionRing.isHidden = true
 
         let reached = challengeCompleted
-        let pearls = score + (reached ? challengeBonus : 0)
+        let basePearls = GameBalance.challengeBaseReward(score: score,
+                                                         reachedTarget: reached,
+                                                         phase: phase,
+                                                         special: session == .event,
+                                                         isHatching: session == .hatching)
+        let pearls = GameBalance.scaledPearlReward(baseAmount: basePearls,
+                                                   multiplier: shellRewardMultiplier)
         let xp = CGFloat(score) / 5 * (session == .event ? 1.5 : 1)
 
         let resultTint = reached
@@ -594,7 +609,10 @@ final class TideWeavingOverlay: SKNode {
         scoreLine.position = CGPoint(x: 0, y: 24)
         panelContent.addChild(scoreLine)
 
-        let rewardLine = SKLabelNode(text: "Conchas +\(pearls)   XP +\(Int(xp))")
+        let rewardText = session == .hatching
+            ? "Energia de nascimento +\(score)"
+            : "Conchas +\(pearls)   XP +\(Int(xp))"
+        let rewardLine = SKLabelNode(text: rewardText)
         rewardLine.fontName = "AvenirNext-DemiBold"
         rewardLine.fontSize = 17
         rewardLine.fontColor = GameUI.gold
@@ -622,7 +640,7 @@ final class TideWeavingOverlay: SKNode {
         pendingResult = ChallengeResult(kind: .plot,
                                         score: score,
                                         reachedTarget: reached,
-                                        pearls: pearls,
+                                        pearls: basePearls,
                                         xp: xp,
                                         special: session == .event,
                                         isHatching: session == .hatching)

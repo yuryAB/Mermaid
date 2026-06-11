@@ -162,6 +162,8 @@ private final class ClimbBubble: SKShapeNode {
 
 final class BubbleClimbOverlay: SKNode {
     private let special: Bool
+    private let phase: MermaidPhase
+    private let shellRewardMultiplier: CGFloat
     private let challengeGoalBubbles: Int
     private let challengeBonus: Int
     private let onFinish: (ChallengeResult) -> Void
@@ -208,11 +210,18 @@ final class BubbleClimbOverlay: SKNode {
          phase: MermaidPhase,
          palette: MermaidPalette,
          special: Bool,
+         shellRewardMultiplier: CGFloat,
          giverDisplay: SKNode?,
          onFinish: @escaping (ChallengeResult) -> Void) {
         self.special = special
+        self.phase = phase
+        self.shellRewardMultiplier = shellRewardMultiplier
         self.challengeGoalBubbles = special ? 24 : 16
-        self.challengeBonus = special ? 1_000 : 700
+        self.challengeBonus = GameBalance.challengeBaseReward(score: 0,
+                                                              reachedTarget: true,
+                                                              phase: phase,
+                                                              special: special,
+                                                              isHatching: false)
         self.onFinish = onFinish
         self.areaWidth = min(size.width - 36, 380)
         super.init()
@@ -650,7 +659,13 @@ final class BubbleClimbOverlay: SKNode {
         updateTimerLabels()
 
         let reached = challengeCompleted
-        let pearls = shellScore + (reached ? challengeBonus : 0)
+        let basePearls = GameBalance.challengeBaseReward(score: shellScore,
+                                                         reachedTarget: reached,
+                                                         phase: phase,
+                                                         special: special,
+                                                         isHatching: false)
+        let pearls = GameBalance.scaledPearlReward(baseAmount: basePearls,
+                                                   multiplier: shellRewardMultiplier)
         let xp = CGFloat(bubblesClimbed) * 2.0 * (special ? 1.5 : 1)
 
         let resultTint = reached
@@ -709,7 +724,7 @@ final class BubbleClimbOverlay: SKNode {
         pendingResult = ChallengeResult(kind: .ascent,
                                         score: shellScore,
                                         reachedTarget: reached,
-                                        pearls: pearls,
+                                        pearls: basePearls,
                                         xp: xp,
                                         special: special,
                                         isHatching: false)

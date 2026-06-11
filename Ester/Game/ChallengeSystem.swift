@@ -70,19 +70,17 @@ struct ChallengeResult {
 
 final class ChallengeSystem {
     unowned let ctx: GameContext
+    private var babyChallengeOfferCooldownUntil: Date?
 
     init(ctx: GameContext) {
         self.ctx = ctx
     }
 
-    /// Limite de ofertas simultâneas perto da sereia.
-    private let maxNearbyGivers = 2
-    /// Chance de um peixe recém-criado oferecer desafio.
-    private let spawnChallengeChance = 4 // em 1/10
-
     /// Chamado quando um peixe nasce: decide se ele oferece um desafio.
     func decorateSpawn(_ fish: FishNode) {
         guard ctx.stats.phase != .egg else { return }
+        let maxNearbyGivers = GameBalance.maxNearbyChallengeGivers(for: ctx.stats.phase)
+        let spawnChallengeChance = GameBalance.challengeSpawnChanceTenths(for: ctx.stats.phase)
         guard nearbyGivers(to: fish.position, maxDistance: 2600).count < maxNearbyGivers else { return }
         guard Int.random(in: 0..<10) < spawnChallengeChance else { return }
         fish.offeredChallenge = ChallengeKind.allCases.randomElement()
@@ -104,6 +102,16 @@ final class ChallengeSystem {
     func ensureGiver(near point: CGPoint) -> FishNode? {
         if let existing = nearestGiver(to: point, maxDistance: 2200) {
             return existing
+        }
+        if ctx.stats.phase == .baby {
+            if let until = babyChallengeOfferCooldownUntil, until > Date() {
+                return nil
+            }
+            babyChallengeOfferCooldownUntil = Date()
+                .addingTimeInterval(GameBalance.challengeCommandCooldown(for: .baby))
+            guard CGFloat.random(in: 0...1) <= GameBalance.challengeOfferChance(for: .baby) else {
+                return nil
+            }
         }
         let zone = DepthZone.zone(atY: point.y)
         guard let fish = ctx.fish.spawnFish(zone: zone, near: point) else { return nil }

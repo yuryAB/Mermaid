@@ -45,6 +45,7 @@ final class MermaidStats: Codable {
     var feedingUpgradeLevel: Int = 0
     var energyUpgradeLevel: Int = 0
     var dispositionUpgradeLevel: Int = 0
+    var balanceVersion: Int = GameBalance.currentVersion
 
     // Estado transitório, não persiste
     var moodBoost: CGFloat = 0
@@ -58,6 +59,7 @@ final class MermaidStats: Codable {
         case posX, posY, discoveredRegionIds, regionProgress, destinationRegionId
         case speedUpgradeLevel, shellGainUpgradeLevel, feedingUpgradeLevel
         case energyUpgradeLevel, dispositionUpgradeLevel
+        case balanceVersion
     }
 
     init() {}
@@ -96,6 +98,7 @@ final class MermaidStats: Codable {
         feedingUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .feedingUpgradeLevel) ?? 0
         energyUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .energyUpgradeLevel) ?? 0
         dispositionUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .dispositionUpgradeLevel) ?? 0
+        balanceVersion = try c.decodeIfPresent(Int.self, forKey: .balanceVersion) ?? 1
     }
 
     private static func estimatedPhaseStartedAt(for phase: MermaidPhase, birthDate: Date) -> Date {
@@ -195,7 +198,7 @@ final class MermaidStats: Codable {
     func upgradeCost(for kind: UpgradeKind) -> Int? {
         let level = upgradeLevel(for: kind)
         guard level < maximumUpgradeLevel else { return nil }
-        return (level + 1) * 100
+        return 40 + level * 35 + level * level * 3
     }
 
     @discardableResult
@@ -216,31 +219,31 @@ final class MermaidStats: Codable {
     }
 
     var speedMultiplier: CGFloat {
-        (1 + CGFloat(speedUpgradeLevel) * 0.0045).clamped(to: 1...1.45)
+        (1 + CGFloat(speedUpgradeLevel) * 0.007).clamped(to: 1...1.7)
     }
 
     var explorationProgressMultiplier: CGFloat {
-        (1 + CGFloat(speedUpgradeLevel) * 0.005).clamped(to: 1...1.5)
+        (1 + CGFloat(speedUpgradeLevel) * 0.007).clamped(to: 1...1.7)
     }
 
     var shellRewardMultiplier: CGFloat {
-        (0.85 + CGFloat(shellGainUpgradeLevel) * 0.011).clamped(to: 0.85...1.95)
+        (0.65 + CGFloat(shellGainUpgradeLevel) * 0.035).clamped(to: 0.65...2.4)
     }
 
     var feedingDrainMultiplier: CGFloat {
-        (1 - CGFloat(feedingUpgradeLevel) * 0.004).clamped(to: 0.60...1)
+        (1 - CGFloat(feedingUpgradeLevel) * 0.012).clamped(to: 0.35...1)
     }
 
     var energyDrainMultiplier: CGFloat {
-        (1.15 - CGFloat(energyUpgradeLevel) * 0.005).clamped(to: 0.65...1.15)
+        (1.12 - CGFloat(energyUpgradeLevel) * 0.012).clamped(to: 0.45...1.12)
     }
 
     var dispositionDrainMultiplier: CGFloat {
-        (1 - CGFloat(dispositionUpgradeLevel) * 0.004).clamped(to: 0.60...1)
+        (1 - CGFloat(dispositionUpgradeLevel) * 0.010).clamped(to: 0.35...1)
     }
 
     var dispositionAcceptanceBonus: CGFloat {
-        CGFloat(dispositionUpgradeLevel) * 0.003
+        (CGFloat(dispositionUpgradeLevel) * 0.008).clamped(to: 0...0.45)
     }
 
     // MARK: - Ganhos
@@ -267,7 +270,8 @@ final class MermaidStats: Codable {
     @discardableResult
     func awardPearls(_ baseAmount: Int) -> Int {
         guard baseAmount > 0 else { return 0 }
-        let amount = max(1, Int((CGFloat(baseAmount) * shellRewardMultiplier).rounded()))
+        let amount = GameBalance.scaledPearlReward(baseAmount: baseAmount,
+                                                   multiplier: shellRewardMultiplier)
         pearls += amount
         return amount
     }
@@ -276,7 +280,7 @@ final class MermaidStats: Codable {
 
     /// Avança fome, disposição e energia. `energyDelta` é a taxa por segundo da atividade atual.
     func tick(dt: CGFloat, energyDelta: CGFloat) {
-        let hungerRate = 0.08 * feedingDrainMultiplier
+        let hungerRate = GameBalance.hungerRate(for: phase) * feedingDrainMultiplier
         hunger = (hunger + dt * hungerRate).clamped(to: 0...100)
 
         let adjustedEnergyDelta = energyDelta < 0 ? energyDelta * energyDrainMultiplier : energyDelta
@@ -309,7 +313,7 @@ final class MermaidStats: Codable {
                 stats.posX = World.startPosition.x
                 stats.posY = World.startPosition.y
             }
-            stats.applyOfflineProgress()
+            stats.applyBalanceMigrationIfNeeded()
             return stats
         }
         return MermaidStats()
@@ -322,18 +326,21 @@ final class MermaidStats: Codable {
         }
     }
 
-    /// Progresso enquanto o app esteve fechado: fome cresce devagar, energia recupera.
-    private func applyOfflineProgress() {
-        let elapsed = CGFloat(Date().timeIntervalSince(lastSaved))
-        guard elapsed > 30 else { return }
-        let capped = min(elapsed, 60 * 60 * 16)
-        hunger = (hunger + capped * 0.015 * feedingDrainMultiplier).clamped(to: 0...100)
-        energy = (energy + capped * 0.01).clamped(to: 0...100)
-        let targetDisposition: CGFloat = 52
-        let dispositionRate = mood > targetDisposition ? dispositionDrainMultiplier : 1
-        mood += (targetDisposition - mood) * min(1, capped / (60 * 60 * 6) * dispositionRate)
-        mood = mood.clamped(to: 0...100)
-        scaredTimer = 0
-        moodBoost = 0
+    private func applyBalanceMigrationIfNeeded() {
+        guard balanceVersion < GameBalance.currentVersion else { return }
+        if phase == .baby {
+            pearls = GameBalance.babyStartingPearls
+            xp = min(xp, 30)
+            hunger = max(hunger, 45)
+            energy = energy.clamped(to: 55...80)
+            mood = min(mood, 65)
+            speedUpgradeLevel = 0
+            shellGainUpgradeLevel = 0
+            feedingUpgradeLevel = 0
+            energyUpgradeLevel = 0
+            dispositionUpgradeLevel = 0
+            addMemory("Economia da fase bebê rebalanceada")
+        }
+        balanceVersion = GameBalance.currentVersion
     }
 }

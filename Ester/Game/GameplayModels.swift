@@ -20,6 +20,96 @@ enum World {
     static let startPosition = CGPoint(x: 0, y: -7000)
 }
 
+// MARK: - Balanceamento
+
+enum GameBalance {
+    static let currentVersion = 2
+
+    static let babyStartingPearls = 5
+    static let babyStartingHunger: CGFloat = 42
+    static let babyStartingEnergy: CGFloat = 75
+    static let babyStartingDisposition: CGFloat = 58
+    static let babyStartingXP: CGFloat = 4
+
+    static func hungerRate(for phase: MermaidPhase) -> CGFloat {
+        switch phase {
+        case .egg: return 0
+        case .baby: return 0.11
+        case .child: return 0.095
+        case .teen: return 0.08
+        case .young: return 0.07
+        case .adult: return 0.06
+        }
+    }
+
+    static func foodSpawnInterval(for phase: MermaidPhase) -> ClosedRange<CGFloat> {
+        phase == .baby ? 16...24 : 8...15
+    }
+
+    static func maxFoodCount(for phase: MermaidPhase) -> Int {
+        phase == .baby ? 3 : 7
+    }
+
+    static func requestFoodHungerThreshold(for phase: MermaidPhase) -> CGFloat {
+        phase == .baby ? 45 : 30
+    }
+
+    static func autoEatHungerThreshold(for phase: MermaidPhase) -> CGFloat {
+        phase == .baby ? 55 : 35
+    }
+
+    static func challengeSpawnChanceTenths(for phase: MermaidPhase) -> Int {
+        phase == .baby ? 1 : 4
+    }
+
+    static func maxNearbyChallengeGivers(for phase: MermaidPhase) -> Int {
+        phase == .baby ? 1 : 2
+    }
+
+    static func challengeCommandCooldown(for phase: MermaidPhase) -> TimeInterval {
+        phase == .baby ? 120 : 10
+    }
+
+    static func challengeOfferChance(for phase: MermaidPhase) -> CGFloat {
+        phase == .baby ? 0.35 : 1
+    }
+
+    static func challengeBaseReward(score: Int,
+                                    reachedTarget: Bool,
+                                    phase: MermaidPhase,
+                                    special: Bool,
+                                    isHatching: Bool) -> Int {
+        guard !isHatching else { return 0 }
+        let bonus: Int
+        switch phase {
+        case .egg: bonus = 0
+        case .baby: bonus = 12
+        case .child: bonus = 25
+        case .teen: bonus = 40
+        case .young: bonus = 60
+        case .adult: bonus = 90
+        }
+        let base = max(0, score / 4) + (reachedTarget ? bonus : 0)
+        return special ? base * 3 : base
+    }
+
+    static func scaledPearlReward(baseAmount: Int, multiplier: CGFloat) -> Int {
+        guard baseAmount > 0 else { return 0 }
+        return max(1, Int((CGFloat(baseAmount) * multiplier).rounded()))
+    }
+
+    static func growthShellCost(for phase: MermaidPhase) -> Int {
+        switch phase {
+        case .egg: return 0
+        case .baby: return 300
+        case .child: return 600
+        case .teen: return 1_000
+        case .young: return 1_600
+        case .adult: return 0
+        }
+    }
+}
+
 // MARK: - Camadas de profundidade
 
 enum DepthZone: Int, Codable, CaseIterable {

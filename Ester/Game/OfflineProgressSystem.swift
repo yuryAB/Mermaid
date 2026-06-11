@@ -36,7 +36,7 @@ enum OfflineProgressSystem {
             if destination.contains(CGPoint(x: stats.posX, y: stats.posY)) {
                 stats.destinationRegionId = nil
                 stats.discoveredRegionIds.insert(destination.id)
-                stats.awardPearls(5)
+                stats.awardPearls(4)
                 stats.addMemory("Chegou a \(destination.name) durante a sua ausência")
                 lines.append("ela chegou a \(destination.name)! 🗺")
             } else {
@@ -52,15 +52,16 @@ enum OfflineProgressSystem {
         // manter a posição dentro das camadas liberadas
         stats.posY = stats.posY.clamped(to: allowedYRange(for: stats))
 
-        // alimentação e descanso moderados
-        if hours >= 1 {
-            let meals = Int(min(4, hours / 2)) + 1
-            stats.mealsEaten += meals
-            stats.hunger = max(0, stats.hunger - CGFloat(meals) * 8)
-            lines.append("encontrou comida pelo caminho")
-        }
-        stats.gainXP(min(50, hours * 6))
-        let pearlGain = Int(min(6, hours))
+        // Fora do app ela descansa, mas a fome ainda vira tensão de cuidado.
+        let hungerGain: CGFloat = stats.phase == .baby
+            ? min(35, hours * 6)
+            : min(25, hours * 2.5)
+        stats.hunger = (stats.hunger + hungerGain * stats.feedingDrainMultiplier).clamped(to: 0...100)
+        stats.energy = (stats.energy + min(35, hours * 8)).clamped(to: 0...100)
+        lines.append("descansou, mas voltou precisando de cuidado")
+
+        stats.gainXP(stats.phase == .baby ? min(8, hours * 1.5) : min(35, hours * 4))
+        let pearlGain = stats.phase == .baby ? (hours >= 6 ? 1 : 0) : Int(min(4, hours / 2))
         if pearlGain > 0 {
             let gained = stats.awardPearls(pearlGain)
             lines.append("juntou 🐚\(gained)")
@@ -70,6 +71,7 @@ enum OfflineProgressSystem {
             lines.append("viu algo bonito e guardou a memória ✨")
         }
 
+        stats.lastSaved = Date()
         guard !lines.isEmpty else { return nil }
         return "Enquanto você esteve fora: " + lines.joined(separator: ", ") + "."
     }
