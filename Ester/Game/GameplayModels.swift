@@ -59,19 +59,15 @@ enum GameBalance {
     }
 
     static func challengeSpawnChanceTenths(for phase: MermaidPhase) -> Int {
-        phase == .baby ? 1 : 4
+        4
     }
 
     static func maxNearbyChallengeGivers(for phase: MermaidPhase) -> Int {
-        phase == .baby ? 1 : 2
+        2
     }
 
     static func challengeCommandCooldown(for phase: MermaidPhase) -> TimeInterval {
-        phase == .baby ? 120 : 10
-    }
-
-    static func challengeOfferChance(for phase: MermaidPhase) -> CGFloat {
-        phase == .baby ? 0.35 : 1
+        10
     }
 
     static func challengeBaseReward(score: Int,
@@ -80,16 +76,22 @@ enum GameBalance {
                                     special: Bool,
                                     isHatching: Bool) -> Int {
         guard !isHatching else { return 0 }
-        let bonus: Int
+        let completionBonus: Int
         switch phase {
-        case .egg: bonus = 0
-        case .baby: bonus = 12
-        case .child: bonus = 25
-        case .teen: bonus = 40
-        case .young: bonus = 60
-        case .adult: bonus = 90
+        case .egg:
+            completionBonus = 0
+        case .baby:
+            completionBonus = 6
+        case .child:
+            completionBonus = 12
+        case .teen:
+            completionBonus = 20
+        case .young:
+            completionBonus = 30
+        case .adult:
+            completionBonus = 45
         }
-        let base = max(0, score / 4) + (reachedTarget ? bonus : 0)
+        let base = max(0, score) + (reachedTarget ? completionBonus : 0)
         return special ? base * 3 : base
     }
 

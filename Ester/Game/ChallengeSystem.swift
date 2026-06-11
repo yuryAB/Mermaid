@@ -70,7 +70,6 @@ struct ChallengeResult {
 
 final class ChallengeSystem {
     unowned let ctx: GameContext
-    private var babyChallengeOfferCooldownUntil: Date?
 
     init(ctx: GameContext) {
         self.ctx = ctx
@@ -102,16 +101,6 @@ final class ChallengeSystem {
     func ensureGiver(near point: CGPoint) -> FishNode? {
         if let existing = nearestGiver(to: point, maxDistance: 2200) {
             return existing
-        }
-        if ctx.stats.phase == .baby {
-            if let until = babyChallengeOfferCooldownUntil, until > Date() {
-                return nil
-            }
-            babyChallengeOfferCooldownUntil = Date()
-                .addingTimeInterval(GameBalance.challengeCommandCooldown(for: .baby))
-            guard CGFloat.random(in: 0...1) <= GameBalance.challengeOfferChance(for: .baby) else {
-                return nil
-            }
         }
         let zone = DepthZone.zone(atY: point.y)
         guard let fish = ctx.fish.spawnFish(zone: zone, near: point) else { return nil }

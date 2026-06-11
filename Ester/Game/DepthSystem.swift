@@ -11,6 +11,19 @@
 import Foundation
 import SpriteKit
 
+struct DepthEnvironment {
+    let waterColor: UIColor
+    let fogColor: UIColor
+    let fogAlpha: CGFloat
+    let causticAlpha: CGFloat
+    let lightRayAlpha: CGFloat
+    let planktonDensity: CGFloat
+    let marineSnowDensity: CGFloat
+    let maxVisibleDistance: CGFloat
+    let lifeDensity: CGFloat
+    let glowIntensity: CGFloat
+}
+
 final class DepthSystem {
     unowned let ctx: GameContext
 
@@ -52,6 +65,91 @@ final class DepthSystem {
             }
         }
         return waterAnchors.last!.color
+    }
+
+    func environment(atY y: CGFloat) -> DepthEnvironment {
+        let zone = DepthZone.zone(atY: y)
+        let water = waterColor(atY: y)
+
+        switch zone {
+        case .surface:
+            return DepthEnvironment(waterColor: water,
+                                    fogColor: UIColor.lerp(water, .white, 0.28),
+                                    fogAlpha: 0.06,
+                                    causticAlpha: 0.95,
+                                    lightRayAlpha: 0.85,
+                                    planktonDensity: 0.35,
+                                    marineSnowDensity: 0.05,
+                                    maxVisibleDistance: 1.0,
+                                    lifeDensity: 0.45,
+                                    glowIntensity: 0.0)
+        case .clear:
+            return DepthEnvironment(waterColor: water,
+                                    fogColor: UIColor.lerp(water, .white, 0.18),
+                                    fogAlpha: 0.10,
+                                    causticAlpha: 0.80,
+                                    lightRayAlpha: 0.70,
+                                    planktonDensity: 0.42,
+                                    marineSnowDensity: 0.12,
+                                    maxVisibleDistance: 0.92,
+                                    lifeDensity: 0.58,
+                                    glowIntensity: 0.04)
+        case .shallow:
+            return DepthEnvironment(waterColor: water,
+                                    fogColor: UIColor.lerp(water, .white, 0.08),
+                                    fogAlpha: 0.16,
+                                    causticAlpha: 0.45,
+                                    lightRayAlpha: 0.36,
+                                    planktonDensity: 0.58,
+                                    marineSnowDensity: 0.20,
+                                    maxVisibleDistance: 0.78,
+                                    lifeDensity: 0.72,
+                                    glowIntensity: 0.08)
+        case .mid:
+            return DepthEnvironment(waterColor: water,
+                                    fogColor: UIColor.lerp(water, .black, 0.08),
+                                    fogAlpha: 0.24,
+                                    causticAlpha: 0.22,
+                                    lightRayAlpha: 0.18,
+                                    planktonDensity: 0.68,
+                                    marineSnowDensity: 0.36,
+                                    maxVisibleDistance: 0.62,
+                                    lifeDensity: 0.58,
+                                    glowIntensity: 0.16)
+        case .blue:
+            return DepthEnvironment(waterColor: water,
+                                    fogColor: UIColor.lerp(water, .black, 0.15),
+                                    fogAlpha: 0.32,
+                                    causticAlpha: 0.12,
+                                    lightRayAlpha: 0.08,
+                                    planktonDensity: 0.72,
+                                    marineSnowDensity: 0.48,
+                                    maxVisibleDistance: 0.48,
+                                    lifeDensity: 0.38,
+                                    glowIntensity: 0.24)
+        case .deep:
+            return DepthEnvironment(waterColor: water,
+                                    fogColor: UIColor.lerp(water, .black, 0.24),
+                                    fogAlpha: 0.42,
+                                    causticAlpha: 0.05,
+                                    lightRayAlpha: 0.03,
+                                    planktonDensity: 0.58,
+                                    marineSnowDensity: 0.62,
+                                    maxVisibleDistance: 0.34,
+                                    lifeDensity: 0.30,
+                                    glowIntensity: 0.48)
+        case .abyss:
+            return DepthEnvironment(waterColor: water,
+                                    fogColor: UIColor.lerp(water, .black, 0.36),
+                                    fogAlpha: 0.52,
+                                    causticAlpha: 0.02,
+                                    lightRayAlpha: 0.0,
+                                    planktonDensity: 0.30,
+                                    marineSnowDensity: 0.44,
+                                    maxVisibleDistance: 0.22,
+                                    lifeDensity: 0.18,
+                                    glowIntensity: 0.58)
+        }
     }
 
     /// Paleta do corpo: clara só junto à superfície, padrão na imensa

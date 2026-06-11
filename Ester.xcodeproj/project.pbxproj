@@ -65,6 +65,7 @@
 		FAB1E101000000000000000E /* OfflineProgressSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000000E /* OfflineProgressSystem.swift */; };
 		FAB1E101000000000000000F /* ChallengeSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000000F /* ChallengeSystem.swift */; };
 		FAB1E1010000000000000010 /* BubbleClimbOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000010 /* BubbleClimbOverlay.swift */; };
+		FAB1E1010000000000000011 /* WorldEnvironmentSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000011 /* WorldEnvironmentSystem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -127,6 +128,7 @@
 		FAB1E001000000000000000E /* OfflineProgressSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineProgressSystem.swift; sourceTree = "<group>"; };
 		FAB1E001000000000000000F /* ChallengeSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeSystem.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000010 /* BubbleClimbOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BubbleClimbOverlay.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000011 /* WorldEnvironmentSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldEnvironmentSystem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -305,6 +307,7 @@
 				FAB1E001000000000000000E /* OfflineProgressSystem.swift */,
 				FAB1E001000000000000000F /* ChallengeSystem.swift */,
 				FAB1E0010000000000000010 /* BubbleClimbOverlay.swift */,
+				FAB1E0010000000000000011 /* WorldEnvironmentSystem.swift */,
 			);
 			path = Game;
 			sourceTree = "<group>";
@@ -439,6 +442,7 @@
 				FAB1E101000000000000000E /* OfflineProgressSystem.swift in Sources */,
 				FAB1E101000000000000000F /* ChallengeSystem.swift in Sources */,
 				FAB1E1010000000000000010 /* BubbleClimbOverlay.swift in Sources */,
+				FAB1E1010000000000000011 /* WorldEnvironmentSystem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

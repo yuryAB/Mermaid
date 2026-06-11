@@ -26,6 +26,7 @@ class GameScene: SKScene {
     private var refugePortal: RefugePortalNode?
     private var rigDebugTool: MermaidRigDebugTool?
     private var oceanBackdrop: OceanParallaxBackdrop?
+    private var worldChunkManager: WorldChunkManager?
     private var showDebugControls: Bool {
 #if DEBUG || DEVELOPMENT || DEV
         true
@@ -65,6 +66,7 @@ class GameScene: SKScene {
 
         ctx.growth.setup()
         snapCameraToTarget()
+        worldChunkManager?.update(dt: 1, cameraPosition: cameraNode.position)
         updateOceanBackdrop(dt: 0, waterColor: ctx.depth.waterColor(atY: cameraNode.position.y))
 
         NotificationCenter.default.addObserver(self,
@@ -274,8 +276,7 @@ class GameScene: SKScene {
         worldNode.addChild(floor)
 
         setupDepthVeils()
-        setupCurrentRibbons()
-        setupReefGardens()
+        worldChunkManager = WorldChunkManager(parent: worldNode)
     }
 
     private func setupDepthVeils() {
@@ -590,7 +591,8 @@ class GameScene: SKScene {
         }
 
         let mermaidPosition = ctx.mermaidPosition
-        var water = ctx.depth.waterColor(atY: mermaidPosition.y)
+        let environment = ctx.depth.environment(atY: mermaidPosition.y)
+        var water = environment.waterColor
         if let tint = ctx.regions.waterTint(at: mermaidPosition) {
             water = .lerp(water, tint.color, tint.strength)
         }
@@ -606,6 +608,7 @@ class GameScene: SKScene {
                     commandCooldowns: ctx.autonomy.commandCooldownsRemaining)
 
         updateCamera(dt: dt)
+        worldChunkManager?.update(dt: dt, cameraPosition: cameraNode.position)
         updateOceanBackdrop(dt: dt, waterColor: water)
 
         saveTimer += dt
@@ -639,11 +642,16 @@ class GameScene: SKScene {
         cameraNode.position = clampedCameraPosition(cameraTarget)
     }
 
-    private func updateOceanBackdrop(dt: CGFloat, waterColor: UIColor) {
+    private func updateOceanBackdrop(dt: CGFloat, environment: DepthEnvironment? = nil, waterColor: UIColor) {
+        let cameraZone = DepthZone.zone(atY: cameraNode.position.y)
+        let cameraEnvironment = environment ?? ctx.depth.environment(atY: cameraNode.position.y)
+        let biome = AquaticBiome.biome(at: cameraNode.position, zone: cameraZone)
         oceanBackdrop?.update(dt: dt,
                               cameraPosition: cameraNode.position,
                               waterColor: waterColor,
-                              zone: ctx.depth.currentZone)
+                              zone: cameraZone,
+                              environment: cameraEnvironment,
+                              biome: biome)
     }
 
     private func clampedCameraPosition(_ p: CGPoint) -> CGPoint {
@@ -1072,13 +1080,18 @@ private final class OceanParallaxBackdrop: SKNode {
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    func update(dt: CGFloat, cameraPosition: CGPoint, waterColor: UIColor, zone: DepthZone) {
+    func update(dt: CGFloat,
+                cameraPosition: CGPoint,
+                waterColor: UIColor,
+                zone: DepthZone,
+                environment: DepthEnvironment,
+                biome: AquaticBiome) {
         elapsed += dt
         position = cameraPosition
 
         gradientWash.color = UIColor.lerp(waterColor, .white, 0.05)
         gradientWash.colorBlendFactor = 0.12
-        gradientWash.alpha = gradientAlpha(for: zone)
+        gradientWash.alpha = gradientAlpha(for: zone) + environment.fogAlpha * 0.35
 
         farLayer.position = CGPoint(x: wrapped(-cameraPosition.x * 0.025, span: sceneSize.width),
                                     y: wrapped(-cameraPosition.y * 0.012, span: sceneSize.height))
@@ -1091,10 +1104,10 @@ private final class OceanParallaxBackdrop: SKNode {
         kelpCurtainLayer.position = CGPoint(x: wrapped(-cameraPosition.x * 0.16, span: sceneSize.width),
                                             y: wrapped(-cameraPosition.y * 0.07, span: sceneSize.height))
 
-        causticLayer.alpha = causticAlpha(for: zone)
-        planktonLayer.alpha = planktonAlpha(for: zone)
-        kelpCurtainLayer.alpha = curtainAlpha(for: zone)
-        lifeLayer.alpha = lifeAlpha(for: zone)
+        causticLayer.alpha = environment.causticAlpha * biomeCausticMultiplier(for: biome)
+        planktonLayer.alpha = planktonAlpha(for: zone) * environment.planktonDensity
+        kelpCurtainLayer.alpha = curtainAlpha(for: zone) * biomeCurtainMultiplier(for: biome)
+        lifeLayer.alpha = lifeAlpha(for: zone) * environment.lifeDensity * biomeLifeMultiplier(for: biome)
 
         for node in ambientLife {
             node.update(dt: dt, bounds: sceneSize)
@@ -1332,6 +1345,47 @@ private final class OceanParallaxBackdrop: SKNode {
         case .mid, .blue: return 0.42
         case .deep: return 0.34
         case .abyss: return 0.26
+        }
+    }
+
+    private func biomeCausticMultiplier(for biome: AquaticBiome) -> CGFloat {
+        switch biome {
+        case .coralGarden, .kelpForest:
+            return 1.12
+        case .openWater:
+            return 0.82
+        case .deepVents, .abyssPlain:
+            return 0.32
+        default:
+            return 0.72
+        }
+    }
+
+    private func biomeCurtainMultiplier(for biome: AquaticBiome) -> CGFloat {
+        switch biome {
+        case .kelpForest:
+            return 1.55
+        case .coralGarden, .reefWall:
+            return 1.12
+        case .openWater, .abyssPlain:
+            return 0.35
+        default:
+            return 0.72
+        }
+    }
+
+    private func biomeLifeMultiplier(for biome: AquaticBiome) -> CGFloat {
+        switch biome {
+        case .coralGarden, .kelpForest:
+            return 1.35
+        case .openWater:
+            return 0.72
+        case .deepVents, .crystalField:
+            return 0.82
+        case .abyssPlain:
+            return 0.42
+        default:
+            return 1.0
         }
     }
 

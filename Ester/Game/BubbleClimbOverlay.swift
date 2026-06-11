@@ -165,7 +165,6 @@ final class BubbleClimbOverlay: SKNode {
     private let phase: MermaidPhase
     private let shellRewardMultiplier: CGFloat
     private let challengeGoalBubbles: Int
-    private let challengeBonus: Int
     private let onFinish: (ChallengeResult) -> Void
 
     private let areaWidth: CGFloat
@@ -217,11 +216,6 @@ final class BubbleClimbOverlay: SKNode {
         self.phase = phase
         self.shellRewardMultiplier = shellRewardMultiplier
         self.challengeGoalBubbles = special ? 24 : 16
-        self.challengeBonus = GameBalance.challengeBaseReward(score: 0,
-                                                              reachedTarget: true,
-                                                              phase: phase,
-                                                              special: special,
-                                                              isHatching: false)
         self.onFinish = onFinish
         self.areaWidth = min(size.width - 36, 380)
         super.init()
@@ -377,14 +371,24 @@ final class BubbleClimbOverlay: SKNode {
     }
 
     private func progressText() -> String {
-        "Conchas \(shellScore)"
+        "Conchas +\(projectedPearls())"
     }
 
     private func objectiveText() -> String {
         if challengeCompleted {
-            return "Bônus pronto +\(challengeBonus)"
+            return "Bônus pronto"
         }
-        return "Meta \(bubblesClimbed)/\(challengeGoalBubbles) · +\(challengeBonus)"
+        return "Bolhas \(bubblesClimbed)/\(challengeGoalBubbles)"
+    }
+
+    private func projectedPearls(reached: Bool? = nil) -> Int {
+        let basePearls = GameBalance.challengeBaseReward(score: shellScore,
+                                                         reachedTarget: reached ?? challengeCompleted,
+                                                         phase: phase,
+                                                         special: special,
+                                                         isHatching: false)
+        return GameBalance.scaledPearlReward(baseAmount: basePearls,
+                                             multiplier: shellRewardMultiplier)
     }
 
     private func contentY(forViewY viewY: CGFloat) -> CGFloat {
@@ -537,7 +541,7 @@ final class BubbleClimbOverlay: SKNode {
         guard !bubble.starter, !bubble.scored else { return }
         bubble.scored = true
         bubblesClimbed += 1
-        shellScore += min(bubblesClimbed, 100)
+        shellScore += 1
         if !challengeCompleted && bubblesClimbed >= challengeGoalBubbles {
             challengeCompleted = true
         }
@@ -664,8 +668,7 @@ final class BubbleClimbOverlay: SKNode {
                                                          phase: phase,
                                                          special: special,
                                                          isHatching: false)
-        let pearls = GameBalance.scaledPearlReward(baseAmount: basePearls,
-                                                   multiplier: shellRewardMultiplier)
+        let pearls = projectedPearls(reached: reached)
         let xp = CGFloat(bubblesClimbed) * 2.0 * (special ? 1.5 : 1)
 
         let resultTint = reached

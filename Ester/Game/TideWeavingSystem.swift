@@ -89,8 +89,8 @@ final class TideWeavingOverlay: SKNode {
     private var board: [[Int]] = []
     private var pieces: [[SKNode?]] = []
     private var score = 0
-    private let actionTimeLimit: CGFloat = 40
-    private var actionTimeLeft: CGFloat = 40
+    private let actionTimeLimit: CGFloat = 10
+    private var actionTimeLeft: CGFloat = 10
     private var challengeCompleted = false
     private var busy = false
     private var finished = false
@@ -539,17 +539,30 @@ final class TideWeavingOverlay: SKNode {
     private var pendingResult: ChallengeResult?
 
     private func scoreText() -> String {
+        if session == .hatching {
+            return "Energia \(score)/\(challengeGoal)"
+        }
         if challengeCompleted {
-            return "Pontos \(score) · Bônus pronto"
+            return "Conchas +\(projectedPearls()) · Bônus pronto"
         }
         if challengeBonus > 0 {
-            return "Meta \(score)/\(challengeGoal) · +\(challengeBonus)"
+            return "Conchas +\(projectedPearls()) · Meta \(score)/\(challengeGoal)"
         }
-        return "Energia \(score)/\(challengeGoal)"
+        return "Conchas +\(projectedPearls())"
     }
 
     private func actionTimerText() -> String {
         "Ação \(max(0, Int(ceil(actionTimeLeft))))s"
+    }
+
+    private func projectedPearls(reached: Bool? = nil) -> Int {
+        let basePearls = GameBalance.challengeBaseReward(score: score,
+                                                         reachedTarget: reached ?? challengeCompleted,
+                                                         phase: phase,
+                                                         special: session == .event,
+                                                         isHatching: session == .hatching)
+        return GameBalance.scaledPearlReward(baseAmount: basePearls,
+                                             multiplier: shellRewardMultiplier)
     }
 
     private func updateChallengeProgress() {
@@ -572,8 +585,7 @@ final class TideWeavingOverlay: SKNode {
                                                          phase: phase,
                                                          special: session == .event,
                                                          isHatching: session == .hatching)
-        let pearls = GameBalance.scaledPearlReward(baseAmount: basePearls,
-                                                   multiplier: shellRewardMultiplier)
+        let pearls = projectedPearls(reached: reached)
         let xp = CGFloat(score) / 5 * (session == .event ? 1.5 : 1)
 
         let resultTint = reached
