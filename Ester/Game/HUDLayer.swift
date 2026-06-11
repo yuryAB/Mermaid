@@ -43,6 +43,8 @@ final class HUDLayer: SKNode {
     private var messageContainer: SKNode!
     private var messageTitleLabel: SKLabelNode!
     private var messageLabel: SKLabelNode!
+    private var touchCooldownChip: SKNode!
+    private var touchCooldownLabel: SKLabelNode!
     private var lastEggMode = false
     private var lastObjectiveAvailable: Bool?
     private let enableDebugRigToolButton: Bool
@@ -77,6 +79,7 @@ final class HUDLayer: SKNode {
         static let line = UIColor(red: 0.20, green: 0.40, blue: 0.52, alpha: 1)
         static let aqua = UIColor(red: 0.47, green: 0.78, blue: 0.78, alpha: 1)
         static let teal = UIColor(red: 0.16, green: 0.50, blue: 0.52, alpha: 1)
+        static let energy = UIColor(red: 0.12, green: 0.58, blue: 0.82, alpha: 1)
         static let algae = UIColor(red: 0.33, green: 0.54, blue: 0.30, alpha: 1)
         static let coral = UIColor(red: 0.78, green: 0.34, blue: 0.30, alpha: 1)
         static let gold = UIColor(red: 0.83, green: 0.62, blue: 0.25, alpha: 1)
@@ -266,6 +269,9 @@ final class HUDLayer: SKNode {
     // MARK: - Ficha superior
 
     private var topPanelBottomY: CGFloat = 0
+    private var topPanelTitleMaxWidth: CGFloat = 0
+    private var topPanelStatusMaxWidth: CGFloat = 0
+    private var topPanelPearlsMaxWidth: CGFloat = 0
 
     private func buildTopPanel() {
         let panelWidth = sceneSize.width - 24
@@ -288,6 +294,13 @@ final class HUDLayer: SKNode {
         panel.addChild(panelContent)
 
         let halfW = panelWidth / 2
+        let contentLeft = -halfW + 22
+        let rightGutter: CGFloat = 18
+        let resourceClusterWidth: CGFloat = 142
+        let resourceClusterLeft = halfW - rightGutter - resourceClusterWidth
+        topPanelTitleMaxWidth = max(132, panelWidth - 178)
+        topPanelStatusMaxWidth = max(96, resourceClusterLeft - contentLeft - 12)
+        topPanelPearlsMaxWidth = 84
 
         let clip = SKShapeNode(rectOf: CGSize(width: 34, height: 9), cornerRadius: 4)
         clip.fillColor = UIColor(red: 0.76, green: 0.77, blue: 0.70, alpha: 1)
@@ -302,7 +315,9 @@ final class HUDLayer: SKNode {
                                style: .noteBold,
                                color: HUDPalette.ink)
         titleLabel.horizontalAlignmentMode = .left
-        titleLabel.position = CGPoint(x: -halfW + 22, y: panelHeight / 2 - 25)
+        titleLabel.preferredMaxLayoutWidth = topPanelTitleMaxWidth
+        titleLabel.numberOfLines = 1
+        titleLabel.position = CGPoint(x: contentLeft, y: panelHeight / 2 - 25)
         panelContent.addChild(titleLabel)
 
         let editButton = SKNode()
@@ -338,25 +353,30 @@ final class HUDLayer: SKNode {
         phaseLabel = makeLabel(fontSize: 14, style: .bodyBold, color: HUDPalette.blueInk)
         phaseLabel.horizontalAlignmentMode = .left
         phaseLabel.verticalAlignmentMode = .center
-        phaseLabel.position = CGPoint(x: -halfW + 22, y: panelHeight / 2 - 51)
+        phaseLabel.preferredMaxLayoutWidth = topPanelStatusMaxWidth
+        phaseLabel.numberOfLines = 2
+        phaseLabel.lineBreakMode = .byWordWrapping
+        phaseLabel.position = CGPoint(x: contentLeft, y: panelHeight / 2 - 51)
         panelContent.addChild(phaseLabel)
 
         depthLabel = makeLabel(fontSize: 11, style: .body, color: HUDPalette.mutedInk)
         depthLabel.horizontalAlignmentMode = .left
         depthLabel.verticalAlignmentMode = .center
-        depthLabel.position = CGPoint(x: -halfW + 22, y: panelHeight / 2 - 70)
+        depthLabel.preferredMaxLayoutWidth = topPanelStatusMaxWidth
+        depthLabel.numberOfLines = 1
+        depthLabel.position = CGPoint(x: contentLeft, y: panelHeight / 2 - 70)
         panelContent.addChild(depthLabel)
 
         growthLabel = makeLabel(fontSize: 10, style: .note, color: HUDPalette.teal)
         growthLabel.horizontalAlignmentMode = .left
         growthLabel.verticalAlignmentMode = .center
-        growthLabel.position = CGPoint(x: -halfW + 22, y: panelHeight / 2 - 88)
-        growthLabel.preferredMaxLayoutWidth = max(140, panelWidth - 172)
+        growthLabel.position = CGPoint(x: contentLeft, y: panelHeight / 2 - 88)
+        growthLabel.preferredMaxLayoutWidth = topPanelStatusMaxWidth
         growthLabel.numberOfLines = 1
         panelContent.addChild(growthLabel)
 
         let planktonIcon = HUDLayer.iconNode(kind: .shell, color: HUDPalette.gold)
-        planktonIcon.position = CGPoint(x: halfW - 126, y: panelHeight / 2 - 52)
+        planktonIcon.position = CGPoint(x: resourceClusterLeft + 14, y: panelHeight / 2 - 52)
         planktonIcon.zPosition = 8
         panelContent.addChild(planktonIcon)
 
@@ -364,6 +384,8 @@ final class HUDLayer: SKNode {
         pearlsTag.node.position = CGPoint(x: halfW - 64, y: panelHeight / 2 - 52)
         panelContent.addChild(pearlsTag.node)
         pearlsLabel = pearlsTag.label
+        pearlsLabel.preferredMaxLayoutWidth = topPanelPearlsMaxWidth
+        pearlsLabel.numberOfLines = 1
 
         let divider = HUDLayer.pathNode(points: [
             CGPoint(x: -halfW + 18, y: -22),
@@ -374,7 +396,7 @@ final class HUDLayer: SKNode {
 
         let barConfigs: [(key: String, label: String, color: UIColor, column: Int, row: Int)] = [
             ("hunger", "Alimentação", HUDPalette.algae, 0, 0),
-            ("energy", "Energia", HUDPalette.gold, 1, 0),
+            ("energy", "Energia", HUDPalette.energy, 1, 0),
             ("mood", "Disposição", HUDPalette.algae, 0, 1),
             ("bond", "Vínculo", HUDPalette.teal, 1, 1)
         ]
@@ -389,6 +411,16 @@ final class HUDLayer: SKNode {
                             width: columnWidth,
                             at: CGPoint(x: x, y: y),
                             parent: panelContent)
+        }
+    }
+
+    private func fitLabelToWidth(_ label: SKLabelNode,
+                                 maxWidth: CGFloat,
+                                 baseSize: CGFloat,
+                                 minSize: CGFloat) {
+        label.fontSize = baseSize
+        while label.calculateAccumulatedFrame().width > maxWidth && label.fontSize > minSize {
+            label.fontSize -= 0.5
         }
     }
 
@@ -570,6 +602,36 @@ final class HUDLayer: SKNode {
         intentLabel.verticalAlignmentMode = .center
         intentLabel.zPosition = 2
         intentChip.addChild(intentLabel)
+
+        let cooldownSize = CGSize(width: 116, height: 24)
+        touchCooldownChip = SKNode()
+        touchCooldownChip.position = CGPoint(x: sceneSize.width / 2 - cooldownSize.width / 2 - 18,
+                                             y: chipY + 34)
+        touchCooldownChip.alpha = 0
+        touchCooldownChip.isHidden = true
+        addChild(touchCooldownChip)
+
+        let cooldownCard = HUDLayer.paperCard(size: cooldownSize,
+                                              cornerRadius: 8,
+                                              fill: HUDPalette.palePaper,
+                                              stroke: HUDPalette.coral.withAlphaComponent(0.62),
+                                              shadowAlpha: 0.12)
+        cooldownCard.zPosition = 1
+        touchCooldownChip.addChild(cooldownCard)
+
+        let mark = SKShapeNode(circleOfRadius: 4)
+        mark.fillColor = HUDPalette.coral.withAlphaComponent(0.78)
+        mark.strokeColor = .clear
+        mark.position = CGPoint(x: -cooldownSize.width / 2 + 14, y: 0)
+        mark.zPosition = 2
+        touchCooldownChip.addChild(mark)
+
+        touchCooldownLabel = makeLabel(fontSize: 10, style: .noteBold, color: HUDPalette.ink)
+        touchCooldownLabel.horizontalAlignmentMode = .left
+        touchCooldownLabel.verticalAlignmentMode = .center
+        touchCooldownLabel.position = CGPoint(x: -cooldownSize.width / 2 + 26, y: 0)
+        touchCooldownLabel.zPosition = 2
+        touchCooldownChip.addChild(touchCooldownLabel)
     }
 
     // MARK: - Botoes de comando
@@ -793,9 +855,14 @@ final class HUDLayer: SKNode {
                  evolutionProgress: CGFloat,
                  evolutionNote: String,
                  objectiveAvailable: Bool,
-                 commandCooldowns: [PlayerCommand: TimeInterval]) {
+                 commandCooldowns: [PlayerCommand: TimeInterval],
+                 touchCooldownRemaining: TimeInterval) {
         let eggMode = stats.phase == .egg
         titleLabel.text = "Registro da \(stats.mermaidName)"
+        fitLabelToWidth(titleLabel,
+                        maxWidth: topPanelTitleMaxWidth,
+                        baseSize: 16,
+                        minSize: 12)
         updateNameEditPosition()
 
         if eggMode {
@@ -810,6 +877,11 @@ final class HUDLayer: SKNode {
             barLabels["bond"]?.text = "Vínculo"
         }
 
+        fitLabelToWidth(phaseLabel,
+                        maxWidth: topPanelStatusMaxWidth,
+                        baseSize: 14,
+                        minSize: 11)
+
         let zoneText = zone.displayName.lowercased()
         if let regionName {
             depthLabel.text = "\(regionName) · \(zoneText)"
@@ -817,17 +889,28 @@ final class HUDLayer: SKNode {
             depthLabel.text = "Camada atual: \(zoneText)"
         }
         pearlsLabel.text = "Conchas \(stats.pearls)"
+        fitLabelToWidth(pearlsLabel,
+                        maxWidth: topPanelPearlsMaxWidth,
+                        baseSize: 10,
+                        minSize: 8)
 
         let nourishment = 1 - stats.hunger / 100
         setBar("hunger", value: nourishment)
         setBar("energy", value: stats.energy / 100)
         setBar("mood", value: stats.disposition / 100)
         setBar("bond", value: eggMode ? evolutionProgress : stats.trust / 100)
+        updateTouchCooldown(remaining: touchCooldownRemaining)
 
         if let hunger = bars["hunger"] {
             hunger.fillColor = nourishment < 0.28
                 ? HUDPalette.coral.withAlphaComponent(0.86)
                 : HUDPalette.algae.withAlphaComponent(0.70)
+        }
+
+        if let energy = bars["energy"] {
+            energy.fillColor = stats.energy < 28
+                ? HUDPalette.coral.withAlphaComponent(0.86)
+                : HUDPalette.energy.withAlphaComponent(0.74)
         }
 
         disabledCommands = Set(commandCooldowns.keys.filter { (commandCooldowns[$0] ?? 0) > 0 })
@@ -860,6 +943,20 @@ final class HUDLayer: SKNode {
         for (command, highlight) in buttonHighlights {
             highlight.isHidden = command != activeCommand || disabledCommands.contains(command)
         }
+    }
+
+    private func updateTouchCooldown(remaining: TimeInterval) {
+        guard let chip = touchCooldownChip,
+              let label = touchCooldownLabel else { return }
+        guard remaining > 0 else {
+            chip.isHidden = true
+            chip.alpha = 0
+            return
+        }
+
+        chip.isHidden = false
+        chip.alpha = 1
+        label.text = "Gesto \(Int(ceil(remaining)))s"
     }
 
     private func updateCooldownOverlay(for command: PlayerCommand, remaining: TimeInterval) {

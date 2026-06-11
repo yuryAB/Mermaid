@@ -605,7 +605,8 @@ class GameScene: SKScene {
                     evolutionProgress: ctx.growth.progressToNext(),
                     evolutionNote: ctx.growth.evolutionNote(),
                     objectiveAvailable: ctx.events.currentObjective != nil,
-                    commandCooldowns: ctx.autonomy.commandCooldownsRemaining)
+                    commandCooldowns: ctx.autonomy.commandCooldownsRemaining,
+                    touchCooldownRemaining: ctx.autonomy.touchRequestCooldownRemaining)
 
         updateCamera(dt: dt)
         worldChunkManager?.update(dt: dt, cameraPosition: cameraNode.position)
@@ -879,11 +880,68 @@ class GameScene: SKScene {
             ctx.growth.tapEgg()
             return
         }
-        // tocar num peixe com desafio também manda ela para lá
-        if ctx.challenges.nearestGiver(to: location, maxDistance: 160) != nil {
-            ctx.autonomy.give(.challenge)
+
+        if ctx.autonomy.touchRequestCooldownRemaining > 0 {
+            showTouchRipple(at: location, accepted: false)
+            ctx.autonomy.showTouchCooldownFeedback()
             return
         }
+
+        if let objectivePoint = ctx.events.currentObjective?.position(),
+           objectivePoint.distance(to: location) < 180 {
+            let accepted = ctx.autonomy.requestObjectiveFromTouch()
+            showTouchRipple(at: objectivePoint, accepted: accepted)
+            return
+        }
+
+        if let giver = ctx.challenges.nearestGiver(to: location, maxDistance: 170) {
+            let accepted = ctx.autonomy.requestChallengeFromTouch(giver)
+            showTouchRipple(at: giver.position, accepted: accepted)
+            return
+        }
+
+        if let fish = ctx.fish.nearestFish(to: location, maxDistance: 155) {
+            let accepted = ctx.autonomy.requestFishFromTouch(fish)
+            showTouchRipple(at: fish.position, accepted: accepted)
+            return
+        }
+
+        if let food = ctx.food.nearestFood(to: location, maxDistance: 150) {
+            let accepted = ctx.autonomy.requestFoodFromTouch(food)
+            showTouchRipple(at: food.position, accepted: accepted)
+            return
+        }
+
+        let accepted = ctx.autonomy.requestPointFromTouch(location)
+        showTouchRipple(at: location, accepted: accepted)
+    }
+
+    private func showTouchRipple(at point: CGPoint, accepted: Bool = true) {
+        let color = accepted
+            ? UIColor(white: 1, alpha: 0.75)
+            : GameUI.coral.withAlphaComponent(0.82)
+        let ring = SKShapeNode(circleOfRadius: 22)
+        ring.position = point
+        ring.zPosition = 16
+        ring.fillColor = .clear
+        ring.strokeColor = color
+        ring.lineWidth = 2
+        ring.glowWidth = 6
+        worldNode.addChild(ring)
+
+        let dot = SKShapeNode(circleOfRadius: 4)
+        dot.fillColor = color.withAlphaComponent(0.95)
+        dot.strokeColor = .clear
+        dot.glowWidth = 5
+        ring.addChild(dot)
+
+        ring.run(.sequence([
+            .group([
+                .scale(to: 2.6, duration: 0.42),
+                .fadeOut(withDuration: 0.42)
+            ]),
+            .removeFromParent()
+        ]))
     }
 
     // MARK: - Persistência

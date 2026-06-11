@@ -20,11 +20,25 @@ final class AutonomySystem {
     private var intentTime: CGFloat = 0
     private var commandBias: (intent: MermaidIntent, until: Date)?
     private var commandCooldownUntil: [PlayerCommand: Date] = [:]
+    private var touchRequestCooldownUntil: Date?
+    private var touchPointTarget: CGPoint?
+    private weak var touchFoodTarget: FoodNode?
+    private weak var touchFishTarget: FishNode?
+    private weak var touchChallengeTarget: FishNode?
     private var lastAnimation: MovementType = .idle
     private var lastFacing: Mermaid.Direction = .none
     private var eatCooldown: CGFloat = 0
     private var interactCooldown: CGFloat = 0
     private var wobblePhase: CGFloat = .random(in: 0...10)
+
+    private enum TrustBalance {
+        static let acceptedCommand: CGFloat = 0.4
+        static let inconvenientCareAsk: CGFloat = 1.2
+        static let generalRefusal: CGFloat = 1.6
+        static let unmetNeedRefusal: CGFloat = 2.6
+        static let forcedRiskWhileHungry: CGFloat = 3.0
+        static let exhaustedRefusal: CGFloat = 4.0
+    }
 
     /// Pausa total (fase de ovo, puzzle aberto).
     var paused = false
@@ -41,6 +55,10 @@ final class AutonomySystem {
             let remaining = item.value.timeIntervalSince(now)
             if remaining > 0 { result[item.key] = remaining }
         }
+    }
+    var touchRequestCooldownRemaining: TimeInterval {
+        guard let until = touchRequestCooldownUntil else { return 0 }
+        return max(0, until.timeIntervalSince(Date()))
     }
 
     init(ctx: GameContext) {
@@ -164,20 +182,23 @@ final class AutonomySystem {
     private func setIntent(_ newIntent: MermaidIntent) {
         intent = newIntent
         intentTime = 0
+        clearTouchTargets(except: newIntent)
         switch newIntent {
         case .idle, .observing, .resting, .eating, .inChallenge, .avoidingDanger, .returningHome:
             if newIntent != .avoidingDanger { target = nil }
         case .wandering:
-            target = randomWanderPoint()
+            target = touchPointTarget ?? randomWanderPoint()
         case .seekingFood:
-            if let food = ctx.food.nearestFood(to: position, maxDistance: 1800) {
+            if let food = validTouchFoodTarget() {
+                target = food.position
+            } else if let food = ctx.food.nearestFood(to: position, maxDistance: 1800) {
                 target = food.position
             } else {
                 ctx.food.requestSpawn(near: position)
                 target = randomWanderPoint()
             }
         case .seekingChallenge:
-            target = ctx.challenges.ensureGiver(near: position)?.position
+            target = validTouchChallengeTarget()?.position ?? ctx.challenges.ensureGiver(near: position)?.position
         case .goingToObjective:
             target = ctx.events.currentObjective?.position()
         case .enteringRefuge:
@@ -204,7 +225,7 @@ final class AutonomySystem {
         case .traveling:
             target = ctx.travel.targetPoint
         case .interactingWithFish:
-            target = ctx.fish.nearestFish(to: position, maxDistance: 1200)?.position
+            target = validTouchFishTarget()?.position ?? ctx.fish.nearestFish(to: position, maxDistance: 1200)?.position
         }
     }
 
@@ -220,7 +241,17 @@ final class AutonomySystem {
     private func progressIntent(dt: CGFloat) {
         switch intent {
         case .seekingFood:
-            if let food = ctx.food.nearestFood(to: position, maxDistance: 1800) {
+            if let food = validTouchFoodTarget() {
+                target = food.position
+                if position.distance(to: food.position) < 130 {
+                    touchFoodTarget = nil
+                    eat(food)
+                }
+            } else if touchFoodTarget != nil {
+                touchFoodTarget = nil
+                setIntent(.idle)
+                decisionCooldown = min(decisionCooldown, 1.5)
+            } else if let food = ctx.food.nearestFood(to: position, maxDistance: 1800) {
                 target = food.position
                 if position.distance(to: food.position) < 130 { eat(food) }
             } else if intentTime > 6 {
@@ -234,7 +265,18 @@ final class AutonomySystem {
                 decisionCooldown = min(decisionCooldown, 1.5)
             }
         case .seekingChallenge:
-            if let giver = ctx.challenges.nearestGiver(to: position, maxDistance: 2600) {
+            if let giver = validTouchChallengeTarget() {
+                target = giver.position
+                if position.distance(to: giver.position) < 150 {
+                    touchChallengeTarget = nil
+                    enterChallenge()
+                    ctx.scene?.openChallenge(giver: giver)
+                }
+            } else if touchChallengeTarget != nil {
+                touchChallengeTarget = nil
+                setIntent(.idle)
+                decisionCooldown = 2
+            } else if let giver = ctx.challenges.nearestGiver(to: position, maxDistance: 2600) {
                 target = giver.position
                 if position.distance(to: giver.position) < 150 {
                     enterChallenge()
@@ -275,19 +317,19 @@ final class AutonomySystem {
                 setIntent(.idle)
             }
         case .interactingWithFish:
-            if let fish = ctx.fish.nearestFish(to: position, maxDistance: 1200) {
+            if let fish = validTouchFishTarget() {
                 target = fish.position
                 if position.distance(to: fish.position) < 140 && interactCooldown <= 0 {
-                    interactCooldown = 8
-                    ctx.fish.interact(fish)
-                    stats.boostMood(6)
-                    stats.gainXP(3)
-                    if Int.random(in: 0..<12) == 0 {
-                        let gained = stats.awardPearls(1)
-                        ctx.say("O peixinho deixou conchas! 🐚+\(gained)")
-                    }
-                    setIntent(.observing)
-                    decisionCooldown = 4
+                    touchFishTarget = nil
+                    interact(with: fish)
+                }
+            } else if touchFishTarget != nil {
+                touchFishTarget = nil
+                setIntent(.wandering)
+            } else if let fish = ctx.fish.nearestFish(to: position, maxDistance: 1200) {
+                target = fish.position
+                if position.distance(to: fish.position) < 140 && interactCooldown <= 0 {
+                    interact(with: fish)
                 }
             } else {
                 setIntent(.wandering)
@@ -308,6 +350,9 @@ final class AutonomySystem {
             }
         case .wandering, .goingDeeper, .goingUp:
             if let t = target, position.distance(to: t) < 90 {
+                if intent == .wandering {
+                    touchPointTarget = nil
+                }
                 setIntent(.idle)
                 decisionCooldown = min(decisionCooldown, .random(in: 1...2.5))
             }
@@ -338,6 +383,7 @@ final class AutonomySystem {
     private func eat(_ food: FoodNode) {
         guard eatCooldown <= 0 else { return }
         eatCooldown = 1.2
+        touchFoodTarget = nil
         ctx.food.consume(food)
         intent = .eating
         target = nil
@@ -426,12 +472,13 @@ final class AutonomySystem {
             desired = .wandering
         case .seekFood:
             if stats.hunger < 35 {
+                penalizeTrust(TrustBalance.inconvenientCareAsk)
                 refuse(command, saying: "Ela ainda está saciada e virou o rostinho.")
                 return
             }
             // teimosia de criança: quanto mais nova, mais recusa comer
             if CGFloat.random(in: 0...1) < eatRefusalChance() {
-                stats.trust = max(0, stats.trust - 0.2)
+                penalizeTrust(TrustBalance.inconvenientCareAsk)
                 let excuses = [
                     "Não quero comer agora! 😤",
                     "Ela fechou a boquinha e virou o rosto...",
@@ -456,10 +503,12 @@ final class AutonomySystem {
             let hungerLimit: CGFloat = stats.phase == .baby ? 65 : 92
             let energyLimit: CGFloat = stats.phase == .baby ? 35 : 8
             if stats.hunger > hungerLimit {
+                penalizeTrust(TrustBalance.unmetNeedRefusal)
                 refuse(command, saying: "Faminta demais para um desafio... me ajuda a comer algo?")
                 return
             }
             if stats.energy < energyLimit {
+                penalizeTrust(TrustBalance.exhaustedRefusal)
                 refuse(command, saying: "Preciso descansar antes de um desafio... 😴")
                 return
             }
@@ -485,7 +534,7 @@ final class AutonomySystem {
                 return
             }
             if stats.hunger > 80 {
-                stats.trust = max(0, stats.trust - 0.6)
+                penalizeTrust(TrustBalance.forcedRiskWhileHungry)
                 refuse(command, saying: "Com essa fome eu não desço... 🍽")
                 return
             }
@@ -509,18 +558,10 @@ final class AutonomySystem {
             desired = .goingUp
         }
 
-        // Disposição: cresce com vínculo e bem-estar, cai com fome e medo.
-        var chance = (stats.phase == .baby ? 0.25 : 0.34)
-            + stats.trust * 0.0024
-            + stats.disposition * 0.001
-            - stats.hunger * 0.0014
-            + stats.dispositionAcceptanceBonus
-        if stats.phase == .baby && desired == .seekingChallenge { chance -= 0.08 }
-        if stats.scaredTimer > 0 { chance -= 0.2 }
-        chance = chance.clamped(to: stats.phase == .baby ? 0.12...0.78 : 0.18...0.90)
+        let chance = commandAcceptanceChance(for: desired)
 
         if CGFloat.random(in: 0...1) <= chance {
-            stats.trust = min(100, stats.trust + 0.4)
+            stats.trust = min(100, stats.trust + TrustBalance.acceptedCommand)
             commandBias = (desired, Date().addingTimeInterval(30))
             setIntent(desired)
             decisionCooldown = .random(in: 6...10)
@@ -530,7 +571,7 @@ final class AutonomySystem {
                 ctx.say("Ela foi investigar... 👀")
             }
         } else {
-            stats.trust = max(0, stats.trust - 0.2)
+            penalizeTrust(TrustBalance.generalRefusal)
             let excuses = [
                 "Hmm... agora não.",
                 "Ela fingiu que não ouviu...",
@@ -549,9 +590,210 @@ final class AutonomySystem {
         ctx.say(message)
     }
 
+    @discardableResult
+    func requestPointFromTouch(_ point: CGPoint) -> Bool {
+        let range = ctx.depth.allowedYRange()
+        let clampedPoint = CGPoint(x: point.x.clamped(to: World.minX...World.maxX),
+                                   y: point.y.clamped(to: range))
+        guard acceptTouchRequest(for: .wandering,
+                                 acceptedMessage: "Ela entendeu seu gesto e nadou para lá...",
+                                 refusalMessages: [
+                                    "Ela olhou para onde você apontou, mas preferiu ficar por aqui.",
+                                    "Ela fez que não com a cabeça. Agora não.",
+                                    "Ela viu seu gesto, mas seguiu a própria vontade."
+                                 ]) else { return false }
+        touchPointTarget = clampedPoint
+        commandBias = nil
+        setIntent(.wandering)
+        decisionCooldown = .random(in: 7...12)
+        return true
+    }
+
+    @discardableResult
+    func requestObjectiveFromTouch() -> Bool {
+        guard ctx.events.currentObjective?.position() != nil else {
+            ctx.say("Nada acontecendo ali agora... 👀")
+            return false
+        }
+        guard acceptTouchRequest(for: .goingToObjective,
+                                 acceptedMessage: "Ela aceitou investigar...",
+                                 refusalMessages: [
+                                    "Ela percebeu o objetivo, mas não quis investigar agora.",
+                                    "Ela chegou a olhar... e decidiu nadar por conta própria.",
+                                    "Ela recusou seu pedido com um biquinho teimoso."
+                                 ]) else { return false }
+        commandBias = nil
+        setIntent(.goingToObjective)
+        decisionCooldown = .random(in: 7...12)
+        return true
+    }
+
+    @discardableResult
+    func requestFoodFromTouch(_ food: FoodNode) -> Bool {
+        guard food.parent != nil else { return false }
+        guard stats.hunger >= 28 || food.kind.pearls > 0 || food.kind.xp >= 10 else {
+            return rejectTouchRequest("Ela viu \(food.kind.name), mas não está com fome agora.")
+        }
+        guard acceptTouchRequest(for: .seekingFood,
+                                 acceptedMessage: "Ela aceitou provar \(food.kind.name)...",
+                                 refusalMessages: [
+                                    "Ela viu \(food.kind.name), mas não quis comer agora.",
+                                    "Ela virou o rostinho para longe da comida.",
+                                    "Ela fingiu que não viu \(food.kind.name)."
+                                 ]) else { return false }
+        touchFoodTarget = food
+        commandBias = nil
+        setIntent(.seekingFood)
+        decisionCooldown = .random(in: 7...12)
+        return true
+    }
+
+    @discardableResult
+    func requestFishFromTouch(_ fish: FishNode) -> Bool {
+        guard fish.parent != nil else { return false }
+        guard acceptTouchRequest(for: .interactingWithFish,
+                                 acceptedMessage: "Ela aceitou brincar com o peixinho...",
+                                 refusalMessages: [
+                                    "Ela viu o peixinho, mas não quis chegar perto agora.",
+                                    "Ela deixou o peixinho passar sem seguir.",
+                                    "Ela balançou a cabeça: hoje não."
+                                 ]) else { return false }
+        touchFishTarget = fish
+        commandBias = nil
+        setIntent(.interactingWithFish)
+        decisionCooldown = .random(in: 7...12)
+        return true
+    }
+
+    @discardableResult
+    func requestChallengeFromTouch(_ giver: FishNode) -> Bool {
+        guard giver.parent != nil, giver.offeredChallenge != nil else { return false }
+        let hungerLimit: CGFloat = stats.phase == .baby ? 65 : 92
+        let energyLimit: CGFloat = stats.phase == .baby ? 35 : 8
+        guard stats.hunger <= hungerLimit else {
+            return rejectTouchRequest("Faminta demais para um desafio... me ajuda a comer algo?")
+        }
+        guard stats.energy >= energyLimit else {
+            return rejectTouchRequest("Preciso descansar antes de um desafio... 😴", emotion: .tired)
+        }
+        guard acceptTouchRequest(for: .seekingChallenge,
+                                 acceptedMessage: "Ela aceitou seguir até o peixe do desafio...",
+                                 refusalMessages: [
+                                    "O peixe chamou, mas ela não quis seguir agora.",
+                                    "Ela viu o desafio e recusou por enquanto.",
+                                    "Ela chegou perto da ideia... mas mudou de vontade."
+                                 ]) else { return false }
+        touchChallengeTarget = giver
+        commandBias = nil
+        setIntent(.seekingChallenge)
+        decisionCooldown = .random(in: 7...12)
+        return true
+    }
+
+    func showTouchCooldownFeedback() {
+        let remaining = Int(ceil(touchRequestCooldownRemaining))
+        guard remaining > 0 else { return }
+        ctx.say("Ela ainda está decidida. Tente outro gesto em \(remaining)s.")
+    }
+
+    private func acceptTouchRequest(for desired: MermaidIntent,
+                                    acceptedMessage: String,
+                                    refusalMessages: [String]) -> Bool {
+        guard stats.phase != .egg, intent != .inChallenge, intent != .enteringRefuge, !paused else { return false }
+
+        if touchRequestCooldownRemaining > 0 {
+            showTouchCooldownFeedback()
+            return false
+        }
+
+        let chance = touchAcceptanceChance(for: desired)
+        if CGFloat.random(in: 0...1) <= chance {
+            stats.trust = min(100, stats.trust + 0.15)
+            ctx.say(acceptedMessage)
+            return true
+        }
+
+        stats.trust = max(0, stats.trust - 0.3)
+        let refusal = refusalMessages.randomElement() ?? "Ela recusou seu pedido."
+        return rejectTouchRequest(refusal)
+    }
+
+    private func rejectTouchRequest(_ message: String,
+                                    emotion: MermaidEmotion = .stubborn) -> Bool {
+        touchRequestCooldownUntil = Date().addingTimeInterval(10)
+        showEmotion(emotion, duration: 1.8)
+        ctx.say("\(message) Tente outro gesto em 10s.")
+        return false
+    }
+
+    private func commandAcceptanceChance(for desired: MermaidIntent) -> CGFloat {
+        // Disposição: cresce com vínculo e bem-estar, cai com fome e medo.
+        var chance = (stats.phase == .baby ? 0.25 : 0.34)
+            + stats.trust * 0.0024
+            + stats.disposition * 0.001
+            - stats.hunger * 0.0014
+            + stats.dispositionAcceptanceBonus
+        if stats.phase == .baby && desired == .seekingChallenge { chance -= 0.08 }
+        if stats.scaredTimer > 0 { chance -= 0.2 }
+        return chance.clamped(to: stats.phase == .baby ? 0.12...0.78 : 0.18...0.90)
+    }
+
+    private func touchAcceptanceChance(for desired: MermaidIntent) -> CGFloat {
+        (commandAcceptanceChance(for: desired) / 3).clamped(to: 0.04...0.32)
+    }
+
+    private func validTouchFoodTarget() -> FoodNode? {
+        guard let food = touchFoodTarget, food.parent != nil else { return nil }
+        return food
+    }
+
+    private func validTouchFishTarget() -> FishNode? {
+        guard let fish = touchFishTarget, fish.parent != nil else { return nil }
+        return fish
+    }
+
+    private func validTouchChallengeTarget() -> FishNode? {
+        guard let fish = touchChallengeTarget,
+              fish.parent != nil,
+              fish.offeredChallenge != nil else { return nil }
+        return fish
+    }
+
+    private func clearTouchTargets(except intent: MermaidIntent) {
+        if intent != .wandering {
+            touchPointTarget = nil
+        }
+        if intent != .seekingFood {
+            touchFoodTarget = nil
+        }
+        if intent != .interactingWithFish {
+            touchFishTarget = nil
+        }
+        if intent != .seekingChallenge {
+            touchChallengeTarget = nil
+        }
+    }
+
+    private func interact(with fish: FishNode) {
+        interactCooldown = 8
+        ctx.fish.interact(fish)
+        stats.boostMood(6)
+        stats.gainXP(3)
+        if Int.random(in: 0..<12) == 0 {
+            let gained = stats.awardPearls(1)
+            ctx.say("O peixinho deixou conchas! 🐚+\(gained)")
+        }
+        setIntent(.observing)
+        decisionCooldown = 4
+    }
+
     private func clearExpiredCommandCooldowns() {
         let now = Date()
         commandCooldownUntil = commandCooldownUntil.filter { $0.value > now }
+    }
+
+    private func penalizeTrust(_ amount: CGFloat) {
+        stats.trust = max(0, stats.trust - amount)
     }
 
     /// Quanto mais nova, mais teimosa para comer quando mandam.
@@ -568,7 +810,7 @@ final class AutonomySystem {
     }
 
     private func refuseTired(_ command: PlayerCommand) {
-        stats.trust = max(0, stats.trust - 1)
+        penalizeTrust(TrustBalance.exhaustedRefusal)
         let excuses = [
             "Estou sem energia... preciso descansar. 😮‍💨",
             "Cansada demais para isso agora...",

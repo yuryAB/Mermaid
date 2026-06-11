@@ -31,6 +31,7 @@ final class EventSystem {
     private weak var worldNode: SKNode?
     private let objectivePearlReward = 12
     private let maxObjectivePearlReward = 40
+    private let currentEnergyDrainPerSecond: CGFloat = 1.6
 
     private var timer: CGFloat = 20
     private var driftResetTimer: CGFloat = -1
@@ -47,6 +48,7 @@ final class EventSystem {
 
     func update(dt: CGFloat) {
         if driftResetTimer > 0 {
+            drainEnergyFromCurrent(dt: min(dt, driftResetTimer))
             driftResetTimer -= dt
             if driftResetTimer <= 0 {
                 ctx.autonomy.drift = CGVector(dx: 0, dy: 0)
@@ -202,6 +204,11 @@ final class EventSystem {
         ctx.autonomy.drift = drift
         spawnCurrentBurst(drift: drift, near: position)
         ctx.say("Uma correnteza passou! 🌊")
+    }
+
+    private func drainEnergyFromCurrent(dt: CGFloat) {
+        let force = (activeCurrentDrift.length / 420).clamped(to: 0.75...1.25)
+        ctx.stats.energy = max(0, ctx.stats.energy - currentEnergyDrainPerSecond * force * dt)
     }
 
     private func spawnCurrentBurst(drift: CGVector, near position: CGPoint) {
