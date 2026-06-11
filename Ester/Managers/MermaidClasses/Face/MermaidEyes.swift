@@ -9,24 +9,30 @@ import Foundation
 import SpriteKit
 
 class MermaidEyes {
-    let base:SKSpriteNode
-    let right:SKSpriteNode
-    let left:SKSpriteNode
+    let base: SKNode
+    let rightNode: SKNode
+    let leftNode: SKNode
+    let right: SKSpriteNode
+    let left: SKSpriteNode
     
     init() {
-        base = SKSpriteNode()
-        right = SKSpriteNode(texture: SKTexture(imageNamed: "eye"))
-        left = SKSpriteNode(texture: SKTexture(imageNamed: "eye"))
+        base = SKNode()
+        rightNode = SKNode()
+        leftNode = SKNode()
+        right = SKSpriteNode(texture: SKTexture(imageNamed: "eye_open"))
+        left = SKSpriteNode(texture: SKTexture(imageNamed: "eye_open"))
         left.xScale = -1.0
         
-        base.addChild(right)
-        base.addChild(left)
+        rightNode.addChild(right)
+        leftNode.addChild(left)
+        base.addChild(rightNode)
+        base.addChild(leftNode)
         setPositions()
     }
     
     func setPositions() {
         let xpos:CGFloat = 40
-        right.position.x = xpos
-        left.position.x = -xpos
+        rightNode.position.x = xpos
+        leftNode.position.x = -xpos
     }
 }

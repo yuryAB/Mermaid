@@ -64,6 +64,7 @@ final class AutonomySystem {
         progressIntent(dt: dt)
         steer(dt: dt)
         updateAnimation()
+        updateEmotion(dt: dt)
     }
 
     private func tickStats(dt: CGFloat) {
@@ -228,6 +229,7 @@ final class AutonomySystem {
             }
         case .eating:
             if intentTime > 1.6 {
+                showEmotion(.satisfied, duration: 1.6)
                 setIntent(.idle)
                 decisionCooldown = min(decisionCooldown, 1.5)
             }
@@ -335,6 +337,7 @@ final class AutonomySystem {
         intent = .eating
         target = nil
         intentTime = 0
+        showEmotion(.eating, duration: 1.2)
     }
 
     // MARK: - Medo / eventos
@@ -369,6 +372,7 @@ final class AutonomySystem {
     func finishChallenge() {
         intent = .idle
         decisionCooldown = 2.5
+        showEmotion(.satisfied, duration: 1.8)
     }
 
     // MARK: - Portal do Refúgio
@@ -381,6 +385,7 @@ final class AutonomySystem {
         commandBias = nil
         setIntent(.enteringRefuge)
         decisionCooldown = 2
+        showEmotion(.surprised, duration: 1.2)
     }
 
     func cancelRefugeEntry() {
@@ -525,6 +530,7 @@ final class AutonomySystem {
 
     private func refuse(_ command: PlayerCommand, saying message: String) {
         commandCooldownUntil[command] = Date().addingTimeInterval(refusalCooldownSeconds)
+        showEmotion(.stubborn, duration: 1.8)
         ctx.say(message)
     }
 
@@ -625,5 +631,17 @@ final class AutonomySystem {
             lastFacing = facing
             mermaid.setVisualDirection(facing)
         }
+    }
+
+    private func updateEmotion(dt: CGFloat) {
+        ctx.mermaidEntity
+            .component(ofType: MermaidEmotionComponent.self)?
+            .update(dt: dt, intent: intent, stats: stats)
+    }
+
+    private func showEmotion(_ emotion: MermaidEmotion, duration: CGFloat) {
+        ctx.mermaidEntity
+            .component(ofType: MermaidEmotionComponent.self)?
+            .show(emotion, duration: duration)
     }
 }

@@ -58,5 +58,8 @@ class MermaidEntity: GKEntity {
         
         let movementComponent = MovementComponent(baseClass: mermaid)
         self.addComponent(movementComponent)
+
+        let emotionComponent = MermaidEmotionComponent(mermaid: mermaid)
+        self.addComponent(emotionComponent)
     }
 }

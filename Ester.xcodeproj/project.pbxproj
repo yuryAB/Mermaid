@@ -17,6 +17,7 @@
 		723814312C56E0D9007B3836 /* EntityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814302C56E0D9007B3836 /* EntityManager.swift */; };
 		723814332C56E18D007B3836 /* MovementComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814322C56E18D007B3836 /* MovementComponent.swift */; };
 		723814352C56E19A007B3836 /* BaseSpriteComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814342C56E19A007B3836 /* BaseSpriteComponent.swift */; };
+		7238143C2C56EAA0007B3836 /* MermaidEmotionComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7238143B2C56EAA0007B3836 /* MermaidEmotionComponent.swift */; };
 		723814382C56E419007B3836 /* MermaidMovementStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814372C56E419007B3836 /* MermaidMovementStates.swift */; };
 		7238143A2C56E84C007B3836 /* MermaidDirectionStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814392C56E84C007B3836 /* MermaidDirectionStates.swift */; };
 		724C618F2C5546A900A5885C /* MermaidFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 724C618E2C5546A900A5885C /* MermaidFace.swift */; };
@@ -77,6 +78,7 @@
 		723814302C56E0D9007B3836 /* EntityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityManager.swift; sourceTree = "<group>"; };
 		723814322C56E18D007B3836 /* MovementComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementComponent.swift; sourceTree = "<group>"; };
 		723814342C56E19A007B3836 /* BaseSpriteComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseSpriteComponent.swift; sourceTree = "<group>"; };
+		7238143B2C56EAA0007B3836 /* MermaidEmotionComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEmotionComponent.swift; sourceTree = "<group>"; };
 		723814372C56E419007B3836 /* MermaidMovementStates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidMovementStates.swift; sourceTree = "<group>"; };
 		723814392C56E84C007B3836 /* MermaidDirectionStates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidDirectionStates.swift; sourceTree = "<group>"; };
 		724C618E2C5546A900A5885C /* MermaidFace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidFace.swift; sourceTree = "<group>"; };
@@ -185,6 +187,7 @@
 			children = (
 				723814342C56E19A007B3836 /* BaseSpriteComponent.swift */,
 				723814322C56E18D007B3836 /* MovementComponent.swift */,
+				7238143B2C56EAA0007B3836 /* MermaidEmotionComponent.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -387,6 +390,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				723814332C56E18D007B3836 /* MovementComponent.swift in Sources */,
+				7238143C2C56EAA0007B3836 /* MermaidEmotionComponent.swift in Sources */,
 				7271E5682C41BBD6008CE3C8 /* Model.swift in Sources */,
 				7238142E2C56CACA007B3836 /* MovementEnums.swift in Sources */,
 				72A119592C55DB33003E827B /* MermaidEyes.swift in Sources */,

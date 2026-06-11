@@ -57,6 +57,7 @@ protocol MermaidFigure {
     func applyAnimationMode(_ mode: MovementType)
     func applyDirection(_ direction: MovementDirection)
     func applyPalette(_ palette: MermaidPalette)
+    func applyFacePose(_ pose: MermaidFacePose, animated: Bool)
 
     func setPartX(_ x: CGFloat, for part: MermaidFigurePart)
     func setPartY(_ y: CGFloat, for part: MermaidFigurePart)
@@ -78,6 +79,7 @@ class Mermaid {
 
     private(set) var formKind: MermaidFormKind = .young
     private(set) var figure: MermaidFigure = YoungMermaidFigure()
+    private(set) var formRevision = 0
 
     enum Direction {
         case up
@@ -91,6 +93,7 @@ class Mermaid {
         base = SKSpriteNode()
         base.addChild(figure.root)
         figure.applyAnimationMode(.idle)
+        figure.applyFacePose(.pose(for: .neutral), animated: false)
     }
 
     private static func formKind(for phase: MermaidPhase) -> MermaidFormKind {
@@ -140,9 +143,11 @@ class Mermaid {
             figure = AdultMermaidFigure()
         }
 
+        formRevision += 1
         base.addChild(figure.root)
         currentDirection = .none
         figure.applyAnimationMode(.idle)
+        figure.applyFacePose(.pose(for: .neutral), animated: false)
     }
 
     func setFigurePartX(_ x: CGFloat, for part: MermaidFigurePart) {
@@ -159,6 +164,10 @@ class Mermaid {
 
     func setFigurePartPosition(_ position: CGPoint, for part: MermaidFigurePart) {
         figure.setPartPosition(position, for: part)
+    }
+
+    func applyFacePose(_ pose: MermaidFacePose, animated: Bool) {
+        figure.applyFacePose(pose, animated: animated)
     }
 
     private var shouldTranslateWithBody: Bool {

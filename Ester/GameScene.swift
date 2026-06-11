@@ -218,9 +218,11 @@ class GameScene: SKScene {
         rigDebugTool = nil
         if stats.phase != .egg {
             ctx.autonomy.paused = false
-            mermaidEntity.mermaid.setForm(for: stats.phase)
-            mermaidEntity.mermaid.base.setScale(stats.phase.scale)
-            mermaidEntity.mermaid.applyIdleMoveMode()
+            let mermaid = mermaidEntity.mermaid
+            mermaid.setForm(for: stats.phase)
+            mermaid.reloadForm()
+            mermaid.base.setScale(stats.phase.scale)
+            mermaid.applyIdleMoveMode()
         }
     }
 

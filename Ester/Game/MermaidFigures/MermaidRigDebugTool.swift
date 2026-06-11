@@ -19,6 +19,12 @@ final class MermaidRigDebugTool: SKNode {
     private var activeStepperName: String?
     private let stepperRepeatActionKey = "rig_stepper_repeat"
     private var exportMessage: String?
+    private var previewFitByForm: [MermaidFormKind: PreviewFit] = [:]
+
+    private struct PreviewFit {
+        let scale: CGFloat
+        let offset: CGPoint
+    }
 
     init(size: CGSize, insets: UIEdgeInsets, initialForm: MermaidFormKind) {
         self.sceneSize = size
@@ -109,7 +115,7 @@ final class MermaidRigDebugTool: SKNode {
             let column = index % 2
             let row = index / 2
             addButton(id: "rig_part_\(part.rawValue)",
-                      text: part.displayName,
+                      text: part.rigToolDisplayName,
                       position: CGPoint(x: leftX + partButtonWidth / 2 + CGFloat(column) * (partButtonWidth + partColumnGap),
                                         y: partsTop - CGFloat(row) * 34),
                       width: partButtonWidth,
@@ -138,9 +144,9 @@ final class MermaidRigDebugTool: SKNode {
 
     private func valueText() -> String {
         guard let transform = MermaidRigStore.shared.transform(for: selectedForm, part: selectedPart) else {
-            return "\(selectedForm.displayName).\(selectedPart.displayName): indisponivel"
+            return "\(selectedForm.displayName).\(selectedPart.rigToolDisplayName): indisponivel"
         }
-        return "\(selectedForm.displayName).\(selectedPart.displayName) | x: \(Int(transform.x)) y: \(Int(transform.y)) z: \(Int(transform.z)) scale: \(formatScale(transform.scale))"
+        return "\(selectedForm.displayName).\(selectedPart.rigToolDisplayName) | x: \(Int(transform.x)) y: \(Int(transform.y)) z: \(Int(transform.z)) scale: \(formatScale(transform.scale))"
     }
 
     private func addPreview(center: CGPoint, size: CGSize) {
@@ -161,6 +167,7 @@ final class MermaidRigDebugTool: SKNode {
         mermaid.applyIdleMoveMode()
         mermaid.applyPalette(.main)
         fitPreview(mermaid.base,
+                   form: selectedForm,
                    maxSize: CGSize(width: size.width - 58, height: size.height - 94),
                    center: CGPoint(x: center.x, y: center.y - 18))
         mermaid.base.zPosition = 4
@@ -177,9 +184,15 @@ final class MermaidRigDebugTool: SKNode {
         content.addChild(panel)
     }
 
-    private func fitPreview(_ node: SKNode, maxSize: CGSize, center: CGPoint) {
+    private func fitPreview(_ node: SKNode, form: MermaidFormKind, maxSize: CGSize, center: CGPoint) {
         node.position = .zero
         node.setScale(1)
+
+        if let cachedFit = previewFitByForm[form] {
+            node.setScale(cachedFit.scale)
+            node.position = center + cachedFit.offset
+            return
+        }
 
         let rawFrame = node.calculateAccumulatedFrame()
         guard rawFrame.width > 0, rawFrame.height > 0 else {
@@ -192,6 +205,7 @@ final class MermaidRigDebugTool: SKNode {
 
         let scaledFrame = node.calculateAccumulatedFrame()
         node.position = CGPoint(x: center.x - scaledFrame.midX, y: center.y - scaledFrame.midY)
+        previewFitByForm[form] = PreviewFit(scale: scale, offset: node.position - center)
     }
 
     private func addAxisStepper(axis: String, label title: String, x: CGFloat, y: CGFloat) {
@@ -374,5 +388,22 @@ private extension String {
     func removingPrefix(_ prefix: String) -> String? {
         guard hasPrefix(prefix) else { return nil }
         return String(dropFirst(prefix.count))
+    }
+}
+
+private extension MermaidFigurePart {
+    var rigToolDisplayName: String {
+        switch self {
+        case .eyeLeft:
+            return "olho tela esq"
+        case .eyeRight:
+            return "olho tela dir"
+        case .eyebrowLeft:
+            return "sobr tela esq"
+        case .eyebrowRight:
+            return "sobr tela dir"
+        default:
+            return displayName
+        }
     }
 }

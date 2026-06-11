@@ -17,11 +17,13 @@ final class BabyMermaidFigure: MermaidFigure {
     private let hairBack = SKSpriteNode(imageNamed: "baby-hairBack")
     private let hairFront = SKSpriteNode(imageNamed: "baby-hairFront")
     private let head = SKSpriteNode(imageNamed: "MermHead")
-    private let eyeLeft = SKSpriteNode(imageNamed: "eye")
-    private let eyeRight = SKSpriteNode(imageNamed: "eye")
+    private let eyeLeftNode = SKNode()
+    private let eyeRightNode = SKNode()
+    private let eyeLeft = SKSpriteNode(imageNamed: "eye_open")
+    private let eyeRight = SKSpriteNode(imageNamed: "eye_open")
     private let eyebrowLeft = SKSpriteNode(imageNamed: "eyeBrow")
     private let eyebrowRight = SKSpriteNode(imageNamed: "eyeBrow")
-    private let mouth = SKSpriteNode(imageNamed: "mouth")
+    private let mouth = SKSpriteNode(imageNamed: "mouth_neutral")
     private let waistBack = SKSpriteNode(imageNamed: "baby-waistBack")
     private let waistFront = SKSpriteNode(imageNamed: "baby-waistFront")
     private let tailFin = SKSpriteNode(imageNamed: "baby-fin")
@@ -50,15 +52,19 @@ final class BabyMermaidFigure: MermaidFigure {
         head.setScale(rig.head.scale)
         upperBody.addChild(head)
 
-        eyeLeft.zPosition = rig.eyeLeft.z
-        eyeLeft.position = rig.eyeLeft.point
-        applyScale(rig.eyeLeft.scale, to: eyeLeft, part: .eyeLeft)
-        upperBody.addChild(eyeLeft)
+        eyeLeftNode.zPosition = rig.eyeLeft.z
+        eyeLeftNode.position = rig.eyeLeft.point
+        eyeLeftNode.setScale(abs(rig.eyeLeft.scale))
+        eyeLeft.xScale = -1
+        eyeLeft.yScale = 1
+        eyeLeftNode.addChild(eyeLeft)
+        upperBody.addChild(eyeLeftNode)
 
-        eyeRight.zPosition = rig.eyeRight.z
-        eyeRight.position = rig.eyeRight.point
-        eyeRight.setScale(rig.eyeRight.scale)
-        upperBody.addChild(eyeRight)
+        eyeRightNode.zPosition = rig.eyeRight.z
+        eyeRightNode.position = rig.eyeRight.point
+        eyeRightNode.setScale(abs(rig.eyeRight.scale))
+        eyeRightNode.addChild(eyeRight)
+        upperBody.addChild(eyeRightNode)
 
         eyebrowLeft.zPosition = rig.eyebrowLeft.z
         eyebrowLeft.position = rig.eyebrowLeft.point
@@ -184,6 +190,42 @@ final class BabyMermaidFigure: MermaidFigure {
         }
     }
 
+    func applyFacePose(_ pose: MermaidFacePose, animated: Bool) {
+        let faceRig = MermaidRigStore.shared.document.baby
+        eyeLeft.setFaceTexture(pose.eyeAsset.rawValue)
+        eyeRight.setFaceTexture(pose.eyeAsset.rawValue)
+        mouth.setFaceTexture(pose.mouthAsset.rawValue)
+
+        eyeLeft.xScale = -1
+        eyeLeft.yScale = 1
+        eyeRight.setScale(1)
+        eyeLeftNode.applyFaceTransform(position: faceRig.eyeLeft.point,
+                                       scale: faceRig.eyeLeft.scale,
+                                       mirrored: false,
+                                       rotationDegrees: 0,
+                                       animated: animated)
+        eyeRightNode.applyFaceTransform(position: faceRig.eyeRight.point,
+                                        scale: faceRig.eyeRight.scale,
+                                        mirrored: false,
+                                        rotationDegrees: 0,
+                                        animated: animated)
+        eyebrowLeft.applyFaceTransform(position: faceRig.eyebrowLeft.point + pose.leftEyebrowOffset,
+                                       scale: faceRig.eyebrowLeft.scale,
+                                       mirrored: true,
+                                       rotationDegrees: 6 + pose.leftEyebrowRotationDelta,
+                                       animated: animated)
+        eyebrowRight.applyFaceTransform(position: faceRig.eyebrowRight.point + pose.rightEyebrowOffset,
+                                        scale: faceRig.eyebrowRight.scale,
+                                        mirrored: false,
+                                        rotationDegrees: -6 + pose.rightEyebrowRotationDelta,
+                                        animated: animated)
+        mouth.applyFaceTransform(position: faceRig.mouth.point + pose.mouthOffset,
+                                 scale: faceRig.mouth.scale * pose.mouthScale,
+                                 mirrored: false,
+                                 rotationDegrees: 0,
+                                 animated: animated)
+    }
+
     func setPartX(_ x: CGFloat, for part: MermaidFigurePart) {
         node(for: part)?.position.x = x
     }
@@ -205,9 +247,9 @@ final class BabyMermaidFigure: MermaidFigure {
         case .hairFront:
             return hairFront
         case .eyeLeft:
-            return eyeLeft
+            return eyeLeftNode
         case .eyeRight:
-            return eyeRight
+            return eyeRightNode
         case .eyebrowLeft:
             return eyebrowLeft
         case .eyebrowRight:
@@ -233,11 +275,12 @@ final class BabyMermaidFigure: MermaidFigure {
 
     private func applyScale(_ scale: CGFloat, to node: SKNode?, part: MermaidFigurePart) {
         guard let node else { return }
-        if part == .eyeLeft || part == .eyebrowLeft {
-            node.xScale = -scale
-            node.yScale = scale
+        if part == .eyebrowLeft {
+            let targetScale = abs(scale)
+            node.xScale = -targetScale
+            node.yScale = targetScale
         } else {
-            node.setScale(scale)
+            node.setScale(abs(scale))
         }
     }
 

@@ -12,6 +12,6 @@ class MermaidMouth {
     let base:SKSpriteNode
     
     init() {
-        base = SKSpriteNode(texture: SKTexture(imageNamed: "mouth"))
+        base = SKSpriteNode(texture: SKTexture(imageNamed: "mouth_neutral"))
     }
 }
