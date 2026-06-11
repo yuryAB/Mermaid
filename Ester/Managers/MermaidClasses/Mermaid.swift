@@ -170,6 +170,10 @@ class Mermaid {
         figure.applyFacePose(pose, animated: animated)
     }
 
+    func applyExpression(_ expression: MermaidExpressionName, animated: Bool) {
+        figure.applyFacePose(MermaidExpressionLibrary.pose(named: expression), animated: animated)
+    }
+
     private var shouldTranslateWithBody: Bool {
         return formKind == .young || formKind == .adult
     }

@@ -36,8 +36,191 @@ enum MermaidEmotion: Equatable {
     case scared
     case stubborn
     case focused
+    case adventurous
     case surprised
     case sad
+}
+
+enum MermaidExpressionName: String, CaseIterable {
+    case neutral
+    case curious
+    case happy
+    case satisfied
+    case hungry
+    case eating
+    case tired
+    case scared
+    case snob
+    case focused
+    case adventurous
+    case surprised
+    case sad
+}
+
+struct MermaidEyebrowExpression {
+    var x: CGFloat
+    var y: CGFloat
+    var rotation: CGFloat
+
+    init(x: CGFloat = 0, y: CGFloat = 0, rotation: CGFloat = 0) {
+        self.x = x
+        self.y = y
+        self.rotation = rotation
+    }
+}
+
+struct MermaidExpressionPreset {
+    var eye: MermaidEyeAsset
+    var mouth: MermaidMouthAsset
+    var leftBrow: MermaidEyebrowExpression
+    var rightBrow: MermaidEyebrowExpression
+    var mouthX: CGFloat
+    var mouthY: CGFloat
+    var mouthScale: CGFloat
+
+    init(eye: MermaidEyeAsset,
+         mouth: MermaidMouthAsset,
+         leftBrow: MermaidEyebrowExpression = MermaidEyebrowExpression(),
+         rightBrow: MermaidEyebrowExpression = MermaidEyebrowExpression(),
+         mouthX: CGFloat = 0,
+         mouthY: CGFloat = 0,
+         mouthScale: CGFloat = 1) {
+        self.eye = eye
+        self.mouth = mouth
+        self.leftBrow = leftBrow
+        self.rightBrow = rightBrow
+        self.mouthX = mouthX
+        self.mouthY = mouthY
+        self.mouthScale = mouthScale
+    }
+
+    var pose: MermaidFacePose {
+        MermaidFacePose(eyeAsset: eye,
+                        mouthAsset: mouth,
+                        leftEyebrowOffset: CGPoint(x: leftBrow.x, y: leftBrow.y),
+                        rightEyebrowOffset: CGPoint(x: rightBrow.x, y: rightBrow.y),
+                        leftEyebrowRotationDelta: leftBrow.rotation,
+                        rightEyebrowRotationDelta: rightBrow.rotation,
+                        mouthOffset: CGPoint(x: mouthX, y: mouthY),
+                        mouthScale: mouthScale)
+    }
+}
+
+enum MermaidExpressionLibrary {
+    // Edit expressions here. Positive eyebrow y raises it; positive rotation
+    // tilts the left brow clockwise and the right brow clockwise in local space.
+    static var presets: [MermaidExpressionName: MermaidExpressionPreset] = [
+        .neutral: MermaidExpressionPreset(eye: .open,
+                                          mouth: .neutral),
+
+        .curious: MermaidExpressionPreset(eye: .open,
+                                          mouth: .smile,
+                                          leftBrow: MermaidEyebrowExpression(y: 8, rotation: -5),
+                                          rightBrow: MermaidEyebrowExpression(y: 1, rotation: -2)),
+
+        .happy: MermaidExpressionPreset(eye: .open,
+                                        mouth: .smile,
+                                        leftBrow: MermaidEyebrowExpression(y: 5, rotation: -4),
+                                        rightBrow: MermaidEyebrowExpression(y: 5, rotation: 4),
+                                        mouthY: 2,
+                                        mouthScale: 1.05),
+
+        .satisfied: MermaidExpressionPreset(eye: .closed,
+                                            mouth: .smile,
+                                            leftBrow: MermaidEyebrowExpression(y: 3, rotation: -3),
+                                            rightBrow: MermaidEyebrowExpression(y: 3, rotation: 3),
+                                            mouthY: 1),
+
+        .hungry: MermaidExpressionPreset(eye: .half,
+                                         mouth: .open,
+                                         leftBrow: MermaidEyebrowExpression(x: 1, y: -2, rotation: 7),
+                                         rightBrow: MermaidEyebrowExpression(x: -1, y: -2, rotation: -7),
+                                         mouthY: -1),
+
+        .eating: MermaidExpressionPreset(eye: .half,
+                                         mouth: .chew,
+                                         leftBrow: MermaidEyebrowExpression(y: 1),
+                                         rightBrow: MermaidEyebrowExpression(y: 1),
+                                         mouthScale: 1.08),
+
+        .tired: MermaidExpressionPreset(eye: .half,
+                                        mouth: .sleepy,
+                                        leftBrow: MermaidEyebrowExpression(y: -5, rotation: -2),
+                                        rightBrow: MermaidEyebrowExpression(y: -5, rotation: 2),
+                                        mouthY: -2),
+
+        .scared: MermaidExpressionPreset(eye: .wide,
+                                         mouth: .o,
+                                         leftBrow: MermaidEyebrowExpression(x: -2, y: 13, rotation: -8),
+                                         rightBrow: MermaidEyebrowExpression(x: 2, y: 13, rotation: 8),
+                                         mouthScale: 1.08),
+
+        .snob: MermaidExpressionPreset(eye: .half,
+                                       mouth: .pout,
+                                       leftBrow: MermaidEyebrowExpression(x: -2, y: 5, rotation: -12),
+                                       rightBrow: MermaidEyebrowExpression(x: 2, y: -1, rotation: -8),
+                                       mouthX: 2,
+                                       mouthY: 1,
+                                       mouthScale: 0.96),
+
+        .focused: MermaidExpressionPreset(eye: .open,
+                                          mouth: .neutral,
+                                          leftBrow: MermaidEyebrowExpression(x: 2, y: -2, rotation: 4),
+                                          rightBrow: MermaidEyebrowExpression(x: -2, y: -2, rotation: -4)),
+
+        .adventurous: MermaidExpressionPreset(eye: .open,
+                                              mouth: .smile,
+                                              leftBrow: MermaidEyebrowExpression(x: -1, y: 4, rotation: -7),
+                                              rightBrow: MermaidEyebrowExpression(x: 1, y: 2, rotation: 5),
+                                              mouthY: 1,
+                                              mouthScale: 1.02),
+
+        .surprised: MermaidExpressionPreset(eye: .wide,
+                                            mouth: .o,
+                                            leftBrow: MermaidEyebrowExpression(y: 10, rotation: -4),
+                                            rightBrow: MermaidEyebrowExpression(y: 10, rotation: 4)),
+
+        .sad: MermaidExpressionPreset(eye: .half,
+                                      mouth: .frown,
+                                      leftBrow: MermaidEyebrowExpression(x: 3, y: 2, rotation: -10),
+                                      rightBrow: MermaidEyebrowExpression(x: -3, y: 2, rotation: 10),
+                                      mouthY: -2)
+    ]
+
+    static func pose(named name: MermaidExpressionName) -> MermaidFacePose {
+        presets[name]?.pose ?? presets[.neutral]!.pose
+    }
+
+    static func expressionName(for emotion: MermaidEmotion) -> MermaidExpressionName {
+        switch emotion {
+        case .neutral:
+            return .neutral
+        case .curious:
+            return .curious
+        case .happy:
+            return .happy
+        case .satisfied:
+            return .satisfied
+        case .hungry:
+            return .hungry
+        case .eating:
+            return .eating
+        case .tired:
+            return .tired
+        case .scared:
+            return .scared
+        case .stubborn:
+            return .snob
+        case .focused:
+            return .focused
+        case .adventurous:
+            return .adventurous
+        case .surprised:
+            return .surprised
+        case .sad:
+            return .sad
+        }
+    }
 }
 
 struct MermaidFacePose {
@@ -71,102 +254,16 @@ struct MermaidFacePose {
     }
 
     static func pose(for emotion: MermaidEmotion) -> MermaidFacePose {
-        switch emotion {
-        case .neutral:
-            return MermaidFacePose(eyeAsset: .open, mouthAsset: .neutral)
-        case .curious:
-            return MermaidFacePose(eyeAsset: .open,
-                                   mouthAsset: .smile,
-                                   leftEyebrowOffset: CGPoint(x: 0, y: 8),
-                                   rightEyebrowOffset: CGPoint(x: 0, y: 1),
-                                   leftEyebrowRotationDelta: -5,
-                                   rightEyebrowRotationDelta: -2)
-        case .happy:
-            return MermaidFacePose(eyeAsset: .open,
-                                   mouthAsset: .smile,
-                                   leftEyebrowOffset: CGPoint(x: 0, y: 5),
-                                   rightEyebrowOffset: CGPoint(x: 0, y: 5),
-                                   leftEyebrowRotationDelta: -4,
-                                   rightEyebrowRotationDelta: 4,
-                                   mouthOffset: CGPoint(x: 0, y: 2),
-                                   mouthScale: 1.05)
-        case .satisfied:
-            return MermaidFacePose(eyeAsset: .closed,
-                                   mouthAsset: .smile,
-                                   leftEyebrowOffset: CGPoint(x: 0, y: 3),
-                                   rightEyebrowOffset: CGPoint(x: 0, y: 3),
-                                   leftEyebrowRotationDelta: -3,
-                                   rightEyebrowRotationDelta: 3,
-                                   mouthOffset: CGPoint(x: 0, y: 1))
-        case .hungry:
-            return MermaidFacePose(eyeAsset: .half,
-                                   mouthAsset: .open,
-                                   leftEyebrowOffset: CGPoint(x: 1, y: -2),
-                                   rightEyebrowOffset: CGPoint(x: -1, y: -2),
-                                   leftEyebrowRotationDelta: 7,
-                                   rightEyebrowRotationDelta: -7,
-                                   mouthOffset: CGPoint(x: 0, y: -1))
-        case .eating:
-            return MermaidFacePose(eyeAsset: .half,
-                                   mouthAsset: .chew,
-                                   leftEyebrowOffset: CGPoint(x: 0, y: 1),
-                                   rightEyebrowOffset: CGPoint(x: 0, y: 1),
-                                   mouthScale: 1.08)
-        case .tired:
-            return MermaidFacePose(eyeAsset: .half,
-                                   mouthAsset: .sleepy,
-                                   leftEyebrowOffset: CGPoint(x: 0, y: -5),
-                                   rightEyebrowOffset: CGPoint(x: 0, y: -5),
-                                   leftEyebrowRotationDelta: -2,
-                                   rightEyebrowRotationDelta: 2,
-                                   mouthOffset: CGPoint(x: 0, y: -2))
-        case .scared:
-            return MermaidFacePose(eyeAsset: .wide,
-                                   mouthAsset: .o,
-                                   leftEyebrowOffset: CGPoint(x: -2, y: 13),
-                                   rightEyebrowOffset: CGPoint(x: 2, y: 13),
-                                   leftEyebrowRotationDelta: -8,
-                                   rightEyebrowRotationDelta: 8,
-                                   mouthScale: 1.08)
-        case .stubborn:
-            return MermaidFacePose(eyeAsset: .half,
-                                   mouthAsset: .pout,
-                                   leftEyebrowOffset: CGPoint(x: 3, y: -4),
-                                   rightEyebrowOffset: CGPoint(x: -3, y: -4),
-                                   leftEyebrowRotationDelta: 12,
-                                   rightEyebrowRotationDelta: -12,
-                                   mouthOffset: CGPoint(x: 0, y: -1),
-                                   mouthScale: 1.04)
-        case .focused:
-            return MermaidFacePose(eyeAsset: .open,
-                                   mouthAsset: .neutral,
-                                   leftEyebrowOffset: CGPoint(x: 3, y: -3),
-                                   rightEyebrowOffset: CGPoint(x: -3, y: -3),
-                                   leftEyebrowRotationDelta: 8,
-                                   rightEyebrowRotationDelta: -8)
-        case .surprised:
-            return MermaidFacePose(eyeAsset: .wide,
-                                   mouthAsset: .o,
-                                   leftEyebrowOffset: CGPoint(x: 0, y: 10),
-                                   rightEyebrowOffset: CGPoint(x: 0, y: 10),
-                                   leftEyebrowRotationDelta: -4,
-                                   rightEyebrowRotationDelta: 4)
-        case .sad:
-            return MermaidFacePose(eyeAsset: .half,
-                                   mouthAsset: .frown,
-                                   leftEyebrowOffset: CGPoint(x: 3, y: 2),
-                                   rightEyebrowOffset: CGPoint(x: -3, y: 2),
-                                   leftEyebrowRotationDelta: -10,
-                                   rightEyebrowRotationDelta: 10,
-                                   mouthOffset: CGPoint(x: 0, y: -2))
-        }
+        MermaidExpressionLibrary.pose(named: MermaidExpressionLibrary.expressionName(for: emotion))
     }
 }
 
 final class MermaidEmotionComponent: GKComponent {
     private let mermaid: Mermaid
     private var currentEmotion: MermaidEmotion?
+    private var currentExpression: MermaidExpressionName?
     private var overrideEmotion: MermaidEmotion?
+    private var overrideExpression: MermaidExpressionName?
     private var overrideTime: CGFloat = 0
     private var blinkTimer: CGFloat = .random(in: 2.8...5.2)
     private var blinkTime: CGFloat = 0
@@ -189,40 +286,65 @@ final class MermaidEmotionComponent: GKComponent {
             lastFormKind = mermaid.formKind
             lastFormRevision = mermaid.formRevision
             currentEmotion = nil
+            currentExpression = nil
             blinkTime = 0
         }
 
         if overrideTime > 0 {
             overrideTime -= dt
-            if overrideTime <= 0 { overrideEmotion = nil }
+            if overrideTime <= 0 {
+                overrideEmotion = nil
+                overrideExpression = nil
+            }
         }
 
         let emotion = overrideEmotion ?? emotion(for: intent, stats: stats)
-        setEmotion(emotion, animated: true)
+        if let overrideExpression {
+            setExpression(overrideExpression, animated: true)
+        } else {
+            setEmotion(emotion, animated: true)
+        }
         updateBlink(dt: dt, emotion: emotion)
     }
 
     func show(_ emotion: MermaidEmotion, duration: CGFloat) {
         overrideEmotion = emotion
+        overrideExpression = nil
         overrideTime = max(0, duration)
         setEmotion(emotion, animated: true)
     }
 
+    func show(_ expression: MermaidExpressionName, duration: CGFloat) {
+        overrideEmotion = nil
+        overrideExpression = expression
+        overrideTime = max(0, duration)
+        setExpression(expression, animated: true)
+    }
+
     private func setEmotion(_ emotion: MermaidEmotion, animated: Bool) {
-        guard emotion != currentEmotion else { return }
+        let expression = MermaidExpressionLibrary.expressionName(for: emotion)
+        guard emotion != currentEmotion || expression != currentExpression else { return }
         currentEmotion = emotion
-        activeBasePose = MermaidFacePose.pose(for: emotion)
+        setExpression(expression, animated: animated)
+    }
+
+    private func setExpression(_ expression: MermaidExpressionName, animated: Bool) {
+        guard expression != currentExpression else { return }
+        currentExpression = expression
+        activeBasePose = MermaidExpressionLibrary.pose(named: expression)
         mermaid.applyFacePose(activeBasePose, animated: animated)
     }
 
     private func emotion(for intent: MermaidIntent, stats: MermaidStats) -> MermaidEmotion {
-        if stats.scaredTimer > 0 || intent == .avoidingDanger { return .scared }
+        if intent == .avoidingDanger { return .scared }
         if intent == .eating { return .eating }
         if intent == .resting || stats.energy < 18 { return .tired }
         if stats.hunger > 72 || intent == .seekingFood { return .hungry }
 
         switch intent {
-        case .inChallenge, .seekingChallenge, .goingToObjective, .goingDeeper, .goingUp, .traveling, .enteringRefuge:
+        case .inChallenge, .seekingChallenge:
+            return .adventurous
+        case .goingToObjective, .goingDeeper, .goingUp, .traveling, .enteringRefuge:
             return .focused
         case .wandering, .observing:
             return .curious
@@ -232,6 +354,7 @@ final class MermaidEmotionComponent: GKComponent {
             break
         }
 
+        if stats.scaredTimer > 0 { return .scared }
         if stats.disposition < 28 { return .sad }
         if stats.hunger < 24 && stats.energy > 70 && stats.disposition > 70 { return .satisfied }
         if stats.disposition > 82 { return .happy }
