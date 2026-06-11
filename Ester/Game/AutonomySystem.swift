@@ -120,7 +120,7 @@ final class AutonomySystem {
         }
         if interactCooldown <= 0,
            ctx.fish.nearestFish(to: position, maxDistance: 700) != nil {
-            scores[.interactingWithFish] = 10 + stats.mood * 0.15 + stats.curiosity * 0.1
+            scores[.interactingWithFish] = 10 + stats.disposition * 0.15 + stats.curiosity * 0.1
         }
         if let deeperZone = currentZone.deeper,
            ctx.depth.isUnlocked(deeperZone),
@@ -283,8 +283,8 @@ final class AutonomySystem {
                     stats.boostMood(6)
                     stats.gainXP(3)
                     if Int.random(in: 0..<12) == 0 {
-                        stats.pearls += 1
-                        ctx.say("O peixinho deixou uma concha! 🐚")
+                        let gained = stats.awardPearls(1)
+                        ctx.say("O peixinho deixou conchas! 🐚+\(gained)")
                     }
                     setIntent(.observing)
                     decisionCooldown = 4
@@ -443,7 +443,7 @@ final class AutonomySystem {
         case .rest:
             desired = .resting
         case .travel:
-            // o menu de regiões é interface, não depende de obediência
+            // o menu de regiões é interface, não depende da disposição dela
             ctx.scene?.openRegionMenu()
             return
         case .refuge:
@@ -505,10 +505,14 @@ final class AutonomySystem {
             desired = .goingUp
         }
 
-        // Obediência: cresce com confiança e humor, cai com fome e medo
-        var chance = 0.55 + stats.trust * 0.004 + stats.mood * 0.0015 - stats.hunger * 0.0015
+        // Disposição: cresce com vínculo e bem-estar, cai com fome e medo.
+        var chance = 0.34
+            + stats.trust * 0.0024
+            + stats.disposition * 0.001
+            - stats.hunger * 0.0014
+            + stats.dispositionAcceptanceBonus
         if stats.scaredTimer > 0 { chance -= 0.2 }
-        chance = chance.clamped(to: 0.2...0.97)
+        chance = chance.clamped(to: 0.18...0.90)
 
         if CGFloat.random(in: 0...1) <= chance {
             stats.trust = min(100, stats.trust + 0.4)
@@ -543,13 +547,14 @@ final class AutonomySystem {
 
     /// Quanto mais nova, mais teimosa para comer quando mandam.
     private func eatRefusalChance() -> CGFloat {
+        let reduction = CGFloat(stats.dispositionUpgradeLevel) * 0.0028
         switch stats.phase {
         case .egg: return 0
-        case .baby: return 0.38
-        case .child: return 0.28
-        case .teen: return 0.18
-        case .young: return 0.10
-        case .adult: return 0.05
+        case .baby: return (0.45 - reduction).clamped(to: 0.17...0.45)
+        case .child: return (0.34 - reduction).clamped(to: 0.12...0.34)
+        case .teen: return (0.23 - reduction).clamped(to: 0.08...0.23)
+        case .young: return (0.14 - reduction).clamped(to: 0.05...0.14)
+        case .adult: return (0.08 - reduction).clamped(to: 0.03...0.08)
         }
     }
 
@@ -566,18 +571,20 @@ final class AutonomySystem {
     // MARK: - Locomoção orgânica
 
     private func speed(for intent: MermaidIntent) -> CGFloat {
+        let baseSpeed: CGFloat
         switch intent {
-        case .idle, .observing, .resting, .eating, .inChallenge: return 0
-        case .wandering: return 130
-        case .seekingFood, .seekingChallenge: return 200
-        case .goingToObjective: return 210
-        case .enteringRefuge: return 180
-        case .goingDeeper, .goingUp: return 170
-        case .traveling: return 260
-        case .returningHome: return 220
-        case .interactingWithFish: return 150
-        case .avoidingDanger: return 380
+        case .idle, .observing, .resting, .eating, .inChallenge: baseSpeed = 0
+        case .wandering: baseSpeed = 130
+        case .seekingFood, .seekingChallenge: baseSpeed = 200
+        case .goingToObjective: baseSpeed = 210
+        case .enteringRefuge: baseSpeed = 180
+        case .goingDeeper, .goingUp: baseSpeed = 170
+        case .traveling: baseSpeed = 260
+        case .returningHome: baseSpeed = 220
+        case .interactingWithFish: baseSpeed = 150
+        case .avoidingDanger: baseSpeed = 380
         }
+        return baseSpeed * stats.speedMultiplier
     }
 
     private func steer(dt: CGFloat) {
@@ -610,7 +617,8 @@ final class AutonomySystem {
     }
 
     private func updateAnimation() {
-        let currentSpeed = velocity.length
+        let effectiveVelocity = CGVector(dx: velocity.dx + drift.dx, dy: velocity.dy + drift.dy)
+        let currentSpeed = effectiveVelocity.length
         let mode: MovementType = currentSpeed < 30 ? .idle : (currentSpeed < 290 ? .swing : .fast)
         if mode != lastAnimation {
             lastAnimation = mode
@@ -620,10 +628,10 @@ final class AutonomySystem {
         guard mode != .idle else { return }
 
         let facing: Mermaid.Direction
-        if abs(velocity.dx) > abs(velocity.dy) {
-            facing = velocity.dx > 0 ? .right : .left
+        if abs(effectiveVelocity.dx) > abs(effectiveVelocity.dy) {
+            facing = effectiveVelocity.dx > 0 ? .right : .left
         } else {
-            facing = velocity.dy > 0 ? .up : .down
+            facing = effectiveVelocity.dy > 0 ? .up : .down
         }
         if facing != lastFacing {
             lastFacing = facing

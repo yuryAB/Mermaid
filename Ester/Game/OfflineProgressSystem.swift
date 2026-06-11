@@ -21,7 +21,7 @@ enum OfflineProgressSystem {
         var lines: [String] = []
 
         // distância offline limitada: nunca cruza o mundo de uma vez
-        let distance = min(cappedSeconds * 8, 14000)
+        let distance = min(cappedSeconds * 8 * stats.speedMultiplier, 14000)
 
         if let destinationId = stats.destinationRegionId,
            let destination = RegionDiscoverySystem.region(withId: destinationId) {
@@ -36,7 +36,7 @@ enum OfflineProgressSystem {
             if destination.contains(CGPoint(x: stats.posX, y: stats.posY)) {
                 stats.destinationRegionId = nil
                 stats.discoveredRegionIds.insert(destination.id)
-                stats.pearls += 5
+                stats.awardPearls(5)
                 stats.addMemory("Chegou a \(destination.name) durante a sua ausência")
                 lines.append("ela chegou a \(destination.name)! 🗺")
             } else {
@@ -62,8 +62,8 @@ enum OfflineProgressSystem {
         stats.gainXP(min(50, hours * 6))
         let pearlGain = Int(min(6, hours))
         if pearlGain > 0 {
-            stats.pearls += pearlGain
-            lines.append("juntou 🐚\(pearlGain)")
+            let gained = stats.awardPearls(pearlGain)
+            lines.append("juntou 🐚\(gained)")
         }
         if hours >= 3 && Int.random(in: 0..<3) == 0 {
             stats.addMemory("Viu um cardume raro enquanto você estava fora")

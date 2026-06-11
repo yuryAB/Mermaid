@@ -87,10 +87,10 @@ final class DepthSystem {
         let meters = max(0, -y / 10)
         if meters > ctx.stats.maxDepthMeters + 100 {
             ctx.stats.maxDepthMeters = meters
-            ctx.stats.pearls += 2
+            let gained = ctx.stats.awardPearls(2)
             ctx.stats.gainXP(10)
             ctx.stats.courage = min(100, ctx.stats.courage + 0.5)
-            ctx.say("Ela nadou mais fundo do que nunca! 🐚+2")
+            ctx.say("Ela nadou mais fundo do que nunca! 🐚+\(gained)")
         }
 
         paletteTimer -= dt
@@ -116,10 +116,10 @@ final class DepthSystem {
         for zone in DepthZone.allCases where !ctx.stats.isUnlocked(zone) {
             guard meetsRequirements(zone) else { continue }
             ctx.stats.unlock(zone)
-            ctx.stats.pearls += 10
+            let gained = ctx.stats.awardPearls(10)
             ctx.stats.gainXP(30)
             ctx.stats.addMemory("Alcançou a \(zone.displayName)")
-            ctx.say("🌊 Nova camada alcançável: \(zone.displayName)! 🐚+10")
+            ctx.say("🌊 Nova camada alcançável: \(zone.displayName)! 🐚+\(gained)")
         }
     }
 

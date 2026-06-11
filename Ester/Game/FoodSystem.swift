@@ -232,8 +232,8 @@ final class FoodSystem {
             stats.courage = min(100, stats.courage + food.kind.courage)
         }
         if food.kind.pearls > 0 {
-            stats.pearls += food.kind.pearls
-            ctx.say("Ela achou \(food.kind.name)! 🐚+\(food.kind.pearls)")
+            let gained = stats.awardPearls(food.kind.pearls)
+            ctx.say("Ela achou \(food.kind.name)! 🐚+\(gained)")
         } else if Int.random(in: 0..<4) == 0 {
             ctx.say("Nham... \(food.kind.name) 😋")
         }

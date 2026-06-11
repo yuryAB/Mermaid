@@ -93,11 +93,11 @@ final class RegionDiscoverySystem {
         // descoberta permanente
         if !ctx.stats.discoveredRegionIds.contains(region.id) {
             ctx.stats.discoveredRegionIds.insert(region.id)
-            ctx.stats.pearls += 15
+            let gained = ctx.stats.awardPearls(15)
             ctx.stats.gainXP(40)
             ctx.stats.courage = min(100, ctx.stats.courage + 2)
             ctx.stats.addMemory("Descobriu \(region.name)")
-            ctx.say("Nova região catalogada: \(region.name). Conchas +15")
+            ctx.say("Nova região catalogada: \(region.name). Conchas +\(gained)")
         }
 
         // progresso de exploração lento (0–100% em ~20 min na região)
@@ -106,7 +106,7 @@ final class RegionDiscoverySystem {
             progressTimer = 0
             let current = ctx.stats.regionProgress[region.id] ?? 0
             if current < 1 {
-                ctx.stats.regionProgress[region.id] = min(1, current + 5.0 / 1200.0)
+                ctx.stats.regionProgress[region.id] = min(1, current + 5.0 / 1200.0 * ctx.stats.explorationProgressMultiplier)
             }
         }
     }
@@ -200,10 +200,10 @@ final class TravelSystem {
         if destination.contains(ctx.mermaidPosition) {
             clearDestination()
             ctx.stats.gainXP(20)
-            ctx.stats.pearls += 5
+            let gained = ctx.stats.awardPearls(5)
             ctx.stats.boostMood(8)
             ctx.stats.addMemory("Viajou até \(destination.name)")
-            ctx.say("Chegada registrada: \(destination.name). Conchas +5")
+            ctx.say("Chegada registrada: \(destination.name). Conchas +\(gained)")
         }
     }
 }

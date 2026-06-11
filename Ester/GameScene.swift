@@ -311,17 +311,29 @@ class GameScene: SKScene {
                 let ribbon = SKShapeNode(path: path.cgPath)
                 ribbon.strokeColor = OceanPalette.currentColor(for: zone)
                 ribbon.fillColor = .clear
-                ribbon.lineWidth = CGFloat.random(in: 3...8)
-                ribbon.glowWidth = CGFloat.random(in: 2...8)
-                ribbon.alpha = CGFloat.random(in: 0.18...0.36)
-                ribbon.zPosition = -24
+                ribbon.lineWidth = CGFloat.random(in: 5...11)
+                ribbon.glowWidth = CGFloat.random(in: 5...13)
+                let baseAlpha = CGFloat.random(in: 0.28...0.52)
+                ribbon.alpha = baseAlpha
+                ribbon.zPosition = -18
                 worldNode.addChild(ribbon)
 
-                let low = SKAction.fadeAlpha(to: ribbon.alpha * 0.45, duration: Double.random(in: 4.0...7.0))
-                let high = SKAction.fadeAlpha(to: ribbon.alpha, duration: Double.random(in: 4.0...7.0))
+                let low = SKAction.fadeAlpha(to: baseAlpha * 0.5, duration: Double.random(in: 3.0...5.2))
+                let high = SKAction.fadeAlpha(to: baseAlpha, duration: Double.random(in: 3.0...5.2))
                 low.eaeInEaseOut()
                 high.eaeInEaseOut()
-                ribbon.run(.repeatForever(.sequence([low, high])))
+
+                let direction: CGFloat = Bool.random() ? 1 : -1
+                let drift = SKAction.moveBy(x: direction * CGFloat.random(in: 110...240),
+                                            y: CGFloat.random(in: -18...18),
+                                            duration: Double.random(in: 5.5...8.5))
+                let returnDrift = drift.reversed()
+                drift.eaeInEaseOut()
+                returnDrift.eaeInEaseOut()
+                ribbon.run(.repeatForever(.group([
+                    .sequence([low, high]),
+                    .sequence([drift, returnDrift])
+                ])))
             }
         }
     }
@@ -821,14 +833,14 @@ class GameScene: SKScene {
         climbOverlay?.removeFromParent()
         climbOverlay = nil
 
-        stats.pearls += result.pearls
+        let gainedPearls = stats.awardPearls(result.pearls)
         stats.gainXP(result.xp)
 
         // Durante o ovo, o desafio reúne energia de nascimento
         if result.isHatching || stats.phase == .egg {
             ctx.growth.addHatchProgress(CGFloat(result.score) / 900)
             stats.save()
-            ctx.say("O desafio reuniu energia de nascimento! 🥚✨ 🐚+\(result.pearls)")
+            ctx.say("O desafio reuniu energia de nascimento! 🥚✨ 🐚+\(gainedPearls)")
             return
         }
 
@@ -844,8 +856,8 @@ class GameScene: SKScene {
         }
         stats.save()
         ctx.say(result.reachedTarget
-                ? "Ela adorou o \(result.kind.title)! 🐚+\(result.pearls)"
-                : "Quase! Ainda assim ganhou 🐚+\(result.pearls)")
+                ? "Ela adorou o \(result.kind.title)! 🐚+\(gainedPearls)"
+                : "Quase! Ainda assim ganhou 🐚+\(gainedPearls)")
     }
 
     // MARK: - Toques no mundo

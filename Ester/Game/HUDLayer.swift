@@ -375,7 +375,7 @@ final class HUDLayer: SKNode {
         let barConfigs: [(key: String, label: String, color: UIColor, column: Int, row: Int)] = [
             ("hunger", "Alimentação", HUDPalette.algae, 0, 0),
             ("energy", "Energia", HUDPalette.gold, 1, 0),
-            ("mood", "Ânimo", HUDPalette.algae, 0, 1),
+            ("mood", "Disposição", HUDPalette.algae, 0, 1),
             ("bond", "Vínculo", HUDPalette.teal, 1, 1)
         ]
 
@@ -782,7 +782,7 @@ final class HUDLayer: SKNode {
         let nourishment = 1 - stats.hunger / 100
         setBar("hunger", value: nourishment)
         setBar("energy", value: stats.energy / 100)
-        setBar("mood", value: stats.mood / 100)
+        setBar("mood", value: stats.disposition / 100)
         setBar("bond", value: eggMode ? evolutionProgress : stats.trust / 100)
 
         if let hunger = bars["hunger"] {

@@ -9,6 +9,7 @@
 
 import Foundation
 import SpriteKit
+import UIKit
 
 // MARK: - Objetivo no mundo
 
@@ -29,6 +30,8 @@ final class EventSystem {
 
     private var timer: CGFloat = 20
     private var driftResetTimer: CGFloat = -1
+    private var driftDuration: CGFloat = 1
+    private var activeCurrentDrift = CGVector(dx: 0, dy: 0)
 
     /// Objetivo ativo no momento, se houver.
     private(set) var currentObjective: WorldObjective?
@@ -43,6 +46,12 @@ final class EventSystem {
             driftResetTimer -= dt
             if driftResetTimer <= 0 {
                 ctx.autonomy.drift = CGVector(dx: 0, dy: 0)
+                activeCurrentDrift = CGVector(dx: 0, dy: 0)
+            } else {
+                let progress = (driftResetTimer / driftDuration).clamped(to: 0...1)
+                let easing = progress * progress
+                ctx.autonomy.drift = CGVector(dx: activeCurrentDrift.dx * easing,
+                                              dy: activeCurrentDrift.dy * easing)
             }
         }
 
@@ -157,9 +166,125 @@ final class EventSystem {
     }
 
     private func current() {
-        ctx.autonomy.drift = CGVector(dx: .random(in: -70...70), dy: .random(in: -25...25))
-        driftResetTimer = 8
+        let position = ctx.mermaidPosition
+        let horizontalDirection: CGFloat
+        if position.x < World.minX + 1400 {
+            horizontalDirection = 1
+        } else if position.x > World.maxX - 1400 {
+            horizontalDirection = -1
+        } else {
+            horizontalDirection = Bool.random() ? 1 : -1
+        }
+
+        let yRange = ctx.depth.allowedYRange()
+        let verticalDirection: CGFloat
+        if position.y < yRange.lowerBound + 500 {
+            verticalDirection = .random(in: 0.08...0.38)
+        } else if position.y > yRange.upperBound - 500 {
+            verticalDirection = .random(in: -0.38 ... -0.08)
+        } else {
+            verticalDirection = .random(in: -0.28...0.28)
+        }
+
+        let drift = CGVector(dx: horizontalDirection * .random(in: 320...460),
+                             dy: verticalDirection * .random(in: 220...320))
+        activeCurrentDrift = drift
+        driftDuration = .random(in: 4.2...5.4)
+        driftResetTimer = driftDuration
+        ctx.autonomy.drift = drift
+        spawnCurrentBurst(drift: drift, near: position)
         ctx.say("Uma correnteza passou! 🌊")
+    }
+
+    private func spawnCurrentBurst(drift: CGVector, near position: CGPoint) {
+        guard let world = worldNode else { return }
+        let zone = DepthZone.zone(atY: position.y)
+        let speed = max(1, drift.length)
+        let unit = CGVector(dx: drift.dx / speed, dy: drift.dy / speed)
+        let perp = CGVector(dx: -unit.dy, dy: unit.dx)
+        let color = currentBurstColor(for: zone)
+        let band = SKNode()
+        band.position = position
+        band.zPosition = 9
+        world.addChild(band)
+
+        for i in 0..<7 {
+            let lane = (CGFloat(i) - 3) * CGFloat.random(in: 44...70)
+            let length = CGFloat.random(in: 1450...2050)
+            let path = UIBezierPath()
+            for step in 0...9 {
+                let t = CGFloat(step) / 9
+                let along = -length / 2 + length * t
+                let ripple = sin(t * .pi * 4 + CGFloat(i) * 0.7) * CGFloat.random(in: 18...42)
+                let point = CGPoint(x: unit.dx * along + perp.dx * (lane + ripple),
+                                    y: unit.dy * along + perp.dy * (lane + ripple))
+                if step == 0 {
+                    path.move(to: point)
+                } else {
+                    path.addLine(to: point)
+                }
+            }
+
+            let ribbon = SKShapeNode(path: path.cgPath)
+            ribbon.strokeColor = color.withAlphaComponent(CGFloat.random(in: 0.38...0.68))
+            ribbon.fillColor = .clear
+            ribbon.lineWidth = CGFloat.random(in: 9...17)
+            ribbon.glowWidth = CGFloat.random(in: 9...16)
+            ribbon.alpha = 0
+            band.addChild(ribbon)
+
+            let appear = SKAction.fadeAlpha(to: CGFloat.random(in: 0.72...0.95), duration: 0.16)
+            let hold = SKAction.wait(forDuration: Double.random(in: 0.35...0.7))
+            let vanish = SKAction.fadeOut(withDuration: Double.random(in: 1.0...1.5))
+            ribbon.run(.sequence([appear, hold, vanish]))
+        }
+
+        for i in 0..<24 {
+            let fleck = SKShapeNode(circleOfRadius: CGFloat.random(in: 3...8))
+            fleck.fillColor = UIColor(white: 1, alpha: CGFloat.random(in: 0.45...0.82))
+            fleck.strokeColor = color.withAlphaComponent(0.45)
+            fleck.glowWidth = 2
+            let along = CGFloat.random(in: -700...300)
+            let lane = CGFloat.random(in: -250...250)
+            fleck.position = CGPoint(x: unit.dx * along + perp.dx * lane,
+                                     y: unit.dy * along + perp.dy * lane)
+            fleck.alpha = 0
+            band.addChild(fleck)
+
+            let delay = SKAction.wait(forDuration: Double(i) * 0.015)
+            let travel = SKAction.group([
+                .fadeAlpha(to: CGFloat.random(in: 0.5...0.9), duration: 0.08),
+                .moveBy(x: unit.dx * CGFloat.random(in: 650...1150),
+                        y: unit.dy * CGFloat.random(in: 650...1150),
+                        duration: Double.random(in: 1.0...1.8))
+            ])
+            let fade = SKAction.fadeOut(withDuration: 0.45)
+            fleck.run(.sequence([delay, travel, fade]))
+        }
+
+        let shove = SKAction.moveBy(x: unit.dx * 540, y: unit.dy * 540, duration: 2.2)
+        shove.timingMode = .easeOut
+        band.run(.sequence([
+            .group([shove, .sequence([.wait(forDuration: 1.4), .fadeOut(withDuration: 0.8)])]),
+            .removeFromParent()
+        ]))
+    }
+
+    private func currentBurstColor(for zone: DepthZone) -> UIColor {
+        switch zone {
+        case .surface, .clear:
+            return UIColor(red: 0.78, green: 1.0, blue: 0.95, alpha: 1)
+        case .shallow:
+            return UIColor(red: 0.38, green: 0.95, blue: 0.78, alpha: 1)
+        case .mid:
+            return UIColor(red: 0.25, green: 0.78, blue: 0.95, alpha: 1)
+        case .blue:
+            return UIColor(red: 0.28, green: 0.56, blue: 1.0, alpha: 1)
+        case .deep:
+            return UIColor(red: 0.30, green: 0.44, blue: 0.90, alpha: 1)
+        case .abyss:
+            return UIColor(red: 0.45, green: 0.36, blue: 0.95, alpha: 1)
+        }
     }
 
     private func glowingFood() {
@@ -185,7 +310,7 @@ final class EventSystem {
                          return fish.position
                      },
                      onReach: { [weak self] in
-                         self?.ctx.stats.pearls += 1
+                         self?.ctx.stats.awardPearls(1)
                      })
 
         // se ela estiver por perto quando ele some, vira memória
@@ -195,9 +320,9 @@ final class EventSystem {
                 guard let self else { return }
                 if fish.position.distance(to: self.ctx.mermaidPosition) < 600 {
                     self.ctx.stats.gainXP(15)
-                    self.ctx.stats.pearls += 2
+                    let gained = self.ctx.stats.awardPearls(2)
                     self.ctx.stats.addMemory("Viu um peixe raro em \(zone.displayName)")
-                    self.ctx.say("Ela observou o peixe raro de pertinho! ✨ 🐚+2")
+                    self.ctx.say("Ela observou o peixe raro de pertinho! ✨ 🐚+\(gained)")
                 }
             }
         ]))

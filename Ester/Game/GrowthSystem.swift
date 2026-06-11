@@ -388,7 +388,7 @@ final class GrowthSystem {
         ctx.stats.phaseStartedAt = Date()
         let mermaid = ctx.mermaidEntity.mermaid
         mermaid.setForm(for: next)
-        ctx.stats.pearls += 20
+        let gained = ctx.stats.awardPearls(20)
         ctx.stats.courage = min(100, ctx.stats.courage + 5)
         ctx.stats.addMemory("Evoluiu para \(next.displayName)")
         let grow = SKAction.scale(to: next.scale, duration: 1.5)
@@ -410,7 +410,7 @@ final class GrowthSystem {
             ]))
         }
 
-        ctx.say("✨ Ela evoluiu: agora é \(next.displayName)! 🐚+20")
+        ctx.say("✨ Ela evoluiu: agora é \(next.displayName)! 🐚+\(gained)")
         ctx.stats.save()
     }
 }
