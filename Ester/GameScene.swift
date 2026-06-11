@@ -1003,6 +1003,37 @@ private final class OceanParallaxBackdrop: SKNode {
     private let kelpCurtainLayer = SKNode()
     private var ambientLife: [AmbientLifeNode] = []
     private var elapsed: CGFloat = 0
+    private static let softMistTexture: SKTexture = {
+        let size = CGSize(width: 64, height: 64)
+        let format = UIGraphicsImageRendererFormat()
+        format.opaque = false
+        format.scale = 1
+        let image = UIGraphicsImageRenderer(size: size, format: format).image { renderer in
+            let rect = CGRect(origin: .zero, size: size)
+            let context = renderer.cgContext
+            context.clear(rect)
+
+            let center = CGPoint(x: size.width / 2, y: size.height / 2)
+            let colors = [
+                UIColor(white: 1, alpha: 0.70).cgColor,
+                UIColor(white: 1, alpha: 0.22).cgColor,
+                UIColor(white: 1, alpha: 0.0).cgColor
+            ] as CFArray
+            let locations: [CGFloat] = [0.0, 0.42, 1.0]
+            guard let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(),
+                                            colors: colors,
+                                            locations: locations) else { return }
+            context.drawRadialGradient(gradient,
+                                       startCenter: center,
+                                       startRadius: 0,
+                                       endCenter: center,
+                                       endRadius: size.width / 2,
+                                       options: [.drawsAfterEndLocation])
+        }
+        let texture = SKTexture(image: image)
+        texture.filteringMode = .linear
+        return texture
+    }()
 
     init(size: CGSize) {
         sceneSize = size
@@ -1032,7 +1063,7 @@ private final class OceanParallaxBackdrop: SKNode {
         lifeLayer.zPosition = -36
         kelpCurtainLayer.zPosition = -24
 
-        buildDistantRidges()
+        buildDistantParticleMist()
         buildCaustics()
         buildPlankton()
         buildKelpCurtains()
@@ -1070,44 +1101,82 @@ private final class OceanParallaxBackdrop: SKNode {
         }
     }
 
-    private func buildDistantRidges() {
-        let width = sceneSize.width * 4.4
-        let height = sceneSize.height * 2.6
-        for row in 0..<8 {
-            let baseline = -height * 0.42 + CGFloat(row) * height * 0.12
-            let path = UIBezierPath()
-            path.move(to: CGPoint(x: -width / 2, y: baseline))
-            let segments = 22
-            for step in 0...segments {
-                let x = -width / 2 + width * CGFloat(step) / CGFloat(segments)
-                let y = baseline
-                    + CGFloat.random(in: -38...52)
-                    + sin(CGFloat(step) * 0.62 + CGFloat(row)) * 52
-                path.addLine(to: CGPoint(x: x, y: y))
-            }
+    private func buildDistantParticleMist() {
+        let coverage = CGSize(width: max(sceneSize.width * 3.4, 1200),
+                              height: max(sceneSize.height * 2.8, 1400))
+        let density = ((sceneSize.width * sceneSize.height) / (390 * 844)).clamped(to: 0.55...1.25)
 
-            let haze = SKShapeNode(path: path.cgPath)
-            haze.strokeColor = UIColor(red: 0.01,
-                                       green: 0.05 + CGFloat(row) * 0.006,
-                                       blue: 0.10 + CGFloat(row) * 0.008,
-                                       alpha: max(0.04, 0.18 - CGFloat(row) * 0.015))
-            haze.fillColor = .clear
-            haze.lineWidth = CGFloat.random(in: 22...52)
-            haze.glowWidth = CGFloat.random(in: 18...46)
-            haze.zPosition = CGFloat(row)
-            farLayer.addChild(haze)
-        }
+        addDistantEmitter(color: UIColor(red: 0.04, green: 0.12, blue: 0.18, alpha: 1),
+                          birthRate: min(4.4, 3.2 * density),
+                          lifetime: 42,
+                          scale: 2.1,
+                          scaleRange: 1.4,
+                          alpha: 0.16,
+                          alphaRange: 0.08,
+                          speed: 3,
+                          coverage: coverage,
+                          blendMode: .alpha,
+                          zPosition: -2)
 
-        for i in 0..<18 {
-            let hazeRock = SKShapeNode(ellipseOf: CGSize(width: CGFloat.random(in: 160...420),
-                                                         height: CGFloat.random(in: 42...130)))
-            hazeRock.fillColor = UIColor(red: 0.0, green: 0.035, blue: 0.075, alpha: CGFloat.random(in: 0.04...0.10))
-            hazeRock.strokeColor = .clear
-            hazeRock.position = CGPoint(x: CGFloat.random(in: -width / 2...width / 2),
-                                        y: -height * 0.42 + CGFloat(i % 6) * height * 0.15)
-            hazeRock.zPosition = -1
-            farLayer.addChild(hazeRock)
-        }
+        addDistantEmitter(color: UIColor(red: 0.14, green: 0.28, blue: 0.32, alpha: 1),
+                          birthRate: min(8.0, 5.8 * density),
+                          lifetime: 28,
+                          scale: 0.44,
+                          scaleRange: 0.28,
+                          alpha: 0.18,
+                          alphaRange: 0.10,
+                          speed: 9,
+                          coverage: coverage,
+                          blendMode: .alpha,
+                          zPosition: -1)
+
+        addDistantEmitter(color: UIColor(red: 0.70, green: 0.94, blue: 0.92, alpha: 1),
+                          birthRate: min(2.1, 1.4 * density),
+                          lifetime: 18,
+                          scale: 0.18,
+                          scaleRange: 0.12,
+                          alpha: 0.22,
+                          alphaRange: 0.12,
+                          speed: 6,
+                          coverage: coverage,
+                          blendMode: .add,
+                          zPosition: 0)
+    }
+
+    private func addDistantEmitter(color: UIColor,
+                                   birthRate: CGFloat,
+                                   lifetime: CGFloat,
+                                   scale: CGFloat,
+                                   scaleRange: CGFloat,
+                                   alpha: CGFloat,
+                                   alphaRange: CGFloat,
+                                   speed: CGFloat,
+                                   coverage: CGSize,
+                                   blendMode: SKBlendMode,
+                                   zPosition: CGFloat) {
+        let emitter = SKEmitterNode()
+        emitter.particleTexture = Self.softMistTexture
+        emitter.particleBirthRate = birthRate
+        emitter.particleLifetime = lifetime
+        emitter.particleLifetimeRange = lifetime * 0.32
+        emitter.particlePositionRange = CGVector(dx: coverage.width, dy: coverage.height)
+        emitter.particleSpeed = speed
+        emitter.particleSpeedRange = speed * 0.7
+        emitter.emissionAngle = .pi / 2
+        emitter.emissionAngleRange = .pi * 2
+        emitter.particleScale = scale
+        emitter.particleScaleRange = scaleRange
+        emitter.particleScaleSpeed = -scale / max(lifetime, 1)
+        emitter.particleAlpha = alpha
+        emitter.particleAlphaRange = alphaRange
+        emitter.particleAlphaSpeed = -alpha / max(lifetime, 1)
+        emitter.particleColor = color
+        emitter.particleColorBlendFactor = 1
+        emitter.particleBlendMode = blendMode
+        emitter.zPosition = zPosition
+        emitter.targetNode = farLayer
+        farLayer.addChild(emitter)
+        emitter.advanceSimulationTime(TimeInterval(lifetime * 0.8))
     }
 
     private func buildCaustics() {

@@ -113,22 +113,6 @@ final class GrowthSystem {
         max(0, req.waitSeconds - effectivePhaseSeconds())
     }
 
-    func growthShellLabelText() -> String {
-        if ctx.stats.phase == .egg { return "Crescer após nascer" }
-        guard let next = ctx.stats.phase.next,
-              let req = requirement(toReach: next) else {
-            return "Ciclo completo"
-        }
-        if remainingWaitSeconds(for: req) <= 0 {
-            return "Tempo já aberto"
-        }
-        let shellGrowthCost = GameBalance.growthShellCost(for: ctx.stats.phase)
-        if ctx.stats.pearls < shellGrowthCost {
-            return "Faltam \(shellGrowthCost - ctx.stats.pearls) conchas"
-        }
-        return "Reduzir tempo\n\(shellGrowthCost) conchas"
-    }
-
     @discardableResult
     func spendShellsForGrowth() -> Bool {
         if ctx.stats.phase == .egg {
@@ -147,15 +131,15 @@ final class GrowthSystem {
         }
         let shellGrowthCost = GameBalance.growthShellCost(for: ctx.stats.phase)
         guard ctx.stats.pearls >= shellGrowthCost else {
-            ctx.say("Reduzir tempo custa \(shellGrowthCost) conchas. Faltam \(shellGrowthCost - ctx.stats.pearls).")
+            ctx.say("Acelerar crescimento custa \(shellGrowthCost) conchas. Faltam \(shellGrowthCost - ctx.stats.pearls) conchas.")
             return false
         }
 
         let skipped = min(shellGrowthSkipSeconds, remaining)
         ctx.stats.pearls -= shellGrowthCost
         ctx.stats.phaseStartedAt = ctx.stats.phaseStartedAt.addingTimeInterval(-skipped)
-        ctx.stats.addMemory("Conchas reduziram \(GrowthSystem.formatDuration(skipped)) da espera de crescimento")
-        ctx.say("Tempo da sereia reduzido em \(GrowthSystem.formatDuration(skipped)).")
+        ctx.stats.addMemory("Conchas aceleraram \(GrowthSystem.formatDuration(skipped)) do crescimento")
+        ctx.say("Crescimento acelerado em \(GrowthSystem.formatDuration(skipped)).")
         if canEvolve() { evolve() } else { ctx.stats.save() }
         return true
     }

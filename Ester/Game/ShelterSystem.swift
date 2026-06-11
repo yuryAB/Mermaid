@@ -85,11 +85,11 @@ final class RefugeOverlay: SKNode {
     private var foodLabel: SKLabelNode!
     private var careLabel: SKLabelNode!
     private var upgradeLabel: SKLabelNode!
-    private var growthLabel: SKLabelNode!
     private var pearlsLabel: SKLabelNode!
     private var refreshTimer: CGFloat = 0
     private var displayMermaid: Mermaid?
     private var enhancementsOverlay: RefugeEnhancementsOverlay?
+    private let safeAreaInsets: UIEdgeInsets
 
     init(size: CGSize,
          insets: UIEdgeInsets,
@@ -98,6 +98,7 @@ final class RefugeOverlay: SKNode {
         self.ctx = ctx
         self.onClose = onClose
         self.overlaySize = size
+        self.safeAreaInsets = insets
         super.init()
         isUserInteractionEnabled = true
         build(size: size, insets: insets)
@@ -247,15 +248,14 @@ final class RefugeOverlay: SKNode {
         memoriesLabel.position = CGPoint(x: 0, y: -64)
         card.addChild(memoriesLabel)
 
-        // botões: cuidados, reduzir tempo de crescimento e voltar
-        let buttonWidth = (size.width - 80) / 3
+        // botões: aprimoramentos e voltar. Acelerar fica dentro de aprimoramentos.
+        let buttonWidth = (size.width - 72) / 2
         let actions: [(name: String, text: String, color: UIColor, column: Int)] = [
-            ("refuge_enhancements", "Cuidados", GameUI.gold, 0),
-            ("refuge_growth", "Reduzir tempo", GameUI.coral, 1),
-            ("refuge_close", "Voltar", GameUI.accent, 2)
+            ("refuge_enhancements", "Aprimoramentos", GameUI.gold, 0),
+            ("refuge_close", "Voltar", GameUI.accent, 1)
         ]
         for action in actions {
-            let x = -size.width / 2 + 24 + buttonWidth / 2 + CGFloat(action.column) * (buttonWidth + 16)
+            let x = -size.width / 2 + 24 + buttonWidth / 2 + CGFloat(action.column) * (buttonWidth + 24)
             let button = SKNode()
             button.name = action.name
             button.position = CGPoint(x: x, y: buttonRowY)
@@ -277,8 +277,6 @@ final class RefugeOverlay: SKNode {
 
             if action.name == "refuge_enhancements" {
                 upgradeLabel = label
-            } else if action.name == "refuge_growth" {
-                growthLabel = label
             }
         }
 
@@ -311,13 +309,14 @@ final class RefugeOverlay: SKNode {
         foodLabel.text = ctx.growth.evolutionNote()
         careLabel.text = "Energia \(Int(stats.energy))% · Alimentação \(Int(100 - stats.hunger))%"
         pearlsLabel.text = "Conchas \(stats.pearls)"
-        upgradeLabel.text = "Cuidados"
-        growthLabel.text = ctx.growth.growthShellLabelText()
+        upgradeLabel.text = "Aprimoramentos"
     }
 
     private func openEnhancements() {
         enhancementsOverlay?.removeFromParent()
-        let overlay = RefugeEnhancementsOverlay(size: overlaySize, stats: ctx.stats)
+        let overlay = RefugeEnhancementsOverlay(size: overlaySize,
+                                                insets: safeAreaInsets,
+                                                stats: ctx.stats)
         overlay.zPosition = 20
         addChild(overlay)
         enhancementsOverlay = overlay
@@ -344,7 +343,7 @@ final class RefugeOverlay: SKNode {
                       let kind = MermaidStats.UpgradeKind(rawValue: String(raw)) else { return }
                 if let cost = ctx.stats.upgradeCost(for: kind) {
                     guard ctx.stats.pearls >= cost else {
-                        ctx.say("\(kind.title) custa \(cost) conchas. Faltam \(cost - ctx.stats.pearls).")
+                        ctx.say("\(kind.title) custa \(cost) conchas. Faltam \(cost - ctx.stats.pearls) conchas.")
                         return
                     }
                     if ctx.stats.buyUpgrade(kind) {
@@ -358,8 +357,12 @@ final class RefugeOverlay: SKNode {
                     ctx.say("\(kind.title) já chegou ao nível máximo.")
                 }
                 return
-            case "refuge_growth":
-                ctx.growth.spendShellsForGrowth()
+            case "growth_accelerate":
+                if ctx.growth.spendShellsForGrowth() {
+                    enhancementsOverlay?.removeFromParent()
+                    enhancementsOverlay = nil
+                    openEnhancements()
+                }
                 refreshLabels()
                 return
             case "refuge_close":
@@ -374,9 +377,11 @@ final class RefugeOverlay: SKNode {
 
 final class RefugeEnhancementsOverlay: SKNode {
     private let stats: MermaidStats
+    private let insets: UIEdgeInsets
 
-    init(size: CGSize, stats: MermaidStats) {
+    init(size: CGSize, insets: UIEdgeInsets, stats: MermaidStats) {
         self.stats = stats
+        self.insets = insets
         super.init()
         isUserInteractionEnabled = false
         build(size: size)
@@ -391,26 +396,27 @@ final class RefugeEnhancementsOverlay: SKNode {
         backdrop.zPosition = 0
         addChild(backdrop)
 
-        let top = size.height / 2
-        let title = makeLabel(text: "Cuidados da Eistrelinha", fontSize: 21, bold: true, color: GameUI.ink)
-        title.position = CGPoint(x: 0, y: top - 52)
+        let top = size.height / 2 - insets.top
+        let title = makeLabel(text: "Aprimoramentos", fontSize: 21, bold: true, color: GameUI.ink)
+        title.position = CGPoint(x: 0, y: top - 42)
         title.zPosition = 2
         addChild(title)
 
         let subtitle = makeLabel(text: "aprimoramentos comprados com conchas", fontSize: 12, color: GameUI.mutedInk)
-        subtitle.position = CGPoint(x: 0, y: top - 74)
+        subtitle.position = CGPoint(x: 0, y: top - 66)
         subtitle.zPosition = 2
         addChild(subtitle)
 
         let pearlLine = makeLabel(text: "Conchas \(stats.pearls)", fontSize: 13, bold: true, color: GameUI.gold)
-        pearlLine.position = CGPoint(x: 0, y: top - 98)
+        pearlLine.position = CGPoint(x: 0, y: top - 92)
         pearlLine.zPosition = 2
         addChild(pearlLine)
 
         let rowWidth = min(size.width - 28, 420)
-        let availableHeight = max(390, size.height - 180)
-        let rowHeight = min(90, max(74, availableHeight / CGFloat(MermaidStats.UpgradeKind.allCases.count)))
-        let firstY = top - 142
+        let rowCount = MermaidStats.UpgradeKind.allCases.count + 1
+        let availableHeight = max(390, size.height - insets.top - insets.bottom - 228)
+        let rowHeight = min(90, max(74, availableHeight / CGFloat(rowCount)))
+        let firstY = top - 148
 
         for (index, kind) in MermaidStats.UpgradeKind.allCases.enumerated() {
             addRow(kind: kind,
@@ -418,10 +424,13 @@ final class RefugeEnhancementsOverlay: SKNode {
                    height: rowHeight - 8,
                    centerY: firstY - CGFloat(index) * rowHeight)
         }
+        addGrowthRow(width: rowWidth,
+                     height: rowHeight - 8,
+                     centerY: firstY - CGFloat(MermaidStats.UpgradeKind.allCases.count) * rowHeight)
 
         let closeButton = SKNode()
         closeButton.name = "enhancements_close"
-        closeButton.position = CGPoint(x: 0, y: -size.height / 2 + 48)
+        closeButton.position = CGPoint(x: 0, y: -size.height / 2 + insets.bottom + 48)
         closeButton.zPosition = 4
         let closeCard = GameUI.card(size: CGSize(width: min(220, size.width - 80), height: 44),
                                     cornerRadius: 9,
@@ -481,7 +490,7 @@ final class RefugeEnhancementsOverlay: SKNode {
 
         let buttonText: String
         if let cost = stats.upgradeCost(for: kind) {
-            buttonText = "\(cost)\nconchas"
+            buttonText = "comprar\n\(cost) conchas"
         } else {
             buttonText = "nível\nmáximo"
         }
@@ -491,6 +500,67 @@ final class RefugeEnhancementsOverlay: SKNode {
         label.verticalAlignmentMode = .center
         label.zPosition = 5
         button.addChild(label)
+    }
+
+    private func addGrowthRow(width: CGFloat,
+                              height: CGFloat,
+                              centerY: CGFloat) {
+        let row = SKNode()
+        row.position = CGPoint(x: 0, y: centerY)
+        row.zPosition = 2
+        addChild(row)
+
+        let bg = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 10)
+        bg.fillColor = UIColor.white.withAlphaComponent(0.36)
+        bg.strokeColor = GameUI.coral.withAlphaComponent(0.28)
+        bg.lineWidth = 1
+        row.addChild(bg)
+
+        let title = makeLabel(text: "Acelerar", fontSize: 13, bold: true, color: GameUI.ink)
+        title.horizontalAlignmentMode = .left
+        title.position = CGPoint(x: -width / 2 + 14, y: height / 2 - 22)
+        row.addChild(title)
+
+        let description = makeLabel(text: "Adianta 1h da espera de crescimento.", fontSize: 10.5, color: GameUI.mutedInk)
+        description.horizontalAlignmentMode = .left
+        description.preferredMaxLayoutWidth = width - 126
+        description.numberOfLines = 2
+        description.lineBreakMode = .byWordWrapping
+        description.position = CGPoint(x: -width / 2 + 14, y: -4)
+        row.addChild(description)
+
+        let actionName = "growth_accelerate"
+        let button = SKNode()
+        button.name = actionName
+        button.position = CGPoint(x: width / 2 - 56, y: -4)
+        button.zPosition = 4
+        row.addChild(button)
+
+        let buttonBg = GameUI.card(size: CGSize(width: 92, height: 48),
+                                   cornerRadius: 8,
+                                   tint: GameUI.coral)
+        buttonBg.name = actionName
+        button.addChild(buttonBg)
+
+        let cost = GameBalance.growthShellCost(for: stats.phase)
+        let label = makeLabel(text: "\(Self.shellCostText(cost))\nconchas", fontSize: 10.5, bold: true, color: GameUI.ink)
+        label.name = actionName
+        label.numberOfLines = 2
+        label.verticalAlignmentMode = .center
+        label.zPosition = 5
+        button.addChild(label)
+    }
+
+    private static func shellCostText(_ cost: Int) -> String {
+        let digits = String(cost)
+        var groups: [String] = []
+        var end = digits.endIndex
+        while end > digits.startIndex {
+            let start = digits.index(end, offsetBy: -3, limitedBy: digits.startIndex) ?? digits.startIndex
+            groups.insert(String(digits[start..<end]), at: 0)
+            end = start
+        }
+        return groups.joined(separator: ".")
     }
 
     private func makeLabel(text: String,
