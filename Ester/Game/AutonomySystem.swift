@@ -20,7 +20,7 @@ final class AutonomySystem {
     private var intentTime: CGFloat = 0
     private var commandBias: (intent: MermaidIntent, until: Date)?
     private var commandCooldownUntil: [PlayerCommand: Date] = [:]
-    private let refusalCooldownSeconds: TimeInterval = 40
+    private let refusalCooldownSeconds: TimeInterval = 10
     private var lastAnimation: MovementType = .idle
     private var lastFacing: Mermaid.Direction = .none
     private var eatCooldown: CGFloat = 0
