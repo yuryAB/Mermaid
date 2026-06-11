@@ -3,8 +3,9 @@
 //  Ester
 //
 //  Evolução por fases: ovo → bebê → criança → adolescente → jovem → adulta.
-//  Progresso lento, pensado para acompanhamento diário (a fase adulta
-//  leva meses). Depende de idade real, XP, exploração e puzzles.
+//  Progresso lento, pensado para acompanhamento real: 1 mês da bebê para
+//  criança, 2 meses para a próxima fase, e assim por diante. No Refúgio,
+//  1000 brilhos podem ser gastos para apagar 1 hora de espera.
 //
 
 import Foundation
@@ -23,28 +24,35 @@ final class GrowthSystem {
     private var crackCount = 0
     private var announcedAlmostBorn = false
     private let crackThresholds: [CGFloat] = [0.35, 0.6, 0.82]
+    private let daysPerGrowthMonth: Double = 30
+    private let sparkleGrowthCost = 1_000
+    private let sparkleGrowthSkipSeconds: TimeInterval = 3_600
 
     init(ctx: GameContext, worldNode: SKNode) {
         self.ctx = ctx
         self.worldNode = worldNode
     }
 
-    // MARK: - Requisitos (idade em dias reais)
+    // MARK: - Requisitos
 
     private struct Requirement {
-        let ageDays: Double
+        let waitDays: Double
         let xp: CGFloat
         let zone: DepthZone?
+
+        var waitSeconds: Double { waitDays * 86_400 }
     }
 
     private func requirement(toReach phase: MermaidPhase) -> Requirement? {
+        let months = Double(max(1, phase.rawValue - MermaidPhase.baby.rawValue))
+        let waitDays = months * daysPerGrowthMonth
         switch phase {
         case .egg: return nil
-        case .baby: return Requirement(ageDays: 0.002, xp: 0, zone: nil)          // ~3 min
-        case .child: return Requirement(ageDays: 1, xp: 150, zone: nil)
-        case .teen: return Requirement(ageDays: 4, xp: 1000, zone: .blue)
-        case .young: return Requirement(ageDays: 14, xp: 4000, zone: .deep)
-        case .adult: return Requirement(ageDays: 60, xp: 16000, zone: .abyss)
+        case .baby: return Requirement(waitDays: 0, xp: 0, zone: nil)
+        case .child: return Requirement(waitDays: waitDays, xp: 150, zone: nil)
+        case .teen: return Requirement(waitDays: waitDays, xp: 1000, zone: .blue)
+        case .young: return Requirement(waitDays: waitDays, xp: 4000, zone: .deep)
+        case .adult: return Requirement(waitDays: waitDays, xp: 16000, zone: .abyss)
         }
     }
 
@@ -54,20 +62,121 @@ final class GrowthSystem {
         guard let next = ctx.stats.phase.next,
               let req = requirement(toReach: next) else { return 1 }
         var fractions: [CGFloat] = []
-        fractions.append(CGFloat(min(1, ctx.stats.ageDays / req.ageDays)))
+        if req.waitSeconds > 0 {
+            fractions.append(CGFloat(min(1, effectivePhaseSeconds() / req.waitSeconds)))
+        }
         if req.xp > 0 { fractions.append(min(1, ctx.stats.xp / req.xp)) }
         if let zone = req.zone { fractions.append(ctx.stats.isUnlocked(zone) ? 1 : 0.5 * ctx.stats.adaptation(for: zone.adaptationGate?.zone ?? .shallow) / 100) }
         return fractions.min() ?? 0
     }
 
+    func evolutionNote() -> String {
+        if ctx.stats.phase == .egg {
+            return "Choco em curso · carinho aquece a concha"
+        }
+        guard let next = ctx.stats.phase.next,
+              let req = requirement(toReach: next) else {
+            return "Ciclo adulto completo · canto estabilizado"
+        }
+
+        let remaining = remainingWaitSeconds(for: req)
+        if remaining > 0 {
+            let waitText = GrowthSystem.formatDuration(remaining)
+            return "Cresce em \(waitText) · 1000 brilhos apagam 1h"
+        }
+
+        if ctx.stats.xp < req.xp {
+            return "Cresce depois de \(Int(ceil(req.xp - ctx.stats.xp))) XP de maré"
+        }
+        if let zone = req.zone, !ctx.stats.isUnlocked(zone) {
+            return "Cresce quando \(zone.displayName.lowercased()) for catalogada"
+        }
+        if next == .adult && !ctx.stats.isUnlocked(.surface) {
+            return "Cresce adulta quando superfície for registrada"
+        }
+        return "Crescimento pronto · próxima forma: \(next.displayName.lowercased())"
+    }
+
     private func canEvolve() -> Bool {
         guard let next = ctx.stats.phase.next,
               let req = requirement(toReach: next) else { return false }
-        if ctx.stats.ageDays < req.ageDays { return false }
+        if effectivePhaseSeconds() < req.waitSeconds { return false }
         if ctx.stats.xp < req.xp { return false }
         if let zone = req.zone, !ctx.stats.isUnlocked(zone) { return false }
         if next == .adult && !ctx.stats.isUnlocked(.surface) { return false }
         return true
+    }
+
+    private func effectivePhaseSeconds() -> Double {
+        ctx.stats.phaseAgeSeconds
+    }
+
+    private func remainingWaitSeconds(for req: Requirement) -> Double {
+        max(0, req.waitSeconds - effectivePhaseSeconds())
+    }
+
+    func growthSparkleLabelText() -> String {
+        if ctx.stats.phase == .egg { return "Crescer após nascer" }
+        guard let next = ctx.stats.phase.next,
+              let req = requirement(toReach: next) else {
+            return "Ciclo completo"
+        }
+        if remainingWaitSeconds(for: req) <= 0 {
+            return "Tempo já aberto"
+        }
+        if ctx.stats.pearls < sparkleGrowthCost {
+            return "Faltam \(sparkleGrowthCost - ctx.stats.pearls) brilhos"
+        }
+        return "Crescer · 1000 brilhos"
+    }
+
+    @discardableResult
+    func spendSparklesForGrowth() -> Bool {
+        if ctx.stats.phase == .egg {
+            ctx.say("O ovo ainda precisa nascer antes de crescer.")
+            return false
+        }
+        guard let next = ctx.stats.phase.next,
+              let req = requirement(toReach: next) else {
+            ctx.say("Ciclo adulto completo. Os brilhos ficam para o Refúgio.")
+            return false
+        }
+        let remaining = remainingWaitSeconds(for: req)
+        guard remaining > 0 else {
+            ctx.say("A espera já abriu. Agora faltam os outros sinais do mar.")
+            return false
+        }
+        guard ctx.stats.pearls >= sparkleGrowthCost else {
+            ctx.say("Crescer custa 1000 brilhos. Faltam \(sparkleGrowthCost - ctx.stats.pearls).")
+            return false
+        }
+
+        let skipped = min(sparkleGrowthSkipSeconds, remaining)
+        ctx.stats.pearls -= sparkleGrowthCost
+        ctx.stats.phaseStartedAt = ctx.stats.phaseStartedAt.addingTimeInterval(-skipped)
+        ctx.stats.addMemory("Brilhos apagaram \(GrowthSystem.formatDuration(skipped)) da espera de crescimento")
+        ctx.say("Brilhos acenderam o crescimento. Espera reduzida em \(GrowthSystem.formatDuration(skipped)).")
+        if canEvolve() { evolve() } else { ctx.stats.save() }
+        return true
+    }
+
+    private static func formatDuration(_ seconds: Double) -> String {
+        let totalHours = max(0, Int(ceil(seconds / 3600)))
+        if totalHours >= 24 * 30 {
+            let days = totalHours / 24
+            let months = days / 30
+            let remDays = days % 30
+            let monthText = months == 1 ? "1 mês" : "\(months) meses"
+            return remDays > 0 ? "\(monthText) \(remDays)d" : monthText
+        }
+        if totalHours >= 24 {
+            let days = totalHours / 24
+            let hours = totalHours % 24
+            return hours > 0 ? "\(days)d \(hours)h" : "\(days)d"
+        }
+        if totalHours >= 1 { return "\(totalHours)h" }
+        let minutes = max(1, Int(ceil(seconds / 60)))
+        return "\(minutes)min"
     }
 
     // MARK: - Setup
@@ -227,8 +336,8 @@ final class GrowthSystem {
 
     func update(dt: CGFloat) {
         if ctx.stats.phase == .egg {
-            // não choca no meio de um puzzle aberto
-            guard ctx.scene?.isPuzzleOpen != true else { return }
+            // não choca no meio de um desafio aberto
+            guard ctx.scene?.isChallengeOpen != true else { return }
             // o tempo sozinho choca em ~4 min; interações aceleram muito
             addHatchProgress(dt / 240)
             return
@@ -241,7 +350,10 @@ final class GrowthSystem {
 
     private func hatch() {
         guard let egg = eggNode else { return }
+        let now = Date()
         ctx.stats.phase = .baby
+        ctx.stats.birthDate = now
+        ctx.stats.phaseStartedAt = now
         let mermaid = ctx.mermaidEntity.mermaid
         mermaid.setForm(for: .baby)
         eggNode = nil
@@ -274,6 +386,7 @@ final class GrowthSystem {
     private func evolve() {
         guard let next = ctx.stats.phase.next else { return }
         ctx.stats.phase = next
+        ctx.stats.phaseStartedAt = Date()
         let mermaid = ctx.mermaidEntity.mermaid
         mermaid.setForm(for: next)
         ctx.stats.pearls += 20

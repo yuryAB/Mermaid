@@ -22,8 +22,16 @@ final class ShelterSystem {
 
     var capacity: Int { ctx.stats.shelterLevel * 3 }
 
+    private var maximumLevel: Int { MermaidPhase.adult.rawValue }
+
     var upgradeCost: Int? {
-        ctx.stats.shelterLevel < 5 ? ctx.stats.shelterLevel * 40 : nil
+        guard ctx.stats.shelterLevel < maximumLevel else { return nil }
+        return ctx.stats.shelterLevel * 40
+    }
+
+    var upgradeLabelText: String {
+        if let cost = upgradeCost { return "Melhorar · \(cost) brilhos" }
+        return "Nível máximo"
     }
 
     /// Guarda uma comida encontrada quando ela não está com fome.
@@ -47,23 +55,86 @@ final class ShelterSystem {
         ctx.stats.storedFood -= 1
         ctx.stats.hunger = max(0, ctx.stats.hunger - 28)
         ctx.stats.boostMood(5)
-        ctx.say("Nham! Ela comeu do estoque do Refúgio 🐚")
+        ctx.say("Alimentação registrada com estoque do Refúgio.")
         return true
     }
 
     func tryUpgrade() {
         guard let cost = upgradeCost else {
-            ctx.say("O Refúgio já está no nível máximo! 🐚✨")
+            ctx.say("Refúgio já catalogado no nível máximo.")
             return
         }
         guard ctx.stats.pearls >= cost else {
-            ctx.say("Melhorar o Refúgio custa 💠\(cost). Faltam \(cost - ctx.stats.pearls).")
+            ctx.say("Melhorar o Refúgio custa \(cost) brilhos. Faltam \(cost - ctx.stats.pearls).")
             return
         }
         ctx.stats.pearls -= cost
         ctx.stats.shelterLevel += 1
         ctx.stats.gainXP(20)
-        ctx.say("Refúgio melhorado para o nível \(ctx.stats.shelterLevel)! 🐚✨ (+capacidade)")
+        ctx.say("Refúgio melhorado para o nível \(ctx.stats.shelterLevel). Capacidade ampliada.")
+    }
+}
+
+// MARK: - Portal do Refúgio (nó no mundo)
+
+/// Pequeno portal mágico que se abre perto da sereia; ela nada até ele,
+/// entra, e só então o Refúgio aparece.
+final class RefugePortalNode: SKNode {
+    private let outerRing = SKShapeNode(ellipseOf: CGSize(width: 110, height: 170))
+    private let innerSwirl = SKShapeNode(ellipseOf: CGSize(width: 70, height: 120))
+    private let core = SKShapeNode(ellipseOf: CGSize(width: 34, height: 64))
+
+    override init() {
+        super.init()
+        zPosition = 9
+
+        outerRing.fillColor = UIColor(red: 0.55, green: 0.4, blue: 0.85, alpha: 0.25)
+        outerRing.strokeColor = UIColor(red: 0.8, green: 0.7, blue: 1, alpha: 0.9)
+        outerRing.lineWidth = 3
+        outerRing.glowWidth = 16
+        addChild(outerRing)
+
+        innerSwirl.fillColor = UIColor(red: 0.7, green: 0.55, blue: 0.95, alpha: 0.35)
+        innerSwirl.strokeColor = UIColor(white: 1, alpha: 0.5)
+        innerSwirl.lineWidth = 1.5
+        innerSwirl.glowWidth = 8
+        addChild(innerSwirl)
+
+        core.fillColor = UIColor(white: 1, alpha: 0.85)
+        core.strokeColor = .clear
+        core.glowWidth = 10
+        addChild(core)
+
+        // começa fechado
+        setScale(0.01)
+        alpha = 0
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    /// Abre devagar, com um giro suave — nada de pressa.
+    func open() {
+        let grow = SKAction.scale(to: 1.0, duration: 1.1)
+        grow.eaeInEaseOut()
+        run(.group([.fadeIn(withDuration: 0.7), grow]))
+        innerSwirl.run(.repeatForever(.rotate(byAngle: .pi * 2, duration: 5)))
+        outerRing.run(.repeatForever(.sequence([
+            .scale(to: 1.06, duration: 1.0),
+            .scale(to: 1.0, duration: 1.0)
+        ])))
+        core.run(.repeatForever(.sequence([
+            .fadeAlpha(to: 0.55, duration: 0.9),
+            .fadeAlpha(to: 0.95, duration: 0.9)
+        ])))
+    }
+
+    /// Fecha e some do mundo.
+    func close(after delay: TimeInterval = 0) {
+        run(.sequence([
+            .wait(forDuration: delay),
+            .group([.scale(to: 0.01, duration: 0.5), .fadeOut(withDuration: 0.5)]),
+            .removeFromParent()
+        ]))
     }
 }
 
@@ -72,11 +143,12 @@ final class ShelterSystem {
 final class RefugeOverlay: SKNode {
     unowned let ctx: GameContext
     private let onClose: () -> Void
-    private let onTide: () -> Void
 
     private var statusLabel: SKLabelNode!
     private var foodLabel: SKLabelNode!
+    private var careLabel: SKLabelNode!
     private var upgradeLabel: SKLabelNode!
+    private var growthLabel: SKLabelNode!
     private var pearlsLabel: SKLabelNode!
     private var refreshTimer: CGFloat = 0
     private var displayMermaid: Mermaid?
@@ -84,10 +156,8 @@ final class RefugeOverlay: SKNode {
     init(size: CGSize,
          insets: UIEdgeInsets,
          ctx: GameContext,
-         onTide: @escaping () -> Void,
          onClose: @escaping () -> Void) {
         self.ctx = ctx
-        self.onTide = onTide
         self.onClose = onClose
         super.init()
         isUserInteractionEnabled = true
@@ -102,29 +172,19 @@ final class RefugeOverlay: SKNode {
         let topEdge = size.height / 2 - insets.top
         let bottomEdge = -size.height / 2 + insets.bottom
 
-        // fundo da dimensão mágica
+        // página do diário do refúgio
         let backdrop = SKShapeNode(rectOf: CGSize(width: size.width * 2, height: size.height * 2))
-        backdrop.fillColor = UIColor(red: 0.04, green: 0.1, blue: 0.18, alpha: 0.97)
+        backdrop.fillTexture = GameUI.paperTexture(size: CGSize(width: size.width * 2, height: size.height * 2),
+                                                   base: GameUI.palePaper)
+        backdrop.fillColor = .white
         backdrop.strokeColor = .clear
         addChild(backdrop)
-
-        // halo de concha atrás da sereia
-        let halo = SKShapeNode(circleOfRadius: 150)
-        halo.fillColor = UIColor(red: 0.95, green: 0.8, blue: 0.85, alpha: 0.15)
-        halo.strokeColor = UIColor(red: 1, green: 0.9, blue: 0.9, alpha: 0.4)
-        halo.glowWidth = 26
-        halo.position = CGPoint(x: 0, y: 130)
-        addChild(halo)
-        halo.run(.repeatForever(.sequence([
-            .fadeAlpha(to: 0.6, duration: 2.2),
-            .fadeAlpha(to: 1.0, duration: 2.2)
-        ])))
 
         // bolhas suaves subindo
         for i in 0..<6 {
             let bubble = SKShapeNode(circleOfRadius: .random(in: 4...10))
-            bubble.fillColor = UIColor(white: 1, alpha: 0.12)
-            bubble.strokeColor = UIColor(white: 1, alpha: 0.3)
+            bubble.fillColor = GameUI.accent.withAlphaComponent(0.08)
+            bubble.strokeColor = GameUI.accent.withAlphaComponent(0.24)
             bubble.position = CGPoint(x: .random(in: -size.width / 2...size.width / 2),
                                       y: .random(in: -size.height / 2...0))
             addChild(bubble)
@@ -135,94 +195,151 @@ final class RefugeOverlay: SKNode {
             bubble.run(.sequence([.wait(forDuration: Double(i)), rise]))
         }
 
-        let title = SKLabelNode(text: "Refúgio das Marés")
-        title.fontName = "Helvetica-Bold"
+        let title = SKLabelNode(text: "Registro do Refúgio")
+        title.fontName = "AvenirNext-DemiBold"
         title.fontSize = 21
-        title.fontColor = .white
+        title.fontColor = GameUI.ink
         title.position = CGPoint(x: 0, y: topEdge - 52)
         addChild(title)
 
-        let subtitle = SKLabelNode(text: "o cantinho mágico dela, em qualquer lugar do oceano")
-        subtitle.fontName = "Helvetica"
+        let subtitle = SKLabelNode(text: "abrigo portátil catalogado para descanso e cuidado")
+        subtitle.fontName = "AvenirNext-Regular"
         subtitle.fontSize = 12
-        subtitle.fontColor = UIColor(white: 1, alpha: 0.6)
+        subtitle.fontColor = GameUI.mutedInk
         subtitle.position = CGPoint(x: 0, y: topEdge - 72)
         addChild(subtitle)
 
-        // sereia em destaque, com a paleta atual dela
+        // ---- Layout vertical sem sobreposição ----
+        // botões (uma linha) embaixo, cartão acima deles e a sereia no
+        // espaço restante entre o subtítulo e o cartão.
+        let buttonRowY = bottomEdge + 60
+        let buttonHeight: CGFloat = 48
+        let cardHeight: CGFloat = 176
+        let cardCenterY = buttonRowY + buttonHeight / 2 + 18 + cardHeight / 2
+        let cardTopY = cardCenterY + cardHeight / 2
+        let stageTopY = topEdge - 100
+        let stageBottomY = cardTopY + 24
+        let stageCenterY = (stageTopY + stageBottomY) / 2
+        let stageHeight = max(140, stageTopY - stageBottomY)
+
+        // halo de concha atrás da sereia
+        let haloRadius = min(size.width * 0.46, stageHeight * 0.56)
+        let halo = SKShapeNode(circleOfRadius: haloRadius)
+        halo.fillColor = GameUI.paper.withAlphaComponent(0.42)
+        halo.strokeColor = GameUI.coral.withAlphaComponent(0.25)
+        halo.glowWidth = 0
+        halo.position = CGPoint(x: 0, y: stageCenterY)
+        addChild(halo)
+        halo.run(.repeatForever(.sequence([
+            .fadeAlpha(to: 0.6, duration: 2.2),
+            .fadeAlpha(to: 1.0, duration: 2.2)
+        ])))
+
+        // sereia em destaque: a forma da FASE ATUAL (bebê mostra bebê!),
+        // com paleta clara — o Refúgio é um lugar iluminado.
         let mermaid = Mermaid()
-        mermaid.base.setScale(0.34)
-        mermaid.base.position = CGPoint(x: 0, y: 200)
-        mermaid.applyPalette(ctx.depth.mermaidPalette(atY: ctx.mermaidPosition.y))
+        if ctx.stats.phase != .egg {
+            mermaid.setForm(for: ctx.stats.phase)
+        }
+        mermaid.applyPalette(.main)
         mermaid.setAnimationMode(.idle)
+        let targetMermaidHeight = min(stageHeight * 0.72,
+                                      size.height * 0.36,
+                                      size.width * 0.76)
+        let scale = ChallengeChrome.fitScale(for: mermaid.base,
+                                             targetHeight: targetMermaidHeight)
+        mermaid.base.setScale(scale)
+        mermaid.base.alpha = 1
+        let mermaidFrame = mermaid.base.calculateAccumulatedFrame()
+        mermaid.base.position = CGPoint(x: 0, y: stageCenterY - mermaidFrame.midY)
+        mermaid.base.zPosition = 2
         addChild(mermaid.base)
         displayMermaid = mermaid
 
-        // cartão de estado
-        let card = SKShapeNode(rectOf: CGSize(width: size.width - 48, height: 120), cornerRadius: 16)
-        card.fillColor = UIColor(white: 1, alpha: 0.07)
-        card.strokeColor = UIColor(white: 1, alpha: 0.22)
-        card.position = CGPoint(x: 0, y: -95)
+        // cartão de estado (conteúdo cabe dentro do cartão)
+        let card = GameUI.card(size: CGSize(width: size.width - 48, height: cardHeight),
+                               cornerRadius: 10,
+                               tint: GameUI.accent.withAlphaComponent(0.72))
+        card.position = CGPoint(x: 0, y: cardCenterY)
+        card.zPosition = 3
         addChild(card)
 
-        statusLabel = makeLabel(fontSize: 14, bold: true)
-        statusLabel.position = CGPoint(x: 0, y: 36)
+        statusLabel = makeLabel(fontSize: 13, bold: true)
+        statusLabel.position = CGPoint(x: 0, y: 64)
+        statusLabel.preferredMaxLayoutWidth = size.width - 80
+        statusLabel.numberOfLines = 1
         card.addChild(statusLabel)
 
         foodLabel = makeLabel(fontSize: 13)
-        foodLabel.position = CGPoint(x: 0, y: 10)
+        foodLabel.position = CGPoint(x: 0, y: 39)
+        foodLabel.preferredMaxLayoutWidth = size.width - 80
+        foodLabel.numberOfLines = 1
         card.addChild(foodLabel)
 
+        careLabel = makeLabel(fontSize: 13)
+        careLabel.position = CGPoint(x: 0, y: 17)
+        careLabel.preferredMaxLayoutWidth = size.width - 80
+        careLabel.numberOfLines = 1
+        card.addChild(careLabel)
+
         pearlsLabel = makeLabel(fontSize: 13)
-        pearlsLabel.position = CGPoint(x: 0, y: -14)
+        pearlsLabel.position = CGPoint(x: 0, y: -8)
+        pearlsLabel.preferredMaxLayoutWidth = size.width - 80
+        pearlsLabel.numberOfLines = 1
         card.addChild(pearlsLabel)
 
         // memórias recentes
         let memoriesTitle = makeLabel(fontSize: 12, bold: true)
         memoriesTitle.text = "Memórias recentes"
-        memoriesTitle.fontColor = UIColor(red: 0.65, green: 0.85, blue: 1, alpha: 1)
-        memoriesTitle.position = CGPoint(x: 0, y: -42)
+        memoriesTitle.fontColor = GameUI.accent
+        memoriesTitle.position = CGPoint(x: 0, y: -37)
         card.addChild(memoriesTitle)
 
         let memories = ctx.stats.memories.suffix(2)
         let memoryText = memories.isEmpty
-            ? "Nenhuma memória ainda — explore o oceano ✨"
+            ? "Nenhuma memória registrada. Explore o oceano."
             : memories.joined(separator: "  ·  ")
         let memoriesLabel = makeLabel(fontSize: 11)
         memoriesLabel.text = memoryText
-        memoriesLabel.fontColor = UIColor(white: 1, alpha: 0.65)
+        memoriesLabel.fontColor = GameUI.mutedInk
         memoriesLabel.preferredMaxLayoutWidth = size.width - 80
         memoriesLabel.numberOfLines = 2
+        memoriesLabel.lineBreakMode = .byWordWrapping
         memoriesLabel.position = CGPoint(x: 0, y: -64)
         card.addChild(memoriesLabel)
 
-        // botões de ação
-        let buttonWidth = (size.width - 64) / 2
-        let actions: [(name: String, text: String, color: UIColor, column: Int, row: Int)] = [
-            ("refuge_feed", "Alimentar", UIColor(red: 0.5, green: 0.85, blue: 0.5, alpha: 1), 0, 0),
-            ("refuge_upgrade", "Melhorar", UIColor(red: 0.98, green: 0.8, blue: 0.4, alpha: 1), 1, 0),
-            ("refuge_tide", "Trama das Marés", UIColor(red: 0.55, green: 0.8, blue: 1, alpha: 1), 0, 1),
-            ("refuge_close", "Voltar ao oceano", UIColor(red: 0.45, green: 0.9, blue: 0.75, alpha: 1), 1, 1)
+        // botões: melhorar abrigo, gastar brilhos no crescimento e voltar
+        let buttonWidth = (size.width - 80) / 3
+        let actions: [(name: String, text: String, color: UIColor, column: Int)] = [
+            ("refuge_upgrade", "Melhorar", GameUI.gold, 0),
+            ("refuge_growth", "Crescer", GameUI.coral, 1),
+            ("refuge_close", "Voltar", GameUI.accent, 2)
         ]
         for action in actions {
             let x = -size.width / 2 + 24 + buttonWidth / 2 + CGFloat(action.column) * (buttonWidth + 16)
-            let y = bottomEdge + 128 - CGFloat(action.row) * 60
-            let button = SKShapeNode(rectOf: CGSize(width: buttonWidth, height: 48), cornerRadius: 14)
-            button.fillColor = UIColor(white: 1, alpha: 0.08)
-            button.strokeColor = action.color.withAlphaComponent(0.7)
-            button.lineWidth = 1.5
+            let button = SKNode()
             button.name = action.name
-            button.position = CGPoint(x: x, y: y)
+            button.position = CGPoint(x: x, y: buttonRowY)
+            button.zPosition = 3
+            let card = GameUI.card(size: CGSize(width: buttonWidth, height: 48),
+                                   cornerRadius: 9,
+                                   tint: action.color)
+            button.addChild(card)
             addChild(button)
 
-            let label = makeLabel(fontSize: 14, bold: true)
+            let label = makeLabel(fontSize: 11.5, bold: true)
             label.text = action.text
             label.verticalAlignmentMode = .center
+            label.preferredMaxLayoutWidth = buttonWidth - 10
+            label.numberOfLines = 2
             label.name = action.name
+            label.zPosition = 5
             button.addChild(label)
 
             if action.name == "refuge_upgrade" {
                 upgradeLabel = label
+            } else if action.name == "refuge_growth" {
+                growthLabel = label
             }
         }
 
@@ -231,9 +348,11 @@ final class RefugeOverlay: SKNode {
 
     private func makeLabel(fontSize: CGFloat, bold: Bool = false) -> SKLabelNode {
         let label = SKLabelNode(text: "")
-        label.fontName = bold ? "Helvetica-Bold" : "Helvetica"
+        label.fontName = bold ? "AvenirNext-DemiBold" : "AvenirNext-Regular"
         label.fontSize = fontSize
-        label.fontColor = .white
+        label.fontColor = GameUI.ink
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
         return label
     }
 
@@ -249,14 +368,12 @@ final class RefugeOverlay: SKNode {
 
     private func refreshLabels() {
         let stats = ctx.stats!
-        statusLabel.text = "\(stats.phase.displayName) · \(stats.ageText) · descansando em paz 💤"
-        foodLabel.text = "Comida guardada: \(stats.storedFood)/\(ctx.shelter.capacity) · Energia \(Int(stats.energy))% · Fome \(Int(stats.hunger))%"
-        pearlsLabel.text = "💠 \(stats.pearls) pérolas · Refúgio nível \(stats.shelterLevel)"
-        if let cost = ctx.shelter.upgradeCost {
-            upgradeLabel.text = "Melhorar 💠\(cost)"
-        } else {
-            upgradeLabel.text = "Nível máximo ✨"
-        }
+        statusLabel.text = "\(stats.phase.displayName) · \(stats.ageText) · repouso observado"
+        foodLabel.text = ctx.growth.evolutionNote()
+        careLabel.text = "Energia \(Int(stats.energy))% · Fome \(Int(stats.hunger))% · Alimento \(stats.storedFood)/\(ctx.shelter.capacity)"
+        pearlsLabel.text = "Brilhos \(stats.pearls) · Refúgio nível \(stats.shelterLevel)"
+        upgradeLabel.text = ctx.shelter.upgradeLabelText
+        growthLabel.text = ctx.growth.growthSparkleLabelText()
     }
 
     // MARK: - Toques
@@ -266,16 +383,13 @@ final class RefugeOverlay: SKNode {
         var node: SKNode? = atPoint(touch.location(in: self))
         while let current = node {
             switch current.name {
-            case "refuge_feed":
-                ctx.shelter.feedFromStorage()
-                refreshLabels()
-                return
             case "refuge_upgrade":
                 ctx.shelter.tryUpgrade()
                 refreshLabels()
                 return
-            case "refuge_tide":
-                onTide()
+            case "refuge_growth":
+                ctx.growth.spendSparklesForGrowth()
+                refreshLabels()
                 return
             case "refuge_close":
                 onClose()

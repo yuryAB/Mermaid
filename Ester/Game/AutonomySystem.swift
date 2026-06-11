@@ -62,14 +62,14 @@ final class AutonomySystem {
         switch intent {
         case .idle, .observing: energyRate = -0.01
         case .wandering: energyRate = -0.06
-        case .seekingFood, .seekingPuzzle: energyRate = -0.09
+        case .seekingFood, .seekingChallenge: energyRate = -0.09
         case .eating: energyRate = 0
         case .goingDeeper, .goingUp: energyRate = -0.12
         case .traveling: energyRate = -0.05
-        case .returningHome: energyRate = -0.08
-        case .interactingWithFish: energyRate = -0.05
+        case .returningHome, .goingToObjective: energyRate = -0.08
+        case .interactingWithFish, .enteringRefuge: energyRate = -0.05
         case .avoidingDanger: energyRate = -0.25
-        case .solvingPuzzle: energyRate = -0.02
+        case .inChallenge: energyRate = -0.02
         case .resting:
             energyRate = 1.0
         }
@@ -82,6 +82,11 @@ final class AutonomySystem {
     // MARK: - Decisão por pesos
 
     private func decide() {
+        // a caminho do portal do Refúgio: não muda de ideia no meio
+        if intent == .enteringRefuge, portalPoint != nil {
+            decisionCooldown = 1
+            return
+        }
         decisionCooldown = .random(in: 4...8)
         var scores: [MermaidIntent: CGFloat] = [:]
 
@@ -116,8 +121,10 @@ final class AutonomySystem {
         if currentZone != .shallow && currentZone != .surface {
             scores[.goingUp] = 6 + (stats.energy < 50 ? 10 : 0)
         }
-        if ctx.tideWeaving.puzzlePoint != nil {
-            scores[.seekingPuzzle] = 22 + stats.curiosity * 0.2
+        // peixes com desafio por perto despertam interesse próprio
+        if ctx.challenges.nearestGiver(to: position, maxDistance: 1400) != nil,
+           stats.energy > 25 {
+            scores[.seekingChallenge] = 18 + stats.curiosity * 0.2
         }
         // viagem em andamento: prioridade alta, mas fome/cansaço interrompem
         if ctx.travel.destination != nil && stats.energy > 12 && stats.hunger < 88 {
@@ -136,7 +143,7 @@ final class AutonomySystem {
         // Fome alta tira vontade de coisas difíceis
         if stats.hunger > 70 {
             scores[.goingDeeper] = (scores[.goingDeeper] ?? 0) - 30
-            scores[.seekingPuzzle] = (scores[.seekingPuzzle] ?? 0) - 20
+            scores[.seekingChallenge] = (scores[.seekingChallenge] ?? 0) - 20
         }
 
         if let best = scores.max(by: { $0.value < $1.value })?.key {
@@ -148,7 +155,7 @@ final class AutonomySystem {
         intent = newIntent
         intentTime = 0
         switch newIntent {
-        case .idle, .observing, .resting, .eating, .solvingPuzzle, .avoidingDanger, .returningHome:
+        case .idle, .observing, .resting, .eating, .inChallenge, .avoidingDanger, .returningHome:
             if newIntent != .avoidingDanger { target = nil }
         case .wandering:
             target = randomWanderPoint()
@@ -159,8 +166,12 @@ final class AutonomySystem {
                 ctx.food.requestSpawn(near: position)
                 target = randomWanderPoint()
             }
-        case .seekingPuzzle:
-            target = ctx.tideWeaving.ensurePuzzlePoint(near: position, zone: currentZone)
+        case .seekingChallenge:
+            target = ctx.challenges.ensureGiver(near: position)?.position
+        case .goingToObjective:
+            target = ctx.events.currentObjective?.position()
+        case .enteringRefuge:
+            target = portalPoint
         case .goingDeeper:
             // camada bloqueada: tenta mesmo assim e esbarra no limite permitido
             let y: CGFloat
@@ -203,23 +214,56 @@ final class AutonomySystem {
                 target = food.position
                 if position.distance(to: food.position) < 130 { eat(food) }
             } else if intentTime > 6 {
-                ctx.food.requestSpawn(near: position)
-                intentTime = 0
+                // sem comida por perto: recorre ao estoque do Refúgio
+                if stats.storedFood > 0, stats.hunger > 45, ctx.shelter.feedFromStorage() {
+                    setIntent(.idle)
+                    decisionCooldown = min(decisionCooldown, 2)
+                } else {
+                    ctx.food.requestSpawn(near: position)
+                    intentTime = 0
+                }
             }
         case .eating:
             if intentTime > 1.6 {
                 setIntent(.idle)
                 decisionCooldown = min(decisionCooldown, 1.5)
             }
-        case .seekingPuzzle:
-            if let point = ctx.tideWeaving.puzzlePoint {
-                target = point.position
-                if position.distance(to: point.position) < 150 {
-                    enterPuzzle()
-                    ctx.scene?.openTideWeaving(zone: point.zone, special: point.special)
+        case .seekingChallenge:
+            if let giver = ctx.challenges.nearestGiver(to: position, maxDistance: 2600) {
+                target = giver.position
+                if position.distance(to: giver.position) < 150 {
+                    enterChallenge()
+                    ctx.scene?.openChallenge(giver: giver)
+                }
+            } else if intentTime > 4 {
+                target = ctx.challenges.ensureGiver(near: position)?.position
+                intentTime = 0
+            }
+        case .goingToObjective:
+            if let objective = ctx.events.currentObjective,
+               let point = objective.position() {
+                target = point
+                if position.distance(to: point) < 140 {
+                    ctx.events.completeObjective()
+                    setIntent(.observing)
+                    decisionCooldown = 3
                 }
             } else {
-                target = ctx.tideWeaving.ensurePuzzlePoint(near: position, zone: currentZone)
+                // objetivo sumiu no caminho
+                setIntent(.idle)
+                decisionCooldown = min(decisionCooldown, 1.5)
+            }
+        case .enteringRefuge:
+            if let portal = portalPoint {
+                target = portal
+                if position.distance(to: portal) < 90 {
+                    portalPoint = nil
+                    target = nil
+                    velocity = CGVector(dx: 0, dy: 0)
+                    ctx.scene?.mermaidReachedRefugePortal()
+                }
+            } else {
+                setIntent(.idle)
             }
         case .interactingWithFish:
             if let fish = ctx.fish.nearestFish(to: position, maxDistance: 1200) {
@@ -274,7 +318,8 @@ final class AutonomySystem {
     // MARK: - Comida
 
     private func autoEat() {
-        guard intent != .solvingPuzzle, stats.hunger > 25, eatCooldown <= 0 else { return }
+        guard intent != .inChallenge, intent != .enteringRefuge,
+              stats.hunger > 25, eatCooldown <= 0 else { return }
         if let food = ctx.food.nearestFood(to: position, maxDistance: 120) {
             eat(food)
         }
@@ -298,7 +343,7 @@ final class AutonomySystem {
     // MARK: - Medo / eventos
 
     func scare(from point: CGPoint) {
-        guard !paused, intent != .solvingPuzzle else { return }
+        guard !paused, intent != .inChallenge, intent != .enteringRefuge else { return }
         stats.scare(duration: 7)
         let dx = position.x - point.x
         let dy = position.y - point.y
@@ -311,10 +356,10 @@ final class AutonomySystem {
         decisionCooldown = 5
     }
 
-    // MARK: - Puzzle
+    // MARK: - Desafios
 
-    func enterPuzzle() {
-        intent = .solvingPuzzle
+    func enterChallenge() {
+        intent = .inChallenge
         target = nil
         velocity = CGVector(dx: 0, dy: 0)
         if lastAnimation != .idle {
@@ -324,30 +369,62 @@ final class AutonomySystem {
         }
     }
 
-    func finishPuzzle() {
+    func finishChallenge() {
         intent = .idle
         decisionCooldown = 2.5
+    }
+
+    // MARK: - Portal do Refúgio
+
+    private var portalPoint: CGPoint?
+
+    /// A sereia nada até o portal; ao chegar, avisa a cena.
+    func goToRefugePortal(at point: CGPoint) {
+        portalPoint = point
+        commandBias = nil
+        setIntent(.enteringRefuge)
+        decisionCooldown = 2
+    }
+
+    func cancelRefugeEntry() {
+        guard portalPoint != nil || intent == .enteringRefuge else { return }
+        portalPoint = nil
+        setIntent(.idle)
+        decisionCooldown = 1.5
     }
 
     // MARK: - Comandos do jogador
 
     func give(_ command: PlayerCommand) {
         guard stats.phase != .egg else {
-            // Durante o ovo só a Trama funciona — e abre na hora.
-            if command == .tideWeave {
-                ctx.scene?.openTideWeaving(zone: .mid, special: false)
+            // Durante o ovo só o Desafio: Trama funciona — e abre na hora.
+            if command == .challenge {
+                ctx.scene?.openHatchingChallenge()
             } else {
-                ctx.say("A pequena sereia ainda está dormindo no ovo... jogue Trama das Marés para reunir energia de nascimento 🌀")
+                ctx.say("A pequena sereia ainda está dormindo no ovo... jogue o Desafio: Trama para reunir energia de nascimento 🌀")
             }
             return
         }
-        guard intent != .solvingPuzzle else { return }
+        guard intent != .inChallenge else { return }
+        guard intent != .enteringRefuge else { return }
 
         let desired: MermaidIntent
         switch command {
         case .explore:
             desired = .wandering
         case .seekFood:
+            // teimosia de criança: quanto mais nova, mais recusa comer
+            if CGFloat.random(in: 0...1) < eatRefusalChance() {
+                stats.trust = max(0, stats.trust - 0.2)
+                let excuses = [
+                    "Não quero comer agora! 😤",
+                    "Ela fechou a boquinha e virou o rosto...",
+                    "Ela fez bico: \"depois...\"",
+                    "Hmpf! Ela fingiu não estar com fome."
+                ]
+                ctx.say(excuses.randomElement()!)
+                return
+            }
             desired = .seekingFood
         case .rest:
             desired = .resting
@@ -356,9 +433,30 @@ final class AutonomySystem {
             ctx.scene?.openRegionMenu()
             return
         case .refuge:
-            // o Refúgio é um espaço mágico: abre de qualquer lugar
-            ctx.scene?.openRefuge()
+            // portal mágico: ela sempre vai, mas agora dá para VER o caminho
+            ctx.scene?.beginRefugeEntry()
             return
+        case .challenge:
+            if stats.hunger >= 92 {
+                ctx.say("Faminta demais para um desafio... me ajuda a comer algo?")
+                return
+            }
+            if stats.energy < 8 {
+                ctx.say("Preciso descansar antes de um desafio... 😴")
+                return
+            }
+            guard ctx.challenges.ensureGiver(near: position) != nil else {
+                ctx.say("Nenhum peixe com desafio por perto agora...")
+                return
+            }
+            desired = .seekingChallenge
+        case .objective:
+            guard let objective = ctx.events.currentObjective,
+                  objective.position() != nil else {
+                ctx.say("Nada acontecendo por perto agora... 👀")
+                return
+            }
+            desired = .goingToObjective
         case .goDown:
             guard let next = currentZone.deeper else {
                 ctx.say("Já estamos no fundo do abismo.")
@@ -391,21 +489,6 @@ final class AutonomySystem {
                 ctx.say(ctx.depth.ascentHint())
             }
             desired = .goingUp
-        case .tideWeave:
-            // A Trama das Marés está sempre acessível, com custo leve de contexto
-            if stats.hunger >= 92 {
-                ctx.say("Faminta demais para tecer a Trama... me ajuda a comer algo?")
-                return
-            }
-            if stats.energy < 8 {
-                ctx.say("Preciso descansar antes de tecer a Trama... 😴")
-                return
-            }
-            commandBias = (.seekingPuzzle, Date().addingTimeInterval(40))
-            setIntent(.seekingPuzzle)
-            decisionCooldown = .random(in: 8...12)
-            ctx.say("Ela foi procurar um fio da Trama das Marés... ✨")
-            return
         }
 
         // Obediência: cresce com confiança e humor, cai com fome e medo
@@ -418,6 +501,11 @@ final class AutonomySystem {
             commandBias = (desired, Date().addingTimeInterval(30))
             setIntent(desired)
             decisionCooldown = .random(in: 6...10)
+            if desired == .seekingChallenge {
+                ctx.say("Ela foi atrás de um peixe com desafio... 🏆")
+            } else if desired == .goingToObjective {
+                ctx.say("Ela foi investigar... 👀")
+            }
         } else {
             stats.trust = max(0, stats.trust - 0.2)
             let excuses = [
@@ -426,6 +514,18 @@ final class AutonomySystem {
                 "Ela balançou a cabeça, sem vontade."
             ]
             ctx.say(excuses.randomElement()!)
+        }
+    }
+
+    /// Quanto mais nova, mais teimosa para comer quando mandam.
+    private func eatRefusalChance() -> CGFloat {
+        switch stats.phase {
+        case .egg: return 0
+        case .baby: return 0.38
+        case .child: return 0.28
+        case .teen: return 0.18
+        case .young: return 0.10
+        case .adult: return 0.05
         }
     }
 
@@ -443,9 +543,11 @@ final class AutonomySystem {
 
     private func speed(for intent: MermaidIntent) -> CGFloat {
         switch intent {
-        case .idle, .observing, .resting, .eating, .solvingPuzzle: return 0
+        case .idle, .observing, .resting, .eating, .inChallenge: return 0
         case .wandering: return 130
-        case .seekingFood, .seekingPuzzle: return 200
+        case .seekingFood, .seekingChallenge: return 200
+        case .goingToObjective: return 210
+        case .enteringRefuge: return 180
         case .goingDeeper, .goingUp: return 170
         case .traveling: return 260
         case .returningHome: return 220

@@ -206,15 +206,16 @@ final class FoodSystem {
     }
 
     /// Spawn de comida rara perto da sereia (eventos).
-    func spawnRare(near point: CGPoint) {
-        guard let world = worldNode else { return }
+    @discardableResult
+    func spawnRare(near point: CGPoint) -> FoodNode? {
+        guard let world = worldNode else { return nil }
         let zone = DepthZone.zone(atY: point.y)
         let rare = FoodSystem.kinds(for: zone).max { $0.xp < $1.xp } ?? FoodSystem.kinds(for: zone)[0]
         let position = CGPoint(
             x: (point.x + .random(in: -350...350)).clamped(to: World.minX...World.maxX),
             y: (point.y + .random(in: -250...250)).clamped(to: ctx.depth.allowedYRange())
         )
-        spawn(kind: rare, at: position, in: world)
+        return spawn(kind: rare, at: position, in: world)
     }
 
     /// Come a comida: aplica efeitos nos atributos.

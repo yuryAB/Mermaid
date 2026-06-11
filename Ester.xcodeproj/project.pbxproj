@@ -44,6 +44,10 @@
 		72D020872C1905FC002F11FC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D020862C1905FC002F11FC /* Assets.xcassets */; };
 		72D0208A2C1905FC002F11FC /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 72D020892C1905FC002F11FC /* Base */; };
 		72D1A7AE2C1BD681005213A4 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D1A7AD2C1BD681005213A4 /* ColorManager.swift */; };
+		FAD1F1010000000000000001 /* Kalam-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1F0010000000000000001 /* Kalam-Regular.ttf */; };
+		FAD1F1010000000000000002 /* Kalam-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1F0010000000000000002 /* Kalam-Bold.ttf */; };
+		FAD1F1010000000000000003 /* Nunito-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1F0010000000000000003 /* Nunito-Regular.ttf */; };
+		FAD1F1010000000000000004 /* Nunito-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1F0010000000000000004 /* Nunito-Italic.ttf */; };
 		FAB1E1010000000000000001 /* GameplayModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000001 /* GameplayModels.swift */; };
 		FAB1E1010000000000000002 /* MermaidStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000002 /* MermaidStats.swift */; };
 		FAB1E1010000000000000003 /* MermaidAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000003 /* MermaidAppearance.swift */; };
@@ -58,6 +62,8 @@
 		FAB1E101000000000000000C /* HUDLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000000C /* HUDLayer.swift */; };
 		FAB1E101000000000000000D /* RegionSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000000D /* RegionSystem.swift */; };
 		FAB1E101000000000000000E /* OfflineProgressSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000000E /* OfflineProgressSystem.swift */; };
+		FAB1E101000000000000000F /* ChallengeSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000000F /* ChallengeSystem.swift */; };
+		FAB1E1010000000000000010 /* BubbleClimbOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000010 /* BubbleClimbOverlay.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -99,6 +105,10 @@
 		72D020862C1905FC002F11FC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		72D020892C1905FC002F11FC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		72D1A7AD2C1BD681005213A4 /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
+		FAD1F0010000000000000001 /* Kalam-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Kalam-Regular.ttf"; sourceTree = "<group>"; };
+		FAD1F0010000000000000002 /* Kalam-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Kalam-Bold.ttf"; sourceTree = "<group>"; };
+		FAD1F0010000000000000003 /* Nunito-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Regular.ttf"; sourceTree = "<group>"; };
+		FAD1F0010000000000000004 /* Nunito-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Italic.ttf"; sourceTree = "<group>"; };
 		FAB1E0010000000000000001 /* GameplayModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameplayModels.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000002 /* MermaidStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidStats.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000003 /* MermaidAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidAppearance.swift; sourceTree = "<group>"; };
@@ -113,6 +123,8 @@
 		FAB1E001000000000000000C /* HUDLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDLayer.swift; sourceTree = "<group>"; };
 		FAB1E001000000000000000D /* RegionSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionSystem.swift; sourceTree = "<group>"; };
 		FAB1E001000000000000000E /* OfflineProgressSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineProgressSystem.swift; sourceTree = "<group>"; };
+		FAB1E001000000000000000F /* ChallengeSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeSystem.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000010 /* BubbleClimbOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BubbleClimbOverlay.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -253,9 +265,21 @@
 				72D020812C1905F9002F11FC /* GameViewController.swift */,
 				72D020832C1905F9002F11FC /* Main.storyboard */,
 				72D020862C1905FC002F11FC /* Assets.xcassets */,
+				FAD1F2010000000000000001 /* Fonts */,
 				72D020882C1905FC002F11FC /* LaunchScreen.storyboard */,
 			);
 			path = Ester;
+			sourceTree = "<group>";
+		};
+		FAD1F2010000000000000001 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				FAD1F0010000000000000001 /* Kalam-Regular.ttf */,
+				FAD1F0010000000000000002 /* Kalam-Bold.ttf */,
+				FAD1F0010000000000000003 /* Nunito-Regular.ttf */,
+				FAD1F0010000000000000004 /* Nunito-Italic.ttf */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 		FAB1E2010000000000000001 /* Game */ = {
@@ -276,6 +300,8 @@
 				FAB1E001000000000000000C /* HUDLayer.swift */,
 				FAB1E001000000000000000D /* RegionSystem.swift */,
 				FAB1E001000000000000000E /* OfflineProgressSystem.swift */,
+				FAB1E001000000000000000F /* ChallengeSystem.swift */,
+				FAB1E0010000000000000010 /* BubbleClimbOverlay.swift */,
 			);
 			path = Game;
 			sourceTree = "<group>";
@@ -345,6 +371,10 @@
 				72D020852C1905F9002F11FC /* Base in Resources */,
 				72D020872C1905FC002F11FC /* Assets.xcassets in Resources */,
 				72C0A10B2D8B000B00A5885C /* MermaidRigs.json in Resources */,
+				FAD1F1010000000000000001 /* Kalam-Regular.ttf in Resources */,
+				FAD1F1010000000000000002 /* Kalam-Bold.ttf in Resources */,
+				FAD1F1010000000000000003 /* Nunito-Regular.ttf in Resources */,
+				FAD1F1010000000000000004 /* Nunito-Italic.ttf in Resources */,
 				72D0208A2C1905FC002F11FC /* Base in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -403,6 +433,8 @@
 				FAB1E101000000000000000C /* HUDLayer.swift in Sources */,
 				FAB1E101000000000000000D /* RegionSystem.swift in Sources */,
 				FAB1E101000000000000000E /* OfflineProgressSystem.swift in Sources */,
+				FAB1E101000000000000000F /* ChallengeSystem.swift in Sources */,
+				FAB1E1010000000000000010 /* BubbleClimbOverlay.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

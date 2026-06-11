@@ -20,6 +20,7 @@ final class MermaidStats: Codable {
     var pearls: Int = 20
     var phase: MermaidPhase = .egg
     var birthDate: Date = Date()
+    var phaseStartedAt: Date = Date()
     var adaptationByZone: [String: CGFloat] = [DepthZone.mid.storageKey: 30]
     var unlockedZoneKeys: Set<String> = [DepthZone.shallow.storageKey, DepthZone.mid.storageKey]
     var shelterLevel: Int = 1
@@ -46,7 +47,7 @@ final class MermaidStats: Codable {
 
     enum CodingKeys: String, CodingKey {
         case hunger, energy, mood, xp, courage, trust, curiosity, pearls
-        case phase, birthDate, adaptationByZone, unlockedZoneKeys
+        case phase, birthDate, phaseStartedAt, adaptationByZone, unlockedZoneKeys
         case shelterLevel, storedFood, maxDepthMeters
         case puzzlesSolved, mealsEaten, memories, lastSaved, hatchProgress
         case posX, posY, discoveredRegionIds, regionProgress, destinationRegionId
@@ -67,6 +68,8 @@ final class MermaidStats: Codable {
         pearls = try c.decodeIfPresent(Int.self, forKey: .pearls) ?? 20
         phase = try c.decodeIfPresent(MermaidPhase.self, forKey: .phase) ?? .egg
         birthDate = try c.decodeIfPresent(Date.self, forKey: .birthDate) ?? Date()
+        phaseStartedAt = try c.decodeIfPresent(Date.self, forKey: .phaseStartedAt)
+            ?? MermaidStats.estimatedPhaseStartedAt(for: phase, birthDate: birthDate)
         adaptationByZone = try c.decodeIfPresent([String: CGFloat].self, forKey: .adaptationByZone) ?? [DepthZone.shallow.storageKey: 30]
         unlockedZoneKeys = try c.decodeIfPresent(Set<String>.self, forKey: .unlockedZoneKeys) ?? [DepthZone.shallow.storageKey]
         shelterLevel = try c.decodeIfPresent(Int.self, forKey: .shelterLevel) ?? 1
@@ -84,11 +87,20 @@ final class MermaidStats: Codable {
         destinationRegionId = try c.decodeIfPresent(String.self, forKey: .destinationRegionId)
     }
 
+    private static func estimatedPhaseStartedAt(for phase: MermaidPhase, birthDate: Date) -> Date {
+        let completedGrowthSteps = max(0, phase.rawValue - MermaidPhase.baby.rawValue)
+        let completedMonths = completedGrowthSteps * (completedGrowthSteps + 1) / 2
+        let estimated = birthDate.addingTimeInterval(Double(completedMonths) * 30 * 86_400)
+        return Swift.min(estimated, Date())
+    }
+
     // MARK: - Derivados
 
     var wellbeing: CGFloat { ((100 - hunger) + energy + mood) / 3 }
 
     var ageDays: Double { Date().timeIntervalSince(birthDate) / 86400 }
+
+    var phaseAgeSeconds: Double { max(0, Date().timeIntervalSince(phaseStartedAt)) }
 
     var ageText: String {
         let days = Int(ageDays)
@@ -142,7 +154,8 @@ final class MermaidStats: Codable {
 
     /// Avança fome, humor e energia. `energyDelta` é a taxa por segundo da atividade atual.
     func tick(dt: CGFloat, energyDelta: CGFloat) {
-        hunger = (hunger + dt * 0.022).clamped(to: 0...100)
+        // fome aperta ~3x mais rápido: pede cuidado mais frequente
+        hunger = (hunger + dt * 0.065).clamped(to: 0...100)
         energy = (energy + energyDelta * dt).clamped(to: 0...100)
 
         let moodTarget = ((100 - hunger) * 0.45 + energy * 0.35 + 18 + moodBoost)
@@ -189,7 +202,7 @@ final class MermaidStats: Codable {
         let elapsed = CGFloat(Date().timeIntervalSince(lastSaved))
         guard elapsed > 30 else { return }
         let capped = min(elapsed, 60 * 60 * 16)
-        hunger = (hunger + capped * 0.008).clamped(to: 0...100)
+        hunger = (hunger + capped * 0.012).clamped(to: 0...100)
         energy = (energy + capped * 0.01).clamped(to: 0...100)
         mood += (55 - mood) * min(1, capped / (60 * 60 * 6))
         mood = mood.clamped(to: 0...100)

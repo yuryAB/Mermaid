@@ -2,9 +2,10 @@
 //  TideWeavingSystem.swift
 //  Ester
 //
-//  Trama das Marés: o único tipo de puzzle do jogo (combinar 3+ peças).
-//  A fantasia é a sereia alinhando pérolas, conchas, cristais e correntes.
-//  Sessões: básica (sempre disponível), de região, de evento e de choco.
+//  Desafio: Trama — o minijogo de combinar 3+ peças (antiga "Trama das
+//  Marés"). Hoje é um dos desafios oferecidos pelos peixes; o peixe que
+//  ofereceu fica em destaque no topo enquanto o tabuleiro roda embaixo.
+//  Sessões: básica, de região, de evento (especial) e de choco.
 //
 
 import Foundation
@@ -30,7 +31,7 @@ struct TideTheme {
                       session: TideSessionType) -> TideTheme {
         switch session {
         case .hatching:
-            return TideTheme(icons: ["🫧", "✨", "💛", "🐚", "💙"],
+            return TideTheme(icons: ["○", "✦", "♡", "◡", "◇"],
                              subtitle: "Energia de Nascimento")
         case .region:
             if let region {
@@ -42,150 +43,28 @@ struct TideTheme {
         case .event:
             let base = region.map { TideTheme(icons: $0.tideIcons, subtitle: $0.tideTitle) }
                 ?? zoneTheme(for: zone)
-            return TideTheme(icons: base.icons + ["👑"],
-                             subtitle: "✨ " + base.subtitle + " ✨")
+            return TideTheme(icons: base.icons + ["◎"],
+                             subtitle: base.subtitle + " especial")
         }
     }
 
     private static func zoneTheme(for zone: DepthZone) -> TideTheme {
         switch zone {
         case .clear:
-            return TideTheme(icons: ["🫧", "☀️", "⭐️", "🌿", "🐚"], subtitle: "Luzes da Camada Clara")
+            return TideTheme(icons: ["○", "☼", "✦", "⌁", "◡"], subtitle: "Luzes da Camada Clara")
         case .shallow:
-            return TideTheme(icons: ["🐚", "🫧", "⭐️", "🌿", "🦀"], subtitle: "Conchas da Camada Rasa")
+            return TideTheme(icons: ["◡", "○", "✦", "⌁", "※"], subtitle: "Conchas da Camada Rasa")
         case .mid:
-            return TideTheme(icons: ["💧", "🐟", "🌀", "⭐️", "🫧"], subtitle: "Correntes da Camada Média")
+            return TideTheme(icons: ["◌", "><>", "≈", "✦", "○"], subtitle: "Correntes da Camada Média")
         case .blue:
-            return TideTheme(icons: ["💧", "🌀", "🐟", "💎", "🫧"], subtitle: "Marés da Camada Azul")
+            return TideTheme(icons: ["◌", "≈", "><>", "◇", "○"], subtitle: "Marés da Camada Azul")
         case .deep:
-            return TideTheme(icons: ["💎", "✨", "🦑", "🔮", "🌟"], subtitle: "Cristais da Camada Profunda")
+            return TideTheme(icons: ["◇", "✦", "⌘", "◎", "✧"], subtitle: "Cristais da Camada Profunda")
         case .abyss:
-            return TideTheme(icons: ["💎", "🔮", "🦑", "✨", "🌑"], subtitle: "Segredos da Camada Abissal")
+            return TideTheme(icons: ["◇", "◎", "⌘", "✦", "●"], subtitle: "Segredos da Camada Abissal")
         case .surface:
-            return TideTheme(icons: ["⚓️", "🫧", "☀️", "🛟", "🐬"], subtitle: "Reflexos da Superfície")
+            return TideTheme(icons: ["⌖", "○", "☼", "□", "⌁"], subtitle: "Reflexos da Superfície")
         }
-    }
-}
-
-struct TideResult {
-    let score: Int
-    let reachedTarget: Bool
-    let pearls: Int
-    let xp: CGFloat
-    let session: TideSessionType
-}
-
-// MARK: - Fio da Trama no mundo
-
-final class PuzzlePointNode: SKNode {
-    let zone: DepthZone
-    let special: Bool
-
-    init(zone: DepthZone, special: Bool) {
-        self.zone = zone
-        self.special = special
-        super.init()
-        name = "puzzlePoint"
-        zPosition = 6
-
-        let path = UIBezierPath()
-        path.move(to: CGPoint(x: 0, y: 46))
-        path.addLine(to: CGPoint(x: 26, y: 10))
-        path.addLine(to: CGPoint(x: 14, y: -38))
-        path.addLine(to: CGPoint(x: -14, y: -38))
-        path.addLine(to: CGPoint(x: -26, y: 10))
-        path.close()
-        let crystal = SKShapeNode(path: path.cgPath)
-        crystal.fillColor = special
-            ? UIColor(red: 1, green: 0.8, blue: 0.35, alpha: 0.9)
-            : UIColor(red: 0.55, green: 0.8, blue: 1, alpha: 0.9)
-        crystal.strokeColor = .white
-        crystal.glowWidth = special ? 18 : 12
-        addChild(crystal)
-
-        let pulse = SKAction.repeatForever(.sequence([
-            .scale(to: 1.15, duration: 0.9),
-            .scale(to: 1.0, duration: 0.9)
-        ]))
-        pulse.eaeInEaseOut()
-        crystal.run(pulse)
-        run(.repeatForever(.sequence([
-            .moveBy(x: 0, y: 14, duration: 1.3),
-            .moveBy(x: 0, y: -14, duration: 1.3)
-        ])))
-    }
-
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-}
-
-// MARK: - Sistema (fios no mundo)
-
-final class TideWeavingSystem {
-    unowned let ctx: GameContext
-    private weak var worldNode: SKNode?
-
-    private(set) var puzzlePoint: PuzzlePointNode?
-    private var specialExpiry: CGFloat = -1
-
-    init(ctx: GameContext, worldNode: SKNode) {
-        self.ctx = ctx
-        self.worldNode = worldNode
-    }
-
-    func update(dt: CGFloat) {
-        if specialExpiry > 0 {
-            specialExpiry -= dt
-            if specialExpiry <= 0, let point = puzzlePoint, point.special {
-                clearPoint()
-                ctx.say("O brilho especial da Trama se desfez nas águas...")
-            }
-        }
-    }
-
-    /// Garante um fio da Trama perto da sereia e devolve a posição dele.
-    @discardableResult
-    func ensurePuzzlePoint(near point: CGPoint, zone: DepthZone) -> CGPoint {
-        if let existing = puzzlePoint,
-           existing.position.distance(to: point) < 2200 {
-            return existing.position
-        }
-        clearPoint()
-        guard let world = worldNode else { return point }
-
-        let node = PuzzlePointNode(zone: zone, special: false)
-        let angle = CGFloat.random(in: 0...(2 * .pi))
-        let distance = CGFloat.random(in: 300...550)
-        node.position = CGPoint(
-            x: (point.x + cos(angle) * distance).clamped(to: World.minX...World.maxX),
-            y: (point.y + sin(angle) * distance).clamped(to: ctx.depth.allowedYRange())
-        )
-        node.alpha = 0
-        node.run(.fadeIn(withDuration: 0.7))
-        world.addChild(node)
-        puzzlePoint = node
-        return node.position
-    }
-
-    /// Fio especial criado por eventos (recompensas maiores, expira).
-    func spawnSpecialPoint(near point: CGPoint, zone: DepthZone) {
-        clearPoint()
-        guard let world = worldNode else { return }
-        let node = PuzzlePointNode(zone: zone, special: true)
-        node.position = CGPoint(
-            x: (point.x + .random(in: -450...450)).clamped(to: World.minX...World.maxX),
-            y: (point.y + .random(in: -300...300)).clamped(to: ctx.depth.allowedYRange())
-        )
-        node.alpha = 0
-        node.run(.fadeIn(withDuration: 0.7))
-        world.addChild(node)
-        puzzlePoint = node
-        specialExpiry = 90
-    }
-
-    func clearPoint() {
-        puzzlePoint?.run(.sequence([.fadeOut(withDuration: 0.4), .removeFromParent()]))
-        puzzlePoint = nil
-        specialExpiry = -1
     }
 }
 
@@ -203,12 +82,12 @@ final class TideWeavingOverlay: SKNode {
     private let target: Int
     private let session: TideSessionType
     private let rewardMultiplier: CGFloat
-    private let onFinish: (TideResult) -> Void
+    private let onFinish: (ChallengeResult) -> Void
 
     private var board: [[Int]] = []
     private var pieces: [[SKNode?]] = []
     private var score = 0
-    private var movesLeft = 16
+    private var movesLeft: Int
     private var busy = false
     private var finished = false
     private var selected: GridPos?
@@ -226,7 +105,8 @@ final class TideWeavingOverlay: SKNode {
          region: Region?,
          session: TideSessionType,
          rewardMultiplier: CGFloat,
-         onFinish: @escaping (TideResult) -> Void) {
+         giverDisplay: SKNode?,
+         onFinish: @escaping (ChallengeResult) -> Void) {
         self.theme = TideTheme.theme(for: zone, region: region, session: session)
         self.kindCount = theme.icons.count
         self.session = session
@@ -235,6 +115,14 @@ final class TideWeavingOverlay: SKNode {
         if session == .event { goal += 200 }
         if session == .hatching { goal = 350 }
         self.target = goal
+        switch session {
+        case .hatching:
+            self.movesLeft = 9
+        case .event:
+            self.movesLeft = 13
+        case .basic, .region:
+            self.movesLeft = 12
+        }
         self.onFinish = onFinish
 
         let boardWidth = min(size.width - 36, 380)
@@ -243,7 +131,7 @@ final class TideWeavingOverlay: SKNode {
 
         super.init()
         isUserInteractionEnabled = true
-        buildChrome(size: size, boardWidth: boardWidth)
+        buildChrome(size: size, boardWidth: boardWidth, giverDisplay: giverDisplay)
         fillInitialBoard()
     }
 
@@ -251,64 +139,61 @@ final class TideWeavingOverlay: SKNode {
 
     // MARK: - Visual fixo
 
-    private func buildChrome(size: CGSize, boardWidth: CGFloat) {
+    private func buildChrome(size: CGSize, boardWidth: CGFloat, giverDisplay: SKNode?) {
         let backdrop = SKShapeNode(rectOf: CGSize(width: size.width * 2, height: size.height * 2))
         backdrop.fillColor = UIColor(white: 0, alpha: 0.6)
         backdrop.strokeColor = .clear
         addChild(backdrop)
 
-        let panel = SKShapeNode(rectOf: CGSize(width: boardWidth + 28, height: boardWidth + 190),
-                                cornerRadius: 22)
-        panel.fillColor = UIColor(red: 0.06, green: 0.12, blue: 0.22, alpha: 0.95)
-        panel.strokeColor = UIColor(white: 1, alpha: 0.25)
-        panel.lineWidth = 2
-        panel.position = CGPoint(x: 0, y: -30)
+        let panel = GameUI.card(size: CGSize(width: boardWidth + 28, height: boardWidth + 335),
+                                cornerRadius: 26,
+                                tint: GameUI.accent.withAlphaComponent(0.5))
+        panel.position = CGPoint(x: 0, y: 57)
         addChild(panel)
 
-        let title = SKLabelNode(text: "Trama das Marés")
-        title.fontName = "Helvetica-Bold"
-        title.fontSize = 19
-        title.fontColor = .white
-        title.position = CGPoint(x: 0, y: boardWidth / 2 + 96)
-        addChild(title)
-
-        let subtitle = SKLabelNode(text: theme.subtitle)
-        subtitle.fontName = "Helvetica"
-        subtitle.fontSize = 13
-        subtitle.fontColor = UIColor(red: 0.65, green: 0.85, blue: 1, alpha: 1)
-        subtitle.position = CGPoint(x: 0, y: boardWidth / 2 + 74)
-        addChild(subtitle)
+        // NPC que deu o desafio em destaque no topo + título
+        let header = ChallengeChrome.makeHeader(kind: .plot,
+                                                subtitle: theme.subtitle,
+                                                giverDisplay: giverDisplay,
+                                                width: boardWidth)
+        header.position = CGPoint(x: 0, y: boardWidth / 2 + 160)
+        addChild(header)
 
         scoreLabel = SKLabelNode(text: "0 / \(target)")
-        scoreLabel.fontName = "Helvetica-Bold"
+        scoreLabel.fontName = "AvenirNext-DemiBold"
         scoreLabel.fontSize = 16
-        scoreLabel.fontColor = UIColor(red: 0.6, green: 0.9, blue: 1, alpha: 1)
+        scoreLabel.fontColor = GameUI.ink
         scoreLabel.horizontalAlignmentMode = .left
         scoreLabel.position = CGPoint(x: gridOrigin.x, y: boardWidth / 2 + 44)
         addChild(scoreLabel)
 
         movesLabel = SKLabelNode(text: "Jogadas: \(movesLeft)")
-        movesLabel.fontName = "Helvetica"
+        movesLabel.fontName = "AvenirNext-Regular"
         movesLabel.fontSize = 16
-        movesLabel.fontColor = .white
+        movesLabel.fontColor = GameUI.mutedInk
         movesLabel.horizontalAlignmentMode = .right
         movesLabel.position = CGPoint(x: gridOrigin.x + boardWidth, y: boardWidth / 2 + 44)
         addChild(movesLabel)
 
-        let quit = SKLabelNode(text: "✕ Sair")
-        quit.fontName = "Helvetica"
-        quit.fontSize = 15
-        quit.fontColor = UIColor(white: 1, alpha: 0.7)
+        let quit = GameUI.pill(text: "Sair",
+                               fontSize: 15,
+                               bold: false,
+                               fill: [GameUI.coral.withAlphaComponent(0.95)],
+                               strokeColor: GameUI.coral.withAlphaComponent(0.55),
+                               textColor: GameUI.ink,
+                               hPadding: 26,
+                               height: 34)
         quit.name = "tide_quit"
         quit.position = CGPoint(x: 0, y: gridOrigin.y - 56)
+        quit.zPosition = 20
         addChild(quit)
 
         boardNode.position = .zero
         addChild(boardNode)
 
-        selectionRing.strokeColor = .white
+        selectionRing.strokeColor = GameUI.gold
         selectionRing.lineWidth = 3
-        selectionRing.glowWidth = 4
+        selectionRing.glowWidth = 1
         selectionRing.isHidden = true
         selectionRing.zPosition = 5
         selectionRing.setScale(cellSize / 24)
@@ -336,7 +221,9 @@ final class TideWeavingOverlay: SKNode {
         bg.strokeColor = UIColor(white: 1, alpha: 0.2)
         piece.addChild(bg)
         let icon = SKLabelNode(text: theme.icons[kind])
-        icon.fontSize = cellSize * 0.55
+        icon.fontName = "AvenirNext-DemiBold"
+        icon.fontSize = cellSize * (theme.icons[kind].count > 1 ? 0.28 : 0.50)
+        icon.fontColor = [GameUI.accent, GameUI.gold, GameUI.coral, GameUI.algae, GameUI.mutedInk][kind % 5]
         icon.verticalAlignmentMode = .center
         piece.addChild(icon)
         piece.position = position(of: pos)
@@ -465,10 +352,12 @@ final class TideWeavingOverlay: SKNode {
         swapData(a, b)
         animateSwap(a, b) { [weak self] in
             guard let self else { return }
+            guard !self.finished else { return }
             if self.findMatches().isEmpty {
                 self.swapData(a, b)
                 self.animateSwap(a, b) { [weak self] in
-                    self?.busy = false
+                    guard let self, !self.finished else { return }
+                    self.busy = false
                 }
             } else {
                 self.movesLeft -= 1
@@ -510,6 +399,7 @@ final class TideWeavingOverlay: SKNode {
     }
 
     private func resolveCascade(multiplier: Int) {
+        guard !finished else { return }
         let matches = findMatches()
         if matches.isEmpty {
             busy = false
@@ -518,7 +408,7 @@ final class TideWeavingOverlay: SKNode {
             return
         }
 
-        score += matches.count * 10 * multiplier
+        score += scoreValue(for: matches, cascadeDepth: multiplier)
         scoreLabel.text = "\(score) / \(target)"
 
         for pos in matches {
@@ -539,6 +429,7 @@ final class TideWeavingOverlay: SKNode {
     }
 
     private func applyGravity(multiplier: Int) {
+        guard !finished else { return }
         for c in 0..<gridSize {
             var write = 0
             for r in 0..<gridSize where board[r][c] != -1 {
@@ -570,6 +461,11 @@ final class TideWeavingOverlay: SKNode {
             .wait(forDuration: 0.34),
             .run { [weak self] in self?.resolveCascade(multiplier: multiplier + 1) }
         ]))
+    }
+
+    private func scoreValue(for matches: Set<GridPos>, cascadeDepth: Int) -> Int {
+        let cascadeBonus = min(max(0, cascadeDepth - 1), 3) * 3
+        return matches.count * (8 + cascadeBonus)
     }
 
     // MARK: - Sem jogadas possíveis
@@ -629,7 +525,7 @@ final class TideWeavingOverlay: SKNode {
 
     // MARK: - Fim de sessão
 
-    private var pendingResult: TideResult?
+    private var pendingResult: ChallengeResult?
 
     private func finish() {
         guard !finished else { return }
@@ -643,59 +539,71 @@ final class TideWeavingOverlay: SKNode {
         if session == .event { pearls = Int(CGFloat(pearls) * 1.5) }
         let xp = CGFloat(score) / 5 * (session == .event ? 1.5 : 1)
 
-        let panel = SKShapeNode(rectOf: CGSize(width: 290, height: 220), cornerRadius: 20)
-        panel.fillColor = UIColor(red: 0.08, green: 0.16, blue: 0.28, alpha: 0.98)
-        panel.strokeColor = reached
-            ? UIColor(red: 0.6, green: 0.95, blue: 0.7, alpha: 1)
-            : UIColor(white: 1, alpha: 0.4)
-        panel.lineWidth = 2
+        let resultTint = reached
+            ? UIColor(red: 0.5, green: 0.9, blue: 0.65, alpha: 1)
+            : GameUI.accent
+        let panel = GameUI.card(size: CGSize(width: 290, height: 220),
+                                cornerRadius: 24,
+                                tint: resultTint)
         panel.zPosition = 10
         addChild(panel)
 
+        let panelContent = SKNode()
+        panelContent.zPosition = 5
+        panel.addChild(panelContent)
+
         let titleText: String
         if session == .hatching {
-            titleText = reached ? "Energia reunida! 🥚✨" : "O ovo sentiu o carinho 💛"
+            titleText = reached ? "Energia reunida!" : "O ovo sentiu o carinho"
         } else {
-            titleText = reached ? "Trama concluída! 🎉" : "Boa tentativa!"
+            titleText = reached ? "Desafio concluído!" : "Boa tentativa!"
         }
         let titleLabel = SKLabelNode(text: titleText)
-        titleLabel.fontName = "Helvetica-Bold"
+        titleLabel.fontName = "AvenirNext-DemiBold"
         titleLabel.fontSize = 19
-        titleLabel.fontColor = .white
+        titleLabel.fontColor = GameUI.ink
         titleLabel.position = CGPoint(x: 0, y: 60)
-        panel.addChild(titleLabel)
+        panelContent.addChild(titleLabel)
 
         let scoreLine = SKLabelNode(text: "Pontuação: \(score)")
-        scoreLine.fontName = "Helvetica"
+        scoreLine.fontName = "AvenirNext-Regular"
         scoreLine.fontSize = 16
-        scoreLine.fontColor = .white
+        scoreLine.fontColor = GameUI.mutedInk
         scoreLine.position = CGPoint(x: 0, y: 24)
-        panel.addChild(scoreLine)
+        panelContent.addChild(scoreLine)
 
-        let rewardLine = SKLabelNode(text: "💠 +\(pearls)   ⭐️ +\(Int(xp)) XP")
-        rewardLine.fontName = "Helvetica-Bold"
+        let rewardLine = SKLabelNode(text: "Brilhos +\(pearls)   XP +\(Int(xp))")
+        rewardLine.fontName = "AvenirNext-DemiBold"
         rewardLine.fontSize = 17
-        rewardLine.fontColor = UIColor(red: 0.7, green: 0.9, blue: 1, alpha: 1)
+        rewardLine.fontColor = GameUI.gold
         rewardLine.position = CGPoint(x: 0, y: -10)
-        panel.addChild(rewardLine)
+        panelContent.addChild(rewardLine)
 
-        let continueButton = SKShapeNode(rectOf: CGSize(width: 170, height: 44), cornerRadius: 12)
-        continueButton.fillColor = UIColor(red: 0.25, green: 0.55, blue: 0.85, alpha: 1)
-        continueButton.strokeColor = .clear
+        let continueButton = GameUI.card(size: CGSize(width: 170, height: 44),
+                                         cornerRadius: 16,
+                                         tint: GameUI.accent,
+                                         baseColors: [UIColor(red: 0.22, green: 0.5, blue: 0.82, alpha: 1),
+                                                      UIColor(red: 0.12, green: 0.3, blue: 0.6, alpha: 1)])
         continueButton.name = "tide_continue"
         continueButton.position = CGPoint(x: 0, y: -68)
-        panel.addChild(continueButton)
+        panelContent.addChild(continueButton)
 
         let continueLabel = SKLabelNode(text: "Continuar")
-        continueLabel.fontName = "Helvetica-Bold"
+        continueLabel.fontName = "AvenirNext-DemiBold"
         continueLabel.fontSize = 16
-        continueLabel.fontColor = .white
+        continueLabel.fontColor = GameUI.ink
         continueLabel.verticalAlignmentMode = .center
+        continueLabel.zPosition = 5
         continueLabel.name = "tide_continue"
         continueButton.addChild(continueLabel)
 
-        pendingResult = TideResult(score: score, reachedTarget: reached,
-                                   pearls: pearls, xp: xp, session: session)
+        pendingResult = ChallengeResult(kind: .plot,
+                                        score: score,
+                                        reachedTarget: reached,
+                                        pearls: pearls,
+                                        xp: xp,
+                                        special: session == .event,
+                                        isHatching: session == .hatching)
     }
 
     private func handleFinishedTap(at location: CGPoint) {

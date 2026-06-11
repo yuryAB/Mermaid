@@ -12,16 +12,29 @@ import SpriteKit
 
 // MARK: - Nó de peixe
 
-final class FishNode: SKNode {
+final class FishNode: SKNode, ChallengeGiver {
     let zone: DepthZone
     var heading: CGFloat
     var baseSpeed: CGFloat
     var skittish: Bool
     var isRare = false
 
+    /// Desafio oferecido por este peixe (nil = peixe comum).
+    var offeredChallenge: ChallengeKind? {
+        didSet { updateChallengeHighlight() }
+    }
+    var isSpecialChallenge = false
+    var worldPosition: CGPoint { position }
+
     private var verticalPhase = CGFloat.random(in: 0...6)
     private var fleeTimer: CGFloat = 0
     private let container = SKNode()
+    private var challengeHighlight: SKNode?
+
+    // guardados para gerar a cópia visual do desafio
+    private var bodyLength: CGFloat = 40
+    private var bodyHeight: CGFloat = 18
+    private var bodyColor: UIColor = .white
 
     private let paletteOverride: [UIColor]?
 
@@ -51,10 +64,41 @@ final class FishNode: SKNode {
             ? UIColor(red: 1, green: 0.85, blue: 0.4, alpha: 1)
             : (paletteOverride ?? FishNode.palette(for: zone)).randomElement()!
 
+        bodyLength = length
+        bodyHeight = height
+        bodyColor = color
+
+        let drawing = FishNode.fishDrawing(length: length, height: height, color: color,
+                                           animateTail: true)
+        container.addChild(drawing)
+
+        // brilho nas zonas escuras
+        if zone == .deep || zone == .abyss || isRare {
+            if let body = drawing.childNode(withName: "fish_body") as? SKShapeNode {
+                body.glowWidth = isRare ? 14 : 8
+                let pulse = SKAction.repeatForever(.sequence([
+                    .fadeAlpha(to: 0.7, duration: 1.1),
+                    .fadeAlpha(to: 1.0, duration: 1.1)
+                ]))
+                pulse.eaeInEaseOut()
+                body.run(pulse)
+            }
+        }
+    }
+
+    /// Desenho do peixe (corpo, cauda, olho) reaproveitável para a cópia
+    /// que fica em destaque no topo de um desafio.
+    static func fishDrawing(length: CGFloat,
+                            height: CGFloat,
+                            color: UIColor,
+                            animateTail: Bool) -> SKNode {
+        let node = SKNode()
+
         let body = SKShapeNode(ellipseOf: CGSize(width: length, height: height))
         body.fillColor = color
         body.strokeColor = color.withAlphaComponent(0.4)
-        container.addChild(body)
+        body.name = "fish_body"
+        node.addChild(body)
 
         let tail = UIBezierPath()
         tail.move(to: CGPoint(x: -length * 0.45, y: 0))
@@ -64,36 +108,61 @@ final class FishNode: SKNode {
         let tailNode = SKShapeNode(path: tail.cgPath)
         tailNode.fillColor = color.withAlphaComponent(0.85)
         tailNode.strokeColor = .clear
-        container.addChild(tailNode)
+        node.addChild(tailNode)
 
-        let tailSwing = SKAction.repeatForever(.sequence([
-            .scaleX(to: 0.7, duration: 0.35),
-            .scaleX(to: 1.0, duration: 0.35)
-        ]))
-        tailSwing.eaeInEaseOut()
-        tailNode.run(tailSwing)
+        if animateTail {
+            let tailSwing = SKAction.repeatForever(.sequence([
+                .scaleX(to: 0.7, duration: 0.35),
+                .scaleX(to: 1.0, duration: 0.35)
+            ]))
+            tailSwing.eaeInEaseOut()
+            tailNode.run(tailSwing)
+        }
 
         let eye = SKShapeNode(circleOfRadius: max(2.5, height * 0.1))
         eye.fillColor = .white
         eye.strokeColor = .clear
         eye.position = CGPoint(x: length * 0.3, y: height * 0.12)
-        container.addChild(eye)
+        node.addChild(eye)
         let pupil = SKShapeNode(circleOfRadius: max(1.2, height * 0.05))
         pupil.fillColor = .black
         pupil.strokeColor = .clear
         pupil.position = eye.position
-        container.addChild(pupil)
+        node.addChild(pupil)
 
-        // brilho nas zonas escuras
-        if zone == .deep || zone == .abyss || isRare {
-            body.glowWidth = isRare ? 14 : 8
-            let pulse = SKAction.repeatForever(.sequence([
-                .fadeAlpha(to: 0.7, duration: 1.1),
-                .fadeAlpha(to: 1.0, duration: 1.1)
-            ]))
-            pulse.eaeInEaseOut()
-            body.run(pulse)
-        }
+        return node
+    }
+
+    /// Cópia visual estática deste peixe, para o cabeçalho do desafio.
+    func makeGiverDisplayNode() -> SKNode {
+        FishNode.fishDrawing(length: bodyLength, height: bodyHeight,
+                             color: bodyColor, animateTail: true)
+    }
+
+    /// Anel dourado pulsante indicando que este peixe oferece um desafio.
+    private func updateChallengeHighlight() {
+        challengeHighlight?.removeFromParent()
+        challengeHighlight = nil
+        guard offeredChallenge != nil else { return }
+
+        let radius = bodyLength * 0.85
+        let ring = SKShapeNode(circleOfRadius: radius)
+        ring.fillColor = UIColor(red: 1, green: 0.85, blue: 0.45, alpha: 0.07)
+        ring.strokeColor = UIColor(red: 1, green: 0.85, blue: 0.45, alpha: 0.9)
+        ring.lineWidth = 2.5
+        ring.glowWidth = 10
+        ring.zPosition = -1
+        addChild(ring)
+        ring.run(.repeatForever(.sequence([
+            .group([.scale(to: 1.18, duration: 0.8), .fadeAlpha(to: 0.55, duration: 0.8)]),
+            .group([.scale(to: 1.0, duration: 0.8), .fadeAlpha(to: 1.0, duration: 0.8)])
+        ])))
+
+        let badge = SKLabelNode(text: "❗️")
+        badge.fontSize = 20
+        badge.position = CGPoint(x: 0, y: radius + 14)
+        ring.addChild(badge)
+        challengeHighlight = ring
     }
 
     static func palette(for zone: DepthZone) -> [UIColor] {
@@ -130,7 +199,10 @@ final class FishNode: SKNode {
         heading += CGFloat.random(in: -0.5...0.5) * dt * 2
 
         var speed = baseSpeed
-        if fleeTimer > 0 {
+        if offeredChallenge != nil {
+            // peixes com desafio esperam a sereia: nadam devagar e não fogem
+            speed = min(baseSpeed, 45)
+        } else if fleeTimer > 0 {
             fleeTimer -= dt
             speed = baseSpeed * 2.6
         } else if skittish && position.distance(to: mermaidPosition) < 160 {
@@ -229,6 +301,7 @@ final class FishSystem {
         fish.run(.fadeIn(withDuration: 0.8))
         world.addChild(fish)
         fishes.append(fish)
+        ctx.challenges?.decorateSpawn(fish)
         return fish
     }
 

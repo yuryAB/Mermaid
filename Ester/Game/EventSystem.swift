@@ -10,12 +10,28 @@
 import Foundation
 import SpriteKit
 
+// MARK: - Objetivo no mundo
+
+/// Algo acontecendo por perto que o jogador pode pedir para a sereia
+/// investigar (botão "Objetivo").
+struct WorldObjective {
+    let label: String
+    /// Posição atual (nil quando o alvo sumiu do mundo).
+    let position: () -> CGPoint?
+    /// Recompensa extra ao chegar (opcional).
+    let onReach: (() -> Void)?
+    var timeRemaining: CGFloat
+}
+
 final class EventSystem {
     unowned let ctx: GameContext
     private weak var worldNode: SKNode?
 
     private var timer: CGFloat = 20
     private var driftResetTimer: CGFloat = -1
+
+    /// Objetivo ativo no momento, se houver.
+    private(set) var currentObjective: WorldObjective?
 
     init(ctx: GameContext, worldNode: SKNode) {
         self.ctx = ctx
@@ -30,12 +46,50 @@ final class EventSystem {
             }
         }
 
+        // expira ou invalida o objetivo atual
+        if var objective = currentObjective {
+            objective.timeRemaining -= dt
+            if objective.timeRemaining <= 0 || objective.position() == nil {
+                currentObjective = nil
+            } else {
+                currentObjective = objective
+            }
+        }
+
         guard ctx.stats.phase != .egg else { return }
         timer -= dt
         if timer <= 0 {
             timer = .random(in: 28...55)
             trigger()
         }
+    }
+
+    // MARK: - Objetivos
+
+    private func setObjective(label: String,
+                              duration: CGFloat,
+                              position: @escaping () -> CGPoint?,
+                              onReach: (() -> Void)? = nil) {
+        currentObjective = WorldObjective(label: label,
+                                          position: position,
+                                          onReach: onReach,
+                                          timeRemaining: duration)
+    }
+
+    /// A sereia chegou ao objetivo: recompensa e limpa.
+    func completeObjective() {
+        guard let objective = currentObjective else { return }
+        currentObjective = nil
+        ctx.stats.boostMood(6)
+        ctx.stats.gainXP(10)
+        ctx.stats.curiosity = min(100, ctx.stats.curiosity + 1)
+        ctx.stats.addMemory("Investigou \(objective.label)")
+        objective.onReach?()
+        ctx.say("Ela investigou \(objective.label)! ✨")
+    }
+
+    func clearObjective() {
+        currentObjective = nil
     }
 
     private func trigger() {
@@ -49,9 +103,8 @@ final class EventSystem {
         if zone == .blue || zone == .deep || zone == .abyss {
             options.append((3, bigShadow))
         }
-        if zone != .surface && zone != .clear,
-           ctx.tideWeaving.puzzlePoint == nil {
-            options.append((2, crystalCluster))
+        if zone != .surface && zone != .clear {
+            options.append((2, specialChallengeFish))
         }
         if ctx.mermaidPosition.y > -2500 {
             options.append((2, boatPassing))
@@ -110,15 +163,30 @@ final class EventSystem {
     }
 
     private func glowingFood() {
-        ctx.food.spawnRare(near: ctx.mermaidPosition)
-        ctx.say("Algo brilhante apareceu por perto... ✨")
+        guard let food = ctx.food.spawnRare(near: ctx.mermaidPosition) else { return }
+        ctx.say("Algo brilhante apareceu por perto... ✨ (Objetivo disponível)")
+        setObjective(label: "algo brilhante",
+                     duration: 60,
+                     position: { [weak food] in
+                         guard let food, food.parent != nil else { return nil }
+                         return food.position
+                     })
     }
 
     private func rareFish() {
         guard let world = worldNode else { return }
         let zone = DepthZone.zone(atY: ctx.mermaidPosition.y)
         guard let fish = ctx.fish.spawnFish(zone: zone, near: ctx.mermaidPosition, rare: true) else { return }
-        ctx.say("Um peixe raro está passando! 👀")
+        ctx.say("Um peixe raro está passando! 👀 (Objetivo disponível)")
+        setObjective(label: "o peixe raro",
+                     duration: 45,
+                     position: { [weak fish] in
+                         guard let fish, fish.parent != nil else { return nil }
+                         return fish.position
+                     },
+                     onReach: { [weak self] in
+                         self?.ctx.stats.pearls += 1
+                     })
 
         // se ela estiver por perto quando ele some, vira memória
         world.run(.sequence([
@@ -158,10 +226,10 @@ final class EventSystem {
         }
     }
 
-    private func crystalCluster() {
+    private func specialChallengeFish() {
         let zone = DepthZone.zone(atY: ctx.mermaidPosition.y)
-        ctx.tideWeaving.spawnSpecialPoint(near: ctx.mermaidPosition, zone: zone)
-        ctx.say("Cristais mágicos brilham por perto! 💎 Uma Trama especial apareceu.")
+        ctx.challenges.spawnSpecialGiver(near: ctx.mermaidPosition, zone: zone)
+        ctx.say("Um peixe dourado trouxe um Desafio especial! 💎🏆")
     }
 
     private func boatPassing() {
@@ -217,6 +285,11 @@ final class EventSystem {
             },
             .removeFromParent()
         ]))
-        ctx.say("Algo caiu da superfície! 📦")
+        ctx.say("Algo caiu da superfície! 📦 (Objetivo disponível)")
+
+        let landingPoint = CGPoint(x: x, y: landingY)
+        setObjective(label: "o objeto que caiu",
+                     duration: 75,
+                     position: { landingPoint })
     }
 }

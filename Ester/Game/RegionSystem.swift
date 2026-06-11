@@ -51,7 +51,7 @@ final class RegionDiscoverySystem {
                minPhase: .baby,
                blurb: "Águas calmas e seguras onde tudo começou.",
                tideTitle: "Pérolas do Berço",
-               tideIcons: ["🫧", "⭐️", "🐚", "💧", "✨"]),
+               tideIcons: ["○", "✦", "◡", "◌", "✧"]),
         Region(id: "recife",
                name: "Recife Esmeralda",
                xRange: 14000 ... 28000,
@@ -61,7 +61,7 @@ final class RegionDiscoverySystem {
                minPhase: .child,
                blurb: "Um jardim de corais vibrante e cheio de vida.",
                tideTitle: "Corais do Recife",
-               tideIcons: ["🐚", "🪸", "💎", "🌺", "⭐️"]),
+               tideIcons: ["◡", "⌁", "◇", "✿", "✦"]),
         Region(id: "delta",
                name: "Grande Delta",
                xRange: -30000 ... -16000,
@@ -71,7 +71,7 @@ final class RegionDiscoverySystem {
                minPhase: .child,
                blurb: "Onde o rio encontra o mar, entre correntes e sementes.",
                tideTitle: "Sementes do Delta",
-               tideIcons: ["🌱", "🍃", "🐚", "🪨", "💧"])
+               tideIcons: ["⌁", "≋", "◡", "▧", "◌"])
     ]
 
     init(ctx: GameContext) {
@@ -97,7 +97,7 @@ final class RegionDiscoverySystem {
             ctx.stats.gainXP(40)
             ctx.stats.courage = min(100, ctx.stats.courage + 2)
             ctx.stats.addMemory("Descobriu \(region.name)")
-            ctx.say("🗺 Nova região descoberta: \(region.name)! 💠+15")
+            ctx.say("Nova região catalogada: \(region.name). Brilhos +15")
         }
 
         // progresso de exploração lento (0–100% em ~20 min na região)
@@ -203,7 +203,7 @@ final class TravelSystem {
             ctx.stats.pearls += 5
             ctx.stats.boostMood(8)
             ctx.stats.addMemory("Viajou até \(destination.name)")
-            ctx.say("Ela chegou: \(destination.name)! 💠+5")
+            ctx.say("Chegada registrada: \(destination.name). Brilhos +5")
         }
     }
 }
@@ -234,89 +234,110 @@ final class RegionMenuOverlay: SKNode {
         let discovered = RegionDiscoverySystem.all.filter { stats.discoveredRegionIds.contains($0.id) }
         let unknownCount = RegionDiscoverySystem.all.count - discovered.count
         let rowHeight: CGFloat = 86
-        let panelWidth = min(size.width - 32, 360)
-        let panelHeight = CGFloat(discovered.count) * rowHeight + 130
+        // painel mais estreito, encostado no lado direito da tela
+        let panelWidth = min(size.width * 0.74, 300)
+        let panelHeight = CGFloat(discovered.count) * rowHeight + 140
 
-        let panel = SKShapeNode(rectOf: CGSize(width: panelWidth, height: panelHeight), cornerRadius: 22)
-        panel.fillColor = UIColor(red: 0.06, green: 0.12, blue: 0.22, alpha: 0.97)
-        panel.strokeColor = UIColor(white: 1, alpha: 0.25)
-        panel.lineWidth = 2
-        addChild(panel)
+        // container deslocado para a direita (o backdrop continua centralizado)
+        let content = SKNode()
+        let rightMargin: CGFloat = 14
+        content.position = CGPoint(x: size.width / 2 - panelWidth / 2 - rightMargin, y: 0)
+        addChild(content)
 
-        let title = SKLabelNode(text: "Viajar")
-        title.fontName = "Helvetica-Bold"
-        title.fontSize = 19
-        title.fontColor = .white
-        title.position = CGPoint(x: 0, y: panelHeight / 2 - 40)
-        panel.addChild(title)
+        let panel = GameUI.card(size: CGSize(width: panelWidth, height: panelHeight),
+                                cornerRadius: 26,
+                                tint: GameUI.accent.withAlphaComponent(0.5))
+        content.addChild(panel)
+
+        let panelContent = SKNode()
+        panelContent.zPosition = 5
+        panel.addChild(panelContent)
+
+        let title = GameUI.pill(text: "Mapa de expedição",
+                                fontSize: 16,
+                                fill: [GameUI.accent.withAlphaComponent(0.95)],
+                                strokeColor: GameUI.accent.withAlphaComponent(0.55),
+                                textColor: GameUI.ink,
+                                hPadding: 26,
+                                height: 38)
+        title.position = CGPoint(x: 0, y: panelHeight / 2 - 38)
+        panelContent.addChild(title)
 
         for (index, region) in discovered.enumerated() {
-            let y = panelHeight / 2 - 84 - CGFloat(index) * rowHeight
-            let row = SKShapeNode(rectOf: CGSize(width: panelWidth - 28, height: rowHeight - 12),
-                                  cornerRadius: 14)
+            let y = panelHeight / 2 - 92 - CGFloat(index) * rowHeight
             let isCurrent = region.id == currentRegionId
             let isDestination = region.id == destinationId
-            row.fillColor = isCurrent
-                ? UIColor(white: 1, alpha: 0.08)
-                : UIColor(red: 0.15, green: 0.3, blue: 0.5, alpha: 0.45)
-            row.strokeColor = isDestination
-                ? UIColor(red: 0.5, green: 0.85, blue: 1, alpha: 0.9)
-                : region.tint.withAlphaComponent(0.7)
-            row.lineWidth = 1.5
+
+            let rowTint = isDestination
+                ? UIColor(red: 0.5, green: 0.85, blue: 1, alpha: 1)
+                : region.tint
+            let row = GameUI.card(size: CGSize(width: panelWidth - 28, height: rowHeight - 12),
+                                  cornerRadius: 16,
+                                  tint: rowTint.withAlphaComponent(isCurrent ? 0.9 : 0.6),
+                                  baseColors: GameUI.tintedColors(region.tint))
             row.position = CGPoint(x: 0, y: y)
             row.name = "region_\(region.id)"
-            panel.addChild(row)
+            panelContent.addChild(row)
             rowRegions[region.id] = region
 
+            let rowContent = SKNode()
+            rowContent.zPosition = 5
+            row.addChild(rowContent)
+            let leftX = -(panelWidth - 28) / 2 + 18
+
             let name = SKLabelNode(text: region.name)
-            name.fontName = "Helvetica-Bold"
+            name.fontName = "AvenirNext-DemiBold"
             name.fontSize = 15
-            name.fontColor = .white
+            name.fontColor = GameUI.ink
             name.horizontalAlignmentMode = .left
-            name.position = CGPoint(x: -panelWidth / 2 + 28, y: 12)
-            name.name = row.name
-            row.addChild(name)
+            name.position = CGPoint(x: leftX, y: 13)
+            rowContent.addChild(name)
 
             let blurb = SKLabelNode(text: region.blurb)
-            blurb.fontName = "Helvetica"
-            blurb.fontSize = 11
-            blurb.fontColor = UIColor(white: 1, alpha: 0.7)
+            blurb.fontName = "AvenirNext-Regular"
+            blurb.fontSize = 10.5
+            blurb.fontColor = GameUI.mutedInk
             blurb.horizontalAlignmentMode = .left
-            blurb.position = CGPoint(x: -panelWidth / 2 + 28, y: -8)
-            blurb.name = row.name
-            row.addChild(blurb)
+            blurb.verticalAlignmentMode = .center
+            blurb.preferredMaxLayoutWidth = panelWidth - 64
+            blurb.numberOfLines = 2
+            blurb.position = CGPoint(x: leftX, y: -8)
+            rowContent.addChild(blurb)
 
             let progress = Int((stats.regionProgress[region.id] ?? 0) * 100)
             let statusText: String
-            if isCurrent { statusText = "• atual" }
-            else if isDestination { statusText = "→ a caminho" }
+            if isCurrent { statusText = "local atual" }
+            else if isDestination { statusText = "em rota" }
             else { statusText = "explorada \(progress)%" }
             let status = SKLabelNode(text: statusText)
-            status.fontName = "Helvetica"
+            status.fontName = "AvenirNext-DemiBold"
             status.fontSize = 11
-            status.fontColor = UIColor(red: 0.6, green: 0.9, blue: 1, alpha: 1)
+            status.fontColor = isDestination ? GameUI.gold : GameUI.accent
             status.horizontalAlignmentMode = .left
-            status.position = CGPoint(x: -panelWidth / 2 + 28, y: -26)
-            status.name = row.name
-            row.addChild(status)
+            status.position = CGPoint(x: leftX, y: -28)
+            rowContent.addChild(status)
         }
 
         if unknownCount > 0 {
-            let hint = SKLabelNode(text: "Há águas desconhecidas além... continue explorando.")
-            hint.fontName = "Helvetica"
-            hint.fontSize = 11
-            hint.fontColor = UIColor(white: 1, alpha: 0.55)
+            let hint = SKLabelNode(text: "Águas desconhecidas seguem além.")
+            hint.fontName = "AvenirNext-Regular"
+            hint.fontSize = 10.5
+            hint.fontColor = GameUI.mutedInk
             hint.position = CGPoint(x: 0, y: -panelHeight / 2 + 64)
-            panel.addChild(hint)
+            panelContent.addChild(hint)
         }
 
-        let close = SKLabelNode(text: "✕ Fechar")
-        close.fontName = "Helvetica"
-        close.fontSize = 15
-        close.fontColor = UIColor(white: 1, alpha: 0.75)
+        let close = GameUI.pill(text: "Fechar registro",
+                                fontSize: 14,
+                                bold: false,
+                                fill: [GameUI.coral.withAlphaComponent(0.95)],
+                                strokeColor: GameUI.coral.withAlphaComponent(0.55),
+                                textColor: GameUI.ink,
+                                hPadding: 20,
+                                height: 32)
         close.name = "region_close"
-        close.position = CGPoint(x: 0, y: -panelHeight / 2 + 28)
-        panel.addChild(close)
+        close.position = CGPoint(x: 0, y: -panelHeight / 2 + 30)
+        panelContent.addChild(close)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }

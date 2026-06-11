@@ -2,13 +2,14 @@
 //  HUDLayer.swift
 //  Ester
 //
-//  Interface do cuidador: painel de status agrupado (fase, profundidade,
-//  pérolas e barras), bolha de mensagens, chip de intenção e botões de
-//  comando com SF Symbols. Respeita as safe areas (Dynamic Island).
+//  Interface do cuidador em linguagem de diário de campo: ficha de
+//  observação, medidores biológicos, notas do ambiente e ações em fichas.
 //
 
+import CoreText
 import Foundation
 import SpriteKit
+import UIKit
 
 final class HUDLayer: SKNode {
     var onCommand: ((PlayerCommand) -> Void)?
@@ -17,16 +18,25 @@ final class HUDLayer: SKNode {
     private let sceneSize: CGSize
     private let insets: UIEdgeInsets
 
+    /// Inset superior efetivo: garante folga mesmo se a safe area vier zerada
+    /// no momento da montagem, mantendo a ficha longe da Dynamic Island.
+    private var topInset: CGFloat { max(insets.top, 44) }
+
     private var phaseLabel: SKLabelNode!
     private var depthLabel: SKLabelNode!
+    private var growthLabel: SKLabelNode!
     private var pearlsLabel: SKLabelNode!
     private var storedFoodLabel: SKLabelNode!
     private var intentLabel: SKLabelNode!
+    private var barLabels: [String: SKLabelNode] = [:]
     private var bars: [String: SKShapeNode] = [:]
     private var buttons: [PlayerCommand: SKNode] = [:]
+    private var buttonStamps: [PlayerCommand: SKNode] = [:]
     private var messageContainer: SKNode!
+    private var messageTitleLabel: SKLabelNode!
     private var messageLabel: SKLabelNode!
     private var lastEggMode = false
+    private var lastObjectiveAvailable: Bool?
     private let enableDebugRigToolButton: Bool
     private var debugRigToolButton: SKNode?
 
@@ -35,6 +45,7 @@ final class HUDLayer: SKNode {
         self.insets = insets
         self.enableDebugRigToolButton = enableDebugRigToolButton
         super.init()
+        HUDTypography.registerBundledFonts()
         isUserInteractionEnabled = true
         buildTopPanel()
         buildMessageBubble()
@@ -45,222 +56,585 @@ final class HUDLayer: SKNode {
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    // MARK: - SF Symbols (com fallback para emoji)
+    // MARK: - Tema
 
-    private static func symbolNode(_ name: String,
-                                   fallback: String,
-                                   pointSize: CGFloat,
-                                   color: UIColor) -> SKNode {
-        let config = UIImage.SymbolConfiguration(pointSize: pointSize, weight: .semibold)
-        if let image = UIImage(systemName: name, withConfiguration: config)?
-            .withTintColor(color, renderingMode: .alwaysOriginal) {
-            let renderer = UIGraphicsImageRenderer(size: image.size)
-            let flattened = renderer.image { _ in image.draw(at: .zero) }
-            let sprite = SKSpriteNode(texture: SKTexture(image: flattened))
-            sprite.size = image.size
-            return sprite
+    private enum HUDPalette {
+        static let paper = UIColor(red: 0.96, green: 0.93, blue: 0.84, alpha: 1)
+        static let palePaper = UIColor(red: 0.92, green: 0.97, blue: 0.95, alpha: 1)
+        static let disabledPaper = UIColor(red: 0.82, green: 0.84, blue: 0.80, alpha: 1)
+        static let ink = UIColor(red: 0.04, green: 0.15, blue: 0.28, alpha: 1)
+        static let mutedInk = UIColor(red: 0.28, green: 0.40, blue: 0.49, alpha: 1)
+        static let line = UIColor(red: 0.20, green: 0.40, blue: 0.52, alpha: 1)
+        static let aqua = UIColor(red: 0.47, green: 0.78, blue: 0.78, alpha: 1)
+        static let teal = UIColor(red: 0.16, green: 0.50, blue: 0.52, alpha: 1)
+        static let algae = UIColor(red: 0.33, green: 0.54, blue: 0.30, alpha: 1)
+        static let coral = UIColor(red: 0.78, green: 0.34, blue: 0.30, alpha: 1)
+        static let gold = UIColor(red: 0.83, green: 0.62, blue: 0.25, alpha: 1)
+        static let blueInk = UIColor(red: 0.02, green: 0.24, blue: 0.43, alpha: 1)
+    }
+
+    private enum HUDTypography {
+        private static var didRegister = false
+
+        static func registerBundledFonts() {
+            guard !didRegister else { return }
+            didRegister = true
+            ["Kalam-Regular", "Kalam-Bold", "Nunito-Regular", "Nunito-Italic"].forEach { name in
+                guard let url = Bundle.main.url(forResource: name, withExtension: "ttf") else { return }
+                CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+            }
         }
-        let label = SKLabelNode(text: fallback)
-        label.fontSize = pointSize
-        label.verticalAlignmentMode = .center
-        label.horizontalAlignmentMode = .center
-        return label
+
+        static var body: String { available("Nunito-Regular", fallback: "AvenirNext-Regular") }
+        static var bodyBold: String { available("Nunito-Bold", fallback: "AvenirNext-DemiBold") }
+        static var note: String { available("Kalam-Regular", fallback: "MarkerFelt-Thin") }
+        static var noteBold: String { available("Kalam-Bold", fallback: "MarkerFelt-Wide") }
+
+        private static func available(_ preferred: String, fallback: String) -> String {
+            if UIFont(name: preferred, size: 12) != nil { return preferred }
+            if UIFont(name: fallback, size: 12) != nil { return fallback }
+            return "Helvetica"
+        }
     }
 
-    private func makeLabel(fontSize: CGFloat, bold: Bool = false) -> SKLabelNode {
-        let label = SKLabelNode(text: "")
-        label.fontName = bold ? "Helvetica-Bold" : "Helvetica"
+    private enum HUDTexture {
+        private static var cache: [String: SKTexture] = [:]
+
+        static func paper(size: CGSize, base: UIColor) -> SKTexture {
+            let w = max(1, Int(ceil(size.width)))
+            let h = max(1, Int(ceil(size.height)))
+            let key = "\(w)x\(h)|\(base.hashValue)"
+            if let cached = cache[key] { return cached }
+
+            let image = UIGraphicsImageRenderer(size: CGSize(width: w, height: h)).image { context in
+                let cg = context.cgContext
+                base.setFill()
+                cg.fill(CGRect(x: 0, y: 0, width: w, height: h))
+
+                cg.setStrokeColor(HUDPalette.aqua.withAlphaComponent(0.08).cgColor)
+                cg.setLineWidth(1)
+                for y in stride(from: CGFloat(14), to: CGFloat(h), by: CGFloat(18)) {
+                    cg.move(to: CGPoint(x: 0, y: y))
+                    cg.addLine(to: CGPoint(x: CGFloat(w), y: y + 0.8))
+                    cg.strokePath()
+                }
+
+                for i in 0..<72 {
+                    let x = CGFloat((i * 47 + 13) % w)
+                    let y = CGFloat((i * 83 + 19) % h)
+                    let radius = CGFloat((i % 3) + 1) * 0.55
+                    let alpha = i.isMultiple(of: 2) ? 0.035 : 0.02
+                    HUDPalette.ink.withAlphaComponent(alpha).setFill()
+                    cg.fillEllipse(in: CGRect(x: x, y: y, width: radius, height: radius))
+                }
+
+                let wash = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(),
+                                      colors: [UIColor.white.withAlphaComponent(0.14).cgColor,
+                                               HUDPalette.aqua.withAlphaComponent(0.06).cgColor,
+                                               UIColor.black.withAlphaComponent(0.03).cgColor] as CFArray,
+                                      locations: [0, 0.55, 1])
+                if let wash {
+                    cg.drawLinearGradient(wash,
+                                          start: CGPoint(x: 0, y: 0),
+                                          end: CGPoint(x: CGFloat(w), y: CGFloat(h)),
+                                          options: [])
+                }
+            }
+
+            let texture = SKTexture(image: image)
+            cache[key] = texture
+            return texture
+        }
+    }
+
+    private enum LabelStyle {
+        case body
+        case bodyBold
+        case note
+        case noteBold
+    }
+
+    private func makeLabel(text: String = "",
+                           fontSize: CGFloat,
+                           style: LabelStyle = .body,
+                           color: UIColor = HUDPalette.ink) -> SKLabelNode {
+        let label = SKLabelNode(text: text)
+        switch style {
+        case .body:
+            label.fontName = HUDTypography.body
+        case .bodyBold:
+            label.fontName = HUDTypography.bodyBold
+        case .note:
+            label.fontName = HUDTypography.note
+        case .noteBold:
+            label.fontName = HUDTypography.noteBold
+        }
         label.fontSize = fontSize
-        label.fontColor = .white
+        label.fontColor = color
+        label.verticalAlignmentMode = .center
         return label
     }
 
-    // MARK: - Painel superior
+    private static func paperCard(size: CGSize,
+                                  cornerRadius: CGFloat = 8,
+                                  fill: UIColor = HUDPalette.paper,
+                                  stroke: UIColor = HUDPalette.line.withAlphaComponent(0.45),
+                                  shadowAlpha: CGFloat = 0.18) -> SKNode {
+        let container = SKNode()
+
+        let shadow = SKShapeNode(rectOf: size, cornerRadius: cornerRadius)
+        shadow.fillColor = UIColor(white: 0, alpha: shadowAlpha)
+        shadow.strokeColor = .clear
+        shadow.position = CGPoint(x: 2, y: -4)
+        shadow.zPosition = -2
+        container.addChild(shadow)
+
+        let base = SKShapeNode(rectOf: size, cornerRadius: cornerRadius)
+        base.fillTexture = HUDTexture.paper(size: size, base: fill)
+        base.fillColor = .white
+        base.strokeColor = stroke
+        base.lineWidth = 1.2
+        base.zPosition = 0
+        container.addChild(base)
+
+        let inner = SKShapeNode(rectOf: CGSize(width: size.width - 8, height: size.height - 8),
+                                cornerRadius: max(2, cornerRadius - 2))
+        inner.fillColor = .clear
+        inner.strokeColor = UIColor.white.withAlphaComponent(0.28)
+        inner.lineWidth = 0.8
+        inner.zPosition = 1
+        container.addChild(inner)
+
+        return container
+    }
+
+    private func makeTag(size: CGSize,
+                         accent: UIColor,
+                         fill: UIColor = HUDPalette.palePaper) -> (node: SKNode, label: SKLabelNode) {
+        let node = HUDLayer.paperCard(size: size,
+                                      cornerRadius: 6,
+                                      fill: fill,
+                                      stroke: accent.withAlphaComponent(0.62),
+                                      shadowAlpha: 0.10)
+
+        let accentLine = SKShapeNode(rectOf: CGSize(width: 3, height: size.height - 8),
+                                     cornerRadius: 1.5)
+        accentLine.fillColor = accent.withAlphaComponent(0.72)
+        accentLine.strokeColor = .clear
+        accentLine.position = CGPoint(x: -size.width / 2 + 7, y: 0)
+        accentLine.zPosition = 3
+        node.addChild(accentLine)
+
+        let label = makeLabel(fontSize: 10, style: .bodyBold, color: HUDPalette.ink)
+        label.horizontalAlignmentMode = .center
+        label.position = CGPoint(x: 3, y: 0)
+        label.zPosition = 4
+        node.addChild(label)
+        return (node, label)
+    }
+
+    private func makeStamp(text: String, color: UIColor) -> SKNode {
+        let node = SKNode()
+        node.zRotation = -0.08
+
+        let bg = SKShapeNode(rectOf: CGSize(width: 62, height: 17), cornerRadius: 3)
+        bg.fillColor = color.withAlphaComponent(0.08)
+        bg.strokeColor = color.withAlphaComponent(0.70)
+        bg.lineWidth = 1.1
+        node.addChild(bg)
+
+        let label = makeLabel(text: text.uppercased(),
+                              fontSize: 8,
+                              style: .bodyBold,
+                              color: color.withAlphaComponent(0.86))
+        label.horizontalAlignmentMode = .center
+        label.zPosition = 2
+        node.addChild(label)
+        return node
+    }
+
+    // MARK: - Ficha superior
+
+    private var topPanelBottomY: CGFloat = 0
 
     private func buildTopPanel() {
         let panelWidth = sceneSize.width - 24
-        let panelHeight: CGFloat = 122
-        let topEdge = sceneSize.height / 2 - insets.top
+        let panelHeight: CGFloat = 156
+        let topEdge = sceneSize.height / 2 - topInset
+        let panelCenterY = topEdge - 28 - panelHeight / 2
 
-        let panel = SKShapeNode(rectOf: CGSize(width: panelWidth, height: panelHeight),
-                                cornerRadius: 18)
-        panel.fillColor = UIColor(red: 0.02, green: 0.07, blue: 0.14, alpha: 0.45)
-        panel.strokeColor = UIColor(white: 1, alpha: 0.18)
-        panel.lineWidth = 1
-        // margem extra para ficar confortavelmente abaixo da Dynamic Island
-        panel.position = CGPoint(x: 0, y: topEdge - 20 - panelHeight / 2)
+        let panel = HUDLayer.paperCard(size: CGSize(width: panelWidth, height: panelHeight),
+                                       cornerRadius: 8,
+                                       fill: HUDPalette.paper,
+                                       stroke: HUDPalette.blueInk.withAlphaComponent(0.50),
+                                       shadowAlpha: 0.20)
+        panel.position = CGPoint(x: -2, y: panelCenterY)
+        panel.zRotation = -0.006
         addChild(panel)
+        topPanelBottomY = panelCenterY - panelHeight / 2
+
+        let panelContent = SKNode()
+        panelContent.zPosition = 5
+        panel.addChild(panelContent)
 
         let halfW = panelWidth / 2
-        let row1Y = panelHeight / 2 - 24
-        let row2Y = panelHeight / 2 - 47
 
-        phaseLabel = makeLabel(fontSize: 15, bold: true)
+        let clip = SKShapeNode(rectOf: CGSize(width: 34, height: 9), cornerRadius: 4)
+        clip.fillColor = UIColor(red: 0.76, green: 0.77, blue: 0.70, alpha: 1)
+        clip.strokeColor = HUDPalette.ink.withAlphaComponent(0.28)
+        clip.lineWidth = 1
+        clip.position = CGPoint(x: -halfW + 42, y: panelHeight / 2 - 5)
+        clip.zPosition = 7
+        panelContent.addChild(clip)
+
+        let title = makeLabel(text: "Registro da Criatura",
+                              fontSize: 16,
+                              style: .noteBold,
+                              color: HUDPalette.ink)
+        title.horizontalAlignmentMode = .left
+        title.position = CGPoint(x: -halfW + 22, y: panelHeight / 2 - 25)
+        panelContent.addChild(title)
+
+        let stamp = makeStamp(text: "CAMPO", color: HUDPalette.teal)
+        stamp.position = CGPoint(x: halfW - 45, y: panelHeight / 2 - 26)
+        stamp.zPosition = 8
+        panelContent.addChild(stamp)
+
+        phaseLabel = makeLabel(fontSize: 14, style: .bodyBold, color: HUDPalette.blueInk)
         phaseLabel.horizontalAlignmentMode = .left
         phaseLabel.verticalAlignmentMode = .center
-        phaseLabel.position = CGPoint(x: -halfW + 14, y: row1Y)
-        panel.addChild(phaseLabel)
+        phaseLabel.position = CGPoint(x: -halfW + 22, y: panelHeight / 2 - 51)
+        panelContent.addChild(phaseLabel)
 
-        let pearlIcon = HUDLayer.symbolNode("sparkles", fallback: "💠", pointSize: 13,
-                                            color: UIColor(red: 0.7, green: 0.88, blue: 1, alpha: 1))
-        pearlIcon.position = CGPoint(x: halfW - 92, y: row1Y)
-        panel.addChild(pearlIcon)
-
-        pearlsLabel = makeLabel(fontSize: 14, bold: true)
-        pearlsLabel.horizontalAlignmentMode = .left
-        pearlsLabel.verticalAlignmentMode = .center
-        pearlsLabel.position = CGPoint(x: halfW - 78, y: row1Y)
-        panel.addChild(pearlsLabel)
-
-        depthLabel = makeLabel(fontSize: 12)
-        depthLabel.fontColor = UIColor(white: 1, alpha: 0.75)
+        depthLabel = makeLabel(fontSize: 11, style: .body, color: HUDPalette.mutedInk)
         depthLabel.horizontalAlignmentMode = .left
         depthLabel.verticalAlignmentMode = .center
-        depthLabel.position = CGPoint(x: -halfW + 14, y: row2Y)
-        panel.addChild(depthLabel)
+        depthLabel.position = CGPoint(x: -halfW + 22, y: panelHeight / 2 - 70)
+        panelContent.addChild(depthLabel)
 
-        storedFoodLabel = makeLabel(fontSize: 12)
-        storedFoodLabel.fontColor = UIColor(white: 1, alpha: 0.7)
-        storedFoodLabel.horizontalAlignmentMode = .right
-        storedFoodLabel.verticalAlignmentMode = .center
-        storedFoodLabel.position = CGPoint(x: halfW - 14, y: row2Y)
-        panel.addChild(storedFoodLabel)
+        growthLabel = makeLabel(fontSize: 10, style: .note, color: HUDPalette.teal)
+        growthLabel.horizontalAlignmentMode = .left
+        growthLabel.verticalAlignmentMode = .center
+        growthLabel.position = CGPoint(x: -halfW + 22, y: panelHeight / 2 - 88)
+        growthLabel.preferredMaxLayoutWidth = max(140, panelWidth - 172)
+        growthLabel.numberOfLines = 1
+        panelContent.addChild(growthLabel)
 
-        // barras em duas colunas
-        let barConfigs: [(key: String, symbol: String, fallback: String, color: UIColor, column: Int, row: Int)] = [
-            ("satiety", "fork.knife", "🍽", UIColor(red: 0.95, green: 0.6, blue: 0.3, alpha: 1), 0, 0),
-            ("energy", "bolt.fill", "⚡️", UIColor(red: 0.95, green: 0.85, blue: 0.3, alpha: 1), 1, 0),
-            ("mood", "face.smiling", "😊", UIColor(red: 0.45, green: 0.85, blue: 0.55, alpha: 1), 0, 1),
-            ("evolution", "star.fill", "⭐️", UIColor(red: 0.6, green: 0.75, blue: 1, alpha: 1), 1, 1)
+        let planktonIcon = HUDLayer.iconNode(kind: .plankton, color: HUDPalette.gold)
+        planktonIcon.position = CGPoint(x: halfW - 126, y: panelHeight / 2 - 52)
+        planktonIcon.zPosition = 8
+        panelContent.addChild(planktonIcon)
+
+        let pearlsTag = makeTag(size: CGSize(width: 104, height: 24), accent: HUDPalette.gold)
+        pearlsTag.node.position = CGPoint(x: halfW - 64, y: panelHeight / 2 - 52)
+        panelContent.addChild(pearlsTag.node)
+        pearlsLabel = pearlsTag.label
+
+        let shelterTag = makeTag(size: CGSize(width: 104, height: 24), accent: HUDPalette.coral)
+        shelterTag.node.position = CGPoint(x: halfW - 64, y: panelHeight / 2 - 82)
+        panelContent.addChild(shelterTag.node)
+        storedFoodLabel = shelterTag.label
+
+        let divider = HUDLayer.pathNode(points: [
+            CGPoint(x: -halfW + 18, y: -22),
+            CGPoint(x: halfW - 18, y: -20)
+        ], color: HUDPalette.line.withAlphaComponent(0.28), width: 1)
+        divider.zPosition = 3
+        panelContent.addChild(divider)
+
+        let barConfigs: [(key: String, label: String, color: UIColor, column: Int, row: Int)] = [
+            ("hunger", "Fome", HUDPalette.coral, 0, 0),
+            ("energy", "Energia", HUDPalette.gold, 1, 0),
+            ("mood", "Ânimo", HUDPalette.algae, 0, 1),
+            ("bond", "Vínculo", HUDPalette.teal, 1, 1)
         ]
-        let barWidth = panelWidth / 2 - 52
-        let barHeight: CGFloat = 9
 
+        let columnWidth = (panelWidth - 54) / 2
         for config in barConfigs {
-            let y = -panelHeight / 2 + 40 - CGFloat(config.row) * 24
-            let iconX: CGFloat = config.column == 0 ? -halfW + 22 : 14
-            let barX: CGFloat = config.column == 0 ? -halfW + 40 : 32
-
-            let icon = HUDLayer.symbolNode(config.symbol, fallback: config.fallback,
-                                           pointSize: 11, color: config.color)
-            icon.position = CGPoint(x: iconX, y: y)
-            panel.addChild(icon)
-
-            let bg = SKShapeNode(rect: CGRect(x: 0, y: -barHeight / 2, width: barWidth, height: barHeight),
-                                 cornerRadius: barHeight / 2)
-            bg.fillColor = UIColor(white: 0, alpha: 0.4)
-            bg.strokeColor = UIColor(white: 1, alpha: 0.22)
-            bg.position = CGPoint(x: barX, y: y)
-            panel.addChild(bg)
-
-            let fill = SKShapeNode(rect: CGRect(x: 0, y: -barHeight / 2 + 1.5, width: barWidth - 3, height: barHeight - 3),
-                                   cornerRadius: (barHeight - 3) / 2)
-            fill.fillColor = config.color
-            fill.strokeColor = .clear
-            fill.position = CGPoint(x: 1.5, y: 0)
-            bg.addChild(fill)
-            bars[config.key] = fill
+            let x = config.column == 0 ? -halfW + 22 : -halfW + 22 + columnWidth + 12
+            let y = -panelHeight / 2 + 38 - CGFloat(config.row) * 24
+            addBiologyMeter(key: config.key,
+                            title: config.label,
+                            color: config.color,
+                            width: columnWidth,
+                            at: CGPoint(x: x, y: y),
+                            parent: panelContent)
         }
+    }
+
+    private func addBiologyMeter(key: String,
+                                 title: String,
+                                 color: UIColor,
+                                 width: CGFloat,
+                                 at position: CGPoint,
+                                 parent: SKNode) {
+        let label = makeLabel(text: title, fontSize: 9, style: .bodyBold, color: HUDPalette.ink)
+        label.horizontalAlignmentMode = .left
+        label.position = position
+        label.zPosition = 4
+        parent.addChild(label)
+        barLabels[key] = label
+
+        let meterWidth = width - 66
+        let meter = SKNode()
+        meter.position = CGPoint(x: position.x + 61, y: position.y)
+        meter.zPosition = 4
+        parent.addChild(meter)
+
+        let bg = SKShapeNode(rect: CGRect(x: 0, y: -4, width: meterWidth, height: 8),
+                             cornerRadius: 4)
+        bg.fillColor = UIColor.white.withAlphaComponent(0.38)
+        bg.strokeColor = HUDPalette.line.withAlphaComponent(0.35)
+        bg.lineWidth = 0.8
+        meter.addChild(bg)
+
+        for tick in 1...4 {
+            let x = CGFloat(tick) * meterWidth / 5
+            let mark = HUDLayer.pathNode(points: [CGPoint(x: x, y: -6), CGPoint(x: x, y: 6)],
+                                         color: HUDPalette.line.withAlphaComponent(0.22),
+                                         width: 0.8)
+            mark.zPosition = 2
+            meter.addChild(mark)
+        }
+
+        let fill = SKShapeNode(rect: CGRect(x: 0, y: -3, width: meterWidth, height: 6),
+                               cornerRadius: 3)
+        fill.fillColor = color.withAlphaComponent(0.72)
+        fill.strokeColor = .clear
+        fill.zPosition = 1
+        meter.addChild(fill)
+        bars[key] = fill
     }
 
     // MARK: - Mensagens
 
     private func buildMessageBubble() {
-        let topEdge = sceneSize.height / 2 - insets.top
         messageContainer = SKNode()
-        messageContainer.position = CGPoint(x: 0, y: topEdge - 20 - 122 - 36)
+        messageContainer.position = CGPoint(x: -10, y: topPanelBottomY - 44)
         messageContainer.alpha = 0
-        messageContainer.zPosition = 5
+        messageContainer.zPosition = 6
+        messageContainer.zRotation = -0.018
         addChild(messageContainer)
 
-        let bubble = SKShapeNode(rectOf: CGSize(width: sceneSize.width - 56, height: 48), cornerRadius: 14)
-        bubble.fillColor = UIColor(red: 0.02, green: 0.07, blue: 0.14, alpha: 0.62)
-        bubble.strokeColor = UIColor(white: 1, alpha: 0.32)
+        let bubbleSize = CGSize(width: sceneSize.width - 62, height: 64)
+        let bubble = HUDLayer.paperCard(size: bubbleSize,
+                                        cornerRadius: 8,
+                                        fill: HUDPalette.palePaper,
+                                        stroke: HUDPalette.teal.withAlphaComponent(0.58),
+                                        shadowAlpha: 0.16)
         messageContainer.addChild(bubble)
 
-        messageLabel = makeLabel(fontSize: 13)
+        let halfW = bubbleSize.width / 2
+        let wave = HUDLayer.iconNode(kind: .wave, color: HUDPalette.teal)
+        wave.position = CGPoint(x: -halfW + 25, y: -2)
+        wave.zPosition = 5
+        messageContainer.addChild(wave)
+
+        messageTitleLabel = makeLabel(fontSize: 10, style: .bodyBold, color: HUDPalette.teal)
+        messageTitleLabel.horizontalAlignmentMode = .left
+        messageTitleLabel.position = CGPoint(x: -halfW + 48, y: 14)
+        messageTitleLabel.zPosition = 5
+        messageContainer.addChild(messageTitleLabel)
+
+        messageLabel = makeLabel(fontSize: 12, style: .body, color: HUDPalette.ink)
+        messageLabel.horizontalAlignmentMode = .left
         messageLabel.verticalAlignmentMode = .center
-        messageLabel.preferredMaxLayoutWidth = sceneSize.width - 88
+        messageLabel.position = CGPoint(x: -halfW + 48, y: -10)
+        messageLabel.preferredMaxLayoutWidth = bubbleSize.width - 68
         messageLabel.numberOfLines = 2
+        messageLabel.zPosition = 5
         messageContainer.addChild(messageLabel)
     }
 
     func showMessage(_ text: String, duration: TimeInterval = 0) {
-        let holdTime = duration > 0 ? duration : max(3.0, Double(text.count) * 0.07)
-        messageLabel.text = text
+        let note = fieldNote(from: text)
+        let holdTime = duration > 0 ? duration : max(3.0, Double(note.body.count) * 0.07)
+        messageTitleLabel.text = note.title
+        messageLabel.text = note.body
         messageContainer.removeAllActions()
+        messageContainer.alpha = 0
+        messageContainer.setScale(0.96)
         messageContainer.run(.sequence([
-            .fadeIn(withDuration: 0.2),
+            .group([
+                .fadeIn(withDuration: 0.18),
+                .scale(to: 1.0, duration: 0.18)
+            ]),
             .wait(forDuration: holdTime),
-            .fadeOut(withDuration: 0.5)
+            .fadeOut(withDuration: 0.45)
         ]))
     }
 
-    // MARK: - Chip de intenção
+    private func fieldNote(from rawText: String) -> (title: String, body: String) {
+        let lower = rawText.lowercased()
+        var title = "Observação rápida"
+        var body = rawText
+
+        if lower.contains("correnteza") {
+            title = "Registro do ambiente"
+            body = "Correnteza registrada na região."
+        } else if lower.contains("objetivo disponivel") || lower.contains("objetivo disponível") {
+            title = "Nova observação"
+            body = cleanFieldText(rawText)
+                .replacingOccurrences(of: "(Objetivo disponivel)", with: "Objetivo disponível.")
+                .replacingOccurrences(of: "(Objetivo disponível)", with: "Objetivo disponível.")
+        } else if lower.contains("refugio") || lower.contains("refúgio") {
+            title = "Registro do refúgio"
+            body = cleanFieldText(rawText)
+        } else if lower.contains("desafio") || lower.contains("trama") {
+            title = "Desafio registrado"
+            body = cleanFieldText(rawText)
+        } else if lower.contains("camada") || lower.contains("profund") {
+            title = "Camada observada"
+            body = cleanFieldText(rawText)
+        } else if lower.contains("fome") || lower.contains("faminta") || lower.contains("comer") {
+            title = "Sinais biológicos"
+            body = cleanFieldText(rawText)
+        } else {
+            body = cleanFieldText(rawText)
+        }
+
+        return (title, body)
+    }
+
+    private func cleanFieldText(_ text: String) -> String {
+        var result = text
+        let removals = [
+            "🌊", "🥚", "🌀", "✨", "💠", "👀", "😨", "💪", "💎", "🏆",
+            "⛵️", "📦", "🐚", "😴", "🍽", "😋", "🧜‍♀️", "⚡️", "😊", "⭐️"
+        ]
+        removals.forEach { result = result.replacingOccurrences(of: $0, with: "") }
+        result = result.replacingOccurrences(of: "!", with: ".")
+        result = result.replacingOccurrences(of: "...", with: ".")
+        while result.contains("  ") {
+            result = result.replacingOccurrences(of: "  ", with: " ")
+        }
+        result = result.trimmingCharacters(in: .whitespacesAndNewlines)
+        return result.isEmpty ? "Nova observação registrada." : result
+    }
+
+    // MARK: - Etiqueta de comportamento
 
     private var intentChip: SKShapeNode!
 
     private func buildIntentChip() {
         let chipY = buttonRowY(0) + 50
-        intentChip = SKShapeNode(rectOf: CGSize(width: 250, height: 26), cornerRadius: 13)
-        intentChip.fillColor = UIColor(red: 0.02, green: 0.07, blue: 0.14, alpha: 0.4)
-        intentChip.strokeColor = UIColor(white: 1, alpha: 0.18)
-        intentChip.position = CGPoint(x: 0, y: chipY)
+        let chipSize = CGSize(width: min(286, sceneSize.width - 68), height: 30)
+        intentChip = SKShapeNode(rectOf: chipSize, cornerRadius: 8)
+        intentChip.fillTexture = HUDTexture.paper(size: chipSize, base: HUDPalette.palePaper)
+        intentChip.fillColor = .white
+        intentChip.strokeColor = HUDPalette.teal.withAlphaComponent(0.48)
+        intentChip.lineWidth = 1
+        intentChip.position = CGPoint(x: 7, y: chipY)
+        intentChip.zRotation = 0.012
         addChild(intentChip)
 
-        intentLabel = makeLabel(fontSize: 12)
-        intentLabel.fontColor = UIColor(white: 1, alpha: 0.9)
+        let pencil = HUDLayer.pathNode(points: [
+            CGPoint(x: -chipSize.width / 2 + 16, y: -4),
+            CGPoint(x: -chipSize.width / 2 + 28, y: 5)
+        ], color: HUDPalette.gold, width: 2.0)
+        pencil.zPosition = 2
+        intentChip.addChild(pencil)
+
+        intentLabel = makeLabel(fontSize: 12, style: .note, color: HUDPalette.ink)
+        intentLabel.horizontalAlignmentMode = .center
         intentLabel.verticalAlignmentMode = .center
+        intentLabel.zPosition = 2
         intentChip.addChild(intentLabel)
     }
 
-    // MARK: - Botões de comando
+    // MARK: - Botoes de comando
 
     private func buttonRowY(_ row: Int) -> CGFloat {
-        -sceneSize.height / 2 + insets.bottom + 134 - CGFloat(row) * 62
+        -sceneSize.height / 2 + insets.bottom + 190 - CGFloat(row) * 60
     }
 
     private func buildButtons() {
         let commands: [[PlayerCommand]] = [
-            [.explore, .seekFood, .tideWeave, .rest],
-            [.goUp, .goDown, .travel, .refuge]
+            [.explore, .seekFood, .rest],
+            [.challenge, .objective, .refuge],
+            [.goUp, .goDown, .travel]
         ]
-        let buttonWidth = (sceneSize.width - 60) / 4
-        let buttonHeight: CGFloat = 54
+        let buttonWidth = (sceneSize.width - 52) / 3
 
         for (rowIndex, row) in commands.enumerated() {
             let y = buttonRowY(rowIndex)
+            let primary = rowIndex == 0
+            let buttonHeight: CGFloat = primary ? 58 : 50
             for (columnIndex, command) in row.enumerated() {
                 let x = -sceneSize.width / 2 + 18 + buttonWidth / 2 + CGFloat(columnIndex) * (buttonWidth + 8)
                 let button = SKNode()
                 button.name = "cmd_\(command.rawValue)"
                 button.position = CGPoint(x: x, y: y)
+                button.zRotation = buttonTilt(row: rowIndex, column: columnIndex)
 
-                let bg = SKShapeNode(rectOf: CGSize(width: buttonWidth, height: buttonHeight),
-                                     cornerRadius: 14)
-                bg.fillColor = UIColor(red: 0.02, green: 0.07, blue: 0.14, alpha: 0.5)
-                bg.strokeColor = command.tint.withAlphaComponent(0.55)
-                bg.lineWidth = 1.5
-                bg.name = button.name
-                button.addChild(bg)
+                let card = makeActionCard(size: CGSize(width: buttonWidth, height: buttonHeight),
+                                          accent: command.tint,
+                                          primary: primary)
+                button.addChild(card)
 
-                let icon = HUDLayer.symbolNode(command.symbolName, fallback: command.icon,
-                                               pointSize: 17, color: command.tint)
-                icon.position = CGPoint(x: 0, y: 8)
-                icon.name = button.name
+                let icon = HUDLayer.iconNode(for: command, color: command.tint)
+                icon.position = CGPoint(x: 0, y: primary ? 11 : 8)
+                icon.zPosition = 5
                 button.addChild(icon)
 
-                let text = makeLabel(fontSize: 10)
-                text.text = command.label
-                text.fontColor = UIColor(white: 1, alpha: 0.92)
-                text.position = CGPoint(x: 0, y: -19)
-                text.name = button.name
+                let text = makeLabel(text: command.label,
+                                     fontSize: primary ? 11 : 9.5,
+                                     style: .bodyBold,
+                                     color: HUDPalette.ink)
+                text.horizontalAlignmentMode = .center
+                text.position = CGPoint(x: 0, y: primary ? -20 : -17)
+                text.preferredMaxLayoutWidth = buttonWidth - 10
+                text.numberOfLines = 1
+                text.zPosition = 5
                 button.addChild(text)
+
+                if command == .objective {
+                    let stamp = makeStamp(text: "Sem reg.", color: HUDPalette.mutedInk)
+                    stamp.position = CGPoint(x: buttonWidth / 2 - 34, y: buttonHeight / 2 - 13)
+                    stamp.zPosition = 7
+                    stamp.isHidden = true
+                    button.addChild(stamp)
+                    buttonStamps[command] = stamp
+                }
 
                 addChild(button)
                 buttons[command] = button
             }
         }
+    }
+
+    private func buttonTilt(row: Int, column: Int) -> CGFloat {
+        let tilts: [[CGFloat]] = [
+            [-0.012, 0.006, -0.004],
+            [0.008, -0.010, 0.012],
+            [-0.006, 0.010, -0.008]
+        ]
+        return tilts[row][column]
+    }
+
+    private func makeActionCard(size: CGSize, accent: UIColor, primary: Bool) -> SKNode {
+        let node = HUDLayer.paperCard(size: size,
+                                      cornerRadius: 8,
+                                      fill: primary ? HUDPalette.paper : HUDPalette.palePaper,
+                                      stroke: HUDPalette.blueInk.withAlphaComponent(primary ? 0.42 : 0.34),
+                                      shadowAlpha: primary ? 0.18 : 0.13)
+
+        let tab = SKShapeNode(rectOf: CGSize(width: size.width - 14, height: primary ? 4 : 3),
+                              cornerRadius: 2)
+        tab.fillColor = accent.withAlphaComponent(primary ? 0.70 : 0.55)
+        tab.strokeColor = .clear
+        tab.position = CGPoint(x: 0, y: size.height / 2 - 8)
+        tab.zPosition = 3
+        node.addChild(tab)
+
+        let stitch = HUDLayer.pathNode(points: [
+            CGPoint(x: -size.width / 2 + 10, y: -size.height / 2 + 9),
+            CGPoint(x: size.width / 2 - 10, y: -size.height / 2 + 8)
+        ], color: HUDPalette.line.withAlphaComponent(0.20), width: 1)
+        stitch.zPosition = 3
+        node.addChild(stitch)
+
+        return node
     }
 
     private func buildDebugRigToolButton() {
@@ -273,24 +647,20 @@ final class HUDLayer: SKNode {
         )
 
         let background = SKShapeNode(circleOfRadius: 30)
-        background.fillColor = UIColor(red: 0.08, green: 0.16, blue: 0.26, alpha: 0.78)
-        background.strokeColor = UIColor(red: 0.9, green: 0.95, blue: 1, alpha: 0.8)
-        background.lineWidth = 1.8
+        background.fillTexture = HUDTexture.paper(size: CGSize(width: 60, height: 60), base: HUDPalette.paper)
+        background.fillColor = .white
+        background.strokeColor = HUDPalette.blueInk.withAlphaComponent(0.62)
+        background.lineWidth = 1.4
         background.name = button.name
         button.addChild(background)
 
-        let icon = HUDLayer.symbolNode("arrow.clockwise.circle.fill",
-                                      fallback: "↻",
-                                      pointSize: 20,
-                                      color: UIColor(red: 0.95, green: 0.95, blue: 1, alpha: 0.95))
-        icon.position = CGPoint(x: 0, y: 1)
+        let icon = makeLabel(text: "↻", fontSize: 22, style: .bodyBold, color: HUDPalette.blueInk)
+        icon.position = CGPoint(x: 0, y: 2)
         icon.name = button.name
         button.addChild(icon)
 
-        let text = makeLabel(fontSize: 10)
-        text.text = "rig"
+        let text = makeLabel(text: "rig", fontSize: 10, style: .bodyBold, color: HUDPalette.ink)
         text.position = CGPoint(x: 0, y: -34)
-        text.fontColor = UIColor(white: 1, alpha: 0.9)
         text.name = button.name
         button.addChild(text)
 
@@ -298,49 +668,68 @@ final class HUDLayer: SKNode {
         debugRigToolButton = button
     }
 
-    // MARK: - Atualização
+    // MARK: - Atualizacao
 
     func refresh(stats: MermaidStats,
                  intent: MermaidIntent,
                  zone: DepthZone,
                  regionName: String?,
                  evolutionProgress: CGFloat,
-                 shelterCapacity: Int) {
+                 evolutionNote: String,
+                 shelterCapacity: Int,
+                 objectiveAvailable: Bool) {
         let eggMode = stats.phase == .egg
 
         if eggMode {
-            phaseLabel.text = "Ovo · \(Int(evolutionProgress * 100))% chocado"
-            intentLabel.text = "reunindo energia de nascimento..."
+            phaseLabel.text = "Ovo misterioso · \(Int(evolutionProgress * 100))% chocado"
+            growthLabel.text = evolutionNote
+            intentLabel.text = "Registro: incubação em andamento"
+            barLabels["bond"]?.text = "Nascimento"
         } else {
-            phaseLabel.text = "\(stats.phase.displayName) · \(stats.ageText)"
-            intentLabel.text = "• \(intent.displayName)"
+            phaseLabel.text = "Sereia \(stats.phase.displayName.lowercased()) · \(stats.ageText) observada"
+            growthLabel.text = evolutionNote
+            intentLabel.text = "Comportamento: \(intent.displayName)"
+            barLabels["bond"]?.text = "Vínculo"
         }
-        if let regionName {
-            depthLabel.text = "\(regionName) · \(zone.displayName)"
-        } else {
-            depthLabel.text = zone.displayName
-        }
-        pearlsLabel.text = "\(stats.pearls)"
-        storedFoodLabel.text = stats.storedFood > 0 ? "abrigo: \(stats.storedFood)/\(shelterCapacity)" : ""
 
-        setBar("satiety", value: (100 - stats.hunger) / 100)
+        let zoneText = zone.displayName.lowercased()
+        if let regionName {
+            depthLabel.text = "\(regionName) · \(zoneText)"
+        } else {
+            depthLabel.text = "Camada atual: \(zoneText)"
+        }
+        pearlsLabel.text = "Brilhos \(stats.pearls)"
+        storedFoodLabel.text = "Abrigo \(stats.storedFood)/\(shelterCapacity)"
+
+        setBar("hunger", value: stats.hunger / 100)
         setBar("energy", value: stats.energy / 100)
         setBar("mood", value: stats.mood / 100)
-        setBar("evolution", value: evolutionProgress)
+        setBar("bond", value: eggMode ? evolutionProgress : stats.trust / 100)
 
-        // saciedade fica vermelha quando a fome aperta
-        if let satiety = bars["satiety"] {
-            satiety.fillColor = stats.hunger > 75
-                ? UIColor(red: 0.9, green: 0.25, blue: 0.25, alpha: 1)
-                : UIColor(red: 0.95, green: 0.6, blue: 0.3, alpha: 1)
+        if let hunger = bars["hunger"] {
+            hunger.fillColor = stats.hunger > 75
+                ? HUDPalette.coral.withAlphaComponent(0.86)
+                : HUDPalette.gold.withAlphaComponent(0.58)
         }
 
-        // durante o ovo, só a Trama fica ativa
-        if eggMode != lastEggMode {
+        if eggMode != lastEggMode || objectiveAvailable != lastObjectiveAvailable {
             lastEggMode = eggMode
+            lastObjectiveAvailable = objectiveAvailable
             for (command, button) in buttons {
-                let active = !eggMode || command == .tideWeave
-                button.alpha = active ? 1 : 0.32
+                var active = !eggMode || command == .challenge
+                if command == .objective {
+                    active = active && objectiveAvailable
+                    buttonStamps[command]?.isHidden = active
+                }
+                button.alpha = active ? 1 : (command == .objective ? 0.82 : 0.42)
+            }
+
+            if objectiveAvailable, !eggMode, let button = buttons[.objective] {
+                button.removeAllActions()
+                button.run(.sequence([
+                    .scale(to: 1.08, duration: 0.18),
+                    .scale(to: 1.0, duration: 0.22)
+                ]))
             }
         }
     }
@@ -354,18 +743,22 @@ final class HUDLayer: SKNode {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
-        for node in nodes(at: location) {
-            if let name = node.name, name.hasPrefix("cmd_"),
-               let command = PlayerCommand(rawValue: String(name.dropFirst(4))) {
-                flashButton(command)
-                onCommand?(command)
-                return
+        var node: SKNode? = atPoint(location)
+        while let current = node {
+            if let name = current.name {
+                if name.hasPrefix("cmd_"),
+                   let command = PlayerCommand(rawValue: String(name.dropFirst(4))) {
+                    flashButton(command)
+                    onCommand?(command)
+                    return
+                }
+                if name == "cmd_debug_rig_tool" {
+                    flashNode(debugRigToolButton)
+                    onDebugRigToolTap?()
+                    return
+                }
             }
-            if node.name == "cmd_debug_rig_tool" {
-                flashNode(debugRigToolButton)
-                onDebugRigToolTap?()
-                return
-            }
+            node = current.parent
         }
     }
 
@@ -381,5 +774,181 @@ final class HUDLayer: SKNode {
             .scale(to: 0.9, duration: 0.08),
             .scale(to: 1.0, duration: 0.12)
         ]))
+    }
+
+    // MARK: - Icones desenhados
+
+    private enum IconKind {
+        case plankton
+        case wave
+    }
+
+    private static func iconNode(kind: IconKind, color: UIColor) -> SKNode {
+        let node = SKNode()
+        switch kind {
+        case .plankton:
+            let star = UIBezierPath()
+            for i in 0..<8 {
+                let angle = CGFloat(i) * CGFloat.pi / 4
+                let radius: CGFloat = i.isMultiple(of: 2) ? 7 : 3
+                let p = CGPoint(x: cos(angle) * radius, y: sin(angle) * radius)
+                i == 0 ? star.move(to: p) : star.addLine(to: p)
+            }
+            star.close()
+            let shape = pathNode(path: star, color: color, width: 1.5)
+            node.addChild(shape)
+            addDot(to: node, at: CGPoint(x: 10, y: 4), radius: 1.4, color: color)
+            addDot(to: node, at: CGPoint(x: -9, y: -5), radius: 1.1, color: color)
+        case .wave:
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: -11, y: -2))
+            path.addCurve(to: CGPoint(x: -2, y: -2),
+                          controlPoint1: CGPoint(x: -8, y: 5),
+                          controlPoint2: CGPoint(x: -5, y: 5))
+            path.addCurve(to: CGPoint(x: 9, y: -2),
+                          controlPoint1: CGPoint(x: 2, y: -8),
+                          controlPoint2: CGPoint(x: 5, y: -8))
+            node.addChild(pathNode(path: path, color: color, width: 2.1))
+            addDot(to: node, at: CGPoint(x: 10, y: 6), radius: 1.2, color: color)
+            addDot(to: node, at: CGPoint(x: -8, y: 7), radius: 1.0, color: color)
+        }
+        return node
+    }
+
+    private static func iconNode(for command: PlayerCommand, color: UIColor) -> SKNode {
+        let node = SKNode()
+        switch command {
+        case .explore:
+            let circle = SKShapeNode(circleOfRadius: 10)
+            circle.fillColor = .clear
+            circle.strokeColor = color
+            circle.lineWidth = 1.8
+            node.addChild(circle)
+            node.addChild(pathNode(points: [CGPoint(x: -3, y: -5), CGPoint(x: 4, y: 7), CGPoint(x: 1, y: -2)],
+                                  color: color,
+                                  width: 1.8))
+        case .seekFood:
+            node.addChild(pathNode(points: [CGPoint(x: 0, y: -10), CGPoint(x: 0, y: 10)],
+                                  color: color,
+                                  width: 1.8))
+            node.addChild(pathNode(points: [CGPoint(x: 0, y: -2), CGPoint(x: -8, y: 4), CGPoint(x: -3, y: 7)],
+                                  color: color,
+                                  width: 1.7))
+            node.addChild(pathNode(points: [CGPoint(x: 0, y: 2), CGPoint(x: 8, y: 6), CGPoint(x: 4, y: 9)],
+                                  color: color,
+                                  width: 1.7))
+        case .rest:
+            let moon = UIBezierPath()
+            moon.move(to: CGPoint(x: 5, y: 9))
+            moon.addCurve(to: CGPoint(x: 3, y: -9),
+                          controlPoint1: CGPoint(x: -5, y: 6),
+                          controlPoint2: CGPoint(x: -6, y: -5))
+            moon.addCurve(to: CGPoint(x: 9, y: 5),
+                          controlPoint1: CGPoint(x: -1, y: -4),
+                          controlPoint2: CGPoint(x: 2, y: 4))
+            node.addChild(pathNode(path: moon, color: color, width: 1.9))
+            addDot(to: node, at: CGPoint(x: -8, y: -5), radius: 1.4, color: color)
+            addDot(to: node, at: CGPoint(x: -10, y: 5), radius: 1.1, color: color)
+        case .challenge:
+            let star = UIBezierPath()
+            for i in 0..<10 {
+                let angle = -CGFloat.pi / 2 + CGFloat(i) * CGFloat.pi / 5
+                let radius: CGFloat = i.isMultiple(of: 2) ? 10 : 5
+                let p = CGPoint(x: cos(angle) * radius, y: sin(angle) * radius)
+                i == 0 ? star.move(to: p) : star.addLine(to: p)
+            }
+            star.close()
+            node.addChild(pathNode(path: star, color: color, width: 1.7))
+        case .objective:
+            let box = SKShapeNode(rectOf: CGSize(width: 17, height: 19), cornerRadius: 3)
+            box.fillColor = .clear
+            box.strokeColor = color
+            box.lineWidth = 1.6
+            node.addChild(box)
+            node.addChild(pathNode(points: [CGPoint(x: -5, y: 3), CGPoint(x: -2, y: 0), CGPoint(x: 5, y: 6)],
+                                  color: color,
+                                  width: 1.7))
+            node.addChild(pathNode(points: [CGPoint(x: -5, y: -5), CGPoint(x: 6, y: -5)],
+                                  color: color,
+                                  width: 1.4))
+        case .refuge:
+            let shell = UIBezierPath()
+            shell.move(to: CGPoint(x: -9, y: -7))
+            shell.addCurve(to: CGPoint(x: 9, y: -7),
+                           controlPoint1: CGPoint(x: -7, y: 9),
+                           controlPoint2: CGPoint(x: 7, y: 9))
+            shell.addCurve(to: CGPoint(x: -9, y: -7),
+                           controlPoint1: CGPoint(x: 5, y: -10),
+                           controlPoint2: CGPoint(x: -5, y: -10))
+            node.addChild(pathNode(path: shell, color: color, width: 1.8))
+            for x in [CGFloat(-5), 0, 5] {
+                node.addChild(pathNode(points: [CGPoint(x: 0, y: -7), CGPoint(x: x, y: 7)],
+                                      color: color.withAlphaComponent(0.78),
+                                      width: 1.1))
+            }
+        case .goUp:
+            node.addChild(pathNode(points: [CGPoint(x: 0, y: -9), CGPoint(x: 0, y: 9)],
+                                  color: color,
+                                  width: 1.9))
+            node.addChild(pathNode(points: [CGPoint(x: -6, y: 3), CGPoint(x: 0, y: 9), CGPoint(x: 6, y: 3)],
+                                  color: color,
+                                  width: 1.9))
+            addDot(to: node, at: CGPoint(x: -8, y: -4), radius: 1.2, color: color)
+            addDot(to: node, at: CGPoint(x: 8, y: 1), radius: 1.0, color: color)
+        case .goDown:
+            node.addChild(pathNode(points: [CGPoint(x: 0, y: 9), CGPoint(x: 0, y: -9)],
+                                  color: color,
+                                  width: 1.9))
+            node.addChild(pathNode(points: [CGPoint(x: -6, y: -3), CGPoint(x: 0, y: -9), CGPoint(x: 6, y: -3)],
+                                  color: color,
+                                  width: 1.9))
+            addDot(to: node, at: CGPoint(x: -8, y: 4), radius: 1.2, color: color)
+            addDot(to: node, at: CGPoint(x: 8, y: -1), radius: 1.0, color: color)
+        case .travel:
+            let map = UIBezierPath()
+            map.move(to: CGPoint(x: -10, y: -8))
+            map.addLine(to: CGPoint(x: -3, y: -5))
+            map.addLine(to: CGPoint(x: 4, y: -8))
+            map.addLine(to: CGPoint(x: 10, y: -5))
+            map.addLine(to: CGPoint(x: 10, y: 8))
+            map.addLine(to: CGPoint(x: 4, y: 5))
+            map.addLine(to: CGPoint(x: -3, y: 8))
+            map.addLine(to: CGPoint(x: -10, y: 5))
+            map.close()
+            node.addChild(pathNode(path: map, color: color, width: 1.6))
+            node.addChild(pathNode(points: [CGPoint(x: -3, y: -5), CGPoint(x: -3, y: 8)],
+                                  color: color.withAlphaComponent(0.70),
+                                  width: 1.1))
+            node.addChild(pathNode(points: [CGPoint(x: 4, y: -8), CGPoint(x: 4, y: 5)],
+                                  color: color.withAlphaComponent(0.70),
+                                  width: 1.1))
+        }
+        return node
+    }
+
+    private static func pathNode(points: [CGPoint], color: UIColor, width: CGFloat) -> SKShapeNode {
+        let path = UIBezierPath()
+        guard let first = points.first else { return SKShapeNode() }
+        path.move(to: first)
+        points.dropFirst().forEach { path.addLine(to: $0) }
+        return pathNode(path: path, color: color, width: width)
+    }
+
+    private static func pathNode(path: UIBezierPath, color: UIColor, width: CGFloat) -> SKShapeNode {
+        let shape = SKShapeNode(path: path.cgPath)
+        shape.fillColor = .clear
+        shape.strokeColor = color
+        shape.lineWidth = width
+        shape.lineCap = .round
+        shape.lineJoin = .round
+        return shape
+    }
+
+    private static func addDot(to node: SKNode, at point: CGPoint, radius: CGFloat, color: UIColor) {
+        let dot = SKShapeNode(circleOfRadius: radius)
+        dot.fillColor = color.withAlphaComponent(0.82)
+        dot.strokeColor = .clear
+        dot.position = point
+        node.addChild(dot)
     }
 }
