@@ -578,7 +578,8 @@ class GameScene: SKScene {
         ctx.regions.update(dt: dt)
         ctx.travel.update(dt: dt)
 
-        // o desafio de subida precisa de loop próprio
+        // desafios modais com tempo/física próprios
+        plotOverlay?.update(dt: dt)
         climbOverlay?.update(dt: dt)
 
         // no Refúgio o tempo é gentil: descanso acelerado
@@ -783,9 +784,6 @@ class GameScene: SKScene {
         stats.energy = max(0, stats.energy - 8)
         ctx.autonomy.paused = true
 
-        // bem-estar alto melhora as recompensas (0.7x – 1.1x)
-        let multiplier = 0.7 + stats.wellbeing / 250
-
         switch kind {
         case .plot:
             let session: TideSessionType
@@ -802,7 +800,6 @@ class GameScene: SKScene {
                                              zone: zone,
                                              region: ctx.regions.currentRegion,
                                              session: session,
-                                             rewardMultiplier: multiplier,
                                              giverDisplay: giverDisplay) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
             }
@@ -816,7 +813,6 @@ class GameScene: SKScene {
                                              phase: stats.phase,
                                              palette: ctx.depth.mermaidPalette(atY: ctx.mermaidPosition.y),
                                              special: special,
-                                             rewardMultiplier: multiplier,
                                              giverDisplay: giverDisplay) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
             }
@@ -833,7 +829,8 @@ class GameScene: SKScene {
         climbOverlay?.removeFromParent()
         climbOverlay = nil
 
-        let gainedPearls = stats.awardPearls(result.pearls)
+        let gainedPearls = max(0, result.pearls)
+        stats.pearls += gainedPearls
         stats.gainXP(result.xp)
 
         // Durante o ovo, o desafio reúne energia de nascimento

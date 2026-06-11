@@ -79,15 +79,17 @@ final class TideWeavingOverlay: SKNode {
     private let gridSize = 7
     private let theme: TideTheme
     private let kindCount: Int
-    private let target: Int
+    private let challengeGoal: Int
+    private let challengeBonus: Int
     private let session: TideSessionType
-    private let rewardMultiplier: CGFloat
     private let onFinish: (ChallengeResult) -> Void
 
     private var board: [[Int]] = []
     private var pieces: [[SKNode?]] = []
     private var score = 0
-    private var movesLeft: Int
+    private let actionTimeLimit: CGFloat = 40
+    private var actionTimeLeft: CGFloat = 40
+    private var challengeCompleted = false
     private var busy = false
     private var finished = false
     private var selected: GridPos?
@@ -96,7 +98,7 @@ final class TideWeavingOverlay: SKNode {
     private let cellSize: CGFloat
     private let gridOrigin: CGPoint
     private var scoreLabel: SKLabelNode!
-    private var movesLabel: SKLabelNode!
+    private var timerLabel: SKLabelNode!
     private let selectionRing = SKShapeNode(circleOfRadius: 10)
     private let boardNode = SKNode()
 
@@ -104,25 +106,23 @@ final class TideWeavingOverlay: SKNode {
          zone: DepthZone,
          region: Region?,
          session: TideSessionType,
-         rewardMultiplier: CGFloat,
          giverDisplay: SKNode?,
          onFinish: @escaping (ChallengeResult) -> Void) {
         self.theme = TideTheme.theme(for: zone, region: region, session: session)
         self.kindCount = theme.icons.count
         self.session = session
-        self.rewardMultiplier = rewardMultiplier
-        var goal = 400 + zone.rawValue * 100
-        if session == .event { goal += 200 }
-        if session == .hatching { goal = 350 }
-        self.target = goal
-        switch session {
-        case .hatching:
-            self.movesLeft = 9
-        case .event:
-            self.movesLeft = 13
-        case .basic, .region:
-            self.movesLeft = 12
+        var goal = 18 + zone.rawValue * 4
+        var bonus = 400 + zone.rawValue * 100
+        if session == .event {
+            goal += 10
+            bonus += 200
         }
+        if session == .hatching {
+            goal = 35
+            bonus = 0
+        }
+        self.challengeGoal = goal
+        self.challengeBonus = bonus
         self.onFinish = onFinish
 
         let boardWidth = min(size.width - 36, 380)
@@ -136,6 +136,15 @@ final class TideWeavingOverlay: SKNode {
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    func update(dt: CGFloat) {
+        guard !finished else { return }
+        actionTimeLeft = max(0, actionTimeLeft - dt)
+        timerLabel.text = actionTimerText()
+        if actionTimeLeft <= 0 {
+            finish()
+        }
+    }
 
     // MARK: - Visual fixo
 
@@ -159,7 +168,7 @@ final class TideWeavingOverlay: SKNode {
         header.position = CGPoint(x: 0, y: boardWidth / 2 + 160)
         addChild(header)
 
-        scoreLabel = SKLabelNode(text: "0 / \(target)")
+        scoreLabel = SKLabelNode(text: scoreText())
         scoreLabel.fontName = "AvenirNext-DemiBold"
         scoreLabel.fontSize = 16
         scoreLabel.fontColor = GameUI.ink
@@ -167,13 +176,13 @@ final class TideWeavingOverlay: SKNode {
         scoreLabel.position = CGPoint(x: gridOrigin.x, y: boardWidth / 2 + 44)
         addChild(scoreLabel)
 
-        movesLabel = SKLabelNode(text: "Jogadas: \(movesLeft)")
-        movesLabel.fontName = "AvenirNext-Regular"
-        movesLabel.fontSize = 16
-        movesLabel.fontColor = GameUI.mutedInk
-        movesLabel.horizontalAlignmentMode = .right
-        movesLabel.position = CGPoint(x: gridOrigin.x + boardWidth, y: boardWidth / 2 + 44)
-        addChild(movesLabel)
+        timerLabel = SKLabelNode(text: actionTimerText())
+        timerLabel.fontName = "AvenirNext-Regular"
+        timerLabel.fontSize = 16
+        timerLabel.fontColor = GameUI.mutedInk
+        timerLabel.horizontalAlignmentMode = .right
+        timerLabel.position = CGPoint(x: gridOrigin.x + boardWidth, y: boardWidth / 2 + 44)
+        addChild(timerLabel)
 
         let quit = GameUI.pill(text: "Sair",
                                fontSize: 15,
@@ -360,8 +369,6 @@ final class TideWeavingOverlay: SKNode {
                     self.busy = false
                 }
             } else {
-                self.movesLeft -= 1
-                self.movesLabel.text = "Jogadas: \(self.movesLeft)"
                 self.resolveCascade(multiplier: 1)
             }
         }
@@ -404,12 +411,12 @@ final class TideWeavingOverlay: SKNode {
         if matches.isEmpty {
             busy = false
             if !hasPossibleMove() { reshuffle() }
-            if movesLeft <= 0 { finish() }
             return
         }
 
-        score += scoreValue(for: matches, cascadeDepth: multiplier)
-        scoreLabel.text = "\(score) / \(target)"
+        score += matches.count
+        actionTimeLeft = actionTimeLimit
+        updateChallengeProgress()
 
         for pos in matches {
             board[pos.r][pos.c] = -1
@@ -461,11 +468,6 @@ final class TideWeavingOverlay: SKNode {
             .wait(forDuration: 0.34),
             .run { [weak self] in self?.resolveCascade(multiplier: multiplier + 1) }
         ]))
-    }
-
-    private func scoreValue(for matches: Set<GridPos>, cascadeDepth: Int) -> Int {
-        let cascadeBonus = min(max(0, cascadeDepth - 1), 3) * 3
-        return matches.count * (8 + cascadeBonus)
     }
 
     // MARK: - Sem jogadas possíveis
@@ -527,16 +529,36 @@ final class TideWeavingOverlay: SKNode {
 
     private var pendingResult: ChallengeResult?
 
+    private func scoreText() -> String {
+        if challengeCompleted {
+            return "Conchas \(score) · Bônus pronto"
+        }
+        if challengeBonus > 0 {
+            return "Meta \(score)/\(challengeGoal) · +\(challengeBonus)"
+        }
+        return "Energia \(score)/\(challengeGoal)"
+    }
+
+    private func actionTimerText() -> String {
+        "Ação \(max(0, Int(ceil(actionTimeLeft))))s"
+    }
+
+    private func updateChallengeProgress() {
+        if !challengeCompleted && score >= challengeGoal {
+            challengeCompleted = true
+        }
+        scoreLabel.text = scoreText()
+        timerLabel.text = actionTimerText()
+    }
+
     private func finish() {
         guard !finished else { return }
         finished = true
         busy = true
         selectionRing.isHidden = true
 
-        let reached = score >= target
-        var pearls = Int(CGFloat(score) / 12 * rewardMultiplier)
-        if reached { pearls += 12 }
-        if session == .event { pearls = Int(CGFloat(pearls) * 1.5) }
+        let reached = challengeCompleted
+        let pearls = score + (reached ? challengeBonus : 0)
         let xp = CGFloat(score) / 5 * (session == .event ? 1.5 : 1)
 
         let resultTint = reached
@@ -565,7 +587,7 @@ final class TideWeavingOverlay: SKNode {
         titleLabel.position = CGPoint(x: 0, y: 60)
         panelContent.addChild(titleLabel)
 
-        let scoreLine = SKLabelNode(text: "Pontuação: \(score)")
+        let scoreLine = SKLabelNode(text: "Peças removidas: \(score)")
         scoreLine.fontName = "AvenirNext-Regular"
         scoreLine.fontSize = 16
         scoreLine.fontColor = GameUI.mutedInk

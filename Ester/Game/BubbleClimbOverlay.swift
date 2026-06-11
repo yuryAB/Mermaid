@@ -18,6 +18,7 @@ private final class ClimbBubble: SKShapeNode {
     var popped = false
     var crumbleDuration: CGFloat = 1.15
     var permanent = false
+    var scored = false
 
     private var crumbling = false
     private var crumbleTimer: CGFloat = 0
@@ -138,17 +139,18 @@ private final class ClimbBubble: SKShapeNode {
 
 final class BubbleClimbOverlay: SKNode {
     private let special: Bool
-    private let rewardMultiplier: CGFloat
+    private let challengeGoalBubbles: Int
+    private let challengeBonus: Int
     private let onFinish: (ChallengeResult) -> Void
 
     private let areaWidth: CGFloat
     private let areaCenter = CGPoint(x: 0, y: -30)
     private var areaHalf: CGFloat { areaWidth / 2 }
 
-    private let targetDuration: CGFloat
-    private var timeLeft: CGFloat
-    private var elapsedTime: CGFloat = 0
     private var timerRunning = false
+    private var bubblesClimbed = 0
+    private var shellScore = 0
+    private var challengeCompleted = false
 
     private let contentNode = SKNode()
     private var bubbles: [ClimbBubble] = []
@@ -177,10 +179,6 @@ final class BubbleClimbOverlay: SKNode {
     private let maxHorizontalSpeed: CGFloat = 250
     private let maxFallSpeed: CGFloat = -500
 
-    private var survivedSeconds: Int {
-        Int(min(targetDuration, max(0, elapsedTime)).rounded(.down))
-    }
-
     private var platformCrumbleDuration: CGFloat {
         special ? 0.95 : 1.15
     }
@@ -189,15 +187,13 @@ final class BubbleClimbOverlay: SKNode {
          phase: MermaidPhase,
          palette: MermaidPalette,
          special: Bool,
-         rewardMultiplier: CGFloat,
          giverDisplay: SKNode?,
          onFinish: @escaping (ChallengeResult) -> Void) {
         self.special = special
-        self.rewardMultiplier = rewardMultiplier
+        self.challengeGoalBubbles = special ? 24 : 16
+        self.challengeBonus = special ? 1_000 : 700
         self.onFinish = onFinish
         self.areaWidth = min(size.width - 36, 380)
-        self.targetDuration = special ? 40 : 30
-        self.timeLeft = special ? 40 : 30
         super.init()
         isUserInteractionEnabled = true
         startMotionControl()
@@ -227,7 +223,7 @@ final class BubbleClimbOverlay: SKNode {
 
         let subtitle = special
             ? "Bolhas frágeis em corrente forte"
-            : "Sobreviva nas bolhas frágeis"
+            : "Suba bolhas e acumule conchas"
         let header = ChallengeChrome.makeHeader(kind: .ascent,
                                                 subtitle: subtitle,
                                                 giverDisplay: giverDisplay,
@@ -235,7 +231,7 @@ final class BubbleClimbOverlay: SKNode {
         header.position = CGPoint(x: 0, y: areaHalf + 160)
         addChild(header)
 
-        timerLabel = SKLabelNode(text: "Tempo \(Int(targetDuration))s")
+        timerLabel = SKLabelNode(text: progressText())
         timerLabel.fontName = "AvenirNext-DemiBold"
         timerLabel.fontSize = 16
         timerLabel.fontColor = GameUI.ink
@@ -243,7 +239,7 @@ final class BubbleClimbOverlay: SKNode {
         timerLabel.position = CGPoint(x: -areaHalf, y: areaHalf + 44)
         addChild(timerLabel)
 
-        objectiveLabel = SKLabelNode(text: "Sobreviva: \(Int(targetDuration))s")
+        objectiveLabel = SKLabelNode(text: objectiveText())
         objectiveLabel.fontName = "AvenirNext-DemiBold"
         objectiveLabel.fontSize = 16
         objectiveLabel.fontColor = GameUI.mutedInk
@@ -332,15 +328,7 @@ final class BubbleClimbOverlay: SKNode {
         guard !finished else { return }
 
         updateMotionControl()
-        if timerRunning {
-            elapsedTime = min(targetDuration, elapsedTime + dt)
-            timeLeft = max(0, targetDuration - elapsedTime)
-        }
         updateTimerLabels()
-        if timeLeft <= 0 {
-            finish(survivedFull: true)
-            return
-        }
 
         ensurePlatformsAhead()
         updatePlatforms(dt: dt)
@@ -350,8 +338,19 @@ final class BubbleClimbOverlay: SKNode {
     }
 
     private func updateTimerLabels() {
-        timerLabel.text = "Tempo \(max(0, Int(ceil(timeLeft))))s"
-        objectiveLabel.text = "Sobreviva: \(Int(targetDuration))s"
+        timerLabel.text = progressText()
+        objectiveLabel.text = objectiveText()
+    }
+
+    private func progressText() -> String {
+        "Conchas \(shellScore)"
+    }
+
+    private func objectiveText() -> String {
+        if challengeCompleted {
+            return "Bônus pronto +\(challengeBonus)"
+        }
+        return "Meta \(bubblesClimbed)/\(challengeGoalBubbles) · +\(challengeBonus)"
     }
 
     private func contentY(forViewY viewY: CGFloat) -> CGFloat {
@@ -370,7 +369,7 @@ final class BubbleClimbOverlay: SKNode {
     }
 
     private func spawnPlatformAbove() {
-        let progress = min(1, elapsedTime / targetDuration)
+        let progress = min(1.25, CGFloat(bubblesClimbed) / CGFloat(max(1, challengeGoalBubbles)))
         let minRadius: CGFloat = special ? 23 : 25
         let maxRadius: CGFloat = special ? 31 : 34
         let radius = CGFloat.random(in: minRadius...maxRadius)
@@ -420,7 +419,7 @@ final class BubbleClimbOverlay: SKNode {
         checkLanding(from: previousPosition)
 
         if viewY(forContentY: mermaidNode.position.y) < -areaHalf - 48 {
-            finish(survivedFull: false)
+            finish()
         }
     }
 
@@ -480,10 +479,22 @@ final class BubbleClimbOverlay: SKNode {
         if animated {
             bubble.reactToLanding()
         }
+        scoreLanding(on: bubble)
         bubble.beginCrumbling()
         if shouldBounce {
             bounce(from: bubble)
         }
+    }
+
+    private func scoreLanding(on bubble: ClimbBubble) {
+        guard !bubble.permanent, !bubble.scored else { return }
+        bubble.scored = true
+        bubblesClimbed += 1
+        shellScore += min(bubblesClimbed, 100)
+        if !challengeCompleted && bubblesClimbed >= challengeGoalBubbles {
+            challengeCompleted = true
+        }
+        updateTimerLabels()
     }
 
     private func detachFromPlatform() {
@@ -537,7 +548,7 @@ final class BubbleClimbOverlay: SKNode {
         var node: SKNode? = atPoint(location)
         while let current = node {
             if current.name == "climb_quit" {
-                finish(survivedFull: false)
+                finish()
                 return
             }
             node = current.parent
@@ -594,24 +605,17 @@ final class BubbleClimbOverlay: SKNode {
 
     // MARK: - Fim
 
-    private func finish(survivedFull: Bool) {
+    private func finish() {
         guard !finished else { return }
         finished = true
         touchControl = 0
-        if survivedFull {
-            elapsedTime = targetDuration
-            timeLeft = 0
-            updateTimerLabels()
-        }
+        updateTimerLabels()
 
-        let seconds = survivedFull ? Int(targetDuration) : survivedSeconds
-        let survivalRatio = CGFloat(seconds) / targetDuration
-        var pearls = Int(20 * survivalRatio * rewardMultiplier)
-        if survivedFull { pearls += 12 }
-        if special { pearls = Int(CGFloat(pearls) * 1.5) }
-        let xp = CGFloat(seconds) * 1.2 * (special ? 1.5 : 1)
+        let reached = challengeCompleted
+        let pearls = shellScore + (reached ? challengeBonus : 0)
+        let xp = CGFloat(bubblesClimbed) * 2.0 * (special ? 1.5 : 1)
 
-        let resultTint = survivedFull
+        let resultTint = reached
             ? UIColor(red: 0.5, green: 0.9, blue: 0.65, alpha: 1)
             : GameUI.accent
         let panel = GameUI.card(size: CGSize(width: 290, height: 220),
@@ -624,16 +628,14 @@ final class BubbleClimbOverlay: SKNode {
         panelContent.zPosition = 5
         panel.addChild(panelContent)
 
-        let titleLabel = SKLabelNode(text: survivedFull ? "Desafio concluído!" : "A corrente venceu")
+        let titleLabel = SKLabelNode(text: reached ? "Desafio concluído!" : "A corrente venceu")
         titleLabel.fontName = "AvenirNext-DemiBold"
         titleLabel.fontSize = 19
         titleLabel.fontColor = GameUI.ink
         titleLabel.position = CGPoint(x: 0, y: 60)
         panelContent.addChild(titleLabel)
 
-        let scoreText = survivedFull
-            ? "Sobreviveu \(seconds)s"
-            : "Durou \(seconds)s"
+        let scoreText = "Bolhas subidas: \(bubblesClimbed)"
         let scoreLine = SKLabelNode(text: scoreText)
         scoreLine.fontName = "AvenirNext-Regular"
         scoreLine.fontSize = 16
@@ -667,8 +669,8 @@ final class BubbleClimbOverlay: SKNode {
         continueButton.addChild(continueLabel)
 
         pendingResult = ChallengeResult(kind: .ascent,
-                                        score: seconds,
-                                        reachedTarget: survivedFull,
+                                        score: shellScore,
+                                        reachedTarget: reached,
                                         pearls: pearls,
                                         xp: xp,
                                         special: special,

@@ -33,8 +33,13 @@ final class HUDLayer: SKNode {
     private var barLabels: [String: SKLabelNode] = [:]
     private var bars: [String: SKShapeNode] = [:]
     private var buttons: [PlayerCommand: SKNode] = [:]
+    private var buttonSizes: [PlayerCommand: CGSize] = [:]
     private var buttonHighlights: [PlayerCommand: SKShapeNode] = [:]
     private var buttonStamps: [PlayerCommand: SKNode] = [:]
+    private var buttonCooldownOverlays: [PlayerCommand: SKNode] = [:]
+    private var buttonCooldownFills: [PlayerCommand: SKShapeNode] = [:]
+    private var buttonCooldownLines: [PlayerCommand: SKShapeNode] = [:]
+    private var buttonCooldownLabels: [PlayerCommand: SKLabelNode] = [:]
     private var disabledCommands: Set<PlayerCommand> = []
     private var messageContainer: SKNode!
     private var messageTitleLabel: SKLabelNode!
@@ -44,6 +49,7 @@ final class HUDLayer: SKNode {
     private let enableDebugRigToolButton: Bool
     private var debugRigToolButton: SKNode?
     private var nameEditButton: SKNode?
+    private let commandCooldownAnimationSeconds: TimeInterval = 10
 
     init(size: CGSize, insets: UIEdgeInsets, enableDebugRigToolButton: Bool = false) {
         self.sceneSize = size
@@ -683,8 +689,49 @@ final class HUDLayer: SKNode {
             buttonStamps[command] = stamp
         }
 
+        addCooldownOverlay(for: command, size: size, to: button)
+
         addChild(button)
         buttons[command] = button
+        buttonSizes[command] = size
+    }
+
+    private func addCooldownOverlay(for command: PlayerCommand, size: CGSize, to button: SKNode) {
+        let overlay = SKNode()
+        overlay.isHidden = true
+        overlay.zPosition = 8
+        button.addChild(overlay)
+        buttonCooldownOverlays[command] = overlay
+
+        let veil = SKShapeNode(rectOf: size, cornerRadius: 8)
+        veil.fillColor = HUDPalette.ink.withAlphaComponent(0.10)
+        veil.strokeColor = HUDPalette.blueInk.withAlphaComponent(0.20)
+        veil.lineWidth = 0.8
+        veil.zPosition = 1
+        overlay.addChild(veil)
+
+        let fill = SKShapeNode()
+        fill.fillColor = HUDPalette.blueInk.withAlphaComponent(0.34)
+        fill.strokeColor = .clear
+        fill.zPosition = 2
+        overlay.addChild(fill)
+        buttonCooldownFills[command] = fill
+
+        let line = SKShapeNode()
+        line.fillColor = .clear
+        line.strokeColor = command.tint.withAlphaComponent(0.9)
+        line.lineWidth = 2
+        line.lineCap = .round
+        line.zPosition = 3
+        overlay.addChild(line)
+        buttonCooldownLines[command] = line
+
+        let label = makeLabel(text: "", fontSize: 10, style: .bodyBold, color: HUDPalette.paper)
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.zPosition = 4
+        overlay.addChild(label)
+        buttonCooldownLabels[command] = label
     }
 
     private func makeActionCard(size: CGSize, accent: UIColor, primary: Bool) -> SKNode {
@@ -801,8 +848,10 @@ final class HUDLayer: SKNode {
                 active = active && objectiveAvailable
                 buttonStamps[command]?.isHidden = active
             }
-            if disabledCommands.contains(command) { active = false }
-            button.alpha = active ? 1 : (command == .objective ? 0.82 : 0.42)
+            let coolingDown = disabledCommands.contains(command)
+            if coolingDown { active = false }
+            button.alpha = coolingDown || active ? 1 : (command == .objective ? 0.82 : 0.42)
+            updateCooldownOverlay(for: command, remaining: commandCooldowns[command] ?? 0)
         }
 
         if stateChanged {
@@ -819,6 +868,40 @@ final class HUDLayer: SKNode {
         for (command, highlight) in buttonHighlights {
             highlight.isHidden = command != activeCommand || disabledCommands.contains(command)
         }
+    }
+
+    private func updateCooldownOverlay(for command: PlayerCommand, remaining: TimeInterval) {
+        guard let overlay = buttonCooldownOverlays[command],
+              let size = buttonSizes[command],
+              let fill = buttonCooldownFills[command],
+              let line = buttonCooldownLines[command],
+              let label = buttonCooldownLabels[command] else { return }
+
+        guard remaining > 0 else {
+            overlay.isHidden = true
+            return
+        }
+
+        overlay.isHidden = false
+        let normalized = max(0, min(1, remaining / commandCooldownAnimationSeconds))
+        let progress = CGFloat(normalized)
+        let fillHeight = max(1, size.height * progress)
+        let rect = CGRect(x: -size.width / 2,
+                          y: -size.height / 2,
+                          width: size.width,
+                          height: fillHeight)
+        fill.path = UIBezierPath(roundedRect: rect,
+                                 cornerRadius: min(8, fillHeight / 2)).cgPath
+
+        let topY = -size.height / 2 + fillHeight
+        let linePath = UIBezierPath()
+        linePath.move(to: CGPoint(x: -size.width / 2 + 7, y: topY))
+        linePath.addLine(to: CGPoint(x: size.width / 2 - 7, y: topY))
+        line.path = linePath.cgPath
+        line.alpha = progress > 0.03 ? 1 : 0
+
+        label.text = "\(Int(ceil(remaining)))s"
+        label.alpha = progress > 0.16 ? 1 : 0
     }
 
     private func setBar(_ key: String, value: CGFloat) {
