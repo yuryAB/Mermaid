@@ -70,7 +70,7 @@ final class AdultMermaidFigure: MermaidFigure {
         face.eyebrows.right.setScale(rig.eyebrowRight.scale)
         face.eyes.left.position = rig.eyeLeft.point
         face.eyes.left.zPosition = rig.eyeLeft.z
-        face.eyes.left.setScale(rig.eyeLeft.scale)
+        applyScale(rig.eyeLeft.scale, to: face.eyes.left, part: .eyeLeft)
         face.eyes.right.position = rig.eyeRight.point
         face.eyes.right.zPosition = rig.eyeRight.z
         face.eyes.right.setScale(rig.eyeRight.scale)
@@ -185,7 +185,17 @@ final class AdultMermaidFigure: MermaidFigure {
     }
 
     func setPartScale(_ scale: CGFloat, for part: MermaidFigurePart) {
-        node(for: part)?.setScale(scale)
+        applyScale(scale, to: node(for: part), part: part)
+    }
+
+    private func applyScale(_ scale: CGFloat, to node: SKNode?, part: MermaidFigurePart) {
+        guard let node else { return }
+        if part == .eyeLeft {
+            node.xScale = -scale
+            node.yScale = scale
+        } else {
+            node.setScale(scale)
+        }
     }
 
     private func node(for part: MermaidFigurePart) -> SKNode? {

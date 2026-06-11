@@ -17,8 +17,8 @@ final class BabyMermaidFigure: MermaidFigure {
     private let hairBack = SKSpriteNode(imageNamed: "baby-hairBack")
     private let hairFront = SKSpriteNode(imageNamed: "baby-hairFront")
     private let head = SKSpriteNode(imageNamed: "MermHead")
-    private let eyeLeft = SKSpriteNode(imageNamed: "baby-lEye")
-    private let eyeRight = SKSpriteNode(imageNamed: "baby-rEye")
+    private let eyeLeft = SKSpriteNode(imageNamed: "eye")
+    private let eyeRight = SKSpriteNode(imageNamed: "eye")
     private let eyebrowLeft = SKSpriteNode(imageNamed: "eyeBrow")
     private let eyebrowRight = SKSpriteNode(imageNamed: "eyeBrow")
     private let mouth = SKSpriteNode(imageNamed: "mouth")
@@ -52,7 +52,7 @@ final class BabyMermaidFigure: MermaidFigure {
 
         eyeLeft.zPosition = rig.eyeLeft.z
         eyeLeft.position = rig.eyeLeft.point
-        eyeLeft.setScale(rig.eyeLeft.scale)
+        applyScale(rig.eyeLeft.scale, to: eyeLeft, part: .eyeLeft)
         upperBody.addChild(eyeLeft)
 
         eyeRight.zPosition = rig.eyeRight.z
@@ -233,7 +233,7 @@ final class BabyMermaidFigure: MermaidFigure {
 
     private func applyScale(_ scale: CGFloat, to node: SKNode?, part: MermaidFigurePart) {
         guard let node else { return }
-        if part == .eyebrowLeft {
+        if part == .eyeLeft || part == .eyebrowLeft {
             node.xScale = -scale
             node.yScale = scale
         } else {
