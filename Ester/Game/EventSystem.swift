@@ -19,6 +19,8 @@ struct WorldObjective {
     let label: String
     /// Posição atual (nil quando o alvo sumiu do mundo).
     let position: () -> CGPoint?
+    /// Recompensa em conchas ao interagir, limitada pelo sistema.
+    let pearlReward: Int
     /// Recompensa extra ao chegar (opcional).
     let onReach: (() -> Void)?
     var timeRemaining: CGFloat
@@ -27,6 +29,8 @@ struct WorldObjective {
 final class EventSystem {
     unowned let ctx: GameContext
     private weak var worldNode: SKNode?
+    private let objectivePearlReward = 100
+    private let maxObjectivePearlReward = 1_000
 
     private var timer: CGFloat = 20
     private var driftResetTimer: CGFloat = -1
@@ -78,9 +82,11 @@ final class EventSystem {
     private func setObjective(label: String,
                               duration: CGFloat,
                               position: @escaping () -> CGPoint?,
+                              pearlReward: Int = 100,
                               onReach: (() -> Void)? = nil) {
         currentObjective = WorldObjective(label: label,
                                           position: position,
+                                          pearlReward: pearlReward,
                                           onReach: onReach,
                                           timeRemaining: duration)
     }
@@ -89,12 +95,14 @@ final class EventSystem {
     func completeObjective() {
         guard let objective = currentObjective else { return }
         currentObjective = nil
+        let gainedPearls = min(max(objective.pearlReward, objectivePearlReward), maxObjectivePearlReward)
+        ctx.stats.pearls += gainedPearls
         ctx.stats.boostMood(6)
         ctx.stats.gainXP(10)
         ctx.stats.curiosity = min(100, ctx.stats.curiosity + 1)
         ctx.stats.addMemory("Investigou \(objective.label)")
         objective.onReach?()
-        ctx.say("Ela investigou \(objective.label)! ✨")
+        ctx.say("Ela investigou \(objective.label)! ✨ 🐚+\(gainedPearls)")
     }
 
     func clearObjective() {

@@ -19,23 +19,29 @@ private final class ClimbBubble: SKShapeNode {
     var crumbleDuration: CGFloat = 1.15
     var permanent = false
     var scored = false
+    var starter = false
 
     private var crumbling = false
     private var crumbleTimer: CGFloat = 0
+    private var horizontalMotionCenterX: CGFloat?
+    private var horizontalMotionAmplitude: CGFloat = 0
+    private var horizontalMotionSpeed: CGFloat = 0
+    private var horizontalMotionPhase: CGFloat = 0
 
-    convenience init(radius: CGFloat, crumbleDuration: CGFloat, starter: Bool = false) {
+    convenience init(radius: CGFloat, crumbleDuration: CGFloat, starter: Bool = false, permanent: Bool = false) {
         self.init(circleOfRadius: radius)
         self.radius = radius
         self.crumbleDuration = crumbleDuration
-        self.permanent = starter
-        fillColor = starter
+        self.starter = starter
+        self.permanent = starter || permanent
+        fillColor = self.permanent
             ? UIColor(red: 0.78, green: 0.93, blue: 1.0, alpha: 0.30)
             : UIColor(red: 0.65, green: 0.85, blue: 1, alpha: 0.24)
-        strokeColor = starter
+        strokeColor = self.permanent
             ? GameUI.gold.withAlphaComponent(0.72)
             : UIColor(white: 1, alpha: 0.78)
-        lineWidth = starter ? 2.0 : 1.6
-        glowWidth = starter ? 4 : 3
+        lineWidth = self.permanent ? 2.0 : 1.6
+        glowWidth = self.permanent ? 4 : 3
 
         let shine = SKShapeNode(circleOfRadius: radius * 0.22)
         shine.fillColor = UIColor(white: 1, alpha: 0.55)
@@ -50,6 +56,23 @@ private final class ClimbBubble: SKShapeNode {
         innerGlow.position = CGPoint(x: radius * 0.08, y: -radius * 0.05)
         innerGlow.zPosition = 1
         addChild(innerGlow)
+    }
+
+    func configureHorizontalMotion(amplitude: CGFloat, speed: CGFloat, phase: CGFloat) {
+        horizontalMotionCenterX = position.x
+        horizontalMotionAmplitude = amplitude
+        horizontalMotionSpeed = speed
+        horizontalMotionPhase = phase
+        strokeColor = permanent
+            ? GameUI.gold.withAlphaComponent(0.9)
+            : UIColor(red: 0.72, green: 0.94, blue: 1.0, alpha: 0.92)
+        glowWidth = permanent ? 5 : 4
+    }
+
+    func updateHorizontalMotion(dt: CGFloat) {
+        guard let centerX = horizontalMotionCenterX else { return }
+        horizontalMotionPhase += horizontalMotionSpeed * dt
+        position.x = centerX + sin(horizontalMotionPhase) * horizontalMotionAmplitude
     }
 
     func beginCrumbling() {
@@ -174,13 +197,11 @@ final class BubbleClimbOverlay: SKNode {
     private let mermaidSupportOffset: CGFloat = 20
     private let gravity: CGFloat = 660
     private let jumpVelocity: CGFloat = 430
-    private let horizontalAcceleration: CGFloat = 790
-    private let horizontalDamping: CGFloat = 1.75
     private let maxHorizontalSpeed: CGFloat = 250
     private let maxFallSpeed: CGFloat = -500
 
     private var platformCrumbleDuration: CGFloat {
-        special ? 0.95 : 1.15
+        special ? 1.1 : 1.35
     }
 
     init(size: CGSize,
@@ -313,8 +334,12 @@ final class BubbleClimbOverlay: SKNode {
     private func makePlatform(radius: CGFloat,
                               position: CGPoint,
                               crumbleDuration: CGFloat,
-                              starter: Bool = false) -> ClimbBubble {
-        let bubble = ClimbBubble(radius: radius, crumbleDuration: crumbleDuration, starter: starter)
+                              starter: Bool = false,
+                              permanent: Bool = false) -> ClimbBubble {
+        let bubble = ClimbBubble(radius: radius,
+                                 crumbleDuration: crumbleDuration,
+                                 starter: starter,
+                                 permanent: permanent)
         bubble.position = position
         bubble.zPosition = 4
         contentNode.addChild(bubble)
@@ -384,15 +409,33 @@ final class BubbleClimbOverlay: SKNode {
         let maxX = areaHalf - radius - 14
         x = x.clamped(to: minX...maxX)
 
+        let becomesPermanent = CGFloat.random(in: 0...1) < (special ? 0.10 : 0.14)
+        let movesHorizontally = !becomesPermanent && CGFloat.random(in: 0...1) < (special ? 0.30 : 0.24)
+
+        var motionAmplitude: CGFloat = 0
+        if movesHorizontally {
+            let maxAmplitude = min(54 + progress * 18, min(x - minX, maxX - x))
+            if maxAmplitude >= 24 {
+                motionAmplitude = CGFloat.random(in: 24...maxAmplitude)
+            }
+        }
+
         let bubble = makePlatform(radius: radius,
                                   position: CGPoint(x: x, y: lastPlatformPosition.y + yGap),
-                                  crumbleDuration: platformCrumbleDuration)
+                                  crumbleDuration: platformCrumbleDuration,
+                                  permanent: becomesPermanent)
+        if motionAmplitude > 0 {
+            bubble.configureHorizontalMotion(amplitude: motionAmplitude,
+                                             speed: CGFloat.random(in: 1.05...1.55),
+                                             phase: CGFloat.random(in: 0...(2 * CGFloat.pi)))
+        }
         lastPlatformPosition = bubble.position
     }
 
     private func updatePlatforms(dt: CGFloat) {
         for bubble in bubbles where !bubble.popped {
             let wasPopped = bubble.popped
+            bubble.updateHorizontalMotion(dt: dt)
             bubble.updateFragility(dt: dt)
             if bubble.popped && !wasPopped && bubble === currentPlatform {
                 detachFromPlatform()
@@ -409,7 +452,7 @@ final class BubbleClimbOverlay: SKNode {
         }
 
         let previousPosition = mermaidNode.position
-        applyHorizontalControl(dt: dt)
+        applyHorizontalControl()
         velocity.dy = max(maxFallSpeed, velocity.dy - gravity * dt)
 
         mermaidNode.position.x += velocity.dx * dt
@@ -423,14 +466,9 @@ final class BubbleClimbOverlay: SKNode {
         }
     }
 
-    private func applyHorizontalControl(dt: CGFloat) {
+    private func applyHorizontalControl() {
         let input = activeHorizontalInput()
-        if abs(input) > 0.04 {
-            velocity.dx += input * horizontalAcceleration * dt
-        } else {
-            velocity.dx *= max(0, 1 - horizontalDamping * dt)
-        }
-        velocity.dx = velocity.dx.clamped(to: -maxHorizontalSpeed...maxHorizontalSpeed)
+        velocity.dx = input * maxHorizontalSpeed
     }
 
     private func activeHorizontalInput() -> CGFloat {
@@ -487,7 +525,7 @@ final class BubbleClimbOverlay: SKNode {
     }
 
     private func scoreLanding(on bubble: ClimbBubble) {
-        guard !bubble.permanent, !bubble.scored else { return }
+        guard !bubble.starter, !bubble.scored else { return }
         bubble.scored = true
         bubblesClimbed += 1
         shellScore += min(bubblesClimbed, 100)
@@ -585,7 +623,7 @@ final class BubbleClimbOverlay: SKNode {
     private func updateTouchControl(at location: CGPoint) {
         let relativeX = (location.x - areaCenter.x) / max(1, areaHalf)
         let clamped = relativeX.clamped(to: -1...1)
-        touchControl = clamped * abs(clamped) * 0.86
+        touchControl = clamped * abs(clamped)
     }
 
     private func startMotionControl() {
@@ -600,7 +638,7 @@ final class BubbleClimbOverlay: SKNode {
             return
         }
         let tilt = (CGFloat(motion.gravity.x) * 1.45).clamped(to: -1...1)
-        motionControl = tilt * abs(tilt) * 0.92
+        motionControl = tilt * abs(tilt)
     }
 
     // MARK: - Fim
