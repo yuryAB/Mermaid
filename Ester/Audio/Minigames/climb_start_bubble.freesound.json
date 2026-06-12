@@ -1,0 +1,29 @@
+{
+  "source": "Freesound",
+  "downloadedAt": "2026-06-12T14:56:40.765Z",
+  "query": "underwater bubbles",
+  "previewKey": "preview-hq-mp3",
+  "file": "Ester/Audio/Minigames/climb_start_bubble.mp3",
+  "sound": {
+    "id": 567453,
+    "name": "BUBBLES_LOW_AIR.wav",
+    "username": "sound_ahead",
+    "license": "http://creativecommons.org/licenses/by/3.0/",
+    "duration": 0.851837,
+    "url": "https://freesound.org/people/sound_ahead/sounds/567453/",
+    "tags": [
+      "blowing",
+      "boiling",
+      "bubble",
+      "bubbles",
+      "bubbling",
+      "chemical",
+      "low",
+      "potion",
+      "submerged",
+      "under-water",
+      "underwater",
+      "water"
+    ]
+  }
+}

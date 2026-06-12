@@ -35,6 +35,7 @@ final class ChildMermaidFigure: MermaidFigure {
     init(rig: ChildMermaidRig = MermaidRigStore.shared.document.child) {
         self.rig = rig
         assembleNodes()
+        applyPalette(.main)
         applyAnimationMode(.idle)
     }
 
@@ -168,34 +169,17 @@ final class ChildMermaidFigure: MermaidFigure {
     }
 
     func applyPalette(_ palette: MermaidPalette) {
-        for node in [hairBack, hairFront] {
-            node.color = palette.hair
-            node.colorBlendFactor = 0.55
-        }
-
-        head.color = palette.skin
-        head.colorBlendFactor = 1.0
-
-        for node in [waistBack, waistFront, chest] {
-            node.color = palette.vibrant1
-            node.colorBlendFactor = 0.5
-        }
-
-        tailFin.color = palette.vibrant2
-        tailFin.colorBlendFactor = 1.0
-
-        for node in [eyebrowLeft, eyebrowRight] {
-            node.color = palette.hair
-            node.colorBlendFactor = 1.0
-        }
-
-        mouth.color = palette.skin
-        mouth.colorBlendFactor = 0.45
-
-        for node in [handLeft, handRight] {
-            node.color = palette.skin
-            node.colorBlendFactor = 0.6
-        }
+        hairBack.applyTemplateTexture(named: "child-hairBack", color: palette.hair)
+        hairFront.applyTemplateTexture(named: "child-hairFront", color: palette.hair)
+        head.applyTemplateTexture(named: "MermHead", color: palette.skin)
+        waistBack.applyTemplateTexture(named: "child-waistBack", color: palette.vibrant1)
+        waistFront.applyTemplateTexture(named: "child-waistFront", color: palette.vibrant1)
+        chest.applyTemplateTexture(named: "chest", color: palette.vibrant1)
+        tailFin.applyTemplateTexture(named: "child-fin", color: palette.vibrant2)
+        eyebrowLeft.applyTemplateTexture(named: "eyeBrow", color: palette.hair)
+        eyebrowRight.applyTemplateTexture(named: "eyeBrow", color: palette.hair)
+        handLeft.applyTemplateTexture(named: "baby-hand1-1", color: palette.skin)
+        handRight.applyTemplateTexture(named: "baby-hand1", color: palette.skin)
     }
 
     func applyFacePose(_ pose: MermaidFacePose, animated: Bool) {

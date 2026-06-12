@@ -1,0 +1,24 @@
+{
+  "source": "Freesound",
+  "downloadedAt": "2026-06-12T14:54:43.234Z",
+  "query": "water chime",
+  "previewKey": "preview-hq-mp3",
+  "file": "Ester/Audio/World/travel_arrive_chime.mp3",
+  "sound": {
+    "id": 813182,
+    "name": "Tiny Dink",
+    "username": "ldsqui",
+    "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+    "duration": 0.0557708,
+    "url": "https://freesound.org/people/ldsqui/sounds/813182/",
+    "tags": [
+      "chime",
+      "ding",
+      "dink",
+      "glass",
+      "ping",
+      "plink",
+      "small"
+    ]
+  }
+}

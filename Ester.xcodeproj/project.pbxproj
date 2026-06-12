@@ -17,9 +17,9 @@
 		723814312C56E0D9007B3836 /* EntityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814302C56E0D9007B3836 /* EntityManager.swift */; };
 		723814332C56E18D007B3836 /* MovementComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814322C56E18D007B3836 /* MovementComponent.swift */; };
 		723814352C56E19A007B3836 /* BaseSpriteComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814342C56E19A007B3836 /* BaseSpriteComponent.swift */; };
-		7238143C2C56EAA0007B3836 /* MermaidEmotionComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7238143B2C56EAA0007B3836 /* MermaidEmotionComponent.swift */; };
 		723814382C56E419007B3836 /* MermaidMovementStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814372C56E419007B3836 /* MermaidMovementStates.swift */; };
 		7238143A2C56E84C007B3836 /* MermaidDirectionStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814392C56E84C007B3836 /* MermaidDirectionStates.swift */; };
+		7238143C2C56EAA0007B3836 /* MermaidEmotionComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7238143B2C56EAA0007B3836 /* MermaidEmotionComponent.swift */; };
 		724C618F2C5546A900A5885C /* MermaidFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 724C618E2C5546A900A5885C /* MermaidFace.swift */; };
 		7271E5662C41BA89008CE3C8 /* MermaidEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */; };
 		7271E5682C41BBD6008CE3C8 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7271E5672C41BBD5008CE3C8 /* Model.swift */; };
@@ -45,10 +45,6 @@
 		72D020872C1905FC002F11FC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D020862C1905FC002F11FC /* Assets.xcassets */; };
 		72D0208A2C1905FC002F11FC /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 72D020892C1905FC002F11FC /* Base */; };
 		72D1A7AE2C1BD681005213A4 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D1A7AD2C1BD681005213A4 /* ColorManager.swift */; };
-		FAD1F1010000000000000001 /* Kalam-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1F0010000000000000001 /* Kalam-Regular.ttf */; };
-		FAD1F1010000000000000002 /* Kalam-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1F0010000000000000002 /* Kalam-Bold.ttf */; };
-		FAD1F1010000000000000003 /* Nunito-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1F0010000000000000003 /* Nunito-Regular.ttf */; };
-		FAD1F1010000000000000004 /* Nunito-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1F0010000000000000004 /* Nunito-Italic.ttf */; };
 		FAB1E1010000000000000001 /* GameplayModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000001 /* GameplayModels.swift */; };
 		FAB1E1010000000000000002 /* MermaidStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000002 /* MermaidStats.swift */; };
 		FAB1E1010000000000000003 /* MermaidAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000003 /* MermaidAppearance.swift */; };
@@ -66,6 +62,12 @@
 		FAB1E101000000000000000F /* ChallengeSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000000F /* ChallengeSystem.swift */; };
 		FAB1E1010000000000000010 /* BubbleClimbOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000010 /* BubbleClimbOverlay.swift */; };
 		FAB1E1010000000000000011 /* WorldEnvironmentSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000011 /* WorldEnvironmentSystem.swift */; };
+		FAD1F1010000000000000001 /* Kalam-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1F0010000000000000001 /* Kalam-Regular.ttf */; };
+		FAD1F1010000000000000002 /* Kalam-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1F0010000000000000002 /* Kalam-Bold.ttf */; };
+		FAD1F1010000000000000003 /* Nunito-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1F0010000000000000003 /* Nunito-Regular.ttf */; };
+		FAD1F1010000000000000004 /* Nunito-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1F0010000000000000004 /* Nunito-Italic.ttf */; };
+		FAD210110000000000000001 /* AudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAD210010000000000000001 /* AudioManager.swift */; };
+		FAD220110000000000000001 /* Audio in Resources */ = {isa = PBXBuildFile; fileRef = FAD220010000000000000001 /* Audio */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -79,9 +81,9 @@
 		723814302C56E0D9007B3836 /* EntityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityManager.swift; sourceTree = "<group>"; };
 		723814322C56E18D007B3836 /* MovementComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementComponent.swift; sourceTree = "<group>"; };
 		723814342C56E19A007B3836 /* BaseSpriteComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseSpriteComponent.swift; sourceTree = "<group>"; };
-		7238143B2C56EAA0007B3836 /* MermaidEmotionComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEmotionComponent.swift; sourceTree = "<group>"; };
 		723814372C56E419007B3836 /* MermaidMovementStates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidMovementStates.swift; sourceTree = "<group>"; };
 		723814392C56E84C007B3836 /* MermaidDirectionStates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidDirectionStates.swift; sourceTree = "<group>"; };
+		7238143B2C56EAA0007B3836 /* MermaidEmotionComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEmotionComponent.swift; sourceTree = "<group>"; };
 		724C618E2C5546A900A5885C /* MermaidFace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidFace.swift; sourceTree = "<group>"; };
 		7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEntity.swift; sourceTree = "<group>"; };
 		7271E5672C41BBD5008CE3C8 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
@@ -108,10 +110,6 @@
 		72D020862C1905FC002F11FC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		72D020892C1905FC002F11FC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		72D1A7AD2C1BD681005213A4 /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
-		FAD1F0010000000000000001 /* Kalam-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Kalam-Regular.ttf"; sourceTree = "<group>"; };
-		FAD1F0010000000000000002 /* Kalam-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Kalam-Bold.ttf"; sourceTree = "<group>"; };
-		FAD1F0010000000000000003 /* Nunito-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Regular.ttf"; sourceTree = "<group>"; };
-		FAD1F0010000000000000004 /* Nunito-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Italic.ttf"; sourceTree = "<group>"; };
 		FAB1E0010000000000000001 /* GameplayModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameplayModels.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000002 /* MermaidStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidStats.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000003 /* MermaidAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidAppearance.swift; sourceTree = "<group>"; };
@@ -129,6 +127,12 @@
 		FAB1E001000000000000000F /* ChallengeSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeSystem.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000010 /* BubbleClimbOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BubbleClimbOverlay.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000011 /* WorldEnvironmentSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldEnvironmentSystem.swift; sourceTree = "<group>"; };
+		FAD1F0010000000000000001 /* Kalam-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Kalam-Regular.ttf"; sourceTree = "<group>"; };
+		FAD1F0010000000000000002 /* Kalam-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Kalam-Bold.ttf"; sourceTree = "<group>"; };
+		FAD1F0010000000000000003 /* Nunito-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Regular.ttf"; sourceTree = "<group>"; };
+		FAD1F0010000000000000004 /* Nunito-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Italic.ttf"; sourceTree = "<group>"; };
+		FAD210010000000000000001 /* AudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioManager.swift; sourceTree = "<group>"; };
+		FAD220010000000000000001 /* Audio */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Audio; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -149,6 +153,7 @@
 				723814252C56C91C007B3836 /* Protocols */,
 				723814262C56C92A007B3836 /* Enums */,
 				72D1A7AD2C1BD681005213A4 /* ColorManager.swift */,
+				FAD210010000000000000001 /* AudioManager.swift */,
 				72334A832C50415300D24502 /* Extensions.swift */,
 				723814302C56E0D9007B3836 /* EntityManager.swift */,
 			);
@@ -270,21 +275,11 @@
 				72D020812C1905F9002F11FC /* GameViewController.swift */,
 				72D020832C1905F9002F11FC /* Main.storyboard */,
 				72D020862C1905FC002F11FC /* Assets.xcassets */,
+				FAD220010000000000000001 /* Audio */,
 				FAD1F2010000000000000001 /* Fonts */,
 				72D020882C1905FC002F11FC /* LaunchScreen.storyboard */,
 			);
 			path = Ester;
-			sourceTree = "<group>";
-		};
-		FAD1F2010000000000000001 /* Fonts */ = {
-			isa = PBXGroup;
-			children = (
-				FAD1F0010000000000000001 /* Kalam-Regular.ttf */,
-				FAD1F0010000000000000002 /* Kalam-Bold.ttf */,
-				FAD1F0010000000000000003 /* Nunito-Regular.ttf */,
-				FAD1F0010000000000000004 /* Nunito-Italic.ttf */,
-			);
-			path = Fonts;
 			sourceTree = "<group>";
 		};
 		FAB1E2010000000000000001 /* Game */ = {
@@ -310,6 +305,17 @@
 				FAB1E0010000000000000011 /* WorldEnvironmentSystem.swift */,
 			);
 			path = Game;
+			sourceTree = "<group>";
+		};
+		FAD1F2010000000000000001 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				FAD1F0010000000000000001 /* Kalam-Regular.ttf */,
+				FAD1F0010000000000000002 /* Kalam-Bold.ttf */,
+				FAD1F0010000000000000003 /* Nunito-Regular.ttf */,
+				FAD1F0010000000000000004 /* Nunito-Italic.ttf */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -381,6 +387,7 @@
 				FAD1F1010000000000000002 /* Kalam-Bold.ttf in Resources */,
 				FAD1F1010000000000000003 /* Nunito-Regular.ttf in Resources */,
 				FAD1F1010000000000000004 /* Nunito-Italic.ttf in Resources */,
+				FAD220110000000000000001 /* Audio in Resources */,
 				72D0208A2C1905FC002F11FC /* Base in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -408,6 +415,7 @@
 				723814382C56E419007B3836 /* MermaidMovementStates.swift in Sources */,
 				72334A882C5061B600D24502 /* Mermaid.swift in Sources */,
 				72D1A7AE2C1BD681005213A4 /* ColorManager.swift in Sources */,
+				FAD210110000000000000001 /* AudioManager.swift in Sources */,
 				72D020822C1905F9002F11FC /* GameViewController.swift in Sources */,
 				72A1195B2C55DB59003E827B /* MermaidMouth.swift in Sources */,
 				72334A842C50415300D24502 /* Extensions.swift in Sources */,
@@ -599,6 +607,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Siren;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -630,6 +640,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Siren;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;

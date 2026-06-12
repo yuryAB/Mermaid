@@ -50,7 +50,7 @@ enum OfflineProgressSystem {
         }
 
         // manter a posição dentro das camadas liberadas
-        stats.posY = stats.posY.clamped(to: allowedYRange(for: stats))
+        stats.posY = stats.posY.clamped(to: DepthSystem.allowedYRange(for: stats))
 
         // Fora do app ela descansa, mas a fome ainda vira tensão de cuidado.
         let hungerGain: CGFloat = stats.phase == .baby
@@ -74,20 +74,5 @@ enum OfflineProgressSystem {
         stats.lastSaved = Date()
         guard !lines.isEmpty else { return nil }
         return "Enquanto você esteve fora: " + lines.joined(separator: ", ") + "."
-    }
-
-    /// Réplica estática da faixa permitida, sem depender dos sistemas da cena.
-    private static func allowedYRange(for stats: MermaidStats) -> ClosedRange<CGFloat> {
-        var top: CGFloat = DepthZone.shallow.yRange.upperBound - 80
-        if stats.isUnlocked(.surface) {
-            top = 280
-        } else if stats.isUnlocked(.clear) {
-            top = -150
-        }
-        var deepest = DepthZone.mid.yRange.lowerBound
-        for zone in DepthZone.allCases where zone != .surface && stats.isUnlocked(zone) {
-            deepest = min(deepest, zone.yRange.lowerBound)
-        }
-        return (deepest + 80)...top
     }
 }

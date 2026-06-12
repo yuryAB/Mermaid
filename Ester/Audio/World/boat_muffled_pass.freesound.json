@@ -1,0 +1,22 @@
+{
+  "source": "Freesound",
+  "downloadedAt": "2026-06-12T14:55:45.705Z",
+  "query": "motor boat",
+  "previewKey": "preview-hq-mp3",
+  "file": "Ester/Audio/World/boat_muffled_pass.mp3",
+  "sound": {
+    "id": 609616,
+    "name": "Motorboat Engine",
+    "username": "chungus43A",
+    "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+    "duration": 3.2,
+    "url": "https://freesound.org/people/chungus43A/sounds/609616/",
+    "tags": [
+      "boat",
+      "engine",
+      "lake",
+      "motor",
+      "motorboat"
+    ]
+  }
+}

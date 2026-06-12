@@ -8,6 +8,57 @@
 
 import Foundation
 import SpriteKit
+import UIKit
+
+enum MermaidTemplateTexture {
+    private static var cache: [String: SKTexture] = [:]
+
+    static func texture(named name: String, color: UIColor) -> SKTexture? {
+        guard let source = UIImage(named: name) else { return nil }
+        let key = "\(name)|\(source.size.width)x\(source.size.height)|\(color.mermaidTemplateCacheKey)"
+        if let cached = cache[key] { return cached }
+
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = source.scale
+        format.opaque = false
+        let bounds = CGRect(origin: .zero, size: source.size)
+        let image = UIGraphicsImageRenderer(size: source.size, format: format).image { context in
+            color.setFill()
+            context.cgContext.fill(bounds)
+            source.draw(in: bounds, blendMode: .destinationIn, alpha: 1)
+        }
+
+        let texture = SKTexture(image: image)
+        cache[key] = texture
+        return texture
+    }
+}
+
+extension SKSpriteNode {
+    func applyTemplateTexture(named name: String,
+                              color: UIColor,
+                              fallbackBlendFactor: CGFloat = 1.0) {
+        if let texture = MermaidTemplateTexture.texture(named: name, color: color) {
+            self.texture = texture
+            self.color = .white
+            self.colorBlendFactor = 0
+        } else {
+            self.color = color
+            self.colorBlendFactor = fallbackBlendFactor
+        }
+    }
+}
+
+private extension UIColor {
+    var mermaidTemplateCacheKey: String {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        return String(format: "%.4f,%.4f,%.4f,%.4f", red, green, blue, alpha)
+    }
+}
 
 extension Mermaid {
     /// Tinge todas as partes do corpo com a paleta interpolada pela profundidade.

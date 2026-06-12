@@ -104,6 +104,7 @@ final class EventSystem {
         ctx.stats.curiosity = min(100, ctx.stats.curiosity + 1)
         ctx.stats.addMemory("Investigou \(objective.label)")
         objective.onReach?()
+        GameAudio.shared.play(.pearlReward)
         ctx.say("Ela investigou \(objective.label)! ✨ 🐚+\(gainedPearls)")
     }
 
@@ -125,9 +126,9 @@ final class EventSystem {
         if zone != .surface && zone != .clear {
             options.append((2, specialChallengeFish))
         }
-        if ctx.mermaidPosition.y > -2500 {
+        if ctx.depth.allowsSurfaceTrafficEvents(atY: ctx.mermaidPosition.y) {
             options.append((2, boatPassing))
-            if ctx.stats.isUnlocked(.surface) {
+            if ctx.depth.isUnlocked(.surface) {
                 options.append((2, fallingObject))
             }
         }
@@ -173,6 +174,7 @@ final class EventSystem {
         if origin.distance(to: ctx.mermaidPosition) < 300 {
             ctx.stats.boostMood(2)
         }
+        GameAudio.shared.play(.ambientBubbleBurst)
     }
 
     private func current() {
@@ -203,6 +205,7 @@ final class EventSystem {
         driftResetTimer = driftDuration
         ctx.autonomy.drift = drift
         spawnCurrentBurst(drift: drift, near: position)
+        GameAudio.shared.play(.currentRush)
         ctx.say("Uma correnteza passou! 🌊")
     }
 
@@ -304,6 +307,7 @@ final class EventSystem {
 
     private func glowingFood() {
         guard let food = ctx.food.spawnRare(near: ctx.mermaidPosition) else { return }
+        GameAudio.shared.play(.foodRareSpawn)
         ctx.say("Algo brilhante apareceu por perto... ✨ (Objetivo disponível)")
         setObjective(label: "algo brilhante",
                      duration: 60,
@@ -317,6 +321,7 @@ final class EventSystem {
         guard let world = worldNode else { return }
         let zone = DepthZone.zone(atY: ctx.mermaidPosition.y)
         guard let fish = ctx.fish.spawnFish(zone: zone, near: ctx.mermaidPosition, rare: true) else { return }
+        GameAudio.shared.play(.rareFishPass)
         ctx.say("Um peixe raro está passando! 👀 (Objetivo disponível)")
         setObjective(label: "o peixe raro",
                      duration: 45,
@@ -337,6 +342,7 @@ final class EventSystem {
                     self.ctx.stats.gainXP(15)
                     let gained = self.ctx.stats.awardPearls(2)
                     self.ctx.stats.addMemory("Viu um peixe raro em \(zone.displayName)")
+                    GameAudio.shared.play(.pearlReward)
                     self.ctx.say("Ela observou o peixe raro de pertinho! ✨ 🐚+\(gained)")
                 }
             }
@@ -355,6 +361,7 @@ final class EventSystem {
         world.addChild(shadow)
         let travel = SKAction.moveTo(x: fromLeft ? World.maxX + 300 : World.minX - 300, duration: 9)
         shadow.run(.sequence([travel, .removeFromParent()]))
+        GameAudio.shared.play(.bigShadow)
 
         if ctx.stats.courage < 45 {
             ctx.autonomy.scare(from: shadow.position)
@@ -369,6 +376,7 @@ final class EventSystem {
     private func specialChallengeFish() {
         let zone = DepthZone.zone(atY: ctx.mermaidPosition.y)
         ctx.challenges.spawnSpecialGiver(near: ctx.mermaidPosition, zone: zone)
+        GameAudio.shared.play(.rareFishPass)
         ctx.say("Um peixe dourado trouxe um Desafio especial! 💎🏆")
     }
 
@@ -392,6 +400,7 @@ final class EventSystem {
             .moveTo(x: fromLeft ? World.maxX + 250 : World.minX - 250, duration: 14),
             .removeFromParent()
         ]))
+        GameAudio.shared.play(.boatMuffled)
         ctx.say("Um barco passa lá em cima... ⛵️")
 
         if ctx.mermaidPosition.y > -350 && ctx.stats.courage < 50 {
@@ -415,6 +424,7 @@ final class EventSystem {
         fall.eaeInEaseOut()
         object.run(.sequence([
             fall,
+            .run { GameAudio.shared.play(.fallingSplash) },
             .run { [weak self] in
                 guard let self, let world = self.worldNode else { return }
                 let kind = FoodKind(name: "um objeto humano", weight: 1, nutrition: 5,

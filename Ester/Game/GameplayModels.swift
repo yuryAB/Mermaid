@@ -7,6 +7,7 @@
 
 import Foundation
 import SpriteKit
+import UIKit
 
 // MARK: - Limites do mundo
 
@@ -511,6 +512,7 @@ enum GameUI {
 
     private static var gradientCache: [String: SKTexture] = [:]
     private static var paperCache: [String: SKTexture] = [:]
+    private static var iconCache: [String: SKTexture] = [:]
 
     /// Retorna uma lavagem suave, não um gradiente escuro.
     static func tintedColors(_ tint: UIColor) -> [UIColor] {
@@ -583,6 +585,73 @@ enum GameUI {
 
         let texture = SKTexture(image: image)
         paperCache[key] = texture
+        return texture
+    }
+
+    static func assetIconNode(named name: String,
+                              color: UIColor,
+                              size: CGFloat) -> SKSpriteNode {
+        let sprite: SKSpriteNode
+        if let texture = tintedIconTexture(named: name, color: color, pointSize: size) {
+            sprite = SKSpriteNode(texture: texture)
+        } else {
+            sprite = SKSpriteNode(imageNamed: name)
+        }
+        sprite.size = CGSize(width: size, height: size)
+        return sprite
+    }
+
+    static func symbolIconNode(named symbolName: String,
+                               fallback: String,
+                               color: UIColor,
+                               size: CGFloat) -> SKNode {
+        let node = SKNode()
+        let configuration = UIImage.SymbolConfiguration(pointSize: size, weight: .semibold)
+        if let image = UIImage(systemName: symbolName, withConfiguration: configuration),
+           let texture = tintedIconTexture(image: image, key: "symbol:\(symbolName)", color: color, pointSize: size) {
+            let sprite = SKSpriteNode(texture: texture)
+            sprite.size = CGSize(width: size, height: size)
+            node.addChild(sprite)
+        } else {
+            let label = SKLabelNode(text: fallback)
+            label.fontName = "AvenirNext-Heavy"
+            label.fontSize = size * 0.72
+            label.fontColor = color
+            label.verticalAlignmentMode = .center
+            label.horizontalAlignmentMode = .center
+            node.addChild(label)
+        }
+        return node
+    }
+
+    private static func tintedIconTexture(named name: String,
+                                          color: UIColor,
+                                          pointSize: CGFloat) -> SKTexture? {
+        guard let source = UIImage(named: name) else { return nil }
+        return tintedIconTexture(image: source, key: "asset:\(name)", color: color, pointSize: pointSize)
+    }
+
+    private static func tintedIconTexture(image source: UIImage,
+                                          key sourceKey: String,
+                                          color: UIColor,
+                                          pointSize: CGFloat) -> SKTexture? {
+        let w = max(1, Int(pointSize.rounded()))
+        let h = max(1, Int(pointSize.rounded()))
+        let key = "\(sourceKey)|\(w)x\(h)|\(color.cacheKey)"
+        if let cached = iconCache[key] { return cached }
+
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = UIScreen.main.scale
+        format.opaque = false
+        let canvasSize = CGSize(width: pointSize, height: pointSize)
+        let tintedImage = UIGraphicsImageRenderer(size: canvasSize, format: format).image { context in
+            let rect = source.size.aspectFitRect(in: CGRect(origin: .zero, size: canvasSize))
+            color.setFill()
+            context.cgContext.fill(rect)
+            source.draw(in: rect, blendMode: .destinationIn, alpha: 1)
+        }
+        let texture = SKTexture(image: tintedImage)
+        iconCache[key] = texture
         return texture
     }
 
@@ -677,5 +746,28 @@ enum GameUI {
         label.zPosition = 2
         container.addChild(label)
         return container
+    }
+}
+
+private extension UIColor {
+    var cacheKey: String {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        return String(format: "%.3f,%.3f,%.3f,%.3f", red, green, blue, alpha)
+    }
+}
+
+private extension CGSize {
+    func aspectFitRect(in bounds: CGRect) -> CGRect {
+        guard width > 0, height > 0 else { return bounds }
+        let scale = min(bounds.width / width, bounds.height / height)
+        let fittedSize = CGSize(width: width * scale, height: height * scale)
+        return CGRect(x: bounds.midX - fittedSize.width / 2,
+                      y: bounds.midY - fittedSize.height / 2,
+                      width: fittedSize.width,
+                      height: fittedSize.height)
     }
 }

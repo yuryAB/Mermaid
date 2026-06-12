@@ -1,0 +1,26 @@
+{
+  "source": "Freesound",
+  "downloadedAt": "2026-06-12T17:02:28.720Z",
+  "query": "short water splash bubble",
+  "previewKey": "preview-hq-mp3",
+  "file": "Ester/Audio/Minigames/challenge_success.mp3",
+  "sound": {
+    "id": 27360,
+    "name": "water_dribble_07.wav",
+    "username": "junggle",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "duration": 0.927302,
+    "url": "https://freesound.org/people/junggle/sounds/27360/",
+    "tags": [
+      "aqua",
+      "bubble",
+      "flap",
+      "liquid",
+      "purl",
+      "short",
+      "splash",
+      "stereo",
+      "water"
+    ]
+  }
+}

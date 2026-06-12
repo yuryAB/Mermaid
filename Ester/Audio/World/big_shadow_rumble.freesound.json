@@ -1,0 +1,23 @@
+{
+  "source": "Freesound",
+  "downloadedAt": "2026-06-12T14:55:44.075Z",
+  "query": "deep rumble",
+  "previewKey": "preview-hq-mp3",
+  "file": "Ester/Audio/World/big_shadow_rumble.mp3",
+  "sound": {
+    "id": 38711,
+    "name": "Deep Rumble.wav",
+    "username": "shimsewn",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "duration": 0.562494,
+    "url": "https://freesound.org/people/shimsewn/sounds/38711/",
+    "tags": [
+      "bass",
+      "deep",
+      "electronic",
+      "low",
+      "percussion",
+      "rumble"
+    ]
+  }
+}

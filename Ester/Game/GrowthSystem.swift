@@ -229,6 +229,7 @@ final class GrowthSystem {
         tapCount += 1
 
         addHatchProgress(0.02)
+        GameAudio.shared.play(.eggTap)
 
         if egg.action(forKey: "wiggle") == nil {
             let wiggle = SKAction.sequence([
@@ -283,6 +284,7 @@ final class GrowthSystem {
         let progress = ctx.stats.hatchProgress
         while crackCount < crackThresholds.count && progress >= crackThresholds[crackCount] {
             crackCount += 1
+            GameAudio.shared.play(.eggCrack)
             let path = UIBezierPath()
             let startX = CGFloat.random(in: -30...30)
             let startY = CGFloat.random(in: -30...40)
@@ -368,6 +370,7 @@ final class GrowthSystem {
             }
         ]))
         ctx.stats.addMemory("Nasceu! 🌊")
+        GameAudio.shared.play(.hatch)
         ctx.say("Ela nasceu! 🧜‍♀️🌊")
         ctx.stats.save()
     }
@@ -381,6 +384,7 @@ final class GrowthSystem {
         let gained = ctx.stats.awardPearls(20)
         ctx.stats.courage = min(100, ctx.stats.courage + 5)
         ctx.stats.addMemory("Evoluiu para \(next.displayName)")
+        GameAudio.shared.play(.evolution)
         let grow = SKAction.scale(to: next.scale, duration: 1.5)
         grow.eaeInEaseOut()
         mermaid.base.run(grow)

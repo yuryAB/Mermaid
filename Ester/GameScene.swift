@@ -21,6 +21,7 @@ class GameScene: SKScene {
     private var hud: HUDLayer!
     private var plotOverlay: TideWeavingOverlay?
     private var climbOverlay: BubbleClimbOverlay?
+    private var challengeBackdrop: SKNode?
     private var regionMenu: RegionMenuOverlay?
     private var refugeOverlay: RefugeOverlay?
     private var refugePortal: RefugePortalNode?
@@ -46,6 +47,8 @@ class GameScene: SKScene {
 
     override func didMove(to view: SKView) {
         physicsWorld.gravity = .zero
+        GameAudio.shared.configure()
+        GameAudio.shared.preloadCoreSounds()
 
         stats = MermaidStats.load()
         offlineSummary = OfflineProgressSystem.apply(stats: stats)
@@ -68,6 +71,7 @@ class GameScene: SKScene {
         snapCameraToTarget()
         worldChunkManager?.update(dt: 1, cameraPosition: cameraNode.position)
         updateOceanBackdrop(dt: 0, waterColor: ctx.depth.waterColor(atY: cameraNode.position.y))
+        GameAudio.shared.updateOceanAmbience(for: ctx.depth.currentZone)
 
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(saveOnBackground),
@@ -156,6 +160,9 @@ class GameScene: SKScene {
         hud.zPosition = 100
         hud.onCommand = { [weak self] command in
             self?.ctx.autonomy.give(command)
+        }
+        hud.onGiveSpaceTap = { [weak self] in
+            self?.ctx.autonomy.startGivingSpace()
         }
         hud.onNameEditTap = { [weak self] in
             self?.openMermaidNameEditor()
@@ -606,11 +613,15 @@ class GameScene: SKScene {
                     evolutionNote: ctx.growth.evolutionNote(),
                     objectiveAvailable: ctx.events.currentObjective != nil,
                     commandCooldowns: ctx.autonomy.commandCooldownsRemaining,
-                    touchCooldownRemaining: ctx.autonomy.touchRequestCooldownRemaining)
+                    touchCooldownRemaining: ctx.autonomy.touchRequestCooldownRemaining,
+                    bondRecoveryState: ctx.autonomy.bondRecoveryHUDState)
 
         updateCamera(dt: dt)
         worldChunkManager?.update(dt: dt, cameraPosition: cameraNode.position)
         updateOceanBackdrop(dt: dt, waterColor: water)
+        if refugeOverlay == nil {
+            GameAudio.shared.updateOceanAmbience(for: ctx.depth.currentZone)
+        }
 
         saveTimer += dt
         if saveTimer > 20 {
@@ -664,6 +675,7 @@ class GameScene: SKScene {
 
     func openRegionMenu() {
         guard regionMenu == nil, !isChallengeOpen, refugeOverlay == nil else { return }
+        GameAudio.shared.play(.uiOpenPanel)
         let menu = RegionMenuOverlay(size: size,
                                      stats: stats,
                                      currentRegionId: ctx.regions.currentRegion?.id,
@@ -681,6 +693,9 @@ class GameScene: SKScene {
     }
 
     private func closeRegionMenu() {
+        if regionMenu != nil {
+            GameAudio.shared.play(.uiClosePanel)
+        }
         regionMenu?.removeFromParent()
         regionMenu = nil
     }
@@ -691,6 +706,7 @@ class GameScene: SKScene {
     func beginRefugeEntry() {
         guard refugeOverlay == nil, !isChallengeOpen, refugePortal == nil else { return }
         closeRegionMenu()
+        GameAudio.shared.play(.refugePortalOpen)
 
         let mermaidPos = ctx.mermaidPosition
         let angle = CGFloat.random(in: 0...(2 * .pi))
@@ -713,6 +729,7 @@ class GameScene: SKScene {
     func mermaidReachedRefugePortal() {
         guard let portal = refugePortal else { return }
         ctx.autonomy.paused = true
+        GameAudio.shared.play(.refugePortalEnter)
 
         let base = mermaidEntity.mermaid.base
         let enter = SKAction.group([
@@ -749,12 +766,15 @@ class GameScene: SKScene {
         overlay.zPosition = 195
         cameraNode.addChild(overlay)
         refugeOverlay = overlay
+        GameAudio.shared.startRefugeAmbience()
     }
 
     private func closeRefuge(resume: Bool) {
         guard refugeOverlay != nil else { return }
+        GameAudio.shared.play(.uiClosePanel)
         refugeOverlay?.removeFromParent()
         refugeOverlay = nil
+        GameAudio.shared.updateOceanAmbience(for: ctx.depth.currentZone)
         if resume {
             if stats.phase != .egg {
                 ctx.autonomy.paused = false
@@ -772,6 +792,7 @@ class GameScene: SKScene {
     func openChallenge(giver: FishNode) {
         guard !isChallengeOpen, refugeOverlay == nil else { return }
         guard let kind = giver.offeredChallenge else { return }
+        GameAudio.shared.play(.challengeOpen)
         let special = giver.isSpecialChallenge
         let giverDisplay = giver.makeGiverDisplayNode()
         ctx.challenges.consumeChallenge(of: giver)
@@ -781,6 +802,7 @@ class GameScene: SKScene {
     /// Durante o ovo: o Desafio: Trama abre direto (energia de nascimento).
     func openHatchingChallenge() {
         guard !isChallengeOpen, refugeOverlay == nil else { return }
+        GameAudio.shared.play(.challengeOpen)
         presentChallenge(kind: .plot, special: false, giverDisplay: nil, hatching: true)
     }
 
@@ -792,6 +814,7 @@ class GameScene: SKScene {
         let zone = ctx.depth.currentZone
         stats.energy = max(0, stats.energy - 8)
         ctx.autonomy.paused = true
+        showChallengeBackdrop()
 
         switch kind {
         case .plot:
@@ -835,11 +858,39 @@ class GameScene: SKScene {
         }
     }
 
+    private func showChallengeBackdrop() {
+        challengeBackdrop?.removeFromParent()
+
+        let node = SKNode()
+        node.zPosition = 190
+        node.position = CGPoint(x: 0, y: -modalDropOffset)
+
+        let veil = SKShapeNode(rectOf: CGSize(width: size.width * 2.4, height: size.height * 2.4))
+        veil.fillColor = UIColor.black.withAlphaComponent(0.54)
+        veil.strokeColor = .clear
+        node.addChild(veil)
+
+        for _ in 0..<18 {
+            let bubble = SKShapeNode(circleOfRadius: CGFloat.random(in: 2.5...7.0))
+            bubble.fillColor = UIColor.white.withAlphaComponent(0.035)
+            bubble.strokeColor = GameUI.palePaper.withAlphaComponent(0.10)
+            bubble.lineWidth = 0.8
+            bubble.position = CGPoint(x: CGFloat.random(in: -size.width * 0.55...size.width * 0.55),
+                                      y: CGFloat.random(in: -size.height * 0.55...size.height * 0.55))
+            node.addChild(bubble)
+        }
+
+        cameraNode.addChild(node)
+        challengeBackdrop = node
+    }
+
     private func closeChallenge(result: ChallengeResult, zone: DepthZone) {
         plotOverlay?.removeFromParent()
         plotOverlay = nil
         climbOverlay?.removeFromParent()
         climbOverlay = nil
+        challengeBackdrop?.removeFromParent()
+        challengeBackdrop = nil
 
         let gainedPearls = result.isHatching ? 0 : stats.awardPearls(result.pearls)
 
@@ -847,6 +898,7 @@ class GameScene: SKScene {
         if result.isHatching || stats.phase == .egg {
             ctx.growth.addHatchProgress(CGFloat(result.score) / 900)
             stats.save()
+            GameAudio.shared.play(.eggTap, volumeMultiplier: 0.7)
             ctx.say("O desafio reuniu energia de nascimento! 🥚✨")
             return
         }
@@ -917,6 +969,7 @@ class GameScene: SKScene {
     }
 
     private func showTouchRipple(at point: CGPoint, accepted: Bool = true) {
+        GameAudio.shared.play(accepted ? .worldTapAccept : .worldTapReject)
         let color = accepted
             ? UIColor(white: 1, alpha: 0.75)
             : GameUI.coral.withAlphaComponent(0.82)

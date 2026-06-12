@@ -10,6 +10,13 @@
 import Foundation
 import SpriteKit
 
+enum BondRecoveryHUDState {
+    case hidden
+    case available
+    case waiting(TimeInterval)
+    case ready(Int)
+}
+
 final class AutonomySystem {
     unowned let ctx: GameContext
 
@@ -25,10 +32,13 @@ final class AutonomySystem {
     private weak var touchFoodTarget: FoodNode?
     private weak var touchFishTarget: FishNode?
     private weak var touchChallengeTarget: FishNode?
+    private var bondRecoveryState: BondRecoveryState = .idle
     private var lastAnimation: MovementType = .idle
     private var lastFacing: Mermaid.Direction = .none
     private var eatCooldown: CGFloat = 0
     private var interactCooldown: CGFloat = 0
+    private var boundaryFeedbackCooldown: CGFloat = 0
+    private var activeBoundaryContact: DepthBoundaryEdge?
     private var wobblePhase: CGFloat = .random(in: 0...10)
 
     private enum TrustBalance {
@@ -38,6 +48,20 @@ final class AutonomySystem {
         static let unmetNeedRefusal: CGFloat = 2.6
         static let forcedRiskWhileHungry: CGFloat = 3.0
         static let exhaustedRefusal: CGFloat = 4.0
+    }
+
+    private enum BondRecoveryBalance {
+        static let lowTrustThreshold: CGFloat = 10
+        static let spaceDuration: TimeInterval = 10
+        static let spaceTrustGain: CGFloat = 6
+        static let acceptedRequestTrustGain: CGFloat = 4
+        static let guaranteedRequestCount = 5
+    }
+
+    private enum BondRecoveryState {
+        case idle
+        case waiting(until: Date)
+        case ready(remainingRequests: Int)
     }
 
     /// Pausa total (fase de ovo, puzzle aberto).
@@ -60,6 +84,24 @@ final class AutonomySystem {
         guard let until = touchRequestCooldownUntil else { return 0 }
         return max(0, until.timeIntervalSince(Date()))
     }
+    var bondRecoveryHUDState: BondRecoveryHUDState {
+        guard stats.phase != .egg else { return .hidden }
+        switch bondRecoveryState {
+        case .idle:
+            return stats.trust < BondRecoveryBalance.lowTrustThreshold ? .available : .hidden
+        case .waiting(let until):
+            return .waiting(max(0, until.timeIntervalSince(Date())))
+        case .ready(let remainingRequests):
+            return .ready(remainingRequests)
+        }
+    }
+
+    private var isBondRecoveryRequestReady: Bool {
+        if case .ready(let remainingRequests) = bondRecoveryState {
+            return remainingRequests > 0
+        }
+        return false
+    }
 
     init(ctx: GameContext) {
         self.ctx = ctx
@@ -68,11 +110,13 @@ final class AutonomySystem {
     // MARK: - Loop principal
 
     func update(dt: CGFloat) {
+        updateBondRecovery()
         guard !paused else { return }
         intentTime += dt
         decisionCooldown -= dt
         eatCooldown -= dt
         interactCooldown -= dt
+        boundaryFeedbackCooldown -= dt
         wobblePhase += dt
 
         tickStats(dt: dt)
@@ -385,6 +429,7 @@ final class AutonomySystem {
         eatCooldown = 1.2
         touchFoodTarget = nil
         ctx.food.consume(food)
+        GameAudio.shared.play(.mermaidEat)
         intent = .eating
         target = nil
         intentTime = 0
@@ -395,6 +440,7 @@ final class AutonomySystem {
 
     func scare(from point: CGPoint) {
         guard !paused, intent != .inChallenge, intent != .enteringRefuge else { return }
+        GameAudio.shared.play(.mermaidScared)
         stats.scare(duration: 7)
         let dx = position.x - point.x
         let dy = position.y - point.y
@@ -448,6 +494,58 @@ final class AutonomySystem {
 
     // MARK: - Comandos do jogador
 
+    func startGivingSpace() {
+        guard stats.phase != .egg else { return }
+        switch bondRecoveryState {
+        case .waiting:
+            return
+        case .ready(_):
+            ctx.say("Ela já respirou um pouco. Pode pedir com calma agora.")
+            return
+        case .idle:
+            guard stats.trust < BondRecoveryBalance.lowTrustThreshold else { return }
+        }
+
+        bondRecoveryState = .waiting(until: Date().addingTimeInterval(BondRecoveryBalance.spaceDuration))
+        commandBias = nil
+        touchRequestCooldownUntil = nil
+        GameAudio.shared.play(.mermaidRest)
+        if !paused, intent != .inChallenge, intent != .enteringRefuge {
+            setIntent(.observing)
+            decisionCooldown = CGFloat(BondRecoveryBalance.spaceDuration)
+            showEmotion(.sad, duration: 2)
+        }
+        ctx.say("Você deu espaço. Ela ficou quieta, mas a tensão começou a baixar.")
+    }
+
+    private func updateBondRecovery() {
+        guard case .waiting(let until) = bondRecoveryState else { return }
+        guard Date() >= until else { return }
+        stats.trust = min(100, stats.trust + BondRecoveryBalance.spaceTrustGain)
+        commandCooldownUntil.removeAll()
+        touchRequestCooldownUntil = nil
+        bondRecoveryState = .ready(remainingRequests: BondRecoveryBalance.guaranteedRequestCount)
+        if !paused {
+            showEmotion(.satisfied, duration: 1.8)
+        }
+        GameAudio.shared.play(.uiConfirm)
+        ctx.say("Ela respirou um pouco. Pode pedir com calma agora.")
+    }
+
+    private func rewardAcceptedRequest(baseGain: CGFloat, guaranteedByBondRecovery: Bool) {
+        var gain = baseGain
+        if guaranteedByBondRecovery {
+            gain += BondRecoveryBalance.acceptedRequestTrustGain
+            if case .ready(let remainingRequests) = bondRecoveryState {
+                let nextRemaining = max(0, remainingRequests - 1)
+                bondRecoveryState = nextRemaining > 0
+                    ? .ready(remainingRequests: nextRemaining)
+                    : .idle
+            }
+        }
+        stats.trust = min(100, stats.trust + gain)
+    }
+
     func give(_ command: PlayerCommand) {
         clearExpiredCommandCooldowns()
         if let until = commandCooldownUntil[command], until > Date() {
@@ -466,18 +564,19 @@ final class AutonomySystem {
         guard intent != .inChallenge else { return }
         guard intent != .enteringRefuge else { return }
 
+        let guaranteedByBondRecovery = isBondRecoveryRequestReady
         let desired: MermaidIntent
         switch command {
         case .explore:
             desired = .wandering
         case .seekFood:
-            if stats.hunger < 35 {
+            if !guaranteedByBondRecovery && stats.hunger < 35 {
                 penalizeTrust(TrustBalance.inconvenientCareAsk)
                 refuse(command, saying: "Ela ainda está saciada e virou o rostinho.")
                 return
             }
             // teimosia de criança: quanto mais nova, mais recusa comer
-            if CGFloat.random(in: 0...1) < eatRefusalChance() {
+            if !guaranteedByBondRecovery && CGFloat.random(in: 0...1) < eatRefusalChance() {
                 penalizeTrust(TrustBalance.inconvenientCareAsk)
                 let excuses = [
                     "Não quero comer agora! 😤",
@@ -497,17 +596,21 @@ final class AutonomySystem {
             return
         case .refuge:
             // portal mágico: ela sempre vai, mas agora dá para VER o caminho
+            if guaranteedByBondRecovery {
+                rewardAcceptedRequest(baseGain: TrustBalance.acceptedCommand,
+                                      guaranteedByBondRecovery: true)
+            }
             ctx.scene?.beginRefugeEntry()
             return
         case .challenge:
             let hungerLimit: CGFloat = stats.phase == .baby ? 65 : 92
             let energyLimit: CGFloat = stats.phase == .baby ? 35 : 8
-            if stats.hunger > hungerLimit {
+            if !guaranteedByBondRecovery && stats.hunger > hungerLimit {
                 penalizeTrust(TrustBalance.unmetNeedRefusal)
                 refuse(command, saying: "Faminta demais para um desafio... me ajuda a comer algo?")
                 return
             }
-            if stats.energy < energyLimit {
+            if !guaranteedByBondRecovery && stats.energy < energyLimit {
                 penalizeTrust(TrustBalance.exhaustedRefusal)
                 refuse(command, saying: "Preciso descansar antes de um desafio... 😴")
                 return
@@ -529,11 +632,11 @@ final class AutonomySystem {
                 refuse(command, saying: "Já estamos no fundo do abismo.")
                 return
             }
-            guard stats.energy > 15 else {
+            guard guaranteedByBondRecovery || stats.energy > 15 else {
                 refuseTired(command)
                 return
             }
-            if stats.hunger > 80 {
+            if !guaranteedByBondRecovery && stats.hunger > 80 {
                 penalizeTrust(TrustBalance.forcedRiskWhileHungry)
                 refuse(command, saying: "Com essa fome eu não desço... 🍽")
                 return
@@ -548,24 +651,28 @@ final class AutonomySystem {
                 refuse(command, saying: "Já estou na superfície!")
                 return
             }
-            guard stats.energy > 10 else {
+            guard guaranteedByBondRecovery || stats.energy > 10 else {
                 refuseTired(command)
                 return
             }
             if let next = currentZone.shallower, !ctx.depth.isUnlocked(next) {
-                ctx.say(ctx.depth.ascentHint())
+                ctx.say(ctx.depth.ascentHint(for: next))
             }
             desired = .goingUp
         }
 
         let chance = commandAcceptanceChance(for: desired)
 
-        if CGFloat.random(in: 0...1) <= chance {
-            stats.trust = min(100, stats.trust + TrustBalance.acceptedCommand)
+        if guaranteedByBondRecovery || CGFloat.random(in: 0...1) <= chance {
+            rewardAcceptedRequest(baseGain: TrustBalance.acceptedCommand,
+                                  guaranteedByBondRecovery: guaranteedByBondRecovery)
             commandBias = (desired, Date().addingTimeInterval(30))
             setIntent(desired)
             decisionCooldown = .random(in: 6...10)
-            if desired == .seekingChallenge {
+            GameAudio.shared.play(.uiConfirm)
+            if guaranteedByBondRecovery {
+                ctx.say("Ela aceitou seu pedido. O vínculo entre vocês ficou mais forte.")
+            } else if desired == .seekingChallenge {
                 ctx.say("Ela foi atrás de um peixe com desafio... 🏆")
             } else if desired == .goingToObjective {
                 ctx.say("Ela foi investigar... 👀")
@@ -586,6 +693,7 @@ final class AutonomySystem {
             ? GameBalance.challengeCommandCooldown(for: stats.phase)
             : 10
         commandCooldownUntil[command] = Date().addingTimeInterval(cooldown)
+        GameAudio.shared.play(.uiReject)
         showEmotion(.stubborn, duration: 1.8)
         ctx.say(message)
     }
@@ -631,7 +739,7 @@ final class AutonomySystem {
     @discardableResult
     func requestFoodFromTouch(_ food: FoodNode) -> Bool {
         guard food.parent != nil else { return false }
-        guard stats.hunger >= 28 || food.kind.pearls > 0 || food.kind.xp >= 10 else {
+        guard isBondRecoveryRequestReady || stats.hunger >= 28 || food.kind.pearls > 0 || food.kind.xp >= 10 else {
             return rejectTouchRequest("Ela viu \(food.kind.name), mas não está com fome agora.")
         }
         guard acceptTouchRequest(for: .seekingFood,
@@ -670,10 +778,10 @@ final class AutonomySystem {
         guard giver.parent != nil, giver.offeredChallenge != nil else { return false }
         let hungerLimit: CGFloat = stats.phase == .baby ? 65 : 92
         let energyLimit: CGFloat = stats.phase == .baby ? 35 : 8
-        guard stats.hunger <= hungerLimit else {
+        guard isBondRecoveryRequestReady || stats.hunger <= hungerLimit else {
             return rejectTouchRequest("Faminta demais para um desafio... me ajuda a comer algo?")
         }
-        guard stats.energy >= energyLimit else {
+        guard isBondRecoveryRequestReady || stats.energy >= energyLimit else {
             return rejectTouchRequest("Preciso descansar antes de um desafio... 😴", emotion: .tired)
         }
         guard acceptTouchRequest(for: .seekingChallenge,
@@ -706,10 +814,15 @@ final class AutonomySystem {
             return false
         }
 
+        let guaranteedByBondRecovery = isBondRecoveryRequestReady
         let chance = touchAcceptanceChance(for: desired)
-        if CGFloat.random(in: 0...1) <= chance {
-            stats.trust = min(100, stats.trust + 0.15)
-            ctx.say(acceptedMessage)
+        if guaranteedByBondRecovery || CGFloat.random(in: 0...1) <= chance {
+            rewardAcceptedRequest(baseGain: 0.15,
+                                  guaranteedByBondRecovery: guaranteedByBondRecovery)
+            GameAudio.shared.play(.uiConfirm)
+            ctx.say(guaranteedByBondRecovery
+                    ? "Ela aceitou seu pedido. O vínculo entre vocês ficou mais forte."
+                    : acceptedMessage)
             return true
         }
 
@@ -721,6 +834,7 @@ final class AutonomySystem {
     private func rejectTouchRequest(_ message: String,
                                     emotion: MermaidEmotion = .stubborn) -> Bool {
         touchRequestCooldownUntil = Date().addingTimeInterval(10)
+        GameAudio.shared.play(.uiReject)
         showEmotion(emotion, duration: 1.8)
         ctx.say("\(message) Tente outro gesto em 10s.")
         return false
@@ -777,6 +891,7 @@ final class AutonomySystem {
     private func interact(with fish: FishNode) {
         interactCooldown = 8
         ctx.fish.interact(fish)
+        GameAudio.shared.play(.mermaidFishPlay)
         stats.boostMood(6)
         stats.gainXP(3)
         if Int.random(in: 0..<12) == 0 {
@@ -862,9 +977,40 @@ final class AutonomySystem {
         p.y += sin(wobblePhase * 1.6) * 8 * dt
 
         let yRange = ctx.depth.allowedYRange()
+        let attemptedAboveLimit = p.y > yRange.upperBound + 1
+        let attemptedBelowLimit = p.y < yRange.lowerBound - 1
+        let verticalMotion = velocity.dy + drift.dy
+        let movingUp = verticalMotion > 20 || intent == .goingUp
+        let movingDown = verticalMotion < -20 || intent == .goingDeeper
+        let boundaryContact: DepthBoundaryEdge?
+        if attemptedAboveLimit && movingUp {
+            boundaryContact = .upper
+        } else if attemptedBelowLimit && movingDown {
+            boundaryContact = .lower
+        } else {
+            boundaryContact = nil
+        }
+
         p.x = p.x.clamped(to: World.minX...World.maxX)
         p.y = p.y.clamped(to: yRange)
+        if let boundaryContact {
+            if activeBoundaryContact != boundaryContact {
+                activeBoundaryContact = boundaryContact
+                showBoundaryFeedback(for: boundaryContact)
+            }
+        } else if p.y < yRange.upperBound - 120 && p.y > yRange.lowerBound + 120 {
+            activeBoundaryContact = nil
+        }
         mermaid.base.position = p
+    }
+
+    private func showBoundaryFeedback(for edge: DepthBoundaryEdge) {
+        ctx.depth.flashBoundaryPalette(for: edge)
+        guard boundaryFeedbackCooldown <= 0 else { return }
+        boundaryFeedbackCooldown = 8
+        GameAudio.shared.play(.uiReject)
+        showEmotion(.stubborn, duration: 1.4)
+        ctx.say(ctx.depth.boundaryHint(for: edge))
     }
 
     private func updateAnimation() {

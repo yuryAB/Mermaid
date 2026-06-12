@@ -1,0 +1,23 @@
+{
+  "source": "Freesound",
+  "downloadedAt": "2026-06-12T14:52:52.715Z",
+  "query": "water ripple",
+  "previewKey": "preview-hq-mp3",
+  "file": "Ester/Audio/UI/world_tap_accept.mp3",
+  "sound": {
+    "id": 425209,
+    "name": "water_drop.wav",
+    "username": "velkstar",
+    "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+    "duration": 0.550476,
+    "url": "https://freesound.org/people/velkstar/sounds/425209/",
+    "tags": [
+      "drip",
+      "drop",
+      "liquid",
+      "ripple",
+      "splash",
+      "water"
+    ]
+  }
+}

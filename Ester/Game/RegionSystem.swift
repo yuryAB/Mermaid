@@ -97,6 +97,7 @@ final class RegionDiscoverySystem {
             ctx.stats.gainXP(40)
             ctx.stats.courage = min(100, ctx.stats.courage + 2)
             ctx.stats.addMemory("Descobriu \(region.name)")
+            GameAudio.shared.play(.regionDiscover)
             ctx.say("Nova região catalogada: \(region.name). Conchas +\(gained)")
         }
 
@@ -188,6 +189,7 @@ final class TravelSystem {
             return
         }
         ctx.stats.destinationRegionId = region.id
+        GameAudio.shared.play(.travelStart)
         ctx.say("Ela partiu rumo a \(region.name) 🌊 A viagem leva tempo...")
     }
 
@@ -203,6 +205,7 @@ final class TravelSystem {
             let gained = ctx.stats.awardPearls(4)
             ctx.stats.boostMood(8)
             ctx.stats.addMemory("Viajou até \(destination.name)")
+            GameAudio.shared.play(.travelArrive)
             ctx.say("Chegada registrada: \(destination.name). Conchas +\(gained)")
         }
     }
@@ -434,12 +437,14 @@ final class RegionMenuOverlay: SKNode {
         while let current = node {
             if let name = current.name {
                 if name == "region_close" {
+                    GameAudio.shared.play(.uiClosePanel)
                     onClose()
                     return
                 }
                 if name.hasPrefix("region_"),
                    listViewportRect.contains(location),
                    let region = rowRegions[String(name.dropFirst(7))] {
+                    GameAudio.shared.play(.uiConfirm)
                     onSelect(region)
                     return
                 }

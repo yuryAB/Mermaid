@@ -1,0 +1,21 @@
+{
+  "source": "Freesound",
+  "downloadedAt": "2026-06-12T14:52:53.697Z",
+  "query": "soft thud",
+  "previewKey": "preview-hq-mp3",
+  "file": "Ester/Audio/UI/world_tap_reject.mp3",
+  "sound": {
+    "id": 653910,
+    "name": "soft-hit.wav",
+    "username": "Krokulator",
+    "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+    "duration": 0.258322,
+    "url": "https://freesound.org/people/Krokulator/sounds/653910/",
+    "tags": [
+      "hit",
+      "impact",
+      "soft",
+      "thud"
+    ]
+  }
+}

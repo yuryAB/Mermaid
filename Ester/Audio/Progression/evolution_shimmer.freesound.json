@@ -1,0 +1,28 @@
+{
+  "source": "Freesound",
+  "downloadedAt": "2026-06-12T14:54:13.208Z",
+  "query": "shimmer",
+  "previewKey": "preview-hq-mp3",
+  "file": "Ester/Audio/Progression/evolution_shimmer.mp3",
+  "sound": {
+    "id": 703283,
+    "name": "FX_UX_quick_shimmer_reactive_up and down .wav",
+    "username": "PLukx",
+    "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+    "duration": 1.2188,
+    "url": "https://freesound.org/people/PLukx/sounds/703283/",
+    "tags": [
+      "UI",
+      "UX",
+      "alert",
+      "beep",
+      "button",
+      "dry",
+      "input",
+      "interaction",
+      "metallic",
+      "notification",
+      "shimmer"
+    ]
+  }
+}

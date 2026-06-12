@@ -19,6 +19,7 @@ final class YoungMermaidFigure: MermaidFigure {
         self.rig = rig
         assembleNodes()
         applyRig()
+        applyPalette(.upper)
         applyAnimationMode(.idle)
     }
 
@@ -134,41 +135,19 @@ final class YoungMermaidFigure: MermaidFigure {
     }
 
     func applyPalette(_ palette: MermaidPalette) {
-        head.headNode.color = palette.skin
-        head.hairFrontNode.color = palette.hair
-        head.hairBackNode.color = palette.hair
-        head.headNode.colorBlendFactor = 1.0
-        head.hairFrontNode.colorBlendFactor = 0.55
-        head.hairBackNode.colorBlendFactor = 0.55
-
-        body.body.color = palette.skin
-        body.waist.color = palette.skin
-        body.articulation.color = palette.vibrant1
-        body.waistScale.color = palette.vibrant1
-        body.finScale.color = palette.vibrant1
-        body.fin.color = palette.vibrant2
-        body.body.colorBlendFactor = 1.0
-        body.waist.colorBlendFactor = 1.0
-        body.articulation.colorBlendFactor = 0.5
-        body.waistScale.colorBlendFactor = 0.5
-        body.finScale.colorBlendFactor = 0.5
-        body.fin.colorBlendFactor = 1.0
-
-        arms.left.color = palette.skin
-        arms.right.color = palette.skin
-        arms.left.colorBlendFactor = 0.6
-        arms.right.colorBlendFactor = 0.6
-
-        face.eyebrows.left.color = palette.hair
-        face.eyebrows.right.color = palette.hair
-        face.eyebrows.left.colorBlendFactor = 1.0
-        face.eyebrows.right.colorBlendFactor = 1.0
-        face.eyes.left.color = palette.hair
-        face.eyes.right.color = palette.hair
-        face.eyes.left.colorBlendFactor = 0.25
-        face.eyes.right.colorBlendFactor = 0.25
-        face.mouth.base.color = palette.skin
-        face.mouth.base.colorBlendFactor = 0.25
+        head.headNode.applyTemplateTexture(named: "MermHead", color: palette.skin)
+        head.hairFrontNode.applyTemplateTexture(named: "MermHairFront", color: palette.hair)
+        head.hairBackNode.applyTemplateTexture(named: "MermHairBack", color: palette.hair)
+        body.body.applyTemplateTexture(named: "roundPiece", color: palette.skin)
+        body.waist.applyTemplateTexture(named: "roundPiece", color: palette.skin)
+        body.articulation.applyTemplateTexture(named: "roundPiece", color: palette.vibrant1)
+        body.waistScale.applyTemplateTexture(named: "waist", color: palette.vibrant1)
+        body.finScale.applyTemplateTexture(named: "finFront", color: palette.vibrant1)
+        body.fin.applyTemplateTexture(named: "finBack", color: palette.vibrant2)
+        arms.left.applyTemplateTexture(named: "hand2", color: palette.skin)
+        arms.right.applyTemplateTexture(named: "hand1", color: palette.skin)
+        face.eyebrows.left.applyTemplateTexture(named: "eyeBrow", color: palette.hair)
+        face.eyebrows.right.applyTemplateTexture(named: "eyeBrow", color: palette.hair)
     }
 
     func applyFacePose(_ pose: MermaidFacePose, animated: Bool) {

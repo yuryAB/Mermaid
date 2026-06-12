@@ -1,0 +1,24 @@
+{
+  "source": "Freesound",
+  "downloadedAt": "2026-06-12T14:59:08.369Z",
+  "query": "underwater ambience",
+  "previewKey": "preview-hq-mp3",
+  "file": "Ester/Audio/Ambience/ambient_shallow_reef.mp3",
+  "sound": {
+    "id": 567347,
+    "name": "Underwater ambience.wav",
+    "username": "Merrick079",
+    "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+    "duration": 44,
+    "url": "https://freesound.org/people/Merrick079/sounds/567347/",
+    "tags": [
+      "ambiance",
+      "ambience",
+      "ambient",
+      "atmosphere",
+      "background",
+      "ocean",
+      "underwater"
+    ]
+  }
+}

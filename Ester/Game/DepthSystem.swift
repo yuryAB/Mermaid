@@ -24,14 +24,53 @@ struct DepthEnvironment {
     let glowIntensity: CGFloat
 }
 
+enum DepthBoundaryEdge: Equatable {
+    case upper
+    case lower
+}
+
 final class DepthSystem {
     unowned let ctx: GameContext
 
+    private static let lockedSurfaceApproachTopY: CGFloat = DepthZone.shallow.yRange.upperBound - 800
+    private static let clearLayerApproachTopY: CGFloat = -150
+    private static let surfaceApproachTopY: CGFloat = 280
+    private static let surfaceTrafficMinY: CGFloat = -2500
+    private static let boundaryAlertDuration: CGFloat = 3
+    private static let boundaryBlinkDuration: CGFloat = 1.35
+
     private(set) var currentZone: DepthZone = .mid
     private var paletteTimer: CGFloat = 0
+    private var boundaryPaletteEffect: BoundaryPaletteEffect?
     private var unlockTimer: CGFloat = 2
 
     private let waterAnchors: [(y: CGFloat, color: UIColor)]
+
+    private struct BoundaryPaletteEffect {
+        let basePalette: MermaidPalette
+        let limitPalette: MermaidPalette
+        var elapsed: CGFloat = 0
+
+        var isFinished: Bool {
+            elapsed >= DepthSystem.boundaryAlertDuration
+        }
+
+        func palette() -> MermaidPalette {
+            if elapsed < DepthSystem.boundaryBlinkDuration {
+                return blinkPalette()
+            }
+            return limitPalette
+        }
+
+        private func blinkPalette() -> MermaidPalette {
+            let keyframes = [basePalette, limitPalette, basePalette, limitPalette, basePalette, limitPalette]
+            let progress = (elapsed / DepthSystem.boundaryBlinkDuration).clamped(to: 0...1)
+            let scaled = progress * CGFloat(keyframes.count - 1)
+            let index = min(Int(scaled), keyframes.count - 2)
+            let localT = DepthSystem.smoothStep(scaled - CGFloat(index))
+            return .lerp(keyframes[index], keyframes[index + 1], localT)
+        }
+    }
 
     init(ctx: GameContext) {
         self.ctx = ctx
@@ -155,6 +194,19 @@ final class DepthSystem {
     /// Paleta do corpo: clara só junto à superfície, padrão na imensa
     /// faixa do meio, escura apenas nas camadas realmente profundas.
     func mermaidPalette(atY y: CGFloat) -> MermaidPalette {
+        normalMermaidPalette(atY: y)
+    }
+
+    private func normalMermaidPalette(atY y: CGFloat) -> MermaidPalette {
+        switch ctx.stats.phase {
+        case .baby, .child:
+            return .main
+        case .egg, .teen, .young, .adult:
+            return continuousMermaidPalette(atY: y)
+        }
+    }
+
+    private func continuousMermaidPalette(atY y: CGFloat) -> MermaidPalette {
         if y >= -1500 { return .upper }
         if y >= -5000 {
             return .lerp(.upper, .main, (-y - 1500) / 3500)
@@ -188,13 +240,27 @@ final class DepthSystem {
             let gained = ctx.stats.awardPearls(1)
             ctx.stats.gainXP(10)
             ctx.stats.courage = min(100, ctx.stats.courage + 0.5)
+            GameAudio.shared.play(.depthRecord)
             ctx.say("Ela nadou mais fundo do que nunca! 🐚+\(gained)")
         }
 
+        var forcePaletteUpdate = false
+        if var effect = boundaryPaletteEffect {
+            effect.elapsed += dt
+            if effect.isFinished {
+                boundaryPaletteEffect = nil
+            } else {
+                boundaryPaletteEffect = effect
+            }
+            forcePaletteUpdate = true
+        }
+
         paletteTimer -= dt
-        if paletteTimer <= 0 {
-            paletteTimer = 0.25
-            ctx.mermaidEntity.mermaid.applyPalette(mermaidPalette(atY: y))
+        if forcePaletteUpdate || paletteTimer <= 0 {
+            paletteTimer = boundaryPaletteEffect == nil ? 0.25 : 0
+            let normalPalette = normalMermaidPalette(atY: y)
+            let displayPalette = boundaryPaletteEffect?.palette() ?? normalPalette
+            ctx.mermaidEntity.mermaid.applyPalette(displayPalette)
         }
 
         unlockTimer -= dt
@@ -207,7 +273,7 @@ final class DepthSystem {
     // MARK: - Desbloqueio de camadas
 
     func isUnlocked(_ zone: DepthZone) -> Bool {
-        ctx.stats.isUnlocked(zone)
+        Self.canAccess(zone, with: ctx.stats)
     }
 
     private func checkUnlocks() {
@@ -217,6 +283,7 @@ final class DepthSystem {
             let gained = ctx.stats.awardPearls(8)
             ctx.stats.gainXP(30)
             ctx.stats.addMemory("Alcançou a \(zone.displayName)")
+            GameAudio.shared.play(.zoneUnlock)
             ctx.say("🌊 Nova camada alcançável: \(zone.displayName)! 🐚+\(gained)")
         }
     }
@@ -230,9 +297,27 @@ final class DepthSystem {
         return true
     }
 
-    /// Mensagem para quando o jogador manda subir além do permitido.
-    func ascentHint() -> String {
-        "Ela ainda não está pronta para chegar tão perto da superfície. 🌅"
+    /// Mensagem para quando ela tenta subir além do permitido.
+    func ascentHint(for zone: DepthZone? = nil) -> String {
+        let stats = ctx.stats!
+        let target = zone ?? firstLockedAscentZone()
+
+        if let target {
+            if stats.phase < target.minPhase {
+                return "Ela ainda é muito nova para subir até a \(target.displayName)."
+            }
+            if let prerequisite = target.prerequisiteZone, !stats.isUnlocked(prerequisite) {
+                return "Ela precisa conhecer a \(prerequisite.displayName) antes de subir até a \(target.displayName)."
+            }
+            if stats.courage < target.courageRequired {
+                return "Ela ainda não tem coragem para subir até a \(target.displayName). 😟"
+            }
+            if let gate = target.adaptationGate, stats.adaptation(for: gate.zone) < gate.value {
+                return "Ela precisa se adaptar melhor à \(gate.zone.displayName) antes de subir mais."
+            }
+        }
+
+        return "Ela ainda não está pronta para chegar tão perto da superfície. 🌅"
     }
 
     /// Mensagem para quando o jogador manda descer além do permitido.
@@ -250,21 +335,85 @@ final class DepthSystem {
         return "Ela ainda não consegue descer até a \(zone.displayName)."
     }
 
+    func boundaryHint(for edge: DepthBoundaryEdge) -> String {
+        switch edge {
+        case .upper:
+            return ascentHint()
+        case .lower:
+            if let zone = firstLockedDescentZone() {
+                return descentHint(for: zone)
+            }
+            return "Ela chegou ao limite mais fundo que o oceano deixou hoje."
+        }
+    }
+
+    func flashBoundaryPalette(for edge: DepthBoundaryEdge) {
+        guard edge == .upper else { return }
+        boundaryPaletteEffect = BoundaryPaletteEffect(basePalette: normalMermaidPalette(atY: ctx.mermaidPosition.y),
+                                                      limitPalette: paletteForBoundary(edge))
+        paletteTimer = 0
+    }
+
     /// Faixa vertical onde a sereia pode nadar, baseada nas camadas liberadas.
     /// As fronteiras têm folga para ela nunca encostar em área bloqueada.
     func allowedYRange() -> ClosedRange<CGFloat> {
-        var top: CGFloat = DepthZone.shallow.yRange.upperBound - 80
-        if ctx.stats.isUnlocked(.surface) {
-            top = 280
-        } else if ctx.stats.isUnlocked(.clear) {
-            top = -150
+        Self.allowedYRange(for: ctx.stats)
+    }
+
+    static func allowedYRange(for stats: MermaidStats) -> ClosedRange<CGFloat> {
+        var top = lockedSurfaceApproachTopY
+        if canAccess(.surface, with: stats) {
+            top = surfaceApproachTopY
+        } else if canAccess(.clear, with: stats) {
+            top = clearLayerApproachTopY
         }
 
         var deepest = DepthZone.mid.yRange.lowerBound
-        for zone in DepthZone.allCases where zone != .surface && ctx.stats.isUnlocked(zone) {
+        for zone in DepthZone.allCases where zone != .surface && canAccess(zone, with: stats) {
             deepest = min(deepest, zone.yRange.lowerBound)
         }
         return (deepest + 80)...top
+    }
+
+    func allowsSurfaceTrafficEvents(atY y: CGFloat) -> Bool {
+        Self.canAccess(.clear, with: ctx.stats) && y > Self.surfaceTrafficMinY
+    }
+
+    private func firstLockedAscentZone() -> DepthZone? {
+        if !Self.canAccess(.clear, with: ctx.stats) { return .clear }
+        if !Self.canAccess(.surface, with: ctx.stats) { return .surface }
+        return nil
+    }
+
+    private func firstLockedDescentZone() -> DepthZone? {
+        let deepest = DepthZone.allCases
+            .filter { $0 != .surface && Self.canAccess($0, with: ctx.stats) }
+            .map(\.rawValue)
+            .max() ?? DepthZone.mid.rawValue
+        guard deepest < DepthZone.abyss.rawValue else { return nil }
+        for rawValue in (deepest + 1)...DepthZone.abyss.rawValue {
+            guard let zone = DepthZone(rawValue: rawValue) else { continue }
+            if !Self.canAccess(zone, with: ctx.stats) { return zone }
+        }
+        return nil
+    }
+
+    private func paletteForBoundary(_ edge: DepthBoundaryEdge) -> MermaidPalette {
+        switch edge {
+        case .upper:
+            return continuousMermaidPalette(atY: World.waterlineY)
+        case .lower:
+            return continuousMermaidPalette(atY: World.floorY)
+        }
+    }
+
+    private static func canAccess(_ zone: DepthZone, with stats: MermaidStats) -> Bool {
+        stats.isUnlocked(zone) && stats.phase >= zone.minPhase
+    }
+
+    private static func smoothStep(_ value: CGFloat) -> CGFloat {
+        let t = value.clamped(to: 0...1)
+        return t * t * (3 - 2 * t)
     }
 
     /// Dreno extra de energia em camadas pouco adaptadas.

@@ -259,6 +259,7 @@ final class FoodSystem {
         }
         if food.kind.pearls > 0 {
             let gained = stats.awardPearls(food.kind.pearls)
+            GameAudio.shared.play(.pearlReward)
             ctx.say("Ela achou \(food.kind.name)! 🐚+\(gained)")
         } else if Int.random(in: 0..<4) == 0 {
             ctx.say("Nham... \(food.kind.name) 😋")

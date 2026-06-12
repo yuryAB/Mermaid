@@ -1,0 +1,24 @@
+{
+  "source": "Freesound",
+  "downloadedAt": "2026-06-12T14:55:47.770Z",
+  "query": "portal whoosh",
+  "previewKey": "preview-hq-mp3",
+  "file": "Ester/Audio/Refuge/refuge_portal_open.mp3",
+  "sound": {
+    "id": 735062,
+    "name": "Fast Warp In",
+    "username": "GammaGool",
+    "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+    "duration": 1.2254,
+    "url": "https://freesound.org/people/GammaGool/sounds/735062/",
+    "tags": [
+      "Magic",
+      "Portal",
+      "Sci-Fi",
+      "Teleport",
+      "Warp",
+      "Whoosh",
+      "Zoom"
+    ]
+  }
+}

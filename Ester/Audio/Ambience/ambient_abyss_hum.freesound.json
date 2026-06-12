@@ -1,0 +1,27 @@
+{
+  "source": "Freesound",
+  "downloadedAt": "2026-06-12T14:59:34.099Z",
+  "query": "ocean ambience",
+  "previewKey": "preview-hq-mp3",
+  "file": "Ester/Audio/Ambience/ambient_abyss_hum.mp3",
+  "sound": {
+    "id": 817076,
+    "name": "Spooky Pulsing Ambience",
+    "username": "SecureSubset",
+    "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+    "duration": 29.0141,
+    "url": "https://freesound.org/people/SecureSubset/sounds/817076/",
+    "tags": [
+      "Ambience",
+      "Atmosphere",
+      "Castle",
+      "Drone",
+      "Fantasy",
+      "Free",
+      "Horror",
+      "Ocean",
+      "Pulse",
+      "Tone"
+    ]
+  }
+}

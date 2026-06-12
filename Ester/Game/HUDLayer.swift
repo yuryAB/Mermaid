@@ -13,6 +13,7 @@ import UIKit
 
 final class HUDLayer: SKNode {
     var onCommand: ((PlayerCommand) -> Void)?
+    var onGiveSpaceTap: (() -> Void)?
     var onDebugRigToolTap: (() -> Void)?
     var onNameEditTap: (() -> Void)?
 
@@ -28,6 +29,7 @@ final class HUDLayer: SKNode {
     private var depthLabel: SKLabelNode!
     private var growthLabel: SKLabelNode!
     private var pearlsLabel: SKLabelNode!
+    private var moodLabel: SKLabelNode!
     private var intentLabel: SKLabelNode!
     private var barLabels: [String: SKLabelNode] = [:]
     private var bars: [String: SKShapeNode] = [:]
@@ -45,12 +47,22 @@ final class HUDLayer: SKNode {
     private var messageLabel: SKLabelNode!
     private var touchCooldownChip: SKNode!
     private var touchCooldownLabel: SKLabelNode!
+    private var bondRecoveryBanner: SKNode!
+    private var bondRecoveryTitleLabel: SKLabelNode!
+    private var bondRecoveryMessageLabel: SKLabelNode!
+    private var bondRecoveryButton: SKNode!
+    private var bondRecoveryButtonLabel: SKLabelNode!
+    private var bondRecoveryTimerTrack: SKShapeNode!
+    private var bondRecoveryTimerFill: SKShapeNode!
+    private var bondRecoveryTimerWidth: CGFloat = 0
+    private var bondRecoveryTapEnabled = false
     private var lastEggMode = false
     private var lastObjectiveAvailable: Bool?
     private let enableDebugRigToolButton: Bool
     private var debugRigToolButton: SKNode?
     private var nameEditButton: SKNode?
     private let commandCooldownAnimationSeconds: TimeInterval = 10
+    private let bondRecoveryDurationSeconds: TimeInterval = 10
 
     init(size: CGSize, insets: UIEdgeInsets, enableDebugRigToolButton: Bool = false) {
         self.sceneSize = size
@@ -62,6 +74,7 @@ final class HUDLayer: SKNode {
         buildTopPanel()
         buildMessageBubble()
         buildIntentChip()
+        buildBondRecoveryBanner()
         buildButtons()
         buildDebugRigToolButton()
     }
@@ -272,6 +285,7 @@ final class HUDLayer: SKNode {
     private var topPanelTitleMaxWidth: CGFloat = 0
     private var topPanelStatusMaxWidth: CGFloat = 0
     private var topPanelPearlsMaxWidth: CGFloat = 0
+    private var topPanelMoodMaxWidth: CGFloat = 0
 
     private func buildTopPanel() {
         let panelWidth = sceneSize.width - 24
@@ -296,11 +310,12 @@ final class HUDLayer: SKNode {
         let halfW = panelWidth / 2
         let contentLeft = -halfW + 22
         let rightGutter: CGFloat = 18
-        let resourceClusterWidth: CGFloat = 142
+        let resourceClusterWidth: CGFloat = 122
         let resourceClusterLeft = halfW - rightGutter - resourceClusterWidth
         topPanelTitleMaxWidth = max(132, panelWidth - 178)
         topPanelStatusMaxWidth = max(96, resourceClusterLeft - contentLeft - 12)
         topPanelPearlsMaxWidth = 84
+        topPanelMoodMaxWidth = 84
 
         let clip = SKShapeNode(rectOf: CGSize(width: 34, height: 9), cornerRadius: 4)
         clip.fillColor = UIColor(red: 0.76, green: 0.77, blue: 0.70, alpha: 1)
@@ -354,9 +369,9 @@ final class HUDLayer: SKNode {
         phaseLabel.horizontalAlignmentMode = .left
         phaseLabel.verticalAlignmentMode = .center
         phaseLabel.preferredMaxLayoutWidth = topPanelStatusMaxWidth
-        phaseLabel.numberOfLines = 2
-        phaseLabel.lineBreakMode = .byWordWrapping
-        phaseLabel.position = CGPoint(x: contentLeft, y: panelHeight / 2 - 51)
+        phaseLabel.numberOfLines = 1
+        phaseLabel.lineBreakMode = .byTruncatingTail
+        phaseLabel.position = CGPoint(x: contentLeft, y: panelHeight / 2 - 50)
         panelContent.addChild(phaseLabel)
 
         depthLabel = makeLabel(fontSize: 11, style: .body, color: HUDPalette.mutedInk)
@@ -364,19 +379,19 @@ final class HUDLayer: SKNode {
         depthLabel.verticalAlignmentMode = .center
         depthLabel.preferredMaxLayoutWidth = topPanelStatusMaxWidth
         depthLabel.numberOfLines = 1
-        depthLabel.position = CGPoint(x: contentLeft, y: panelHeight / 2 - 70)
+        depthLabel.position = CGPoint(x: contentLeft, y: panelHeight / 2 - 72)
         panelContent.addChild(depthLabel)
 
         growthLabel = makeLabel(fontSize: 10, style: .note, color: HUDPalette.teal)
         growthLabel.horizontalAlignmentMode = .left
         growthLabel.verticalAlignmentMode = .center
-        growthLabel.position = CGPoint(x: contentLeft, y: panelHeight / 2 - 88)
+        growthLabel.position = CGPoint(x: contentLeft, y: panelHeight / 2 - 90)
         growthLabel.preferredMaxLayoutWidth = topPanelStatusMaxWidth
         growthLabel.numberOfLines = 1
         panelContent.addChild(growthLabel)
 
         let planktonIcon = HUDLayer.iconNode(kind: .shell, color: HUDPalette.gold)
-        planktonIcon.position = CGPoint(x: resourceClusterLeft + 14, y: panelHeight / 2 - 52)
+        planktonIcon.position = CGPoint(x: halfW - 126, y: panelHeight / 2 - 52)
         planktonIcon.zPosition = 8
         panelContent.addChild(planktonIcon)
 
@@ -386,6 +401,13 @@ final class HUDLayer: SKNode {
         pearlsLabel = pearlsTag.label
         pearlsLabel.preferredMaxLayoutWidth = topPanelPearlsMaxWidth
         pearlsLabel.numberOfLines = 1
+
+        let moodTag = makeTag(size: CGSize(width: 104, height: 22), accent: HUDPalette.algae)
+        moodTag.node.position = CGPoint(x: halfW - 64, y: panelHeight / 2 - 82)
+        panelContent.addChild(moodTag.node)
+        moodLabel = moodTag.label
+        moodLabel.preferredMaxLayoutWidth = topPanelMoodMaxWidth
+        moodLabel.numberOfLines = 1
 
         let divider = HUDLayer.pathNode(points: [
             CGPoint(x: -halfW + 18, y: -22),
@@ -634,6 +656,92 @@ final class HUDLayer: SKNode {
         touchCooldownChip.addChild(touchCooldownLabel)
     }
 
+    private func buildBondRecoveryBanner() {
+        let bannerSize = CGSize(width: min(sceneSize.width - 42, 364), height: 56)
+        bondRecoveryBanner = SKNode()
+        bondRecoveryBanner.position = CGPoint(x: 0, y: buttonRowY(0) + 58)
+        bondRecoveryBanner.zPosition = 12
+        bondRecoveryBanner.alpha = 0
+        bondRecoveryBanner.isHidden = true
+        addChild(bondRecoveryBanner)
+
+        let card = HUDLayer.paperCard(size: bannerSize,
+                                      cornerRadius: 8,
+                                      fill: HUDPalette.palePaper,
+                                      stroke: HUDPalette.coral.withAlphaComponent(0.68),
+                                      shadowAlpha: 0.16)
+        bondRecoveryBanner.addChild(card)
+
+        let accentLine = SKShapeNode(rectOf: CGSize(width: 4, height: bannerSize.height - 16),
+                                     cornerRadius: 2)
+        accentLine.fillColor = HUDPalette.coral.withAlphaComponent(0.66)
+        accentLine.strokeColor = .clear
+        accentLine.position = CGPoint(x: -bannerSize.width / 2 + 13, y: 0)
+        accentLine.zPosition = 4
+        bondRecoveryBanner.addChild(accentLine)
+
+        bondRecoveryTitleLabel = makeLabel(fontSize: 9.5, style: .noteBold, color: HUDPalette.teal)
+        bondRecoveryTitleLabel.horizontalAlignmentMode = .left
+        bondRecoveryTitleLabel.verticalAlignmentMode = .center
+        bondRecoveryTitleLabel.position = CGPoint(x: -bannerSize.width / 2 + 26, y: 13)
+        bondRecoveryTitleLabel.zPosition = 5
+        bondRecoveryBanner.addChild(bondRecoveryTitleLabel)
+
+        bondRecoveryMessageLabel = makeLabel(fontSize: 10.5, style: .body, color: HUDPalette.ink)
+        bondRecoveryMessageLabel.horizontalAlignmentMode = .left
+        bondRecoveryMessageLabel.verticalAlignmentMode = .center
+        bondRecoveryMessageLabel.preferredMaxLayoutWidth = bannerSize.width - 142
+        bondRecoveryMessageLabel.numberOfLines = 2
+        bondRecoveryMessageLabel.position = CGPoint(x: -bannerSize.width / 2 + 26, y: -6)
+        bondRecoveryMessageLabel.zPosition = 5
+        bondRecoveryBanner.addChild(bondRecoveryMessageLabel)
+
+        bondRecoveryTimerWidth = bannerSize.width - 52
+        bondRecoveryTimerTrack = SKShapeNode(rectOf: CGSize(width: bondRecoveryTimerWidth, height: 5),
+                                             cornerRadius: 2.5)
+        bondRecoveryTimerTrack.fillColor = UIColor.white.withAlphaComponent(0.42)
+        bondRecoveryTimerTrack.strokeColor = HUDPalette.line.withAlphaComponent(0.25)
+        bondRecoveryTimerTrack.lineWidth = 0.6
+        bondRecoveryTimerTrack.position = CGPoint(x: -bannerSize.width / 2 + 26 + bondRecoveryTimerWidth / 2,
+                                                  y: -21)
+        bondRecoveryTimerTrack.zPosition = 5
+        bondRecoveryTimerTrack.alpha = 0
+        bondRecoveryBanner.addChild(bondRecoveryTimerTrack)
+
+        bondRecoveryTimerFill = SKShapeNode()
+        bondRecoveryTimerFill.fillColor = HUDPalette.teal.withAlphaComponent(0.72)
+        bondRecoveryTimerFill.strokeColor = .clear
+        bondRecoveryTimerFill.position = bondRecoveryTimerTrack.position
+        bondRecoveryTimerFill.zPosition = 6
+        bondRecoveryTimerFill.alpha = 0
+        bondRecoveryBanner.addChild(bondRecoveryTimerFill)
+
+        let buttonSize = CGSize(width: 88, height: 32)
+        bondRecoveryButton = SKNode()
+        bondRecoveryButton.name = "cmd_give_space"
+        bondRecoveryButton.position = CGPoint(x: bannerSize.width / 2 - buttonSize.width / 2 - 10, y: 0)
+        bondRecoveryButton.zPosition = 5
+        bondRecoveryBanner.addChild(bondRecoveryButton)
+
+        let buttonCard = HUDLayer.paperCard(size: buttonSize,
+                                            cornerRadius: 8,
+                                            fill: HUDPalette.paper,
+                                            stroke: HUDPalette.teal.withAlphaComponent(0.62),
+                                            shadowAlpha: 0.08)
+        buttonCard.name = "cmd_give_space"
+        bondRecoveryButton.addChild(buttonCard)
+
+        bondRecoveryButtonLabel = makeLabel(text: "Dar espaço",
+                                            fontSize: 10,
+                                            style: .bodyBold,
+                                            color: HUDPalette.ink)
+        bondRecoveryButtonLabel.name = "cmd_give_space"
+        bondRecoveryButtonLabel.horizontalAlignmentMode = .center
+        bondRecoveryButtonLabel.verticalAlignmentMode = .center
+        bondRecoveryButtonLabel.zPosition = 6
+        bondRecoveryButton.addChild(bondRecoveryButtonLabel)
+    }
+
     // MARK: - Botoes de comando
 
     private func buttonRowY(_ row: Int) -> CGFloat {
@@ -856,7 +964,8 @@ final class HUDLayer: SKNode {
                  evolutionNote: String,
                  objectiveAvailable: Bool,
                  commandCooldowns: [PlayerCommand: TimeInterval],
-                 touchCooldownRemaining: TimeInterval) {
+                 touchCooldownRemaining: TimeInterval,
+                 bondRecoveryState: BondRecoveryHUDState) {
         let eggMode = stats.phase == .egg
         titleLabel.text = "Registro da \(stats.mermaidName)"
         fitLabelToWidth(titleLabel,
@@ -871,7 +980,7 @@ final class HUDLayer: SKNode {
             intentLabel.text = "Registro: incubação em andamento"
             barLabels["bond"]?.text = "Nascimento"
         } else {
-            phaseLabel.text = "Sereia \(stats.phase.displayName.lowercased()) · \(stats.ageText) observada"
+            phaseLabel.text = "Sereia \(stats.phase.displayName.lowercased()) · \(stats.ageText)"
             growthLabel.text = evolutionNote
             intentLabel.text = "Comportamento: \(intent.displayName)"
             barLabels["bond"]?.text = "Vínculo"
@@ -879,8 +988,8 @@ final class HUDLayer: SKNode {
 
         fitLabelToWidth(phaseLabel,
                         maxWidth: topPanelStatusMaxWidth,
-                        baseSize: 14,
-                        minSize: 11)
+                        baseSize: 12.5,
+                        minSize: 10.5)
 
         let zoneText = zone.displayName.lowercased()
         if let regionName {
@@ -893,6 +1002,12 @@ final class HUDLayer: SKNode {
                         maxWidth: topPanelPearlsMaxWidth,
                         baseSize: 10,
                         minSize: 8)
+        moodLabel.text = "Humor: \(moodDescription(for: stats.disposition))"
+        moodLabel.fontColor = moodTint(for: stats.disposition)
+        fitLabelToWidth(moodLabel,
+                        maxWidth: topPanelMoodMaxWidth,
+                        baseSize: 10,
+                        minSize: 8)
 
         let nourishment = 1 - stats.hunger / 100
         setBar("hunger", value: nourishment)
@@ -900,6 +1015,7 @@ final class HUDLayer: SKNode {
         setBar("mood", value: stats.disposition / 100)
         setBar("bond", value: eggMode ? evolutionProgress : stats.trust / 100)
         updateTouchCooldown(remaining: touchCooldownRemaining)
+        updateBondRecoveryBanner(state: bondRecoveryState)
 
         if let hunger = bars["hunger"] {
             hunger.fillColor = nourishment < 0.28
@@ -911,6 +1027,12 @@ final class HUDLayer: SKNode {
             energy.fillColor = stats.energy < 28
                 ? HUDPalette.coral.withAlphaComponent(0.86)
                 : HUDPalette.energy.withAlphaComponent(0.74)
+        }
+
+        if let mood = bars["mood"] {
+            mood.fillColor = moodTint(for: stats.disposition).withAlphaComponent(
+                stats.disposition < 35 ? 0.86 : 0.74
+            )
         }
 
         disabledCommands = Set(commandCooldowns.keys.filter { (commandCooldowns[$0] ?? 0) > 0 })
@@ -959,6 +1081,79 @@ final class HUDLayer: SKNode {
         label.text = "Gesto \(Int(ceil(remaining)))s"
     }
 
+    private func updateBondRecoveryBanner(state: BondRecoveryHUDState) {
+        guard let banner = bondRecoveryBanner else { return }
+
+        let title: String
+        let message: String
+        let buttonText: String
+        let tapEnabled: Bool
+        let timerProgress: CGFloat?
+        let showsButton: Bool
+        switch state {
+        case .hidden:
+            banner.isHidden = true
+            banner.alpha = 0
+            bondRecoveryTapEnabled = false
+            intentChip.isHidden = false
+            return
+        case .available:
+            title = "Reconectar"
+            message = "Ela está distante. Forçar agora pode piorar."
+            buttonText = "Dar espaço"
+            tapEnabled = true
+            timerProgress = nil
+            showsButton = true
+        case .waiting(let remaining):
+            title = "Tempo sem cobrança"
+            message = "Respirando sem novos pedidos."
+            buttonText = ""
+            tapEnabled = false
+            timerProgress = 1 - CGFloat(remaining / bondRecoveryDurationSeconds).clamped(to: 0...1)
+            showsButton = false
+        case .ready(_):
+            banner.isHidden = true
+            banner.alpha = 0
+            bondRecoveryTapEnabled = false
+            intentChip.isHidden = false
+            return
+        }
+
+        banner.isHidden = false
+        banner.alpha = 1
+        intentChip.isHidden = true
+        touchCooldownChip?.isHidden = true
+        touchCooldownChip?.alpha = 0
+        bondRecoveryTitleLabel.text = title
+        bondRecoveryMessageLabel.text = message
+        bondRecoveryMessageLabel.preferredMaxLayoutWidth = showsButton
+            ? max(120, bondRecoveryTimerWidth - 90)
+            : bondRecoveryTimerWidth
+        bondRecoveryButtonLabel.text = buttonText
+        bondRecoveryButton.isHidden = !showsButton
+        bondRecoveryButton.alpha = tapEnabled ? 1 : 0.72
+        if let timerProgress {
+            updateBondRecoveryTimer(progress: timerProgress)
+            bondRecoveryTimerTrack.alpha = 1
+            bondRecoveryTimerFill.alpha = 1
+        } else {
+            bondRecoveryTimerTrack.alpha = 0
+            bondRecoveryTimerFill.alpha = 0
+        }
+        bondRecoveryTapEnabled = tapEnabled
+    }
+
+    private func updateBondRecoveryTimer(progress: CGFloat) {
+        let clampedProgress = progress.clamped(to: 0...1)
+        let fillWidth = max(4, bondRecoveryTimerWidth * clampedProgress)
+        let rect = CGRect(x: -bondRecoveryTimerWidth / 2,
+                          y: -2.5,
+                          width: fillWidth,
+                          height: 5)
+        bondRecoveryTimerFill.path = UIBezierPath(roundedRect: rect,
+                                                  cornerRadius: 2.5).cgPath
+    }
+
     private func updateCooldownOverlay(for command: PlayerCommand, remaining: TimeInterval) {
         guard let overlay = buttonCooldownOverlays[command],
               let size = buttonSizes[command],
@@ -995,6 +1190,32 @@ final class HUDLayer: SKNode {
 
     private func setBar(_ key: String, value: CGFloat) {
         bars[key]?.xScale = value.clamped(to: 0.02...1)
+    }
+
+    private func moodDescription(for value: CGFloat) -> String {
+        switch value.clamped(to: 0...100) {
+        case 85...:
+            return "radiante"
+        case 70..<85:
+            return "animada"
+        case 50..<70:
+            return "tranquila"
+        case 30..<50:
+            return "sensível"
+        default:
+            return "abatida"
+        }
+    }
+
+    private func moodTint(for value: CGFloat) -> UIColor {
+        switch value.clamped(to: 0...100) {
+        case 70...:
+            return HUDPalette.algae
+        case 45..<70:
+            return HUDPalette.gold
+        default:
+            return HUDPalette.coral
+        }
     }
 
     private func updateNameEditPosition() {
@@ -1038,18 +1259,28 @@ final class HUDLayer: SKNode {
         while let current = node {
             if let name = current.name {
                 if name == "cmd_edit_mermaid_name" {
+                    GameAudio.shared.play(.uiTap)
                     flashNode(nameEditButton)
                     onNameEditTap?()
+                    return
+                }
+                if name == "cmd_give_space" {
+                    guard bondRecoveryTapEnabled else { return }
+                    GameAudio.shared.play(.uiConfirm)
+                    flashNode(bondRecoveryButton)
+                    onGiveSpaceTap?()
                     return
                 }
                 if name.hasPrefix("cmd_"),
                    let command = PlayerCommand(rawValue: String(name.dropFirst(4))) {
                     guard !disabledCommands.contains(command) else { return }
+                    GameAudio.shared.play(.uiTap)
                     flashButton(command)
                     onCommand?(command)
                     return
                 }
                 if name == "cmd_debug_rig_tool" {
+                    GameAudio.shared.play(.uiTap)
                     flashNode(debugRigToolButton)
                     onDebugRigToolTap?()
                     return

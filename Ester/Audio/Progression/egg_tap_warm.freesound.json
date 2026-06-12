@@ -1,0 +1,20 @@
+{
+  "source": "Freesound",
+  "downloadedAt": "2026-06-12T14:54:09.201Z",
+  "query": "glass tap",
+  "previewKey": "preview-hq-mp3",
+  "file": "Ester/Audio/Progression/egg_tap_warm.mp3",
+  "sound": {
+    "id": 846554,
+    "name": "Glass Tap",
+    "username": "Cpfcfan10",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "duration": 0.159569,
+    "url": "https://freesound.org/people/Cpfcfan10/sounds/846554/",
+    "tags": [
+      "Board",
+      "Glass",
+      "Tap"
+    ]
+  }
+}

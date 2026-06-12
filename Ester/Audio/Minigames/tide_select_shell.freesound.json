@@ -1,0 +1,22 @@
+{
+  "source": "Freesound",
+  "downloadedAt": "2026-06-12T14:56:29.925Z",
+  "query": "soft click",
+  "previewKey": "preview-hq-mp3",
+  "file": "Ester/Audio/Minigames/tide_select_shell.mp3",
+  "sound": {
+    "id": 150382,
+    "name": "soft sound plastic button click.mp3",
+    "username": "orginaljun",
+    "license": "http://creativecommons.org/licenses/by/3.0/",
+    "duration": 0.118617,
+    "url": "https://freesound.org/people/orginaljun/sounds/150382/",
+    "tags": [
+      "button",
+      "click",
+      "plastic",
+      "soft",
+      "sound"
+    ]
+  }
+}
