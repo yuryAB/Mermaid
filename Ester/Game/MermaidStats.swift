@@ -546,9 +546,9 @@ final class MermaidStats: Codable {
         let adjustedEnergyDelta = energyDelta < 0 ? energyDelta * energyDrainMultiplier : energyDelta
         energy = (energy + adjustedEnergyDelta * dt).clamped(to: 0...100)
 
-        let moodTarget = ((100 - hunger) * 0.45 + energy * 0.35 + 18 + moodBoost)
+        let moodTarget = ((100 - hunger) * 0.58 + energy * 0.30 + 12 + moodBoost)
             .clamped(to: 0...100)
-        let moodRate = moodTarget < mood ? 0.03 * dispositionDrainMultiplier : 0.03
+        let moodRate = moodTarget < mood ? 0.055 * dispositionDrainMultiplier : 0.025
         mood += (moodTarget - mood) * min(1, dt * moodRate)
         mood = mood.clamped(to: 0...100)
 

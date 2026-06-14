@@ -32,6 +32,7 @@ final class AutonomySystem {
     private weak var touchFoodTarget: FoodNode?
     private weak var touchFishTarget: FishNode?
     private weak var touchChallengeTarget: FishNode?
+    private var passiveBondQuietTimer: CGFloat = 0
     private var bondRecoveryState: BondRecoveryState = .idle
     private var lastAnimation: MovementType = .idle
     private var lastFacing: Mermaid.Direction = .none
@@ -56,6 +57,12 @@ final class AutonomySystem {
         static let spaceTrustGain: CGFloat = 6
         static let acceptedRequestTrustGain: CGFloat = 4
         static let guaranteedRequestCount = 5
+    }
+
+    private enum PassiveBondBalance {
+        static let quietDelay: CGFloat = 40
+        static let gainPerSecond: CGFloat = 0.007
+        static let strainedCareMultiplier: CGFloat = 0.35
     }
 
     private enum BondRecoveryState {
@@ -120,6 +127,7 @@ final class AutonomySystem {
         wobblePhase += dt
 
         tickStats(dt: dt)
+        updatePassiveBond(dt: dt)
         autoEat()
         if decisionCooldown <= 0 { decide() }
         progressIntent(dt: dt)
@@ -148,6 +156,33 @@ final class AutonomySystem {
             energyRate -= ctx.depth.energyPenalty(atY: position.y)
         }
         stats.tick(dt: dt, energyDelta: energyRate)
+    }
+
+    private func updatePassiveBond(dt: CGFloat) {
+        guard stats.phase != .egg, stats.trust < 100 else { return }
+        guard commandBias == nil,
+              touchPointTarget == nil,
+              touchFoodTarget == nil,
+              touchFishTarget == nil,
+              touchChallengeTarget == nil,
+              intent != .inChallenge,
+              intent != .enteringRefuge else {
+            passiveBondQuietTimer = 0
+            return
+        }
+
+        passiveBondQuietTimer += dt
+        guard passiveBondQuietTimer >= PassiveBondBalance.quietDelay else { return }
+
+        let needsCare = stats.hunger >= GameBalance.autoEatHungerThreshold(for: stats.phase)
+            || stats.energy < 20
+            || stats.scaredTimer > 0
+        let multiplier = needsCare ? PassiveBondBalance.strainedCareMultiplier : 1
+        stats.trust = min(100, stats.trust + dt * PassiveBondBalance.gainPerSecond * multiplier)
+    }
+
+    private func notePlayerPressure() {
+        passiveBondQuietTimer = 0
     }
 
     // MARK: - Decisão por pesos
@@ -504,6 +539,7 @@ final class AutonomySystem {
 
     func startGivingSpace() {
         guard stats.phase != .egg else { return }
+        notePlayerPressure()
         switch bondRecoveryState {
         case .waiting:
             return
@@ -556,6 +592,7 @@ final class AutonomySystem {
 
     func give(_ command: PlayerCommand) {
         clearExpiredCommandCooldowns()
+        notePlayerPressure()
         if let until = commandCooldownUntil[command], until > Date() {
             return
         }
@@ -581,7 +618,7 @@ final class AutonomySystem {
             guidedExplorePoint = ctx.pois.explorationTargetAfterCommand()
             desired = .wandering
         case .seekFood:
-            if !requestIsGuaranteed && stats.hunger < 35 {
+            if !requestIsGuaranteed && stats.hunger < GameBalance.requestFoodHungerThreshold(for: stats.phase) {
                 penalizeTrust(TrustBalance.inconvenientCareAsk)
                 refuse(command, saying: "Ela ainda está saciada e virou o rostinho.")
                 return
@@ -722,6 +759,7 @@ final class AutonomySystem {
 
     @discardableResult
     func requestPointFromTouch(_ point: CGPoint) -> Bool {
+        notePlayerPressure()
         let range = ctx.depth.allowedYRange()
         let clampedPoint = CGPoint(x: point.x.clamped(to: World.minX...World.maxX),
                                    y: point.y.clamped(to: range))
@@ -752,6 +790,7 @@ final class AutonomySystem {
 
     @discardableResult
     func requestObjectiveFromTouch() -> Bool {
+        notePlayerPressure()
         guard ctx.events.currentObjective?.position() != nil else {
             ctx.say("Nada acontecendo ali agora... 👀")
             return false
@@ -771,6 +810,7 @@ final class AutonomySystem {
 
     @discardableResult
     func requestFoodFromTouch(_ food: FoodNode) -> Bool {
+        notePlayerPressure()
         guard food.parent != nil else { return false }
         let isShellCurrency = food.kind.isShellCurrency
         guard isShellCurrency || isBondRecoveryRequestReady || stats.hunger >= 28 || food.kind.pearls > 0 || food.kind.xp >= 10 else {
@@ -802,6 +842,7 @@ final class AutonomySystem {
 
     @discardableResult
     func requestFishFromTouch(_ fish: FishNode) -> Bool {
+        notePlayerPressure()
         guard fish.parent != nil else { return false }
         guard acceptTouchRequest(for: .interactingWithFish,
                                  acceptedMessage: "Ela aceitou brincar com o peixinho...",
@@ -819,6 +860,7 @@ final class AutonomySystem {
 
     @discardableResult
     func requestChallengeFromTouch(_ giver: FishNode) -> Bool {
+        notePlayerPressure()
         guard giver.parent != nil, giver.offeredChallenge != nil else { return false }
         let hungerLimit: CGFloat = stats.phase == .baby ? 65 : 92
         let energyLimit: CGFloat = stats.phase == .baby ? 35 : 8

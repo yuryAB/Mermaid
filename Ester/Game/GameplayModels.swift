@@ -35,11 +35,11 @@ enum GameBalance {
     static func hungerRate(for phase: MermaidPhase) -> CGFloat {
         switch phase {
         case .egg: return 0
-        case .baby: return 0.11
-        case .child: return 0.095
-        case .teen: return 0.08
-        case .young: return 0.07
-        case .adult: return 0.06
+        case .baby: return 0.18
+        case .child: return 0.15
+        case .teen: return 0.125
+        case .young: return 0.105
+        case .adult: return 0.09
         }
     }
 
@@ -52,11 +52,25 @@ enum GameBalance {
     }
 
     static func requestFoodHungerThreshold(for phase: MermaidPhase) -> CGFloat {
-        phase == .baby ? 45 : 30
+        switch phase {
+        case .egg: return 100
+        case .baby: return 55
+        case .child: return 50
+        case .teen: return 46
+        case .young: return 42
+        case .adult: return 40
+        }
     }
 
     static func autoEatHungerThreshold(for phase: MermaidPhase) -> CGFloat {
-        phase == .baby ? 55 : 35
+        switch phase {
+        case .egg: return 100
+        case .baby: return 68
+        case .child: return 62
+        case .teen: return 58
+        case .young: return 54
+        case .adult: return 50
+        }
     }
 
     static func challengeSpawnChanceTenths(for phase: MermaidPhase) -> Int {
