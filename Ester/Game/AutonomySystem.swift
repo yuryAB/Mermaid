@@ -40,6 +40,7 @@ final class AutonomySystem {
     private var interactCooldown: CGFloat = 0
     private var boundaryFeedbackCooldown: CGFloat = 0
     private var activeBoundaryContact: DepthBoundaryEdge?
+    private var activeHorizontalBoundaryContact: HorizontalBoundarySide?
     private var wobblePhase: CGFloat = .random(in: 0...10)
 
     private enum TrustBalance {
@@ -71,6 +72,19 @@ final class AutonomySystem {
         static let cooldown: CGFloat = 5
     }
 
+    private enum HorizontalBoundarySide {
+        case left
+        case right
+    }
+
+    private enum HorizontalBoundaryBalance {
+        static let contactPadding: CGFloat = 24
+        static let releasePadding: CGFloat = 900
+        static let retreatPaddingRange: ClosedRange<CGFloat> = 1_400...2_300
+        static let wanderPadding: CGFloat = 700
+        static let verticalJitterRange: ClosedRange<CGFloat> = -260...260
+    }
+
     private enum BondRecoveryState {
         case idle
         case waiting(until: Date)
@@ -86,6 +100,9 @@ final class AutonomySystem {
     private var stats: MermaidStats { ctx.stats }
     private var position: CGPoint { mermaid.base.position }
     private var currentZone: DepthZone { DepthZone.zone(atY: position.y) }
+    private var horizontalRange: ClosedRange<CGFloat> {
+        ctx.activeRegion?.playableXRange ?? (World.minX...World.maxX)
+    }
     var commandCooldownsRemaining: [PlayerCommand: TimeInterval] {
         let now = Date()
         return commandCooldownUntil.reduce(into: [:]) { result, item in
@@ -302,7 +319,7 @@ final class AutonomySystem {
             } else {
                 y = position.y - 1600
             }
-            target = CGPoint(x: position.x + .random(in: -800...800), y: y)
+            target = CGPoint(x: (position.x + .random(in: -800...800)).clamped(to: horizontalRange), y: y)
         case .goingUp:
             let y: CGFloat
             if let zone = currentZone.shallower, ctx.depth.isUnlocked(zone) {
@@ -312,7 +329,7 @@ final class AutonomySystem {
             } else {
                 y = position.y + 1600
             }
-            target = CGPoint(x: position.x + .random(in: -800...800), y: y)
+            target = CGPoint(x: (position.x + .random(in: -800...800)).clamped(to: horizontalRange), y: y)
         case .traveling:
             target = ctx.travel.targetPoint
         case .interactingWithFish:
@@ -323,9 +340,19 @@ final class AutonomySystem {
 
     private func randomWanderPoint() -> CGPoint {
         let range = ctx.depth.allowedYRange()
-        let x = (position.x + .random(in: -1100...1100)).clamped(to: World.minX...World.maxX)
+        let x = (position.x + .random(in: -1100...1100)).clamped(to: safeHorizontalWanderRange())
         let y = (position.y + .random(in: -700...700)).clamped(to: range)
         return CGPoint(x: x, y: y)
+    }
+
+    private func safeHorizontalWanderRange() -> ClosedRange<CGFloat> {
+        inset(horizontalRange, by: HorizontalBoundaryBalance.wanderPadding)
+    }
+
+    private func inset(_ range: ClosedRange<CGFloat>, by padding: CGFloat) -> ClosedRange<CGFloat> {
+        let lower = range.lowerBound + padding
+        let upper = range.upperBound - padding
+        return lower <= upper ? lower...upper : range
     }
 
     // MARK: - Progresso da intenção atual
@@ -502,7 +529,7 @@ final class AutonomySystem {
         let dy = position.y - point.y
         let length = max(1, sqrt(dx * dx + dy * dy))
         let range = ctx.depth.allowedYRange()
-        target = CGPoint(x: (position.x + dx / length * 500).clamped(to: World.minX...World.maxX),
+        target = CGPoint(x: (position.x + dx / length * 500).clamped(to: horizontalRange),
                          y: (position.y + dy / length * 500).clamped(to: range))
         intent = .avoidingDanger
         intentTime = 0
@@ -774,7 +801,7 @@ final class AutonomySystem {
     func requestPointFromTouch(_ point: CGPoint) -> Bool {
         notePlayerPressure()
         let range = ctx.depth.allowedYRange()
-        let clampedPoint = CGPoint(x: point.x.clamped(to: World.minX...World.maxX),
+        let clampedPoint = CGPoint(x: point.x.clamped(to: horizontalRange),
                                    y: point.y.clamped(to: range))
         let reachablePoint = pointLimitedByEnergy(clampedPoint)
         let wasLimited = reachablePoint.distance(to: clampedPoint) > 24
@@ -796,7 +823,7 @@ final class AutonomySystem {
 
     func canReachPointWithCurrentEnergy(_ point: CGPoint, margin: CGFloat = 120) -> Bool {
         let range = ctx.depth.allowedYRange()
-        let clampedPoint = CGPoint(x: point.x.clamped(to: World.minX...World.maxX),
+        let clampedPoint = CGPoint(x: point.x.clamped(to: horizontalRange),
                                    y: point.y.clamped(to: range))
         return position.distance(to: clampedPoint) <= directedTravelLimit() + margin
     }
@@ -1093,7 +1120,9 @@ final class AutonomySystem {
         p.x += cos(wobblePhase * 0.9) * 10 * dt
         p.y += sin(wobblePhase * 1.6) * 8 * dt
 
+        let xRange = horizontalRange
         let yRange = ctx.depth.allowedYRange()
+        let horizontalContact = horizontalBoundaryContact(forX: p.x, in: xRange)
         let attemptedAboveLimit = p.y > yRange.upperBound + 1
         let attemptedBelowLimit = p.y < yRange.lowerBound - 1
         let verticalMotion = velocity.dy + drift.dy
@@ -1108,8 +1137,18 @@ final class AutonomySystem {
             boundaryContact = nil
         }
 
-        p.x = p.x.clamped(to: World.minX...World.maxX)
+        p.x = p.x.clamped(to: xRange)
         p.y = p.y.clamped(to: yRange)
+        if let horizontalContact {
+            if activeHorizontalBoundaryContact != horizontalContact,
+               canStartHorizontalBoundaryReturn {
+                activeHorizontalBoundaryContact = horizontalContact
+                startHorizontalBoundaryReturn(from: horizontalContact, yRange: yRange)
+            }
+        } else if p.x > xRange.lowerBound + HorizontalBoundaryBalance.releasePadding,
+                  p.x < xRange.upperBound - HorizontalBoundaryBalance.releasePadding {
+            activeHorizontalBoundaryContact = nil
+        }
         if let boundaryContact {
             if activeBoundaryContact != boundaryContact {
                 activeBoundaryContact = boundaryContact
@@ -1119,6 +1158,36 @@ final class AutonomySystem {
             activeBoundaryContact = nil
         }
         mermaid.base.position = p
+    }
+
+    private func horizontalBoundaryContact(forX x: CGFloat, in range: ClosedRange<CGFloat>) -> HorizontalBoundarySide? {
+        if x <= range.lowerBound + HorizontalBoundaryBalance.contactPadding {
+            return .left
+        }
+        if x >= range.upperBound - HorizontalBoundaryBalance.contactPadding {
+            return .right
+        }
+        return nil
+    }
+
+    private var canStartHorizontalBoundaryReturn: Bool {
+        intent != .inChallenge && intent != .enteringRefuge
+    }
+
+    private func startHorizontalBoundaryReturn(from side: HorizontalBoundarySide, yRange: ClosedRange<CGFloat>) {
+        guard canStartHorizontalBoundaryReturn else { return }
+
+        let range = horizontalRange
+        let width = max(0, range.upperBound - range.lowerBound)
+        let padding = min(CGFloat.random(in: HorizontalBoundaryBalance.retreatPaddingRange), width / 2)
+        let x = side == .left ? range.lowerBound + padding : range.upperBound - padding
+        let y = (position.y + CGFloat.random(in: HorizontalBoundaryBalance.verticalJitterRange)).clamped(to: yRange)
+
+        commandBias = nil
+        touchPointTarget = nil
+        setIntent(.wandering)
+        target = CGPoint(x: x, y: y)
+        decisionCooldown = max(decisionCooldown, 3)
     }
 
     private func showBoundaryFeedback(for edge: DepthBoundaryEdge) {
