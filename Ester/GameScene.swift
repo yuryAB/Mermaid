@@ -909,7 +909,6 @@ class GameScene: SKScene {
         stats.boostMood(8)
         let adaptation = stats.adaptation(for: zone)
         stats.setAdaptation(adaptation + 3, for: zone)
-        stats.courage = min(100, stats.courage + (result.special ? 2 : 0.5))
         if result.reachedTarget {
             stats.puzzlesSolved += 1
             stats.addMemory("Venceu o \(result.kind.title) em \(zone.displayName)")

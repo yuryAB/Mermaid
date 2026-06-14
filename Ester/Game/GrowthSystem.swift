@@ -382,7 +382,6 @@ final class GrowthSystem {
         let mermaid = ctx.mermaidEntity.mermaid
         mermaid.setForm(for: next)
         let gained = ctx.stats.awardPearls(20)
-        ctx.stats.courage = min(100, ctx.stats.courage + 5)
         ctx.stats.addMemory("Evoluiu para \(next.displayName)")
         GameAudio.shared.play(.evolution)
         let grow = SKAction.scale(to: next.scale, duration: 1.5)

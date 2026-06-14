@@ -239,7 +239,6 @@ final class DepthSystem {
             ctx.stats.maxDepthMeters = meters
             let gained = ctx.stats.awardPearls(1)
             ctx.stats.gainXP(10)
-            ctx.stats.courage = min(100, ctx.stats.courage + 0.5)
             GameAudio.shared.play(.depthRecord)
             ctx.say("Ela nadou mais fundo do que nunca! 🐚+\(gained)")
         }
@@ -291,7 +290,6 @@ final class DepthSystem {
     private func meetsRequirements(_ zone: DepthZone) -> Bool {
         let stats = ctx.stats!
         if let prerequisite = zone.prerequisiteZone, !stats.isUnlocked(prerequisite) { return false }
-        if stats.courage < zone.courageRequired { return false }
         if stats.phase < zone.minPhase { return false }
         if let gate = zone.adaptationGate, stats.adaptation(for: gate.zone) < gate.value { return false }
         return true
@@ -309,9 +307,6 @@ final class DepthSystem {
             if let prerequisite = target.prerequisiteZone, !stats.isUnlocked(prerequisite) {
                 return "Ela precisa conhecer a \(prerequisite.displayName) antes de subir até a \(target.displayName)."
             }
-            if stats.courage < target.courageRequired {
-                return "Ela ainda não tem coragem para subir até a \(target.displayName). 😟"
-            }
             if let gate = target.adaptationGate, stats.adaptation(for: gate.zone) < gate.value {
                 return "Ela precisa se adaptar melhor à \(gate.zone.displayName) antes de subir mais."
             }
@@ -325,9 +320,6 @@ final class DepthSystem {
         let stats = ctx.stats!
         if stats.phase < zone.minPhase {
             return "Ela ainda é muito nova para ir tão fundo..."
-        }
-        if stats.courage < zone.courageRequired {
-            return "Ela ainda não tem coragem para ir tão fundo. 😟"
         }
         if let gate = zone.adaptationGate, stats.adaptation(for: gate.zone) < gate.value {
             return "Ela precisa se adaptar melhor à \(gate.zone.displayName) antes de descer mais."

@@ -254,9 +254,6 @@ final class FoodSystem {
         stats.boostMood(4)
         stats.gainXP(food.kind.xp)
         stats.mealsEaten += 1
-        if food.kind.courage > 0 {
-            stats.courage = min(100, stats.courage + food.kind.courage)
-        }
         if food.kind.pearls > 0 {
             let gained = stats.awardPearls(food.kind.pearls)
             GameAudio.shared.play(.pearlReward)

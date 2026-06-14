@@ -363,14 +363,9 @@ final class EventSystem {
         shadow.run(.sequence([travel, .removeFromParent()]))
         GameAudio.shared.play(.bigShadow)
 
-        if ctx.stats.courage < 45 {
-            ctx.autonomy.scare(from: shadow.position)
-            ctx.say("Uma sombra enorme... ela se assustou! 😨")
-        } else {
-            ctx.stats.gainXP(8)
-            ctx.stats.courage = min(100, ctx.stats.courage + 0.5)
-            ctx.say("Uma sombra enorme passou... ela ficou só observando, corajosa. 💪")
-        }
+        ctx.autonomy.scare(from: shadow.position)
+        ctx.stats.gainXP(4)
+        ctx.say("Uma sombra enorme passou perto... ela se assustou e observou de longe. 😨")
     }
 
     private func specialChallengeFish() {
@@ -403,7 +398,7 @@ final class EventSystem {
         GameAudio.shared.play(.boatMuffled)
         ctx.say("Um barco passa lá em cima... ⛵️")
 
-        if ctx.mermaidPosition.y > -350 && ctx.stats.courage < 50 {
+        if ctx.mermaidPosition.y > -350 {
             ctx.autonomy.scare(from: CGPoint(x: ctx.mermaidPosition.x, y: 50))
         }
     }

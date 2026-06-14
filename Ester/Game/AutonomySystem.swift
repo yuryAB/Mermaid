@@ -187,7 +187,7 @@ final class AutonomySystem {
         if let deeperZone = currentZone.deeper,
            ctx.depth.isUnlocked(deeperZone),
            stats.energy > 40, stats.hunger < 70 {
-            scores[.goingDeeper] = stats.curiosity * 0.2 + stats.courage * 0.15
+            scores[.goingDeeper] = stats.curiosity * 0.28 + stats.energy * 0.04
         }
         if currentZone != .shallow && currentZone != .surface {
             scores[.goingUp] = 6 + (stats.energy < 50 ? 10 : 0)

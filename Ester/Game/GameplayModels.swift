@@ -124,6 +124,8 @@ enum DepthZone: Int, Codable, CaseIterable {
     case deep
     case abyss
 
+    static let accessOrder: [DepthZone] = [.clear, .shallow, .mid, .blue, .deep, .abyss, .surface]
+
     var displayName: String {
         switch self {
         case .surface: return "Superfície"
@@ -194,44 +196,32 @@ enum DepthZone: Int, Codable, CaseIterable {
         }
     }
 
-    var courageRequired: CGFloat {
-        switch self {
-        case .shallow, .mid: return 0
-        case .clear: return 12
-        case .blue: return 30
-        case .deep: return 50
-        case .abyss: return 70
-        case .surface: return 85
-        }
-    }
-
     /// A adaptação desta camada precisa amadurecer antes de liberar a próxima.
     var adaptationGate: (zone: DepthZone, value: CGFloat)? {
         switch self {
-        case .shallow, .mid: return nil
-        case .clear: return (.shallow, 15)
+        case .clear, .shallow, .mid: return nil
         case .blue: return (.mid, 30)
         case .deep: return (.blue, 40)
         case .abyss: return (.deep, 55)
-        case .surface: return (.clear, 50)
+        case .surface: return (.abyss, 65)
         }
     }
 
     var minPhase: MermaidPhase {
         switch self {
-        case .shallow, .mid: return .baby
-        case .clear, .blue: return .child
+        case .clear, .shallow, .mid: return .baby
+        case .blue: return .child
         case .deep: return .teen
-        case .abyss, .surface: return .young
+        case .abyss: return .young
+        case .surface: return .adult
         }
     }
 
     /// A superfície só abre depois do abismo; as demais dependem da camada vizinha.
     var prerequisiteZone: DepthZone? {
         switch self {
-        case .shallow, .mid: return nil
+        case .clear, .shallow, .mid: return nil
         case .surface: return .abyss
-        case .clear: return .shallow
         case .blue: return .mid
         case .deep: return .blue
         case .abyss: return .deep
@@ -272,6 +262,17 @@ enum MermaidPhase: Int, Codable, CaseIterable, Comparable {
     }
 
     var next: MermaidPhase? { MermaidPhase(rawValue: rawValue + 1) }
+
+    var mapAccessDisplayName: String {
+        switch self {
+        case .egg: return "Ovo"
+        case .baby: return "bebê"
+        case .child: return "criança"
+        case .teen: return "adolescente"
+        case .young: return "jovem"
+        case .adult: return "adulta"
+        }
+    }
 
     static func < (lhs: MermaidPhase, rhs: MermaidPhase) -> Bool {
         lhs.rawValue < rhs.rawValue

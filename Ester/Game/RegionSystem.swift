@@ -18,6 +18,7 @@ struct Region {
     let name: String
     let xRange: ClosedRange<CGFloat>
     let yRange: ClosedRange<CGFloat>
+    let entryZone: DepthZone
     let tint: UIColor
     let tintStrength: CGFloat
     let minPhase: MermaidPhase
@@ -27,11 +28,15 @@ struct Region {
 
     var center: CGPoint {
         CGPoint(x: (xRange.lowerBound + xRange.upperBound) / 2,
-                y: (yRange.lowerBound + yRange.upperBound) / 2)
+                y: entryZone.midY.clamped(to: yRange))
     }
 
     func contains(_ point: CGPoint) -> Bool {
         xRange.contains(point.x) && yRange.contains(point.y)
+    }
+
+    func isAccessible(for phase: MermaidPhase) -> Bool {
+        phase >= minPhase
     }
 }
 
@@ -41,37 +46,130 @@ final class RegionDiscoverySystem {
     unowned let ctx: GameContext
     private var progressTimer: CGFloat = 0
 
+    private static let catalogOrder = [
+        "nascente",
+        "jardim_calmo",
+        "recife",
+        "delta",
+        "mar_azul_aberto",
+        "cavernas",
+        "campos_cristal",
+        "ruinas",
+        "abismo_vivo",
+        "superficie_distante"
+    ]
+
     static let all: [Region] = [
+        Region(id: "abismo_vivo",
+               name: "Abismo Vivo",
+               xRange: -50000 ... -41000,
+               yRange: World.floorY ... World.surfaceTopY,
+               entryZone: .abyss,
+               tint: UIColor(red: 0.18, green: 0.10, blue: 0.34, alpha: 1),
+               tintStrength: 0.36,
+               minPhase: .adult,
+               blurb: "Vida luminosa pulsa sob pressão extrema.",
+               tideTitle: "Batimentos do Abismo",
+               tideIcons: ["✧", "◇", "◌", "◆", "✦"]),
+        Region(id: "cavernas",
+               name: "Boca das Cavernas",
+               xRange: -40000 ... -31000,
+               yRange: World.floorY ... World.surfaceTopY,
+               entryZone: .blue,
+               tint: UIColor(red: 0.12, green: 0.28, blue: 0.40, alpha: 1),
+               tintStrength: 0.34,
+               minPhase: .teen,
+               blurb: "Fendas azuis e ecos de entradas escondidas.",
+               tideTitle: "Ecos da Boca",
+               tideIcons: ["⌁", "▧", "◇", "◌", "≋"]),
+        Region(id: "delta",
+               name: "Grande Delta",
+               xRange: -30000 ... -21000,
+               yRange: World.floorY ... World.surfaceTopY,
+               entryZone: .shallow,
+               tint: UIColor(red: 0.45, green: 0.5, blue: 0.3, alpha: 1),
+               tintStrength: 0.3,
+               minPhase: .child,
+               blurb: "Onde o rio encontra o mar, entre correntes e sementes.",
+               tideTitle: "Sementes do Delta",
+               tideIcons: ["⌁", "≋", "◡", "▧", "◌"]),
+        Region(id: "ruinas",
+               name: "Ruínas Antigas",
+               xRange: -20000 ... -11000,
+               yRange: World.floorY ... World.surfaceTopY,
+               entryZone: .deep,
+               tint: UIColor(red: 0.30, green: 0.26, blue: 0.48, alpha: 1),
+               tintStrength: 0.32,
+               minPhase: .young,
+               blurb: "Pedras antigas guardam rotas e histórias.",
+               tideTitle: "Memória das Ruínas",
+               tideIcons: ["▧", "◇", "✦", "◌", "◆"]),
         Region(id: "nascente",
                name: "Águas de Nascimento",
-               xRange: -8000 ... 8000,
-               yRange: -10000 ... -4000,
+               xRange: -10000 ... 0,
+               yRange: World.floorY ... World.surfaceTopY,
+               entryZone: .mid,
                tint: UIColor(red: 0.45, green: 0.65, blue: 0.9, alpha: 1),
                tintStrength: 0.12,
                minPhase: .baby,
                blurb: "Águas calmas e seguras onde tudo começou.",
                tideTitle: "Pérolas do Berço",
                tideIcons: ["○", "✦", "◡", "◌", "✧"]),
+        Region(id: "jardim_calmo",
+               name: "Jardim Calmo",
+               xRange: 1000 ... 10000,
+               yRange: World.floorY ... World.surfaceTopY,
+               entryZone: .shallow,
+               tint: UIColor(red: 0.36, green: 0.68, blue: 0.66, alpha: 1),
+               tintStrength: 0.18,
+               minPhase: .baby,
+               blurb: "Jardins lentos para primeiras explorações.",
+               tideTitle: "Folhas do Jardim",
+               tideIcons: ["◡", "✿", "◌", "○", "⌁"]),
         Region(id: "recife",
                name: "Recife Esmeralda",
-               xRange: 14000 ... 28000,
-               yRange: -9000 ... -3000,
+               xRange: 11000 ... 20000,
+               yRange: World.floorY ... World.surfaceTopY,
+               entryZone: .shallow,
                tint: UIColor(red: 0.2, green: 0.75, blue: 0.55, alpha: 1),
                tintStrength: 0.28,
                minPhase: .child,
                blurb: "Um jardim de corais vibrante e cheio de vida.",
                tideTitle: "Corais do Recife",
                tideIcons: ["◡", "⌁", "◇", "✿", "✦"]),
-        Region(id: "delta",
-               name: "Grande Delta",
-               xRange: -30000 ... -16000,
-               yRange: -5500 ... -2200,
-               tint: UIColor(red: 0.45, green: 0.5, blue: 0.3, alpha: 1),
-               tintStrength: 0.3,
-               minPhase: .child,
-               blurb: "Onde o rio encontra o mar, entre correntes e sementes.",
-               tideTitle: "Sementes do Delta",
-               tideIcons: ["⌁", "≋", "◡", "▧", "◌"])
+        Region(id: "superficie_distante",
+               name: "Superfície Distante",
+               xRange: 21000 ... 30000,
+               yRange: World.floorY ... World.surfaceTopY,
+               entryZone: .surface,
+               tint: UIColor(red: 0.78, green: 0.88, blue: 0.96, alpha: 1),
+               tintStrength: 0.24,
+               minPhase: .adult,
+               blurb: "Luz aberta onde céu e água se encontram.",
+               tideTitle: "Céu na Água",
+               tideIcons: ["○", "✦", "◇", "◌", "✧"]),
+        Region(id: "mar_azul_aberto",
+               name: "Mar Azul Aberto",
+               xRange: 31000 ... 40000,
+               yRange: World.floorY ... World.surfaceTopY,
+               entryZone: .blue,
+               tint: UIColor(red: 0.18, green: 0.42, blue: 0.78, alpha: 1),
+               tintStrength: 0.30,
+               minPhase: .teen,
+               blurb: "Água ampla, rotas longas e cardumes velozes.",
+               tideTitle: "Rumos do Azul",
+               tideIcons: ["≋", "○", "✦", "⌁", "◇"]),
+        Region(id: "campos_cristal",
+               name: "Campos de Cristal",
+               xRange: 41000 ... 50000,
+               yRange: World.floorY ... World.surfaceTopY,
+               entryZone: .deep,
+               tint: UIColor(red: 0.54, green: 0.76, blue: 0.94, alpha: 1),
+               tintStrength: 0.30,
+               minPhase: .young,
+               blurb: "Cristais frios refletem caminhos profundos.",
+               tideTitle: "Luzes de Cristal",
+               tideIcons: ["◇", "✧", "◆", "◌", "✦"])
     ]
 
     init(ctx: GameContext) {
@@ -80,6 +178,14 @@ final class RegionDiscoverySystem {
 
     static func region(withId id: String) -> Region? {
         all.first { $0.id == id }
+    }
+
+    static var menuRegions: [Region] {
+        catalogOrder.compactMap { region(withId: $0) }
+    }
+
+    static func accessibleRegions(for phase: MermaidPhase) -> [Region] {
+        menuRegions.filter { $0.isAccessible(for: phase) }
     }
 
     var currentRegion: Region? {
@@ -95,7 +201,6 @@ final class RegionDiscoverySystem {
             ctx.stats.discoveredRegionIds.insert(region.id)
             let gained = ctx.stats.awardPearls(8)
             ctx.stats.gainXP(40)
-            ctx.stats.courage = min(100, ctx.stats.courage + 2)
             ctx.stats.addMemory("Descobriu \(region.name)")
             GameAudio.shared.play(.regionDiscover)
             ctx.say("Nova região catalogada: \(region.name). Conchas +\(gained)")
@@ -181,7 +286,7 @@ final class TravelSystem {
             return
         }
         if ctx.stats.phase < region.minPhase {
-            ctx.say("Ela ainda é muito nova para viajar até \(region.name).")
+            ctx.say("Disponível quando ela for \(region.minPhase.mapAccessDisplayName).")
             return
         }
         if ctx.stats.energy < 15 {
@@ -245,16 +350,15 @@ final class RegionMenuOverlay: SKNode {
         backdrop.strokeColor = .clear
         addChild(backdrop)
 
-        let discovered = RegionDiscoverySystem.all.filter { stats.discoveredRegionIds.contains($0.id) }
-        let unknownCount = RegionDiscoverySystem.all.count - discovered.count
+        let regions = RegionDiscoverySystem.menuRegions
         let rowCardHeight: CGFloat = 78
         let rowSpacing: CGFloat = 10
         let rowStep = rowCardHeight + rowSpacing
         let headerHeight: CGFloat = 84
-        let footerHeight: CGFloat = unknownCount > 0 ? 104 : 72
+        let footerHeight: CGFloat = 72
         // painel mais estreito, encostado no lado direito da tela
         let panelWidth = min(size.width - 28, 336)
-        let desiredPanelHeight = CGFloat(discovered.count) * rowStep + headerHeight + footerHeight
+        let desiredPanelHeight = CGFloat(regions.count) * rowStep + headerHeight + footerHeight
         let maxPanelHeight = max(280, size.height - 72)
         let minPanelHeight = min(maxPanelHeight, 320)
         let panelHeight = min(maxPanelHeight, max(minPanelHeight, desiredPanelHeight))
@@ -289,7 +393,7 @@ final class RegionMenuOverlay: SKNode {
         let listBottomY = -panelHeight / 2 + footerHeight
         listCenterY = (listTopY + listBottomY) / 2
         listViewportHeight = max(96, listTopY - listBottomY)
-        listContentHeight = max(0, CGFloat(discovered.count) * rowStep - rowSpacing)
+        listContentHeight = max(0, CGFloat(regions.count) * rowStep - rowSpacing)
         listViewportRect = CGRect(x: content.position.x - listWidth / 2,
                                   y: listCenterY - listViewportHeight / 2,
                                   width: listWidth,
@@ -306,22 +410,25 @@ final class RegionMenuOverlay: SKNode {
         listCrop.addChild(listNode)
         panelContent.addChild(listCrop)
 
-        for (index, region) in discovered.enumerated() {
+        for (index, region) in regions.enumerated() {
             let y = listViewportHeight / 2 - rowCardHeight / 2 - CGFloat(index) * rowStep
+            let isLocked = !region.isAccessible(for: stats.phase)
             let isCurrent = region.id == currentRegionId
             let isDestination = region.id == destinationId
 
             let rowTint = isDestination
                 ? UIColor(red: 0.5, green: 0.85, blue: 1, alpha: 1)
-                : region.tint
+                : (isLocked ? UIColor(white: 0.45, alpha: 1) : region.tint)
             let row = GameUI.card(size: CGSize(width: listWidth, height: rowCardHeight),
                                   cornerRadius: 16,
                                   tint: rowTint.withAlphaComponent(isCurrent ? 0.9 : 0.6),
-                                  baseColors: GameUI.tintedColors(region.tint))
+                                  baseColors: isLocked ? GameUI.tintedColors(UIColor(white: 0.34, alpha: 1)) : GameUI.tintedColors(region.tint))
             row.position = CGPoint(x: 0, y: y)
             row.name = "region_\(region.id)"
             listNode.addChild(row)
-            rowRegions[region.id] = region
+            if !isLocked {
+                rowRegions[region.id] = region
+            }
 
             let rowContent = SKNode()
             rowContent.zPosition = 5
@@ -331,7 +438,7 @@ final class RegionMenuOverlay: SKNode {
             let name = SKLabelNode(text: region.name)
             name.fontName = "AvenirNext-DemiBold"
             name.fontSize = 15
-            name.fontColor = GameUI.ink
+            name.fontColor = isLocked ? GameUI.mutedInk : GameUI.ink
             name.horizontalAlignmentMode = .left
             name.position = CGPoint(x: leftX, y: 13)
             rowContent.addChild(name)
@@ -339,7 +446,7 @@ final class RegionMenuOverlay: SKNode {
             let blurb = SKLabelNode(text: region.blurb)
             blurb.fontName = "AvenirNext-Regular"
             blurb.fontSize = 10.5
-            blurb.fontColor = GameUI.mutedInk
+            blurb.fontColor = isLocked ? GameUI.mutedInk.withAlphaComponent(0.72) : GameUI.mutedInk
             blurb.horizontalAlignmentMode = .left
             blurb.verticalAlignmentMode = .center
             blurb.preferredMaxLayoutWidth = listWidth - 36
@@ -349,13 +456,15 @@ final class RegionMenuOverlay: SKNode {
 
             let progress = Int((stats.regionProgress[region.id] ?? 0) * 100)
             let statusText: String
-            if isCurrent { statusText = "local atual" }
+            if isLocked { statusText = "Disponível quando ela for \(region.minPhase.mapAccessDisplayName)" }
+            else if isCurrent { statusText = "local atual" }
             else if isDestination { statusText = "em rota" }
-            else { statusText = "explorada \(progress)%" }
+            else if stats.discoveredRegionIds.contains(region.id) { statusText = "explorada \(progress)%" }
+            else { statusText = "ainda não visitado" }
             let status = SKLabelNode(text: statusText)
             status.fontName = "AvenirNext-DemiBold"
             status.fontSize = 11
-            status.fontColor = isDestination ? GameUI.gold : GameUI.accent
+            status.fontColor = isLocked ? GameUI.mutedInk : (isDestination ? GameUI.gold : GameUI.accent)
             status.horizontalAlignmentMode = .left
             status.position = CGPoint(x: leftX, y: -28)
             rowContent.addChild(status)
@@ -381,15 +490,6 @@ final class RegionMenuOverlay: SKNode {
             scrollThumb = thumb
         }
         updateListScroll(0)
-
-        if unknownCount > 0 {
-            let hint = SKLabelNode(text: "Águas desconhecidas seguem além.")
-            hint.fontName = "AvenirNext-Regular"
-            hint.fontSize = 10.5
-            hint.fontColor = GameUI.mutedInk
-            hint.position = CGPoint(x: 0, y: -panelHeight / 2 + 64)
-            panelContent.addChild(hint)
-        }
 
         let close = GameUI.pill(text: "Fechar registro",
                                 fontSize: 14,

@@ -16,6 +16,7 @@ final class MermaidStats: Codable {
     // Mantém a chave antiga do save; no jogo este atributo aparece como Disposição.
     var mood: CGFloat = 70
     var xp: CGFloat = 0
+    // Campo legado de saves antigos. Coragem não participa das regras atuais.
     var courage: CGFloat = 12
     var trust: CGFloat = 50
     var curiosity: CGFloat = 60
@@ -23,8 +24,12 @@ final class MermaidStats: Codable {
     var phase: MermaidPhase = .egg
     var birthDate: Date = Date()
     var phaseStartedAt: Date = Date()
-    var adaptationByZone: [String: CGFloat] = [DepthZone.mid.storageKey: 30]
-    var unlockedZoneKeys: Set<String> = [DepthZone.shallow.storageKey, DepthZone.mid.storageKey]
+    var adaptationByZone: [String: CGFloat] = [DepthZone.clear.storageKey: 30,
+                                               DepthZone.shallow.storageKey: 30,
+                                               DepthZone.mid.storageKey: 30]
+    var unlockedZoneKeys: Set<String> = [DepthZone.clear.storageKey,
+                                         DepthZone.shallow.storageKey,
+                                         DepthZone.mid.storageKey]
     var maxDepthMeters: CGFloat = 0
     var puzzlesSolved: Int = 0
     var mealsEaten: Int = 0
@@ -80,8 +85,12 @@ final class MermaidStats: Codable {
         birthDate = try c.decodeIfPresent(Date.self, forKey: .birthDate) ?? Date()
         phaseStartedAt = try c.decodeIfPresent(Date.self, forKey: .phaseStartedAt)
             ?? MermaidStats.estimatedPhaseStartedAt(for: phase, birthDate: birthDate)
-        adaptationByZone = try c.decodeIfPresent([String: CGFloat].self, forKey: .adaptationByZone) ?? [DepthZone.shallow.storageKey: 30]
-        unlockedZoneKeys = try c.decodeIfPresent(Set<String>.self, forKey: .unlockedZoneKeys) ?? [DepthZone.shallow.storageKey]
+        adaptationByZone = try c.decodeIfPresent([String: CGFloat].self, forKey: .adaptationByZone)
+            ?? [DepthZone.clear.storageKey: 30,
+                DepthZone.shallow.storageKey: 30,
+                DepthZone.mid.storageKey: 30]
+        unlockedZoneKeys = try c.decodeIfPresent(Set<String>.self, forKey: .unlockedZoneKeys)
+            ?? [DepthZone.clear.storageKey, DepthZone.shallow.storageKey, DepthZone.mid.storageKey]
         maxDepthMeters = try c.decodeIfPresent(CGFloat.self, forKey: .maxDepthMeters) ?? 0
         puzzlesSolved = try c.decodeIfPresent(Int.self, forKey: .puzzlesSolved) ?? 0
         mealsEaten = try c.decodeIfPresent(Int.self, forKey: .mealsEaten) ?? 0
@@ -305,6 +314,7 @@ final class MermaidStats: Codable {
         if let data = UserDefaults.standard.data(forKey: saveKey),
            let stats = try? JSONDecoder().decode(MermaidStats.self, from: data) {
             // garantias de base após migrações de mundo
+            stats.unlock(.clear)
             stats.unlock(.shallow)
             stats.unlock(.mid)
             stats.discoveredRegionIds.insert("nascente")
