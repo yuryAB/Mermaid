@@ -43,6 +43,7 @@ class GameScene: SKScene {
         false
 #endif
     }
+    private let showRigDebugButton = false
 
     private let ctx = GameContext()
     private var stats: MermaidStats!
@@ -224,7 +225,7 @@ class GameScene: SKScene {
 
     private func setupHUD() {
         let insets = view?.safeAreaInsets ?? .zero
-        hud = HUDLayer(size: size, insets: insets, enableDebugRigToolButton: showDebugControls)
+        hud = HUDLayer(size: size, insets: insets, enableDebugRigToolButton: showRigDebugButton)
         hud.zPosition = 100
         hud.onCommand = { [weak self] command in
             self?.ctx.autonomy.give(command)
@@ -235,7 +236,7 @@ class GameScene: SKScene {
         hud.onNameEditTap = { [weak self] in
             self?.openMermaidNameEditor()
         }
-        if showDebugControls {
+        if showRigDebugButton {
             hud.onDebugRigToolTap = { [weak self] in
                 self?.openRigDebugTool()
             }
@@ -266,7 +267,7 @@ class GameScene: SKScene {
     }
 
     private func openRigDebugTool() {
-        guard showDebugControls else { return }
+        guard showRigDebugButton else { return }
         if rigDebugTool != nil {
             closeRigDebugTool()
             return

@@ -40,7 +40,7 @@ enum OfflineProgressSystem {
             }
         } else if let destinationId = stats.destinationRegionId,
            let destination = RegionDiscoverySystem.region(withId: destinationId) {
-            let current = CGPoint(x: stats.posX, y: stats.posY)
+            _ = CGPoint(x: stats.posX, y: stats.posY)
             let target = stats.savedMapPosition(for: destination) ?? destination.center
             move(stats: stats, toward: target, maxDistance: distance)
 

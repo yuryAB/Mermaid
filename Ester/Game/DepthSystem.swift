@@ -340,7 +340,6 @@ final class DepthSystem {
     }
 
     func flashBoundaryPalette(for edge: DepthBoundaryEdge) {
-        guard edge == .upper else { return }
         boundaryPaletteEffect = BoundaryPaletteEffect(basePalette: normalMermaidPalette(atY: ctx.mermaidPosition.y),
                                                       limitPalette: paletteForBoundary(edge))
         paletteTimer = 0

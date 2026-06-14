@@ -47,6 +47,7 @@ final class HUDLayer: SKNode {
     private var messageLabel: SKLabelNode!
     private var touchCooldownChip: SKNode!
     private var touchCooldownLabel: SKLabelNode!
+    private var eggModeFocusActive = false
     private var bondRecoveryBanner: SKNode!
     private var bondRecoveryTitleLabel: SKLabelNode!
     private var bondRecoveryMessageLabel: SKLabelNode!
@@ -553,7 +554,10 @@ final class HUDLayer: SKNode {
         var title = "Observação rápida"
         var body = rawText
 
-        if lower.contains("correnteza") {
+        if lower.contains("ovo") || lower.contains("choco") || lower.contains("nasceu") || lower.contains("nascendo") {
+            title = "Incubação"
+            body = cleanFieldText(rawText)
+        } else if lower.contains("correnteza") {
             title = "Registro do ambiente"
             body = "Correnteza registrada na região."
         } else if lower.contains("objetivo disponivel") || lower.contains("objetivo disponível") {
@@ -979,11 +983,15 @@ final class HUDLayer: SKNode {
             growthLabel.text = evolutionNote
             intentLabel.text = "Registro: incubação em andamento"
             barLabels["bond"]?.text = "Nascimento"
+            phaseLabel.fontColor = HUDPalette.blueInk
+            growthLabel.fontColor = HUDPalette.gold
         } else {
-            phaseLabel.text = "Sereia \(stats.phase.displayName.lowercased()) · \(stats.ageText)"
+            phaseLabel.text = "Observada há \(stats.ageText)"
             growthLabel.text = evolutionNote
             intentLabel.text = "Comportamento: \(intent.displayName)"
             barLabels["bond"]?.text = "Vínculo"
+            phaseLabel.fontColor = HUDPalette.blueInk
+            growthLabel.fontColor = HUDPalette.teal
         }
 
         fitLabelToWidth(phaseLabel,
@@ -1014,6 +1022,7 @@ final class HUDLayer: SKNode {
         setBar("energy", value: stats.energy / 100)
         setBar("mood", value: stats.disposition / 100)
         setBar("bond", value: eggMode ? evolutionProgress : stats.trust / 100)
+        updateEggModeChrome(enabled: eggMode)
         updateTouchCooldown(remaining: touchCooldownRemaining)
         updateBondRecoveryBanner(state: bondRecoveryState)
 
@@ -1063,7 +1072,57 @@ final class HUDLayer: SKNode {
 
         let activeCommand = highlightedCommand(for: intent)
         for (command, highlight) in buttonHighlights {
-            highlight.isHidden = command != activeCommand || disabledCommands.contains(command)
+            if eggMode && command == .challenge && !disabledCommands.contains(command) {
+                highlight.isHidden = false
+                highlight.fillColor = HUDPalette.gold.withAlphaComponent(0.16)
+                highlight.strokeColor = HUDPalette.gold.withAlphaComponent(0.86)
+                highlight.glowWidth = 3
+            } else {
+                highlight.isHidden = command != activeCommand || disabledCommands.contains(command)
+                highlight.fillColor = command.tint.withAlphaComponent(0.10)
+                highlight.strokeColor = command.tint.withAlphaComponent(0.72)
+                highlight.glowWidth = 1.5
+            }
+        }
+    }
+
+    private func updateEggModeChrome(enabled: Bool) {
+        if let bond = bars["bond"] {
+            bond.fillColor = enabled
+                ? HUDPalette.gold.withAlphaComponent(0.82)
+                : HUDPalette.teal.withAlphaComponent(0.72)
+        }
+
+        intentChip.strokeColor = enabled
+            ? HUDPalette.gold.withAlphaComponent(0.72)
+            : HUDPalette.teal.withAlphaComponent(0.48)
+        intentChip.glowWidth = enabled ? 1.6 : 0
+
+        guard eggModeFocusActive != enabled else { return }
+        eggModeFocusActive = enabled
+
+        if enabled {
+            if let button = buttons[.challenge] {
+                button.removeAction(forKey: "eggModeFocus")
+                let focus = SKAction.repeatForever(.sequence([
+                    .scale(to: 1.06, duration: 0.62),
+                    .scale(to: 1.0, duration: 0.72)
+                ]))
+                focus.eaeInEaseOut()
+                button.run(focus, withKey: "eggModeFocus")
+            }
+            intentChip.removeAction(forKey: "eggModeGlow")
+            let glow = SKAction.repeatForever(.sequence([
+                .fadeAlpha(to: 0.86, duration: 0.8),
+                .fadeAlpha(to: 1.0, duration: 0.9)
+            ]))
+            glow.eaeInEaseOut()
+            intentChip.run(glow, withKey: "eggModeGlow")
+        } else {
+            buttons[.challenge]?.removeAction(forKey: "eggModeFocus")
+            buttons[.challenge]?.setScale(1.0)
+            intentChip.removeAction(forKey: "eggModeGlow")
+            intentChip.alpha = 1.0
         }
     }
 
