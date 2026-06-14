@@ -202,6 +202,51 @@ final class MermaidStats: Codable {
         expeditionRevealByRegion[regionId] ?? [:]
     }
 
+    func mapDiscoveryProgress(in region: Region) -> CGFloat {
+        let areaProgress = expeditionAreaProgress(in: region)
+        guard hasReachablePOIs(in: region) else { return areaProgress }
+
+        let poiProgress = poiDiscoveryProgress(in: region)
+        return ((areaProgress + poiProgress) / 2).clamped(to: 0...1)
+    }
+
+    func expeditionAreaProgress(in region: Region) -> CGFloat {
+        let reveal = expeditionReveal(for: region.id)
+        var total: CGFloat = 0
+        var count: CGFloat = 0
+
+        for row in 0..<Self.expeditionMapRows {
+            let zone = DepthZone.zone(atY: Self.expeditionWorldY(forRow: row))
+            guard phase >= zone.minPhase, isUnlocked(zone) else { continue }
+
+            for column in 0..<Self.expeditionMapColumns {
+                let key = Self.expeditionCellKey(column: column, row: row)
+                total += (reveal[key] ?? 0).clamped(to: 0...1)
+                count += 1
+            }
+        }
+
+        guard count > 0 else { return 0 }
+        return (total / count).clamped(to: 0...1)
+    }
+
+    func poiDiscoveryProgress(in region: Region) -> CGFloat {
+        let reachablePOIs = reachablePOIs(in: region)
+        guard !reachablePOIs.isEmpty else { return 1 }
+
+        let discoveredCount = reachablePOIs.filter { isPOIDiscovered($0.key) }.count
+        return (CGFloat(discoveredCount) / CGFloat(reachablePOIs.count)).clamped(to: 0...1)
+    }
+
+    private func hasReachablePOIs(in region: Region) -> Bool {
+        !reachablePOIs(in: region).isEmpty
+    }
+
+    private func reachablePOIs(in region: Region) -> [WorldPOI] {
+        WorldPOICatalog.pois(in: region, stats: self)
+            .filter { phase >= $0.zone.minPhase && isUnlocked($0.zone) }
+    }
+
     func revealExpeditionMap(in region: Region, near point: CGPoint) {
         guard phase != .egg else { return }
 
@@ -240,6 +285,12 @@ final class MermaidStats: Codable {
               let column = Int(parts[0]),
               let row = Int(parts[1]) else { return nil }
         return (column, row)
+    }
+
+    static func expeditionWorldY(forRow row: Int) -> CGFloat {
+        let t = CGFloat(row).clamped(to: 0...CGFloat(expeditionMapRows - 1))
+            / CGFloat(max(1, expeditionMapRows - 1))
+        return World.floorY + (World.surfaceTopY - World.floorY) * t
     }
 
     static func expeditionColumn(forX x: CGFloat, in region: Region) -> Int {
@@ -306,15 +357,35 @@ final class MermaidStats: Codable {
 
     func ensureBaselineRegionAccess() {
         discoveredRegionIds.insert("nascente")
-        if phase >= .baby {
-            discoveredRegionIds.insert("jardim_calmo")
-        }
     }
 
     func isRegionKnown(_ region: Region) -> Bool {
         if region.id == "nascente" { return true }
-        if region.id == "jardim_calmo" && phase >= .baby { return true }
         return discoveredRegionIds.contains(region.id)
+    }
+
+    func removeLegacyAutomaticRegionAccessIfUnused() {
+        for regionId in ["jardim_calmo"] where shouldRemoveLegacyAutomaticAccess(for: regionId) {
+            discoveredRegionIds.remove(regionId)
+        }
+    }
+
+    private func shouldRemoveLegacyAutomaticAccess(for regionId: String) -> Bool {
+        guard discoveredRegionIds.contains(regionId),
+              currentRegionId != regionId,
+              destinationRegionId != regionId,
+              pendingRegionDiscoveryId != regionId,
+              discoveryRouteRegionId != regionId,
+              readyRegionDiscoveryId != regionId else { return false }
+        guard (regionProgress[regionId] ?? 0) <= 0.001,
+              mapPositionByRegion[regionId] == nil,
+              (expeditionRevealByRegion[regionId] ?? [:]).isEmpty else { return false }
+
+        let poiKeyPrefixes = ["\(regionId)_", "\(regionId)|"]
+        let hasPOIState = discoveredPOIKeys.contains { key in poiKeyPrefixes.contains { key.hasPrefix($0) } }
+            || visitedPOIKeys.contains { key in poiKeyPrefixes.contains { key.hasPrefix($0) } }
+            || collectedPOIRewardKeys.contains { key in poiKeyPrefixes.contains { key.hasPrefix($0) } }
+        return !hasPOIState
     }
 
     func hasDiscoveryLead(for region: Region) -> Bool {
@@ -569,6 +640,7 @@ final class MermaidStats: Codable {
             stats.unlock(.shallow)
             stats.unlock(.mid)
             stats.ensureBaselineRegionAccess()
+            stats.removeLegacyAutomaticRegionAccessIfUnused()
             if RegionDiscoverySystem.region(withId: stats.currentRegionId) == nil {
                 stats.currentRegionId = "nascente"
             }
@@ -579,6 +651,7 @@ final class MermaidStats: Codable {
             }
             stats.applyBalanceMigrationIfNeeded()
             stats.ensureBaselineRegionAccess()
+            stats.removeLegacyAutomaticRegionAccessIfUnused()
             return stats
         }
         let stats = MermaidStats()

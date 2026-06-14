@@ -40,7 +40,10 @@
 
 ## Regras de Acesso a Mapas
 
-- Cada fase dá acesso cumulativo: **fase atual + todas as fases anteriores**.
+- Cada fase dá **elegibilidade** cumulativa: **fase atual + todas as fases anteriores**.
+- Elegibilidade de fase **não descobre mapa sozinha**.
+- Apenas *Águas de Nascimento* começa conhecido por padrão.
+- Todo outro mapa precisa passar pelo fluxo de pista → seguir pista → confirmar viagem.
 - Mapas de fases futuras aparecem no menu como **bloqueados**, com mensagem: *"Disponível quando ela for [Fase]"*.
 - Voltar para mapa de fase menor **sempre é permitido**.
 
@@ -191,6 +194,12 @@ Isso é análogo às camadas do Terraria, mas rotacionado: no Terraria o eixo de
 - Conteúdo de áreas ainda não reveladas
 - Detalhes de fauna/eventos em tempo real (não é radar)
 - Outros mapas — o mini-mapa é sempre do mapa atual
+
+#### Porcentagem de descoberta
+
+- A porcentagem de descoberta do mapa combina **área revelada** e **POIs alcançáveis descobertos**.
+- Um mapa só pode aparecer como **100% descoberto** quando a área alcançável foi revelada e todos os POIs alcançáveis daquele mapa foram descobertos.
+- POIs em profundidades ainda bloqueadas não entram na porcentagem até a profundidade ser desbloqueada.
 
 #### Raio de visão — decisão fechada
 
@@ -357,6 +366,7 @@ O gatilho de descoberta é **aleatório** e pode vir de duas fontes:
 - Um **POI específico** que contém a pista do novo mapa.
 
 Qual das duas fontes dispara é definido pelo acaso — o jogador não sabe de onde vai vir.
+O destino da pista segue a ordem de progressão dos mapas elegíveis ainda desconhecidos; a aleatoriedade decide **quando e de qual fonte** a pista aparece, não pula para qualquer mapa distante da lista.
 
 ### Fluxo de desbloqueio
 
@@ -442,4 +452,4 @@ Já implementado e definido — **não alterar**.
 
 ---
 
-*Última atualização: 2026-06-13 — coragem removida; desbloqueio híbrido definido; mini-mapa definido; ponto de entrada dinâmico; POIs fase bebê definidos; sistema de recompensas definido; eventos aleatórios com upgrade; v1 sem POIs; energia/fase/conchas/refúgio clarificados; movimento offline definido; desbloqueio de mapas via evento/POI aleatório definido; arquitetura GameScene por mapa destacada*
+*Última atualização: 2026-06-14 — porcentagem de descoberta passa a combinar área revelada + POIs alcançáveis; fase agora é elegibilidade, não descoberta automática de mapa; pistas seguem ordem de progressão dos mapas elegíveis*

@@ -253,9 +253,8 @@ final class RegionDiscoverySystem {
             progressTimer = 0
             ctx.stats.rememberMapPosition(ctx.mermaidPosition, in: region)
             let current = ctx.stats.regionProgress[region.id] ?? 0
-            if current < 1 {
-                ctx.stats.regionProgress[region.id] = min(1, current + 5.0 / 1200.0 * ctx.stats.explorationProgressMultiplier)
-            }
+            let revealedArea = ctx.stats.expeditionAreaProgress(in: region)
+            ctx.stats.regionProgress[region.id] = max(current, revealedArea)
         }
 
         leadTimer += dt
@@ -444,7 +443,7 @@ final class RegionDiscoverySystem {
                     && !ctx.stats.isRegionKnown(region)
                     && !ctx.stats.hasDiscoveryLead(for: region)
             }
-            .randomElement()
+            .first
     }
 
     private func updateDiscoveryRoute(in current: Region) {
@@ -1669,7 +1668,8 @@ final class RegionMenuOverlay: SKNode {
             blurb.position = CGPoint(x: leftX, y: 3)
             rowContent.addChild(blurb)
 
-            let progress = Int((stats.regionProgress[region.id] ?? 0) * 100)
+            let discoveryProgress = stats.mapDiscoveryProgress(in: region)
+            let progress = Int((discoveryProgress * 100).rounded(.down))
             let status = menuLabel("\(actionText) · \(progress)%",
                                    fontSize: 10.5,
                                    color: isLocked ? GameUI.mutedInk.withAlphaComponent(0.78) : (hasLead || isDestination || isCurrent ? GameUI.gold : GameUI.accent),
@@ -1680,7 +1680,7 @@ final class RegionMenuOverlay: SKNode {
 
             let barWidth = max(72, min(150, listWidth - 190))
             let bar = progressBar(width: barWidth,
-                                  progress: CGFloat(progress) / 100,
+                                  progress: discoveryProgress,
                                   color: rowTint)
             bar.position = CGPoint(x: leftX + barWidth / 2, y: -36)
             rowContent.addChild(bar)
