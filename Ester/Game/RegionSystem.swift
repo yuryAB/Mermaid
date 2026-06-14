@@ -711,11 +711,11 @@ enum WorldPOICatalog {
         case .shipwreck:
             return .item(id: "fragmento_\(region.id)", title: "fragmento de naufrágio")
         case .npc:
-            return .temporaryEffect(.eagerCompanion, duration: 3600)
+            return .temporaryEffect(.eagerCompanion, duration: GameBalance.gameplayEffectDuration)
         case .minigame:
-            return .temporaryEffect(.swiftCurrent, duration: 1800)
+            return .temporaryEffect(.swiftCurrent, duration: GameBalance.gameplayEffectDuration)
         case .pet:
-            return .temporaryPet(title: "peixinho companheiro", duration: 3600)
+            return .temporaryPet(title: "peixinho companheiro", duration: GameBalance.visualEffectDuration)
         case .story:
             return .story("Ela ouviu uma história perdida em \(region.name), \(zone.displayName).")
         }

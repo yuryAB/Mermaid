@@ -302,9 +302,9 @@ final class EventSystem {
 
     private func randomObjectiveEffectReward() -> Reward {
         let candidates: [(kind: TimedBuffKind, duration: TimeInterval)] = [
-            (.fullBelly, 1200),
-            (.swiftCurrent, 900),
-            (.eagerCompanion, 900)
+            (.fullBelly, GameBalance.gameplayEffectDuration),
+            (.swiftCurrent, GameBalance.gameplayEffectDuration),
+            (.eagerCompanion, GameBalance.gameplayEffectDuration)
         ]
         let inactive = candidates.filter { !ctx.stats.hasActiveBuff($0.kind) }
         let pool = inactive.isEmpty ? candidates : inactive
@@ -337,7 +337,7 @@ final class EventSystem {
                          guard let fish, fish.parent != nil else { return nil }
                          return fish.position
                      },
-                     reward: .temporaryEffect(.swiftCurrent, duration: 900))
+                     reward: .temporaryEffect(.swiftCurrent, duration: GameBalance.gameplayEffectDuration))
 
         // se ela estiver por perto quando ele some, vira memória
         world.run(.sequence([
