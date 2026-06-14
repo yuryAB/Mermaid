@@ -64,6 +64,7 @@ final class MermaidStats: Codable {
     var feedingUpgradeLevel: Int = 0
     var energyUpgradeLevel: Int = 0
     var dispositionUpgradeLevel: Int = 0
+    var babyGuaranteedRequestsUsed: Int = 0
     var balanceVersion: Int = GameBalance.currentVersion
 
     // Estado transitório, não persiste
@@ -83,6 +84,7 @@ final class MermaidStats: Codable {
         case discoveryPointByRegion, destinationRegionId
         case speedUpgradeLevel, shellGainUpgradeLevel, feedingUpgradeLevel
         case energyUpgradeLevel, dispositionUpgradeLevel
+        case babyGuaranteedRequestsUsed
         case balanceVersion
     }
 
@@ -143,6 +145,7 @@ final class MermaidStats: Codable {
         feedingUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .feedingUpgradeLevel) ?? 0
         energyUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .energyUpgradeLevel) ?? 0
         dispositionUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .dispositionUpgradeLevel) ?? 0
+        babyGuaranteedRequestsUsed = try c.decodeIfPresent(Int.self, forKey: .babyGuaranteedRequestsUsed) ?? 0
         balanceVersion = try c.decodeIfPresent(Int.self, forKey: .balanceVersion) ?? 1
     }
 
@@ -346,6 +349,15 @@ final class MermaidStats: Codable {
 
     func isPOIRewardCollected(_ key: String) -> Bool {
         collectedPOIRewardKeys.contains(key)
+    }
+
+    var canUseBabyGuaranteedRequest: Bool {
+        phase == .baby && babyGuaranteedRequestsUsed < GameBalance.babyGuaranteedRequestCount
+    }
+
+    func consumeBabyGuaranteedRequestIfNeeded() {
+        guard canUseBabyGuaranteedRequest else { return }
+        babyGuaranteedRequestsUsed += 1
     }
 
     func markEntryTextSeen(region: Region, zone: DepthZone) -> Bool {

@@ -616,7 +616,9 @@ final class AutonomySystem {
         ctx.say("Ela respirou um pouco. Pode pedir com calma agora.")
     }
 
-    private func rewardAcceptedRequest(baseGain: CGFloat, guaranteedByBondRecovery: Bool) {
+    private func rewardAcceptedRequest(baseGain: CGFloat,
+                                       guaranteedByBondRecovery: Bool,
+                                       guaranteedByBabyStart: Bool = false) {
         var gain = baseGain
         if guaranteedByBondRecovery {
             gain += BondRecoveryBalance.acceptedRequestTrustGain
@@ -627,13 +629,19 @@ final class AutonomySystem {
                     : .idle
             }
         }
+        if guaranteedByBabyStart {
+            stats.consumeBabyGuaranteedRequestIfNeeded()
+        }
         stats.trust = min(100, stats.trust + gain)
     }
 
     func give(_ command: PlayerCommand) {
         clearExpiredCommandCooldowns()
         notePlayerPressure()
-        if let until = commandCooldownUntil[command], until > Date() {
+        let guaranteedByBabyStart = stats.canUseBabyGuaranteedRequest
+        if !guaranteedByBabyStart,
+           let until = commandCooldownUntil[command],
+           until > Date() {
             return
         }
 
@@ -650,7 +658,7 @@ final class AutonomySystem {
         guard intent != .enteringRefuge else { return }
 
         let guaranteedByBondRecovery = isBondRecoveryRequestReady
-        let requestIsGuaranteed = guaranteedByBondRecovery || stats.hasActiveBuff(.eagerCompanion)
+        let requestIsGuaranteed = guaranteedByBabyStart || guaranteedByBondRecovery || stats.hasActiveBuff(.eagerCompanion)
         var guidedExplorePoint: CGPoint?
         let desired: MermaidIntent
         switch command {
@@ -753,7 +761,8 @@ final class AutonomySystem {
 
         if requestIsGuaranteed || CGFloat.random(in: 0...1) <= chance {
             rewardAcceptedRequest(baseGain: TrustBalance.acceptedCommand,
-                                  guaranteedByBondRecovery: guaranteedByBondRecovery)
+                                  guaranteedByBondRecovery: guaranteedByBondRecovery,
+                                  guaranteedByBabyStart: guaranteedByBabyStart)
             if desired == .wandering {
                 if let guidedExplorePoint {
                     let limitedPoint = pointLimitedByEnergy(guidedExplorePoint)
@@ -853,7 +862,11 @@ final class AutonomySystem {
         notePlayerPressure()
         guard food.parent != nil else { return false }
         guard !food.kind.isShellCurrency else { return false }
-        guard isBondRecoveryRequestReady || stats.hunger >= 28 || food.kind.pearls > 0 || food.kind.xp >= 10 else {
+        guard stats.canUseBabyGuaranteedRequest
+                || isBondRecoveryRequestReady
+                || stats.hunger >= 28
+                || food.kind.pearls > 0
+                || food.kind.xp >= 10 else {
             return rejectTouchRequest("Ela viu \(food.kind.name), mas não está com fome agora.")
         }
         let acceptedMessage = "Ela aceitou provar \(food.kind.name)..."
@@ -896,10 +909,10 @@ final class AutonomySystem {
         guard giver.parent != nil, giver.offeredChallenge != nil else { return false }
         let hungerLimit: CGFloat = stats.phase == .baby ? 65 : 92
         let energyLimit: CGFloat = stats.phase == .baby ? 35 : 8
-        guard isBondRecoveryRequestReady || stats.hunger <= hungerLimit else {
+        guard stats.canUseBabyGuaranteedRequest || isBondRecoveryRequestReady || stats.hunger <= hungerLimit else {
             return rejectTouchRequest("Faminta demais para um desafio... me ajuda a comer algo?")
         }
-        guard isBondRecoveryRequestReady || stats.energy >= energyLimit else {
+        guard stats.canUseBabyGuaranteedRequest || isBondRecoveryRequestReady || stats.energy >= energyLimit else {
             return rejectTouchRequest("Preciso descansar antes de um desafio... 😴", emotion: .tired)
         }
         guard acceptTouchRequest(for: .seekingChallenge,
@@ -927,17 +940,19 @@ final class AutonomySystem {
                                     refusalMessages: [String]) -> Bool {
         guard stats.phase != .egg, intent != .inChallenge, intent != .enteringRefuge, !paused else { return false }
 
-        if touchRequestCooldownRemaining > 0 {
+        let guaranteedByBabyStart = stats.canUseBabyGuaranteedRequest
+        if !guaranteedByBabyStart && touchRequestCooldownRemaining > 0 {
             showTouchCooldownFeedback()
             return false
         }
 
         let guaranteedByBondRecovery = isBondRecoveryRequestReady
-        let requestIsGuaranteed = guaranteedByBondRecovery || stats.hasActiveBuff(.eagerCompanion)
+        let requestIsGuaranteed = guaranteedByBabyStart || guaranteedByBondRecovery || stats.hasActiveBuff(.eagerCompanion)
         let chance = touchAcceptanceChance(for: desired)
         if requestIsGuaranteed || CGFloat.random(in: 0...1) <= chance {
             rewardAcceptedRequest(baseGain: 0.15,
-                                  guaranteedByBondRecovery: guaranteedByBondRecovery)
+                                  guaranteedByBondRecovery: guaranteedByBondRecovery,
+                                  guaranteedByBabyStart: guaranteedByBabyStart)
             GameAudio.shared.play(.uiConfirm)
             ctx.say(guaranteedByBondRecovery
                     ? "Ela aceitou seu pedido. O vínculo entre vocês ficou mais forte."

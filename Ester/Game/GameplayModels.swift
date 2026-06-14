@@ -31,6 +31,7 @@ enum GameBalance {
     static let babyStartingEnergy: CGFloat = 75
     static let babyStartingDisposition: CGFloat = 58
     static let babyStartingXP: CGFloat = 4
+    static let babyGuaranteedRequestCount = 10
     static let gameplayEffectDuration: TimeInterval = 5 * 60
     static let visualEffectDuration: TimeInterval = 20 * 60
 
