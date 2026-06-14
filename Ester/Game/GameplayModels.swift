@@ -209,10 +209,10 @@ enum DepthZone: Int, Codable, CaseIterable {
 
     var minPhase: MermaidPhase {
         switch self {
-        case .clear, .shallow, .mid: return .baby
+        case .shallow, .mid: return .baby
         case .blue: return .child
         case .deep: return .teen
-        case .abyss: return .young
+        case .clear, .abyss: return .young
         case .surface: return .adult
         }
     }

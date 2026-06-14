@@ -27,8 +27,7 @@ final class MermaidStats: Codable {
     var adaptationByZone: [String: CGFloat] = [DepthZone.clear.storageKey: 30,
                                                DepthZone.shallow.storageKey: 30,
                                                DepthZone.mid.storageKey: 30]
-    var unlockedZoneKeys: Set<String> = [DepthZone.clear.storageKey,
-                                         DepthZone.shallow.storageKey,
+    var unlockedZoneKeys: Set<String> = [DepthZone.shallow.storageKey,
                                          DepthZone.mid.storageKey]
     var maxDepthMeters: CGFloat = 0
     var puzzlesSolved: Int = 0
@@ -110,7 +109,10 @@ final class MermaidStats: Codable {
                 DepthZone.shallow.storageKey: 30,
                 DepthZone.mid.storageKey: 30]
         unlockedZoneKeys = try c.decodeIfPresent(Set<String>.self, forKey: .unlockedZoneKeys)
-            ?? [DepthZone.clear.storageKey, DepthZone.shallow.storageKey, DepthZone.mid.storageKey]
+            ?? [DepthZone.shallow.storageKey, DepthZone.mid.storageKey]
+        if phase < DepthZone.clear.minPhase {
+            unlockedZoneKeys.remove(DepthZone.clear.storageKey)
+        }
         maxDepthMeters = try c.decodeIfPresent(CGFloat.self, forKey: .maxDepthMeters) ?? 0
         puzzlesSolved = try c.decodeIfPresent(Int.self, forKey: .puzzlesSolved) ?? 0
         mealsEaten = try c.decodeIfPresent(Int.self, forKey: .mealsEaten) ?? 0

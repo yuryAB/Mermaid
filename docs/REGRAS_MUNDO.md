@@ -48,7 +48,7 @@
 
 ## Profundidades
 
-Camadas disponíveis em cada mapa (ordem de acesso):
+Camadas existentes em cada mapa:
 
 1. Clara
 2. Rasa
@@ -59,6 +59,18 @@ Camadas disponíveis em cada mapa (ordem de acesso):
 7. Superfície *(acima da água)*
 
 Todas as camadas existem em todos os mapas. O que muda é o **desbloqueio**.
+
+Fase mínima por profundidade:
+
+| Profundidade | Fase mínima |
+|---|---|
+| Rasa | Bebê |
+| Média | Bebê |
+| Azul | Criança |
+| Profunda | Adolescente |
+| Clara | Jovem |
+| Abissal | Jovem |
+| Superfície | Adulta |
 
 ---
 
