@@ -306,11 +306,11 @@ final class EventSystem {
         ctx.say("Algo brilhante apareceu por perto... ✨ (Objetivo disponível)")
         setObjective(label: "algo brilhante",
                      duration: 60,
-                     reward: .temporaryEffect(.fullBelly, duration: 1200),
                      position: { [weak food] in
                          guard let food, food.parent != nil else { return nil }
                          return food.position
-                     })
+                     },
+                     reward: .temporaryEffect(.fullBelly, duration: 1200))
     }
 
     private func rareFish() {
@@ -321,11 +321,11 @@ final class EventSystem {
         ctx.say("Um peixe raro está passando! 👀 (Objetivo disponível)")
         setObjective(label: "o peixe raro",
                      duration: 45,
-                     reward: .temporaryEffect(.swiftCurrent, duration: 900),
                      position: { [weak fish] in
                          guard let fish, fish.parent != nil else { return nil }
                          return fish.position
-                     })
+                     },
+                     reward: .temporaryEffect(.swiftCurrent, duration: 900))
 
         // se ela estiver por perto quando ele some, vira memória
         world.run(.sequence([
@@ -428,7 +428,7 @@ final class EventSystem {
         let landingPoint = CGPoint(x: x, y: landingY)
         setObjective(label: "o objeto que caiu",
                      duration: 75,
-                     reward: .item(id: "objeto_humano_curioso", title: "objeto humano curioso"),
-                     position: { landingPoint })
+                     position: { landingPoint },
+                     reward: .item(id: "objeto_humano_curioso", title: "objeto humano curioso"))
     }
 }

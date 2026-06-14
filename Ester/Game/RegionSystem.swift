@@ -737,6 +737,7 @@ final class RegionMenuOverlay: SKNode {
     private var touchStartLocation: CGPoint = .zero
     private var lastTouchLocation: CGPoint = .zero
     private var didScrollDuringTouch = false
+    private var closeButtonRect: CGRect = .zero
 
     init(size: CGSize,
          stats: MermaidStats,
@@ -925,6 +926,11 @@ final class RegionMenuOverlay: SKNode {
                                 height: 32)
         close.name = "region_close"
         close.position = CGPoint(x: 0, y: -panelHeight / 2 + 30)
+        close.zPosition = 20
+        closeButtonRect = CGRect(x: content.position.x + close.position.x - 110,
+                                 y: close.position.y - 24,
+                                 width: 220,
+                                 height: 48)
         panelContent.addChild(close)
     }
 
@@ -955,8 +961,17 @@ final class RegionMenuOverlay: SKNode {
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first, !didScrollDuringTouch else { return }
+        guard let touch = touches.first else { return }
         let location = touch.location(in: self)
+
+        if closeButtonRect.contains(location) {
+            GameAudio.shared.play(.uiClosePanel)
+            onClose()
+            return
+        }
+
+        guard !didScrollDuringTouch else { return }
+
         var node: SKNode? = atPoint(location)
         while let current = node {
             if let name = current.name {
