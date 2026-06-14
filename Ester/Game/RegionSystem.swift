@@ -549,6 +549,48 @@ enum WorldPOIKind: String, Codable, CaseIterable {
     }
 }
 
+struct POIVisual: Codable {
+    let glyph: String
+    let tint: String
+    let scale: CGFloat
+
+    init(glyph: String, tint: String, scale: CGFloat = 1) {
+        self.glyph = glyph
+        self.tint = tint
+        self.scale = scale
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        glyph = try c.decode(String.self, forKey: .glyph)
+        tint = try c.decodeIfPresent(String.self, forKey: .tint) ?? "gold"
+        scale = try c.decodeIfPresent(CGFloat.self, forKey: .scale) ?? 1
+    }
+
+    static func `default`(for kind: WorldPOIKind) -> POIVisual {
+        switch kind {
+        case .shipwreck: return POIVisual(glyph: "▧", tint: "sand")
+        case .npc: return POIVisual(glyph: "?", tint: "coral")
+        case .minigame: return POIVisual(glyph: "◇", tint: "gold")
+        case .pet: return POIVisual(glyph: "•", tint: "aqua")
+        case .story: return POIVisual(glyph: "✦", tint: "violet")
+        }
+    }
+
+    var color: UIColor {
+        switch tint.lowercased() {
+        case "aqua": return UIColor(red: 0.40, green: 0.86, blue: 0.88, alpha: 1)
+        case "teal": return GameUI.accent
+        case "coral": return GameUI.coral
+        case "gold": return GameUI.gold
+        case "algae": return GameUI.algae
+        case "violet": return UIColor(red: 0.68, green: 0.50, blue: 0.92, alpha: 1)
+        case "sand": return UIColor(red: 0.72, green: 0.62, blue: 0.42, alpha: 1)
+        default: return GameUI.gold
+        }
+    }
+}
+
 struct WorldPOI: Codable {
     let key: String
     let regionId: String
@@ -557,6 +599,7 @@ struct WorldPOI: Codable {
     let name: String
     let position: CGPoint
     let reward: Reward
+    let visual: POIVisual
 }
 
 enum WorldPOICatalog {
@@ -580,7 +623,8 @@ enum WorldPOICatalog {
                                 kind: definition.kind,
                                 name: definition.name,
                                 position: position,
-                                reward: definition.reward)
+                                reward: definition.reward,
+                                visual: definition.visual ?? .default(for: definition.kind))
             }
         }
 
@@ -607,7 +651,8 @@ enum WorldPOICatalog {
                             kind: kind,
                             name: name(for: kind, region: region, zone: zone),
                             position: position,
-                            reward: reward(for: kind, region: region, zone: zone))
+                            reward: reward(for: kind, region: region, zone: zone),
+                            visual: .default(for: kind))
         }
     }
 
@@ -618,6 +663,7 @@ enum WorldPOICatalog {
         let kind: WorldPOIKind
         let name: String
         let reward: Reward
+        let visual: POIVisual?
     }
 
     private static let configuredDefinitions: [POIDefinition] = {
@@ -712,13 +758,17 @@ enum WorldPOICatalog {
 
 final class POISystem {
     unowned let ctx: GameContext
+    private weak var worldNode: SKNode?
     private var scanTimer: CGFloat = 0
     private var exploreFocusLevel = 0
     private var focusUntil: Date?
     private var pendingInteraction: WorldPOI?
+    private var visibleNodes: [String: WorldPOINode] = [:]
+    private var visiblePOIs: [String: WorldPOI] = [:]
 
-    init(ctx: GameContext) {
+    init(ctx: GameContext, worldNode: SKNode) {
         self.ctx = ctx
+        self.worldNode = worldNode
     }
 
     func update(dt: CGFloat) {
@@ -730,6 +780,7 @@ final class POISystem {
         scanTimer += dt
         guard scanTimer >= 1 else { return }
         scanTimer = 0
+        syncWorldNodes()
         discoverNearbyPOIs()
         completePendingInteractionIfReached()
     }
@@ -741,16 +792,91 @@ final class POISystem {
         return nearestUndiscoveredPOI()?.position
     }
 
+    func nearestVisiblePOI(to point: CGPoint, maxDistance: CGFloat) -> WorldPOI? {
+        syncWorldNodes()
+        return visiblePOIs.values
+            .filter { $0.position.distance(to: point) <= maxDistance }
+            .min { lhs, rhs in
+                lhs.position.distance(to: point) < rhs.position.distance(to: point)
+            }
+    }
+
     @discardableResult
     func requestReturn(to poi: WorldPOI) -> Bool {
         guard ctx.stats.isPOIDiscovered(poi.key) else {
             ctx.say("Ela só vê uma silhueta no mapa. Precisa chegar mais perto primeiro.")
             return false
         }
+        guard ctx.regions.currentRegion?.id == poi.regionId else {
+            ctx.say("\(poi.name) fica em outro mapa. Viaje para lá antes de voltar ao ponto.")
+            return false
+        }
+        guard isReachable(poi) else {
+            ctx.say("\(poi.name) está em uma profundidade que ela ainda não alcança.")
+            return false
+        }
         guard ctx.autonomy.requestPointFromTouch(poi.position) else { return false }
         pendingInteraction = poi
-        ctx.say("Ela vai tentar voltar a \(poi.name).")
+        syncWorldNodes()
+        ctx.say("Ela aceitou voltar a \(poi.name). O ponto já está visível no mundo.")
+        completePendingInteractionIfReached()
         return true
+    }
+
+    private func syncWorldNodes() {
+        guard let worldNode,
+              let region = ctx.regions.currentRegion else {
+            removeAllWorldNodes()
+            return
+        }
+
+        let pois = WorldPOICatalog.pois(in: region, stats: ctx.stats)
+            .filter { shouldShowInWorld($0) }
+        let validKeys = Set(pois.map { $0.key })
+
+        let staleKeys = visibleNodes.keys.filter { !validKeys.contains($0) }
+        for key in staleKeys {
+            visibleNodes[key]?.removeFromParent()
+            visibleNodes[key] = nil
+            visiblePOIs[key] = nil
+        }
+
+        for poi in pois {
+            let discovered = ctx.stats.isPOIDiscovered(poi.key)
+            let collected = ctx.stats.isPOIRewardCollected(poi.key)
+            let focused = pendingInteraction?.key == poi.key
+
+            if let node = visibleNodes[poi.key] {
+                node.position = poi.position
+                node.update(discovered: discovered, rewardCollected: collected, focused: focused)
+            } else {
+                let node = WorldPOINode(poi: poi,
+                                        discovered: discovered,
+                                        rewardCollected: collected,
+                                        focused: focused)
+                node.position = poi.position
+                worldNode.addChild(node)
+                visibleNodes[poi.key] = node
+            }
+            visiblePOIs[poi.key] = poi
+        }
+    }
+
+    private func removeAllWorldNodes() {
+        for node in visibleNodes.values {
+            node.removeFromParent()
+        }
+        visibleNodes.removeAll()
+        visiblePOIs.removeAll()
+    }
+
+    private func shouldShowInWorld(_ poi: WorldPOI) -> Bool {
+        guard ctx.stats.isPOIDiscovered(poi.key) else { return false }
+        return isReachable(poi)
+    }
+
+    private func isReachable(_ poi: WorldPOI) -> Bool {
+        ctx.stats.phase >= poi.zone.minPhase && ctx.stats.isUnlocked(poi.zone)
     }
 
     private func discoverNearbyPOIs() {
@@ -761,11 +887,13 @@ final class POISystem {
 
         for poi in WorldPOICatalog.pois(in: region, zone: zone, stats: ctx.stats) {
             guard !ctx.stats.isPOIDiscovered(poi.key) else { continue }
+            guard isReachable(poi) else { continue }
             guard poi.position.distance(to: ctx.mermaidPosition) <= radius else { continue }
             ctx.stats.discoverPOI(poi.key)
             ctx.stats.revealExpeditionMap(in: region, near: poi.position)
             ctx.stats.addMemory("Descobriu \(poi.name)")
-            ctx.say("Descobriu \(poi.name)! Ficou marcado no mapa.")
+            syncWorldNodes()
+            ctx.say("Ponto descoberto: \(poi.name). Ele ficou marcado no mapa de expedição.")
             return
         }
     }
@@ -775,11 +903,16 @@ final class POISystem {
               ctx.regions.currentRegion?.id == poi.regionId,
               ctx.mermaidPosition.distance(to: poi.position) < 150 else { return }
         pendingInteraction = nil
+        interact(with: poi)
+    }
+
+    private func interact(with poi: WorldPOI) {
         ctx.stats.visitPOI(poi.key)
         ctx.stats.revealExpeditionMap(in: ctx.activeRegion, near: poi.position)
 
         if ctx.stats.isPOIRewardCollected(poi.key) {
-            ctx.say("Ela voltou a \(poi.name) e ficou um pouco por ali.")
+            syncWorldNodes()
+            ctx.say("Ela voltou a \(poi.name) e reconheceu o lugar. A recompensa dali já foi coletada.")
             return
         }
 
@@ -787,7 +920,8 @@ final class POISystem {
         let rewardText = ctx.rewards.grant(poi.reward, source: poi.name)
         ctx.stats.addMemory("Interagiu com \(poi.name)")
         _ = ctx.regions.maybeRevealRegionLead(source: "POI", chance: 0.35)
-        ctx.say("Ela interagiu com \(poi.name)! \(rewardText)")
+        syncWorldNodes()
+        ctx.say("Ela explorou \(poi.name). \(rewardText)")
     }
 
     private func nearestUndiscoveredPOI() -> WorldPOI? {
@@ -921,6 +1055,7 @@ final class ExpeditionMapNode: SKNode {
     private func drawPOIs(stats: MermaidStats, region: Region) {
         let reveal = stats.expeditionReveal(for: region.id)
         for poi in WorldPOICatalog.pois(in: region, stats: stats) {
+            guard stats.phase >= poi.zone.minPhase && stats.isUnlocked(poi.zone) else { continue }
             let column = MermaidStats.expeditionColumn(forX: poi.position.x, in: region)
             let row = MermaidStats.expeditionRow(forY: poi.position.y)
             let cellKey = MermaidStats.expeditionCellKey(column: column, row: row)
@@ -932,16 +1067,9 @@ final class ExpeditionMapNode: SKNode {
             node.name = discovered ? "poi_\(poi.key)" : nil
             addChild(node)
 
-            let diamond = UIBezierPath()
-            diamond.move(to: CGPoint(x: 0, y: 6))
-            diamond.addLine(to: CGPoint(x: 6, y: 0))
-            diamond.addLine(to: CGPoint(x: 0, y: -6))
-            diamond.addLine(to: CGPoint(x: -6, y: 0))
-            diamond.close()
-
-            let marker = SKShapeNode(path: diamond.cgPath)
+            let marker = SKShapeNode(circleOfRadius: discovered ? 7.2 : 6.0)
             marker.fillColor = discovered
-                ? UIColor(red: 1.0, green: 0.82, blue: 0.34, alpha: 0.94)
+                ? poi.visual.color.withAlphaComponent(0.92)
                 : UIColor.white.withAlphaComponent(0.22)
             marker.strokeColor = discovered
                 ? UIColor.white.withAlphaComponent(0.72)
@@ -952,6 +1080,16 @@ final class ExpeditionMapNode: SKNode {
             node.addChild(marker)
 
             if discovered {
+                let glyph = SKLabelNode(text: poi.visual.glyph)
+                glyph.fontName = "AvenirNext-DemiBold"
+                glyph.fontSize = 8
+                glyph.fontColor = UIColor.white.withAlphaComponent(0.92)
+                glyph.horizontalAlignmentMode = .center
+                glyph.verticalAlignmentMode = .center
+                glyph.name = node.name
+                glyph.zPosition = 2
+                node.addChild(glyph)
+
                 let label = SKLabelNode(text: poi.name)
                 label.fontName = "AvenirNext-DemiBold"
                 label.fontSize = 7.5

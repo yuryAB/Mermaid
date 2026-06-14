@@ -5,6 +5,7 @@
     "zone": "shallow",
     "kind": "story",
     "name": "Ninho de ovos abandonados",
+    "visual": { "glyph": "🥚", "tint": "aqua", "scale": 1.0 },
     "reward": {
       "kind": "story",
       "title": "Memória",
@@ -21,6 +22,7 @@
     "zone": "shallow",
     "kind": "pet",
     "name": "Cardume de peixinhos bebês",
+    "visual": { "glyph": "🐠", "tint": "aqua", "scale": 1.05 },
     "reward": {
       "kind": "temporaryPet",
       "title": "cardume pequeno",
@@ -37,9 +39,10 @@
     "zone": "shallow",
     "kind": "minigame",
     "name": "Concha gigante com música",
+    "visual": { "glyph": "♪", "tint": "gold", "scale": 1.0 },
     "reward": {
       "kind": "temporaryEffect",
-      "title": "Nado veloz",
+      "title": "Nado acelerado",
       "pearlAmount": 0,
       "itemId": null,
       "buffKind": "swiftCurrent",
@@ -53,6 +56,7 @@
     "zone": "mid",
     "kind": "shipwreck",
     "name": "Barco naufragado pequeno",
+    "visual": { "glyph": "▧", "tint": "sand", "scale": 1.0 },
     "reward": {
       "kind": "item",
       "title": "brilho de naufrágio",
@@ -69,6 +73,7 @@
     "zone": "mid",
     "kind": "npc",
     "name": "Tartaruga velha",
+    "visual": { "glyph": "?", "tint": "algae", "scale": 1.0 },
     "reward": {
       "kind": "story",
       "title": "Memória",
@@ -85,9 +90,10 @@
     "zone": "mid",
     "kind": "story",
     "name": "Corrente quente",
+    "visual": { "glyph": "~", "tint": "coral", "scale": 1.0 },
     "reward": {
       "kind": "temporaryEffect",
-      "title": "Aceitação serena",
+      "title": "Pedidos aceitos",
       "pearlAmount": 0,
       "itemId": null,
       "buffKind": "eagerCompanion",
@@ -101,9 +107,10 @@
     "zone": "shallow",
     "kind": "minigame",
     "name": "Planta que reage ao toque",
+    "visual": { "glyph": "✿", "tint": "algae", "scale": 1.0 },
     "reward": {
       "kind": "temporaryEffect",
-      "title": "Sem fome",
+      "title": "Fome pausada",
       "pearlAmount": 0,
       "itemId": null,
       "buffKind": "fullBelly",
@@ -117,6 +124,7 @@
     "zone": "shallow",
     "kind": "npc",
     "name": "Peixe colorido",
+    "visual": { "glyph": "🐠", "tint": "coral", "scale": 1.08 },
     "reward": {
       "kind": "item",
       "title": "escama colorida",
@@ -133,6 +141,7 @@
     "zone": "shallow",
     "kind": "story",
     "name": "Nuvem de bolhas subindo",
+    "visual": { "glyph": "○", "tint": "aqua", "scale": 1.0 },
     "reward": {
       "kind": "pearls",
       "title": "Conchas",
@@ -149,6 +158,7 @@
     "zone": "mid",
     "kind": "story",
     "name": "Ruína coberta de algas",
+    "visual": { "glyph": "▧", "tint": "violet", "scale": 1.0 },
     "reward": {
       "kind": "story",
       "title": "Memória",
@@ -165,6 +175,7 @@
     "zone": "mid",
     "kind": "pet",
     "name": "Polvo bebê escondido",
+    "visual": { "glyph": "🐙", "tint": "violet", "scale": 1.0 },
     "reward": {
       "kind": "temporaryPet",
       "title": "polvo bebê",
@@ -181,6 +192,7 @@
     "zone": "mid",
     "kind": "npc",
     "name": "Sereia anciã dormindo",
+    "visual": { "glyph": "☾", "tint": "gold", "scale": 1.0 },
     "reward": {
       "kind": "story",
       "title": "Memória",

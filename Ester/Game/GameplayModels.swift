@@ -410,10 +410,23 @@ enum TimedBuffKind: String, Codable {
 
     var title: String {
         switch self {
-        case .fullBelly: return "Sem fome"
-        case .eagerCompanion: return "Aceitação serena"
-        case .swiftCurrent: return "Nado veloz"
+        case .fullBelly: return "Fome pausada"
+        case .eagerCompanion: return "Pedidos aceitos"
+        case .swiftCurrent: return "Nado acelerado"
         case .temporaryPet: return "Companhia temporária"
+        }
+    }
+
+    var effectDescription: String {
+        switch self {
+        case .fullBelly:
+            return "A fome dela não aumenta enquanto o efeito durar."
+        case .eagerCompanion:
+            return "Ela não recusa pedidos enquanto o efeito durar."
+        case .swiftCurrent:
+            return "Ela nada mais rápido enquanto o efeito durar."
+        case .temporaryPet:
+            return "Uma companhia segue a exploração enquanto o efeito durar."
         }
     }
 }
@@ -498,30 +511,45 @@ final class RewardSystem {
         case .pearls:
             let gained = stats.awardPearls(reward.pearlAmount)
             GameAudio.shared.play(.pearlReward)
-            return "🐚+\(gained)"
+            return "Recompensa: \(gained) concha\(gained == 1 ? "" : "s")."
         case .temporaryPet:
             stats.addTimedBuff(.temporaryPet,
                                title: reward.title,
                                duration: reward.duration)
             stats.addMemory("\(source): \(reward.title) acompanhou a exploração")
             GameAudio.shared.play(.pearlReward)
-            return "\(reward.title) por tempo limitado"
+            return "Companhia temporária: \(reward.title) acompanha por \(durationText(reward.duration))."
         case .temporaryEffect:
             if let buffKind = reward.buffKind {
                 stats.addTimedBuff(buffKind, title: reward.title, duration: reward.duration)
+                GameAudio.shared.play(.pearlReward)
+                return "Efeito ativo: \(buffKind.title) por \(durationText(reward.duration)). \(buffKind.effectDescription)"
             }
             GameAudio.shared.play(.pearlReward)
-            return reward.title
+            return "Efeito temporário aplicado."
         case .item:
             let itemId = reward.itemId ?? reward.title
             stats.collectItem(id: itemId)
             GameAudio.shared.play(.pearlReward)
-            return reward.title
+            return "Item encontrado: \(reward.title)."
         case .story:
             let text = reward.storyText ?? reward.title
             stats.addMemory(text)
-            return text
+            return "Memória registrada: \(text)"
         }
+    }
+
+    private func durationText(_ duration: TimeInterval) -> String {
+        let minutes = max(1, Int((duration / 60).rounded()))
+        if minutes < 60 {
+            return "\(minutes) min"
+        }
+        let hours = minutes / 60
+        let remainder = minutes % 60
+        if remainder == 0 {
+            return "\(hours) h"
+        }
+        return "\(hours) h \(remainder) min"
     }
 }
 
