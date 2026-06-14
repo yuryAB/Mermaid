@@ -25,6 +25,7 @@ class GameScene: SKScene {
     private var hud: HUDLayer!
     private var plotOverlay: TideWeavingOverlay?
     private var climbOverlay: BubbleClimbOverlay?
+    private var pendingPOIChallengeCompletion: ((ChallengeResult) -> Void)?
     private var challengeBackdrop: SKNode?
     private var regionMenu: RegionMenuOverlay?
     private var refugeOverlay: RefugeOverlay?
@@ -1023,6 +1024,38 @@ class GameScene: SKScene {
         presentChallenge(kind: .plot, special: false, giverDisplay: nil, hatching: true)
     }
 
+    @discardableResult
+    func openPOIChallenge(for poi: WorldPOI,
+                          onCompletion: @escaping (ChallengeResult) -> Void) -> Bool {
+        guard !isChallengeOpen, refugeOverlay == nil else { return false }
+        pendingPOIChallengeCompletion = onCompletion
+        GameAudio.shared.play(.challengeOpen)
+        presentChallenge(kind: .plot,
+                         special: true,
+                         giverDisplay: makePOIChallengeDisplay(for: poi))
+        return true
+    }
+
+    private func makePOIChallengeDisplay(for poi: WorldPOI) -> SKNode {
+        let node = SKNode()
+        let ring = SKShapeNode(circleOfRadius: 28)
+        ring.fillColor = poi.visual.color.withAlphaComponent(0.18)
+        ring.strokeColor = UIColor.white.withAlphaComponent(0.58)
+        ring.lineWidth = 1.4
+        ring.glowWidth = 5
+        node.addChild(ring)
+
+        let glyph = SKLabelNode(text: poi.visual.glyph)
+        glyph.fontName = "AvenirNext-DemiBold"
+        glyph.fontSize = 28
+        glyph.fontColor = UIColor.lerp(poi.visual.color, .white, 0.28)
+        glyph.verticalAlignmentMode = .center
+        glyph.horizontalAlignmentMode = .center
+        glyph.zPosition = 2
+        node.addChild(glyph)
+        return node
+    }
+
     private func presentChallenge(kind: ChallengeKind,
                                   special: Bool,
                                   giverDisplay: SKNode?,
@@ -1108,6 +1141,8 @@ class GameScene: SKScene {
         climbOverlay = nil
         challengeBackdrop?.removeFromParent()
         challengeBackdrop = nil
+        let poiCompletion = pendingPOIChallengeCompletion
+        pendingPOIChallengeCompletion = nil
 
         let gainedPearls = result.isHatching ? 0 : stats.awardPearls(result.pearls)
 
@@ -1131,9 +1166,13 @@ class GameScene: SKScene {
             stats.addMemory("Venceu o \(result.kind.title) em \(zone.displayName)")
         }
         stats.save()
-        ctx.say(result.reachedTarget
-                ? "Ela adorou o \(result.kind.title)! 🐚+\(gainedPearls)"
-                : "Quase! Ainda assim ganhou 🐚+\(gainedPearls)")
+        if let poiCompletion {
+            poiCompletion(result)
+        } else {
+            ctx.say(result.reachedTarget
+                    ? "Ela adorou o \(result.kind.title)! 🐚+\(gainedPearls)"
+                    : "Quase! Ainda assim ganhou 🐚+\(gainedPearls)")
+        }
     }
 
     // MARK: - Toques no mundo

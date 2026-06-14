@@ -916,12 +916,39 @@ final class POISystem {
             return
         }
 
+        if poi.kind == .minigame {
+            guard let scene = ctx.scene,
+                  scene.openPOIChallenge(for: poi, onCompletion: { [weak self] result in
+                      self?.finishPOIChallenge(poi, result: result)
+                  }) else {
+                ctx.say("O desafio local de \(poi.name) não abriu agora. Tente de novo em instantes.")
+                return
+            }
+            ctx.say("Ela começou o desafio local de \(poi.name).")
+            return
+        }
+
+        grantReward(for: poi, prefix: "Ela explorou \(poi.name).")
+    }
+
+    private func finishPOIChallenge(_ poi: WorldPOI, result: ChallengeResult) {
+        guard ctx.regions.currentRegion?.id == poi.regionId else { return }
+        guard result.reachedTarget else {
+            syncWorldNodes()
+            ctx.say("Ela tentou o desafio de \(poi.name). A recompensa dali ainda espera uma vitória.")
+            return
+        }
+        grantReward(for: poi, prefix: "Desafio concluído em \(poi.name).")
+    }
+
+    private func grantReward(for poi: WorldPOI, prefix: String) {
         ctx.stats.collectPOIReward(poi.key)
         let rewardText = ctx.rewards.grant(poi.reward, source: poi.name)
         ctx.stats.addMemory("Interagiu com \(poi.name)")
         _ = ctx.regions.maybeRevealRegionLead(source: "POI", chance: 0.35)
         syncWorldNodes()
-        ctx.say("Ela explorou \(poi.name). \(rewardText)")
+        ctx.stats.save()
+        ctx.say("\(prefix) \(rewardText)")
     }
 
     private func nearestUndiscoveredPOI() -> WorldPOI? {
