@@ -383,6 +383,7 @@ enum MermaidIntent: String {
     case traveling
     case resting
     case returningHome
+    case followingFish
     case interactingWithFish
     case avoidingDanger
     case observing
@@ -401,6 +402,7 @@ enum MermaidIntent: String {
         case .goingUp: return "subindo"
         case .traveling: return "viajando"
         case .resting: return "descansando"
+        case .followingFish: return "seguindo peixe"
         case .returningHome: return "voltando ao refúgio"
         case .interactingWithFish: return "brincando com peixes"
         case .avoidingDanger: return "fugindo"
@@ -424,6 +426,8 @@ enum TimedBuffKind: String, Codable {
     case eagerCompanion
     case swiftCurrent
     case temporaryPet
+    case fishGuide
+    case fishPlay
 
     var title: String {
         switch self {
@@ -431,6 +435,8 @@ enum TimedBuffKind: String, Codable {
         case .eagerCompanion: return "Pedidos aceitos"
         case .swiftCurrent: return "Nado acelerado"
         case .temporaryPet: return "Companhia temporária"
+        case .fishGuide: return "Seguindo peixe"
+        case .fishPlay: return "Brincando com peixe"
         }
     }
 
@@ -444,6 +450,10 @@ enum TimedBuffKind: String, Codable {
             return "Ela nada mais rápido enquanto o efeito durar."
         case .temporaryPet:
             return "Uma companhia segue a exploração enquanto o efeito durar."
+        case .fishGuide:
+            return "O peixe guia Ester para perto de um ponto de interesse."
+        case .fishPlay:
+            return "Ester e o peixe ficam brincando juntos por um tempo."
         }
     }
 }

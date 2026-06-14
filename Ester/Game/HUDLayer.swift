@@ -452,7 +452,14 @@ final class HUDLayer: SKNode {
     private func updateActiveEffects(_ buffs: [TimedBuff]) {
         let active = buffs
             .filter { $0.expiresAt > Date() }
-            .sorted { $0.expiresAt < $1.expiresAt }
+            .sorted { lhs, rhs in
+                let lhsPriority = effectSortPriority(lhs.kind)
+                let rhsPriority = effectSortPriority(rhs.kind)
+                if lhsPriority != rhsPriority {
+                    return lhsPriority < rhsPriority
+                }
+                return lhs.expiresAt < rhs.expiresAt
+            }
         let visibleBuffs = Array(active.prefix(3))
         let signature = visibleBuffs
             .map { "\($0.kind.rawValue)|\(Int(ceil($0.remaining)))|\(Int($0.duration))" }
@@ -551,12 +558,25 @@ final class HUDLayer: SKNode {
         return node
     }
 
+    private func effectSortPriority(_ kind: TimedBuffKind) -> Int {
+        switch kind {
+        case .fishPlay:
+            return 0
+        case .fishGuide:
+            return 1
+        default:
+            return 2
+        }
+    }
+
     private func effectTint(for kind: TimedBuffKind) -> UIColor {
         switch kind {
         case .fullBelly: return HUDPalette.algae
         case .eagerCompanion: return HUDPalette.gold
         case .swiftCurrent: return HUDPalette.energy
         case .temporaryPet: return HUDPalette.coral
+        case .fishGuide: return HUDPalette.teal
+        case .fishPlay: return HUDPalette.gold
         }
     }
 
@@ -566,6 +586,8 @@ final class HUDLayer: SKNode {
         case .eagerCompanion: return "P"
         case .swiftCurrent: return "N"
         case .temporaryPet: return "C"
+        case .fishGuide: return "🐠"
+        case .fishPlay: return "♪"
         }
     }
 

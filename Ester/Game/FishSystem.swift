@@ -53,6 +53,13 @@ fileprivate enum FishPattern: CaseIterable {
     }
 }
 
+fileprivate enum FishMotionMode {
+    case normal
+    case guiding(target: CGPoint, until: Date)
+    case gatheringForPlay(point: CGPoint, until: Date)
+    case playing(center: CGPoint, until: Date)
+}
+
 // MARK: - Nó de peixe
 
 final class FishNode: SKNode, ChallengeGiver {
@@ -68,9 +75,20 @@ final class FishNode: SKNode, ChallengeGiver {
     }
     var isSpecialChallenge = false
     var worldPosition: CGPoint { position }
+    var isCompanionBusy: Bool {
+        switch motionMode {
+        case .normal: return false
+        case .guiding, .gatheringForPlay, .playing: return true
+        }
+    }
+    var isAvailableForCompanionAction: Bool {
+        offeredChallenge == nil && !isCompanionBusy
+    }
 
     private var verticalPhase = CGFloat.random(in: 0...6)
+    private var playPhase = CGFloat.random(in: 0...6)
     private var fleeTimer: CGFloat = 0
+    private var motionMode: FishMotionMode = .normal
     private let container = SKNode()
     private var challengeHighlight: SKNode?
 
@@ -375,6 +393,25 @@ final class FishNode: SKNode, ChallengeGiver {
                              pattern: pattern)
     }
 
+    func startGuiding(toward target: CGPoint, duration: TimeInterval) {
+        motionMode = .guiding(target: target, until: Date().addingTimeInterval(duration))
+        fleeTimer = 0
+    }
+
+    func gatherForPlay(at point: CGPoint, duration: TimeInterval) {
+        motionMode = .gatheringForPlay(point: point, until: Date().addingTimeInterval(duration))
+        fleeTimer = 0
+    }
+
+    func startPlaying(around center: CGPoint, duration: TimeInterval) {
+        motionMode = .playing(center: center, until: Date().addingTimeInterval(duration))
+        fleeTimer = 0
+    }
+
+    func resumeNaturalSwimming() {
+        motionMode = .normal
+    }
+
     /// Anel dourado pulsante indicando que este peixe oferece um desafio.
     private func updateChallengeHighlight() {
         challengeHighlight?.removeFromParent()
@@ -431,6 +468,13 @@ final class FishNode: SKNode, ChallengeGiver {
     }
 
     func update(dt: CGFloat, mermaidPosition: CGPoint) {
+        defer {
+            container.xScale = cos(heading) >= 0 ? 1 : -1
+        }
+        if updateCompanionMotion(dt: dt, mermaidPosition: mermaidPosition) {
+            return
+        }
+
         // ruído suave de direção
         heading += CGFloat.random(in: -0.5...0.5) * dt * 2
 
@@ -460,8 +504,103 @@ final class FishNode: SKNode, ChallengeGiver {
             heading = .pi - heading
             position.x = position.x.clamped(to: World.minX...World.maxX)
         }
+    }
 
-        container.xScale = cos(heading) >= 0 ? 1 : -1
+    private func updateCompanionMotion(dt: CGFloat, mermaidPosition: CGPoint) -> Bool {
+        switch motionMode {
+        case .normal:
+            return false
+        case .guiding(let target, let until):
+            guard Date() < until else {
+                motionMode = .normal
+                return false
+            }
+            updateGuidingMotion(dt: dt, mermaidPosition: mermaidPosition, target: target)
+            return true
+        case .gatheringForPlay(let point, let until):
+            guard Date() < until else {
+                motionMode = .normal
+                return false
+            }
+            updateGatheringMotion(dt: dt, mermaidPosition: mermaidPosition, point: point)
+            return true
+        case .playing(let center, let until):
+            guard Date() < until else {
+                motionMode = .normal
+                return false
+            }
+            updatePlayingMotion(dt: dt, center: center)
+            return true
+        }
+    }
+
+    private func updateGuidingMotion(dt: CGFloat, mermaidPosition: CGPoint, target: CGPoint) {
+        verticalPhase += dt * CGFloat(2)
+        playPhase += dt * CGFloat(0.9)
+
+        let remaining = mermaidPosition.distance(to: target)
+        let desired: CGPoint
+        if remaining < CGFloat(280) {
+            let orbitX = cos(playPhase) * CGFloat(120)
+            let orbitY = sin(playPhase * CGFloat(0.8)) * CGFloat(70)
+            desired = CGPoint(x: target.x + orbitX,
+                              y: target.y + orbitY)
+        } else {
+            let dx = target.x - mermaidPosition.x
+            let dy = target.y - mermaidPosition.y
+            let rawDistance = sqrt(dx * dx + dy * dy)
+            let distance = max(CGFloat(1), rawDistance)
+            let farFromMermaid = position.distance(to: mermaidPosition) > CGFloat(620)
+            let lead: CGFloat = farFromMermaid ? CGFloat(220) : CGFloat(320)
+            let unitX = dx / distance
+            let unitY = dy / distance
+            let desiredX = mermaidPosition.x + unitX * lead
+            let desiredY = mermaidPosition.y + unitY * lead
+            desired = CGPoint(x: desiredX, y: desiredY)
+        }
+
+        let guideSpeed = max(CGFloat(150), baseSpeed * CGFloat(1.35))
+        swimToward(desired, speed: guideSpeed, dt: dt, bob: CGFloat(4))
+    }
+
+    private func updateGatheringMotion(dt: CGFloat, mermaidPosition: CGPoint, point: CGPoint) {
+        verticalPhase += dt * CGFloat(1.2)
+        let distance = position.distance(to: point)
+        if distance > CGFloat(32) {
+            swimToward(point, speed: CGFloat(58), dt: dt, bob: CGFloat(2))
+        } else {
+            heading = atan2(mermaidPosition.y - position.y, mermaidPosition.x - position.x)
+            position.y += sin(verticalPhase) * CGFloat(2) * dt
+            clampToWorldAndZone()
+        }
+    }
+
+    private func updatePlayingMotion(dt: CGFloat, center: CGPoint) {
+        verticalPhase += dt * CGFloat(2.4)
+        playPhase += dt * CGFloat(1.7)
+        let orbitX = cos(playPhase) * CGFloat(90)
+        let orbitY = sin(playPhase * CGFloat(1.2)) * CGFloat(54)
+        let desired = CGPoint(x: center.x + orbitX,
+                              y: center.y + orbitY)
+        swimToward(desired, speed: CGFloat(92), dt: dt, bob: CGFloat(3))
+    }
+
+    private func swimToward(_ point: CGPoint, speed: CGFloat, dt: CGFloat, bob: CGFloat) {
+        let dx = point.x - position.x
+        let dy = point.y - position.y
+        let rawDistance = sqrt(dx * dx + dy * dy)
+        let distance = max(CGFloat(1), rawDistance)
+        heading = atan2(dy, dx)
+        let step = min(distance, speed * dt)
+        position.x += dx / distance * step
+        position.y += dy / distance * step + sin(verticalPhase) * bob * dt
+        clampToWorldAndZone()
+    }
+
+    private func clampToWorldAndZone() {
+        let range = zone.yRange
+        position.x = position.x.clamped(to: World.minX...World.maxX)
+        position.y = position.y.clamped(to: (range.lowerBound + 60)...(range.upperBound - 60))
     }
 }
 
@@ -554,9 +693,9 @@ final class FishSystem {
         }
     }
 
-    func nearestFish(to point: CGPoint, maxDistance: CGFloat) -> FishNode? {
+    func nearestFish(to point: CGPoint, maxDistance: CGFloat, includeBusy: Bool = false) -> FishNode? {
         fishes
-            .filter { $0.position.distance(to: point) <= maxDistance }
+            .filter { (includeBusy || $0.isAvailableForCompanionAction) && $0.position.distance(to: point) <= maxDistance }
             .min { $0.position.distance(to: point) < $1.position.distance(to: point) }
     }
 

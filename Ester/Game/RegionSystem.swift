@@ -787,6 +787,18 @@ final class POISystem {
         return nearestUndiscoveredPOI()?.position
     }
 
+    func guidanceTargetForFish(near point: CGPoint, zone: DepthZone) -> WorldPOI? {
+        guard let region = ctx.regions.currentRegion else { return nil }
+        return WorldPOICatalog.pois(in: region, zone: zone, stats: ctx.stats)
+            .filter { isReachable($0) }
+            .min { lhs, rhs in
+                let lhsRank = guidanceRank(for: lhs)
+                let rhsRank = guidanceRank(for: rhs)
+                if lhsRank != rhsRank { return lhsRank < rhsRank }
+                return lhs.position.distance(to: point) < rhs.position.distance(to: point)
+            }
+    }
+
     func nearestVisiblePOI(to point: CGPoint, maxDistance: CGFloat) -> WorldPOI? {
         syncWorldNodes()
         return visiblePOIs.values
@@ -876,6 +888,13 @@ final class POISystem {
 
     private func isReachable(_ poi: WorldPOI) -> Bool {
         ctx.stats.phase >= poi.zone.minPhase && ctx.stats.isUnlocked(poi.zone)
+    }
+
+    private func guidanceRank(for poi: WorldPOI) -> Int {
+        if !ctx.stats.isPOIDiscovered(poi.key) { return 0 }
+        if !ctx.stats.isPOIVisited(poi.key) { return 1 }
+        if !ctx.stats.isPOIRewardCollected(poi.key) { return 2 }
+        return 3
     }
 
     private func discoverNearbyPOIs() {

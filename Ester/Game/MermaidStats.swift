@@ -431,6 +431,10 @@ final class MermaidStats: Codable {
         addMemory("Efeito temporário: \(buff.title)")
     }
 
+    func removeTimedBuff(_ kind: TimedBuffKind) {
+        activeBuffs.removeAll { $0.kind == kind || $0.expiresAt <= Date() }
+    }
+
     func hasActiveBuff(_ kind: TimedBuffKind) -> Bool {
         activeBuffs.contains { $0.kind == kind && $0.expiresAt > Date() }
     }

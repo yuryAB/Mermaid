@@ -32,6 +32,14 @@ final class AutonomySystem {
     private weak var touchFoodTarget: FoodNode?
     private weak var touchFishTarget: FishNode?
     private weak var touchChallengeTarget: FishNode?
+    private weak var guidingFishTarget: FishNode?
+    private var guidingPOI: WorldPOI?
+    private var fishGuidanceUntil: Date?
+    private weak var playFishTarget: FishNode?
+    private var fishPlayMeetPoint: CGPoint?
+    private var fishPlayAnchor: CGPoint?
+    private var fishPlayUntil: Date?
+    private var fishPlayPhase: CGFloat = 0
     private var passiveBondQuietTimer: CGFloat = 0
     private var bondRecoveryState: BondRecoveryState = .idle
     private var lastAnimation: MovementType = .idle
@@ -70,6 +78,23 @@ final class AutonomySystem {
         static let decisionRange: CGFloat = 1_600
         static let chaseRange: CGFloat = 1_800
         static let cooldown: CGFloat = 5
+        static let guidanceDuration: TimeInterval = 60
+        static let playDuration: TimeInterval = 30
+        static let gatherDuration: TimeInterval = 12
+        static let meetDistance: CGFloat = 120
+        static let guideChanceOnTouch: CGFloat = 0.58
+    }
+
+    private enum FishCompanionAction {
+        case guide(WorldPOI)
+        case play
+
+        var intent: MermaidIntent {
+            switch self {
+            case .guide(_): return .followingFish
+            case .play: return .interactingWithFish
+            }
+        }
     }
 
     private enum HorizontalBoundarySide {
@@ -133,6 +158,20 @@ final class AutonomySystem {
         return false
     }
 
+    private var fishCompanionSessionIsActive: Bool {
+        if intent == .followingFish,
+           let until = fishGuidanceUntil,
+           Date() < until,
+           guidingFishTarget?.parent != nil {
+            return true
+        }
+        if intent == .interactingWithFish,
+           playFishTarget?.parent != nil {
+            return true
+        }
+        return false
+    }
+
     init(ctx: GameContext) {
         self.ctx = ctx
     }
@@ -168,7 +207,7 @@ final class AutonomySystem {
         case .eating: energyRate = 0
         case .goingDeeper, .goingUp: energyRate = -0.12
         case .traveling: energyRate = -0.05
-        case .returningHome, .goingToObjective: energyRate = -0.08
+        case .returningHome, .goingToObjective, .followingFish: energyRate = -0.08
         case .interactingWithFish, .enteringRefuge: energyRate = -0.05
         case .avoidingDanger: energyRate = -0.25
         case .inChallenge: energyRate = -0.02
@@ -216,6 +255,10 @@ final class AutonomySystem {
             decisionCooldown = 1
             return
         }
+        if fishCompanionSessionIsActive {
+            decisionCooldown = 1
+            return
+        }
         decisionCooldown = .random(in: 4...8)
         var scores: [MermaidIntent: CGFloat] = [:]
 
@@ -246,6 +289,16 @@ final class AutonomySystem {
             scores[.interactingWithFish] = 22
                 + stats.disposition * 0.20
                 + stats.curiosity * 0.16
+                + CGFloat.random(in: 0...8)
+        }
+        if interactCooldown <= 0,
+           stats.energy > 30,
+           stats.hunger < 78,
+           stats.scaredTimer <= 0,
+           let fish = ctx.fish.nearestFish(to: position, maxDistance: FishPlayBalance.decisionRange),
+           ctx.pois.guidanceTargetForFish(near: fish.position, zone: fish.zone) != nil {
+            scores[.followingFish] = 12
+                + stats.curiosity * 0.18
                 + CGFloat.random(in: 0...8)
         }
         if let deeperZone = currentZone.deeper,
@@ -288,6 +341,12 @@ final class AutonomySystem {
     }
 
     private func setIntent(_ newIntent: MermaidIntent) {
+        if intent == .followingFish && newIntent != .followingFish {
+            endFishGuidance(removeBuff: true)
+        }
+        if intent == .interactingWithFish && newIntent != .interactingWithFish {
+            cancelFishPlay(removeBuff: true)
+        }
         intent = newIntent
         intentTime = 0
         clearTouchTargets(except: newIntent)
@@ -332,9 +391,25 @@ final class AutonomySystem {
             target = CGPoint(x: (position.x + .random(in: -800...800)).clamped(to: horizontalRange), y: y)
         case .traveling:
             target = ctx.travel.targetPoint
+        case .followingFish:
+            if guidingFishTarget == nil {
+                guard beginAutonomousFishGuidance() else {
+                    intent = .wandering
+                    touchFishTarget = nil
+                    target = randomWanderPoint()
+                    return
+                }
+            }
+            target = guidingFishTarget?.position
         case .interactingWithFish:
-            target = validTouchFishTarget()?.position
-                ?? ctx.fish.nearestFish(to: position, maxDistance: FishPlayBalance.chaseRange)?.position
+            if playFishTarget == nil {
+                let fish = validTouchFishTarget()
+                    ?? ctx.fish.nearestFish(to: position, maxDistance: FishPlayBalance.chaseRange)
+                if let fish = fish {
+                    beginFishPlayGathering(with: fish)
+                }
+            }
+            target = fishPlayMeetPoint ?? playFishTarget?.position
         }
     }
 
@@ -435,24 +510,10 @@ final class AutonomySystem {
             } else {
                 setIntent(.idle)
             }
+        case .followingFish:
+            progressFishGuidance()
         case .interactingWithFish:
-            if let fish = validTouchFishTarget() {
-                target = fish.position
-                if position.distance(to: fish.position) < 140 && interactCooldown <= 0 {
-                    touchFishTarget = nil
-                    interact(with: fish)
-                }
-            } else if touchFishTarget != nil {
-                touchFishTarget = nil
-                setIntent(.wandering)
-            } else if let fish = ctx.fish.nearestFish(to: position, maxDistance: FishPlayBalance.chaseRange) {
-                target = fish.position
-                if position.distance(to: fish.position) < 140 && interactCooldown <= 0 {
-                    interact(with: fish)
-                }
-            } else {
-                setIntent(.wandering)
-            }
+            progressFishPlay(dt: dt)
         case .traveling:
             if let point = ctx.travel.targetPoint {
                 target = point
@@ -492,6 +553,7 @@ final class AutonomySystem {
 
     private func autoEat() {
         guard intent != .inChallenge, intent != .enteringRefuge,
+              intent != .followingFish, intent != .interactingWithFish,
               stats.hunger >= GameBalance.autoEatHungerThreshold(for: stats.phase),
               eatCooldown <= 0 else { return }
         if let food = ctx.food.nearestFood(to: position, maxDistance: 120, includeShellCurrency: false) {
@@ -889,8 +951,17 @@ final class AutonomySystem {
     func requestFishFromTouch(_ fish: FishNode) -> Bool {
         notePlayerPressure()
         guard fish.parent != nil else { return false }
-        guard acceptTouchRequest(for: .interactingWithFish,
-                                 acceptedMessage: "Ela aceitou brincar com o peixinho...",
+        guard fish.isAvailableForCompanionAction else { return false }
+        let action = companionAction(for: fish)
+        let acceptedMessage: String
+        switch action {
+        case .guide(_):
+            acceptedMessage = "Ela aceitou seguir o peixinho..."
+        case .play:
+            acceptedMessage = "Ela aceitou brincar com o peixinho..."
+        }
+        guard acceptTouchRequest(for: action.intent,
+                                 acceptedMessage: acceptedMessage,
                                  refusalMessages: [
                                     "Ela viu o peixinho, mas não quis chegar perto agora.",
                                     "Ela deixou o peixinho passar sem seguir.",
@@ -898,8 +969,16 @@ final class AutonomySystem {
                                  ]) else { return false }
         touchFishTarget = fish
         commandBias = nil
-        setIntent(.interactingWithFish)
-        decisionCooldown = .random(in: 7...12)
+        switch action {
+        case .guide(let poi):
+            beginFishGuidance(with: fish, poi: poi, playerInitiated: true)
+            setIntent(.followingFish)
+            decisionCooldown = CGFloat(FishPlayBalance.guidanceDuration)
+        case .play:
+            beginFishPlayGathering(with: fish)
+            setIntent(.interactingWithFish)
+            decisionCooldown = CGFloat(FishPlayBalance.playDuration + FishPlayBalance.gatherDuration)
+        }
         return true
     }
 
@@ -927,6 +1006,174 @@ final class AutonomySystem {
         setIntent(.seekingChallenge)
         decisionCooldown = .random(in: 7...12)
         return true
+    }
+
+    private func companionAction(for fish: FishNode) -> FishCompanionAction {
+        if let poi = guidanceCandidate(for: fish),
+           CGFloat.random(in: 0...1) <= FishPlayBalance.guideChanceOnTouch {
+            return .guide(poi)
+        }
+        return .play
+    }
+
+    private func guidanceCandidate(for fish: FishNode) -> WorldPOI? {
+        guard fish.isAvailableForCompanionAction else { return nil }
+        return ctx.pois.guidanceTargetForFish(near: fish.position, zone: fish.zone)
+    }
+
+    @discardableResult
+    private func beginAutonomousFishGuidance() -> Bool {
+        guard let fish = ctx.fish.nearestFish(to: position, maxDistance: FishPlayBalance.chaseRange),
+              let poi = guidanceCandidate(for: fish) else {
+            return false
+        }
+        beginFishGuidance(with: fish, poi: poi, playerInitiated: false)
+        return true
+    }
+
+    private func beginFishGuidance(with fish: FishNode,
+                                   poi: WorldPOI,
+                                   playerInitiated: Bool) {
+        cancelFishPlay(removeBuff: true)
+        guidingFishTarget?.resumeNaturalSwimming()
+        guidingFishTarget = fish
+        guidingPOI = poi
+        fishGuidanceUntil = Date().addingTimeInterval(FishPlayBalance.guidanceDuration)
+        touchFishTarget = fish
+        target = fish.position
+        fish.startGuiding(toward: poi.position, duration: FishPlayBalance.guidanceDuration)
+        stats.addTimedBuff(.fishGuide,
+                           title: "Seguindo peixe",
+                           duration: FishPlayBalance.guidanceDuration)
+        showEmotion(.curious, duration: 1.4)
+        if !playerInitiated {
+            ctx.say("Um peixinho parece saber um caminho... ela começou a seguir.")
+        }
+    }
+
+    private func progressFishGuidance() {
+        guard let fish = guidingFishTarget,
+              fish.parent != nil,
+              let poi = guidingPOI,
+              let until = fishGuidanceUntil else {
+            setIntent(.wandering)
+            return
+        }
+
+        target = fish.position
+        if position.distance(to: poi.position) < 420 {
+            ctx.stats.revealExpeditionMap(in: ctx.activeRegion, near: poi.position)
+        }
+        guard Date() < until else {
+            let reached = position.distance(to: poi.position) < 560
+            endFishGuidance(removeBuff: true)
+            if reached {
+                ctx.stats.revealExpeditionMap(in: ctx.activeRegion, near: poi.position)
+                ctx.say("O peixinho levou Ester para perto de \(poi.name).")
+            } else {
+                ctx.say("O peixinho guiou Ester um pouco mais perto de algo curioso.")
+            }
+            setIntent(.observing)
+            decisionCooldown = 3
+            return
+        }
+    }
+
+    private func endFishGuidance(removeBuff: Bool) {
+        guidingFishTarget?.resumeNaturalSwimming()
+        guidingFishTarget = nil
+        guidingPOI = nil
+        fishGuidanceUntil = nil
+        if removeBuff {
+            stats.removeTimedBuff(.fishGuide)
+        }
+    }
+
+    private func beginFishPlayGathering(with fish: FishNode) {
+        endFishGuidance(removeBuff: true)
+        playFishTarget?.resumeNaturalSwimming()
+        playFishTarget = fish
+        touchFishTarget = fish
+        let midpoint = CGPoint(x: (position.x + fish.position.x) / 2,
+                               y: (position.y + fish.position.y) / 2)
+        let range = ctx.depth.allowedYRange()
+        let meetPoint = CGPoint(x: midpoint.x.clamped(to: horizontalRange),
+                                y: midpoint.y.clamped(to: range))
+        fishPlayMeetPoint = meetPoint
+        fishPlayAnchor = nil
+        fishPlayUntil = nil
+        fishPlayPhase = 0
+        target = meetPoint
+        fish.gatherForPlay(at: meetPoint, duration: FishPlayBalance.gatherDuration)
+        stats.addTimedBuff(.fishPlay,
+                           title: "Indo brincar",
+                           duration: FishPlayBalance.gatherDuration)
+        showEmotion(.happy, duration: 1.2)
+    }
+
+    private func progressFishPlay(dt: CGFloat) {
+        guard let fish = playFishTarget, fish.parent != nil else {
+            cancelFishPlay(removeBuff: true)
+            setIntent(.wandering)
+            return
+        }
+
+        if let until = fishPlayUntil, let anchor = fishPlayAnchor {
+            guard Date() < until else {
+                finishFishPlay(with: fish)
+                return
+            }
+            fishPlayPhase += dt * 1.6
+            target = CGPoint(x: anchor.x + cos(fishPlayPhase + .pi) * 72,
+                             y: anchor.y + sin(fishPlayPhase * 1.15 + .pi) * 44)
+            return
+        }
+
+        let meetPoint = fishPlayMeetPoint ?? fish.position
+        target = meetPoint
+        if position.distance(to: meetPoint) <= FishPlayBalance.meetDistance
+            || intentTime >= CGFloat(FishPlayBalance.gatherDuration) {
+            beginActiveFishPlay(with: fish)
+        }
+    }
+
+    private func beginActiveFishPlay(with fish: FishNode) {
+        let range = ctx.depth.allowedYRange()
+        let midpoint = CGPoint(x: (position.x + fish.position.x) / 2,
+                               y: (position.y + fish.position.y) / 2)
+        let anchor = CGPoint(x: midpoint.x.clamped(to: horizontalRange),
+                             y: midpoint.y.clamped(to: range))
+        fishPlayAnchor = anchor
+        fishPlayMeetPoint = nil
+        fishPlayUntil = Date().addingTimeInterval(FishPlayBalance.playDuration)
+        fishPlayPhase = 0
+        target = anchor
+        fish.startPlaying(around: anchor, duration: FishPlayBalance.playDuration)
+        stats.addTimedBuff(.fishPlay,
+                           title: "Brincando com peixe",
+                           duration: FishPlayBalance.playDuration)
+        ctx.say("Ester e o peixinho chegaram pertinho e começaram a brincar.")
+    }
+
+    private func finishFishPlay(with fish: FishNode) {
+        playFishTarget = nil
+        fishPlayMeetPoint = nil
+        fishPlayAnchor = nil
+        fishPlayUntil = nil
+        touchFishTarget = nil
+        fish.resumeNaturalSwimming()
+        interact(with: fish)
+    }
+
+    private func cancelFishPlay(removeBuff: Bool) {
+        playFishTarget?.resumeNaturalSwimming()
+        playFishTarget = nil
+        fishPlayMeetPoint = nil
+        fishPlayAnchor = nil
+        fishPlayUntil = nil
+        if removeBuff {
+            stats.removeTimedBuff(.fishPlay)
+        }
     }
 
     func showTouchCooldownFeedback() {
@@ -1039,7 +1286,7 @@ final class AutonomySystem {
         if intent != .seekingFood {
             touchFoodTarget = nil
         }
-        if intent != .interactingWithFish {
+        if intent != .interactingWithFish && intent != .followingFish {
             touchFishTarget = nil
         }
         if intent != .seekingChallenge {
@@ -1106,6 +1353,7 @@ final class AutonomySystem {
         case .goingDeeper, .goingUp: baseSpeed = 170
         case .traveling: baseSpeed = 260
         case .returningHome: baseSpeed = 220
+        case .followingFish: baseSpeed = 205
         case .interactingWithFish: baseSpeed = 150
         case .avoidingDanger: baseSpeed = 380
         }

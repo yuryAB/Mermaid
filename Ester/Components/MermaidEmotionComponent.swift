@@ -346,7 +346,7 @@ final class MermaidEmotionComponent: GKComponent {
             return .adventurous
         case .goingToObjective, .goingDeeper, .goingUp, .traveling, .enteringRefuge:
             return .focused
-        case .wandering, .observing:
+        case .wandering, .observing, .followingFish:
             return .curious
         case .interactingWithFish:
             return .happy
