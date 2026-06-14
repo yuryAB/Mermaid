@@ -502,10 +502,6 @@ final class TravelSystem {
                 return
             }
         }
-        if ctx.stats.energy < 15 {
-            ctx.say("Cansada demais para uma viagem longa... ela precisa descansar.")
-            return
-        }
         if let current = ctx.regions.currentRegion {
             ctx.stats.rememberMapPosition(ctx.mermaidPosition, in: current)
         }
@@ -813,6 +809,10 @@ final class POISystem {
         }
         guard isReachable(poi) else {
             ctx.say("\(poi.name) está em uma profundidade que ela ainda não alcança.")
+            return false
+        }
+        guard ctx.autonomy.canReachPointWithCurrentEnergy(poi.position, margin: 24) else {
+            ctx.say("\(poi.name) está marcado, mas longe demais para a energia atual. Aproxime-se ou deixe ela descansar antes de interagir.")
             return false
         }
         guard ctx.autonomy.requestPointFromTouch(poi.position) else { return false }

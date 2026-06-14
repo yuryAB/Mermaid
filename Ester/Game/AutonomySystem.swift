@@ -670,7 +670,15 @@ final class AutonomySystem {
             rewardAcceptedRequest(baseGain: TrustBalance.acceptedCommand,
                                   guaranteedByBondRecovery: guaranteedByBondRecovery)
             if desired == .wandering {
-                touchPointTarget = guidedExplorePoint
+                if let guidedExplorePoint {
+                    let limitedPoint = pointLimitedByEnergy(guidedExplorePoint)
+                    touchPointTarget = limitedPoint
+                    if limitedPoint.distance(to: guidedExplorePoint) > 24 {
+                        ctx.say("Ela sentiu uma pista longe, mas vai se aproximar por partes para não cansar.")
+                    }
+                } else {
+                    touchPointTarget = nil
+                }
             }
             commandBias = (desired, Date().addingTimeInterval(30))
             setIntent(desired)
@@ -709,18 +717,29 @@ final class AutonomySystem {
         let range = ctx.depth.allowedYRange()
         let clampedPoint = CGPoint(x: point.x.clamped(to: World.minX...World.maxX),
                                    y: point.y.clamped(to: range))
+        let reachablePoint = pointLimitedByEnergy(clampedPoint)
+        let wasLimited = reachablePoint.distance(to: clampedPoint) > 24
         guard acceptTouchRequest(for: .wandering,
-                                 acceptedMessage: "Ela entendeu seu gesto e nadou para lá...",
+                                 acceptedMessage: wasLimited
+                                    ? "Ela aceitou se aproximar, mas a energia atual não leva até o ponto inteiro."
+                                    : "Ela entendeu seu gesto e nadou para lá...",
                                  refusalMessages: [
                                     "Ela olhou para onde você apontou, mas preferiu ficar por aqui.",
                                     "Ela fez que não com a cabeça. Agora não.",
                                     "Ela viu seu gesto, mas seguiu a própria vontade."
                                  ]) else { return false }
-        touchPointTarget = clampedPoint
+        touchPointTarget = reachablePoint
         commandBias = nil
         setIntent(.wandering)
         decisionCooldown = .random(in: 7...12)
         return true
+    }
+
+    func canReachPointWithCurrentEnergy(_ point: CGPoint, margin: CGFloat = 120) -> Bool {
+        let range = ctx.depth.allowedYRange()
+        let clampedPoint = CGPoint(x: point.x.clamped(to: World.minX...World.maxX),
+                                   y: point.y.clamped(to: range))
+        return position.distance(to: clampedPoint) <= directedTravelLimit() + margin
     }
 
     @discardableResult
@@ -861,6 +880,31 @@ final class AutonomySystem {
 
     private func touchAcceptanceChance(for desired: MermaidIntent) -> CGFloat {
         (commandAcceptanceChance(for: desired) / 3).clamped(to: 0.04...0.32)
+    }
+
+    private func pointLimitedByEnergy(_ point: CGPoint) -> CGPoint {
+        let distance = position.distance(to: point)
+        let limit = directedTravelLimit()
+        guard distance > limit else { return point }
+        let dx = point.x - position.x
+        let dy = point.y - position.y
+        let safeDistance = max(1, distance)
+        return CGPoint(x: position.x + dx / safeDistance * limit,
+                       y: position.y + dy / safeDistance * limit)
+    }
+
+    private func directedTravelLimit() -> CGFloat {
+        let phaseMultiplier: CGFloat
+        switch stats.phase {
+        case .egg: phaseMultiplier = 0
+        case .baby: phaseMultiplier = 0.75
+        case .child: phaseMultiplier = 0.92
+        case .teen: phaseMultiplier = 1.08
+        case .young: phaseMultiplier = 1.22
+        case .adult: phaseMultiplier = 1.36
+        }
+        let base = 2_200 + stats.energy.clamped(to: 0...100) * 160
+        return base * phaseMultiplier * stats.speedMultiplier
     }
 
     private func validTouchFoodTarget() -> FoodNode? {
