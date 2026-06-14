@@ -65,6 +65,12 @@ final class AutonomySystem {
         static let strainedCareMultiplier: CGFloat = 0.35
     }
 
+    private enum FishPlayBalance {
+        static let decisionRange: CGFloat = 1_600
+        static let chaseRange: CGFloat = 1_800
+        static let cooldown: CGFloat = 5
+    }
+
     private enum BondRecoveryState {
         case idle
         case waiting(until: Date)
@@ -216,8 +222,14 @@ final class AutonomySystem {
             scores[.observing, default: 0] += 25
         }
         if interactCooldown <= 0,
-           ctx.fish.nearestFish(to: position, maxDistance: 700) != nil {
-            scores[.interactingWithFish] = 10 + stats.disposition * 0.15 + stats.curiosity * 0.1
+           stats.energy > 24,
+           stats.hunger < 76,
+           stats.scaredTimer <= 0,
+           ctx.fish.nearestFish(to: position, maxDistance: FishPlayBalance.decisionRange) != nil {
+            scores[.interactingWithFish] = 22
+                + stats.disposition * 0.20
+                + stats.curiosity * 0.16
+                + CGFloat.random(in: 0...8)
         }
         if let deeperZone = currentZone.deeper,
            ctx.depth.isUnlocked(deeperZone),
@@ -304,7 +316,8 @@ final class AutonomySystem {
         case .traveling:
             target = ctx.travel.targetPoint
         case .interactingWithFish:
-            target = validTouchFishTarget()?.position ?? ctx.fish.nearestFish(to: position, maxDistance: 1200)?.position
+            target = validTouchFishTarget()?.position
+                ?? ctx.fish.nearestFish(to: position, maxDistance: FishPlayBalance.chaseRange)?.position
         }
     }
 
@@ -405,7 +418,7 @@ final class AutonomySystem {
             } else if touchFishTarget != nil {
                 touchFishTarget = nil
                 setIntent(.wandering)
-            } else if let fish = ctx.fish.nearestFish(to: position, maxDistance: 1200) {
+            } else if let fish = ctx.fish.nearestFish(to: position, maxDistance: FishPlayBalance.chaseRange) {
                 target = fish.position
                 if position.distance(to: fish.position) < 140 && interactCooldown <= 0 {
                     interact(with: fish)
@@ -1001,7 +1014,7 @@ final class AutonomySystem {
     }
 
     private func interact(with fish: FishNode) {
-        interactCooldown = 8
+        interactCooldown = FishPlayBalance.cooldown
         ctx.fish.interact(fish)
         GameAudio.shared.play(.mermaidFishPlay)
         stats.boostMood(6)
