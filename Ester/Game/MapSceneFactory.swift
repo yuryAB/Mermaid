@@ -1,52 +1,9 @@
 //
-//  MapGameScenes.swift
+//  MapSceneFactory.swift
 //  Ester
-//
-//  GameScenes concretas por mapa. Cada classe carrega uma região própria,
-//  mantendo a troca de mapas como troca real de scene.
 //
 
 import SpriteKit
-
-final class BirthWatersGameScene: GameScene {
-    override class var defaultRegionId: String? { "nascente" }
-}
-
-final class CalmGardenGameScene: GameScene {
-    override class var defaultRegionId: String? { "jardim_calmo" }
-}
-
-final class EmeraldReefGameScene: GameScene {
-    override class var defaultRegionId: String? { "recife" }
-}
-
-final class GreatDeltaGameScene: GameScene {
-    override class var defaultRegionId: String? { "delta" }
-}
-
-final class OpenBlueSeaGameScene: GameScene {
-    override class var defaultRegionId: String? { "mar_azul_aberto" }
-}
-
-final class CaveMouthGameScene: GameScene {
-    override class var defaultRegionId: String? { "cavernas" }
-}
-
-final class CrystalFieldsGameScene: GameScene {
-    override class var defaultRegionId: String? { "campos_cristal" }
-}
-
-final class AncientRuinsGameScene: GameScene {
-    override class var defaultRegionId: String? { "ruinas" }
-}
-
-final class LivingAbyssGameScene: GameScene {
-    override class var defaultRegionId: String? { "abismo_vivo" }
-}
-
-final class DistantSurfaceGameScene: GameScene {
-    override class var defaultRegionId: String? { "superficie_distante" }
-}
 
 enum MapSceneFactory {
     static func sceneForSavedMap(size: CGSize) -> GameScene {
