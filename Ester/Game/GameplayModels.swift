@@ -392,6 +392,139 @@ enum MermaidIntent: String {
     }
 }
 
+// MARK: - Recompensas e buffs
+
+enum RewardKind: String, Codable {
+    case pearls
+    case temporaryPet
+    case temporaryEffect
+    case item
+    case story
+}
+
+enum TimedBuffKind: String, Codable {
+    case fullBelly
+    case eagerCompanion
+    case swiftCurrent
+    case temporaryPet
+
+    var title: String {
+        switch self {
+        case .fullBelly: return "Sem fome"
+        case .eagerCompanion: return "Aceitação serena"
+        case .swiftCurrent: return "Nado veloz"
+        case .temporaryPet: return "Companhia temporária"
+        }
+    }
+}
+
+struct TimedBuff: Codable {
+    let kind: TimedBuffKind
+    let title: String
+    let expiresAt: Date
+}
+
+struct Reward: Codable {
+    let kind: RewardKind
+    let title: String
+    let pearlAmount: Int
+    let itemId: String?
+    let buffKind: TimedBuffKind?
+    let duration: TimeInterval
+    let storyText: String?
+
+    static func pearls(_ amount: Int, title: String = "Conchas") -> Reward {
+        Reward(kind: .pearls,
+               title: title,
+               pearlAmount: amount,
+               itemId: nil,
+               buffKind: nil,
+               duration: 0,
+               storyText: nil)
+    }
+
+    static func item(id: String, title: String) -> Reward {
+        Reward(kind: .item,
+               title: title,
+               pearlAmount: 0,
+               itemId: id,
+               buffKind: nil,
+               duration: 0,
+               storyText: nil)
+    }
+
+    static func temporaryEffect(_ kind: TimedBuffKind, duration: TimeInterval) -> Reward {
+        Reward(kind: .temporaryEffect,
+               title: kind.title,
+               pearlAmount: 0,
+               itemId: nil,
+               buffKind: kind,
+               duration: duration,
+               storyText: nil)
+    }
+
+    static func temporaryPet(title: String, duration: TimeInterval) -> Reward {
+        Reward(kind: .temporaryPet,
+               title: title,
+               pearlAmount: 0,
+               itemId: nil,
+               buffKind: nil,
+               duration: duration,
+               storyText: nil)
+    }
+
+    static func story(_ text: String) -> Reward {
+        Reward(kind: .story,
+               title: "Memória",
+               pearlAmount: 0,
+               itemId: nil,
+               buffKind: nil,
+               duration: 0,
+               storyText: text)
+    }
+}
+
+final class RewardSystem {
+    unowned let ctx: GameContext
+
+    init(ctx: GameContext) {
+        self.ctx = ctx
+    }
+
+    @discardableResult
+    func grant(_ reward: Reward, source: String) -> String {
+        let stats = ctx.stats!
+        switch reward.kind {
+        case .pearls:
+            let gained = stats.awardPearls(reward.pearlAmount)
+            GameAudio.shared.play(.pearlReward)
+            return "🐚+\(gained)"
+        case .temporaryPet:
+            stats.addTimedBuff(.temporaryPet,
+                               title: reward.title,
+                               duration: reward.duration)
+            stats.addMemory("\(source): \(reward.title) acompanhou a exploração")
+            GameAudio.shared.play(.pearlReward)
+            return "\(reward.title) por tempo limitado"
+        case .temporaryEffect:
+            if let buffKind = reward.buffKind {
+                stats.addTimedBuff(buffKind, title: reward.title, duration: reward.duration)
+            }
+            GameAudio.shared.play(.pearlReward)
+            return reward.title
+        case .item:
+            let itemId = reward.itemId ?? reward.title
+            stats.collectItem(id: itemId)
+            GameAudio.shared.play(.pearlReward)
+            return reward.title
+        case .story:
+            let text = reward.storyText ?? reward.title
+            stats.addMemory(text)
+            return text
+        }
+    }
+}
+
 // MARK: - Paleta da sereia
 
 struct MermaidPalette {
@@ -441,6 +574,8 @@ final class GameContext {
     var growth: GrowthSystem!
     var regions: RegionDiscoverySystem!
     var travel: TravelSystem!
+    var rewards: RewardSystem!
+    var pois: POISystem!
     var hud: HUDLayer!
 
     var mermaidPosition: CGPoint { mermaidEntity.mermaid.base.position }

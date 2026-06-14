@@ -45,6 +45,9 @@ final class MermaidStats: Codable {
     var regionProgress: [String: CGFloat] = [:]
     /// Fog of war do mapa de expedição: regionId -> "col,row" -> 0...1.
     var expeditionRevealByRegion: [String: [String: CGFloat]] = [:]
+    var discoveredPOIKeys: Set<String> = []
+    var inventoryItems: [String: Int] = [:]
+    var activeBuffs: [TimedBuff] = []
     /// Destino de viagem atual (id de região), se houver.
     var destinationRegionId: String?
     var speedUpgradeLevel: Int = 0
@@ -63,7 +66,8 @@ final class MermaidStats: Codable {
         case phase, birthDate, phaseStartedAt, adaptationByZone, unlockedZoneKeys
         case maxDepthMeters
         case puzzlesSolved, mealsEaten, memories, lastSaved, hatchProgress
-        case posX, posY, discoveredRegionIds, regionProgress, expeditionRevealByRegion, destinationRegionId
+        case posX, posY, discoveredRegionIds, regionProgress, expeditionRevealByRegion
+        case discoveredPOIKeys, inventoryItems, activeBuffs, destinationRegionId
         case speedUpgradeLevel, shellGainUpgradeLevel, feedingUpgradeLevel
         case energyUpgradeLevel, dispositionUpgradeLevel
         case balanceVersion
@@ -104,6 +108,9 @@ final class MermaidStats: Codable {
         discoveredRegionIds = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredRegionIds) ?? ["nascente"]
         regionProgress = try c.decodeIfPresent([String: CGFloat].self, forKey: .regionProgress) ?? [:]
         expeditionRevealByRegion = try c.decodeIfPresent([String: [String: CGFloat]].self, forKey: .expeditionRevealByRegion) ?? [:]
+        discoveredPOIKeys = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredPOIKeys) ?? []
+        inventoryItems = try c.decodeIfPresent([String: Int].self, forKey: .inventoryItems) ?? [:]
+        activeBuffs = try c.decodeIfPresent([TimedBuff].self, forKey: .activeBuffs) ?? []
         destinationRegionId = try c.decodeIfPresent(String.self, forKey: .destinationRegionId)
         speedUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .speedUpgradeLevel) ?? 0
         shellGainUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .shellGainUpgradeLevel) ?? 0
@@ -232,6 +239,38 @@ final class MermaidStats: Codable {
         }
     }
 
+    // MARK: - Recompensas persistentes
+
+    func collectItem(id: String) {
+        inventoryItems[id, default: 0] += 1
+        addMemory("Encontrou \(id)")
+    }
+
+    func discoverPOI(_ key: String) {
+        discoveredPOIKeys.insert(key)
+    }
+
+    func isPOIDiscovered(_ key: String) -> Bool {
+        discoveredPOIKeys.contains(key)
+    }
+
+    func addTimedBuff(_ kind: TimedBuffKind, title: String? = nil, duration: TimeInterval) {
+        let buff = TimedBuff(kind: kind,
+                             title: title ?? kind.title,
+                             expiresAt: Date().addingTimeInterval(duration))
+        activeBuffs.removeAll { $0.kind == kind || $0.expiresAt <= Date() }
+        activeBuffs.append(buff)
+        addMemory("Efeito temporário: \(buff.title)")
+    }
+
+    func hasActiveBuff(_ kind: TimedBuffKind) -> Bool {
+        activeBuffs.contains { $0.kind == kind && $0.expiresAt > Date() }
+    }
+
+    private func pruneExpiredBuffs() {
+        activeBuffs.removeAll { $0.expiresAt <= Date() }
+    }
+
     // MARK: - Aprimoramentos
 
     private let maximumUpgradeLevel = 100
@@ -303,7 +342,8 @@ final class MermaidStats: Codable {
     }
 
     var speedMultiplier: CGFloat {
-        (1 + CGFloat(speedUpgradeLevel) * 0.007).clamped(to: 1...1.7)
+        let buff: CGFloat = hasActiveBuff(.swiftCurrent) ? 0.28 : 0
+        return (1 + buff + CGFloat(speedUpgradeLevel) * 0.007).clamped(to: 1...1.9)
     }
 
     var explorationProgressMultiplier: CGFloat {
@@ -364,7 +404,8 @@ final class MermaidStats: Codable {
 
     /// Avança fome, disposição e energia. `energyDelta` é a taxa por segundo da atividade atual.
     func tick(dt: CGFloat, energyDelta: CGFloat) {
-        let hungerRate = GameBalance.hungerRate(for: phase) * feedingDrainMultiplier
+        pruneExpiredBuffs()
+        let hungerRate = hasActiveBuff(.fullBelly) ? 0 : GameBalance.hungerRate(for: phase) * feedingDrainMultiplier
         hunger = (hunger + dt * hungerRate).clamped(to: 0...100)
 
         let adjustedEnergyDelta = energyDelta < 0 ? energyDelta * energyDrainMultiplier : energyDelta

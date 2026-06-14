@@ -19,8 +19,7 @@ struct WorldObjective {
     let label: String
     /// Posição atual (nil quando o alvo sumiu do mundo).
     let position: () -> CGPoint?
-    /// Recompensa em conchas ao interagir, limitada pelo sistema.
-    let pearlReward: Int
+    let reward: Reward
     /// Recompensa extra ao chegar (opcional).
     let onReach: (() -> Void)?
     var timeRemaining: CGFloat
@@ -29,8 +28,6 @@ struct WorldObjective {
 final class EventSystem {
     unowned let ctx: GameContext
     private weak var worldNode: SKNode?
-    private let objectivePearlReward = 12
-    private let maxObjectivePearlReward = 40
     private let currentEnergyDrainPerSecond: CGFloat = 1.6
 
     private var timer: CGFloat = 20
@@ -84,11 +81,11 @@ final class EventSystem {
     private func setObjective(label: String,
                               duration: CGFloat,
                               position: @escaping () -> CGPoint?,
-                              pearlReward: Int = 12,
+                              reward: Reward = .pearls(12),
                               onReach: (() -> Void)? = nil) {
         currentObjective = WorldObjective(label: label,
                                           position: position,
-                                          pearlReward: pearlReward,
+                                          reward: reward,
                                           onReach: onReach,
                                           timeRemaining: duration)
     }
@@ -97,15 +94,13 @@ final class EventSystem {
     func completeObjective() {
         guard let objective = currentObjective else { return }
         currentObjective = nil
-        let basePearls = min(max(objective.pearlReward, objectivePearlReward), maxObjectivePearlReward)
-        let gainedPearls = ctx.stats.awardPearls(basePearls)
         ctx.stats.boostMood(6)
         ctx.stats.gainXP(10)
         ctx.stats.curiosity = min(100, ctx.stats.curiosity + 1)
         ctx.stats.addMemory("Investigou \(objective.label)")
         objective.onReach?()
-        GameAudio.shared.play(.pearlReward)
-        ctx.say("Ela investigou \(objective.label)! ✨ 🐚+\(gainedPearls)")
+        let rewardText = ctx.rewards.grant(objective.reward, source: objective.label)
+        ctx.say("Ela investigou \(objective.label)! ✨ \(rewardText)")
     }
 
     func clearObjective() {
@@ -311,6 +306,7 @@ final class EventSystem {
         ctx.say("Algo brilhante apareceu por perto... ✨ (Objetivo disponível)")
         setObjective(label: "algo brilhante",
                      duration: 60,
+                     reward: .temporaryEffect(.fullBelly, duration: 1200),
                      position: { [weak food] in
                          guard let food, food.parent != nil else { return nil }
                          return food.position
@@ -325,12 +321,10 @@ final class EventSystem {
         ctx.say("Um peixe raro está passando! 👀 (Objetivo disponível)")
         setObjective(label: "o peixe raro",
                      duration: 45,
+                     reward: .temporaryEffect(.swiftCurrent, duration: 900),
                      position: { [weak fish] in
                          guard let fish, fish.parent != nil else { return nil }
                          return fish.position
-                     },
-                     onReach: { [weak self] in
-                         self?.ctx.stats.awardPearls(1)
                      })
 
         // se ela estiver por perto quando ele some, vira memória
@@ -340,10 +334,9 @@ final class EventSystem {
                 guard let self else { return }
                 if fish.position.distance(to: self.ctx.mermaidPosition) < 600 {
                     self.ctx.stats.gainXP(15)
-                    let gained = self.ctx.stats.awardPearls(2)
                     self.ctx.stats.addMemory("Viu um peixe raro em \(zone.displayName)")
-                    GameAudio.shared.play(.pearlReward)
-                    self.ctx.say("Ela observou o peixe raro de pertinho! ✨ 🐚+\(gained)")
+                    let rewardText = self.ctx.rewards.grant(.pearls(2), source: "peixe raro")
+                    self.ctx.say("Ela observou o peixe raro de pertinho! ✨ \(rewardText)")
                 }
             }
         ]))
@@ -435,6 +428,7 @@ final class EventSystem {
         let landingPoint = CGPoint(x: x, y: landingY)
         setObjective(label: "o objeto que caiu",
                      duration: 75,
+                     reward: .item(id: "objeto_humano_curioso", title: "objeto humano curioso"),
                      position: { landingPoint })
     }
 }

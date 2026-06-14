@@ -128,10 +128,12 @@ class GameScene: SKScene {
         ctx.food = FoodSystem(ctx: ctx, worldNode: worldNode)
         ctx.fish = FishSystem(ctx: ctx, worldNode: worldNode)
         ctx.challenges = ChallengeSystem(ctx: ctx)
+        ctx.rewards = RewardSystem(ctx: ctx)
         ctx.events = EventSystem(ctx: ctx, worldNode: worldNode)
         ctx.growth = GrowthSystem(ctx: ctx, worldNode: worldNode)
         ctx.regions = RegionDiscoverySystem(ctx: ctx)
         ctx.travel = TravelSystem(ctx: ctx)
+        ctx.pois = POISystem(ctx: ctx)
     }
 
     private func setupOceanBackdrop() {
@@ -586,6 +588,7 @@ class GameScene: SKScene {
         ctx.events.update(dt: dt)
         ctx.regions.update(dt: dt)
         ctx.travel.update(dt: dt)
+        ctx.pois.update(dt: dt)
 
         // desafios modais com tempo/física próprios
         plotOverlay?.update(dt: dt)
@@ -684,6 +687,11 @@ class GameScene: SKScene {
                                      onSelect: { [weak self] region in
                                          self?.ctx.travel.setDestination(region)
                                          self?.closeRegionMenu()
+                                     },
+                                     onPOISelect: { [weak self] poi in
+                                         guard let self else { return }
+                                         _ = self.ctx.autonomy.requestPointFromTouch(poi.position)
+                                         self.closeRegionMenu()
                                      },
                                      onClose: { [weak self] in
                                          self?.closeRegionMenu()

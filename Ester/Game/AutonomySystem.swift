@@ -565,18 +565,21 @@ final class AutonomySystem {
         guard intent != .enteringRefuge else { return }
 
         let guaranteedByBondRecovery = isBondRecoveryRequestReady
+        let requestIsGuaranteed = guaranteedByBondRecovery || stats.hasActiveBuff(.eagerCompanion)
+        var guidedExplorePoint: CGPoint?
         let desired: MermaidIntent
         switch command {
         case .explore:
+            guidedExplorePoint = ctx.pois.explorationTargetAfterCommand()
             desired = .wandering
         case .seekFood:
-            if !guaranteedByBondRecovery && stats.hunger < 35 {
+            if !requestIsGuaranteed && stats.hunger < 35 {
                 penalizeTrust(TrustBalance.inconvenientCareAsk)
                 refuse(command, saying: "Ela ainda está saciada e virou o rostinho.")
                 return
             }
             // teimosia de criança: quanto mais nova, mais recusa comer
-            if !guaranteedByBondRecovery && CGFloat.random(in: 0...1) < eatRefusalChance() {
+            if !requestIsGuaranteed && CGFloat.random(in: 0...1) < eatRefusalChance() {
                 penalizeTrust(TrustBalance.inconvenientCareAsk)
                 let excuses = [
                     "Não quero comer agora! 😤",
@@ -605,12 +608,12 @@ final class AutonomySystem {
         case .challenge:
             let hungerLimit: CGFloat = stats.phase == .baby ? 65 : 92
             let energyLimit: CGFloat = stats.phase == .baby ? 35 : 8
-            if !guaranteedByBondRecovery && stats.hunger > hungerLimit {
+            if !requestIsGuaranteed && stats.hunger > hungerLimit {
                 penalizeTrust(TrustBalance.unmetNeedRefusal)
                 refuse(command, saying: "Faminta demais para um desafio... me ajuda a comer algo?")
                 return
             }
-            if !guaranteedByBondRecovery && stats.energy < energyLimit {
+            if !requestIsGuaranteed && stats.energy < energyLimit {
                 penalizeTrust(TrustBalance.exhaustedRefusal)
                 refuse(command, saying: "Preciso descansar antes de um desafio... 😴")
                 return
@@ -632,11 +635,11 @@ final class AutonomySystem {
                 refuse(command, saying: "Já estamos no fundo do abismo.")
                 return
             }
-            guard guaranteedByBondRecovery || stats.energy > 15 else {
+            guard requestIsGuaranteed || stats.energy > 15 else {
                 refuseTired(command)
                 return
             }
-            if !guaranteedByBondRecovery && stats.hunger > 80 {
+            if !requestIsGuaranteed && stats.hunger > 80 {
                 penalizeTrust(TrustBalance.forcedRiskWhileHungry)
                 refuse(command, saying: "Com essa fome eu não desço... 🍽")
                 return
@@ -651,7 +654,7 @@ final class AutonomySystem {
                 refuse(command, saying: "Já estou na superfície!")
                 return
             }
-            guard guaranteedByBondRecovery || stats.energy > 10 else {
+            guard requestIsGuaranteed || stats.energy > 10 else {
                 refuseTired(command)
                 return
             }
@@ -663,9 +666,12 @@ final class AutonomySystem {
 
         let chance = commandAcceptanceChance(for: desired)
 
-        if guaranteedByBondRecovery || CGFloat.random(in: 0...1) <= chance {
+        if requestIsGuaranteed || CGFloat.random(in: 0...1) <= chance {
             rewardAcceptedRequest(baseGain: TrustBalance.acceptedCommand,
                                   guaranteedByBondRecovery: guaranteedByBondRecovery)
+            if desired == .wandering {
+                touchPointTarget = guidedExplorePoint
+            }
             commandBias = (desired, Date().addingTimeInterval(30))
             setIntent(desired)
             decisionCooldown = .random(in: 6...10)
@@ -815,8 +821,9 @@ final class AutonomySystem {
         }
 
         let guaranteedByBondRecovery = isBondRecoveryRequestReady
+        let requestIsGuaranteed = guaranteedByBondRecovery || stats.hasActiveBuff(.eagerCompanion)
         let chance = touchAcceptanceChance(for: desired)
-        if guaranteedByBondRecovery || CGFloat.random(in: 0...1) <= chance {
+        if requestIsGuaranteed || CGFloat.random(in: 0...1) <= chance {
             rewardAcceptedRequest(baseGain: 0.15,
                                   guaranteedByBondRecovery: guaranteedByBondRecovery)
             GameAudio.shared.play(.uiConfirm)

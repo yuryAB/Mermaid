@@ -323,6 +323,185 @@ final class TravelSystem {
     }
 }
 
+// MARK: - Pontos de Interesse
+
+enum WorldPOIKind: String, Codable, CaseIterable {
+    case shipwreck
+    case npc
+    case minigame
+    case pet
+    case story
+
+    var displayName: String {
+        switch self {
+        case .shipwreck: return "Naufrágio"
+        case .npc: return "Encontro"
+        case .minigame: return "Desafio local"
+        case .pet: return "Companhia"
+        case .story: return "Memória"
+        }
+    }
+}
+
+struct WorldPOI: Codable {
+    let key: String
+    let regionId: String
+    let zone: DepthZone
+    let kind: WorldPOIKind
+    let name: String
+    let position: CGPoint
+    let reward: Reward
+}
+
+enum WorldPOICatalog {
+    static func pois(in region: Region, stats: MermaidStats) -> [WorldPOI] {
+        DepthZone.accessOrder.flatMap { pois(in: region, zone: $0, stats: stats) }
+    }
+
+    static func pois(in region: Region, zone: DepthZone, stats: MermaidStats) -> [WorldPOI] {
+        let seedBase = "\(region.id)|\(zone.storageKey)|\(Int(stats.birthDate.timeIntervalSince1970))"
+        var rng = StableRNG(seed: stableHash(seedBase))
+        return (0..<2).map { index in
+            let kindIndex = (Int(rng.nextInt() % UInt64(WorldPOIKind.allCases.count)) + index)
+                % WorldPOIKind.allCases.count
+            let kind = WorldPOIKind.allCases[kindIndex]
+            let key = "\(region.id)|\(zone.storageKey)|\(index)"
+            let xPadding: CGFloat = 520
+            let innerXMin = region.xRange.lowerBound + xPadding
+            let innerXMax = region.xRange.upperBound - xPadding
+            let xRange = innerXMin <= innerXMax ? innerXMin...innerXMax : region.xRange
+            let yPadding: CGFloat = zone == .surface ? 24 : 220
+            let innerYMin = zone.yRange.lowerBound + yPadding
+            let innerYMax = zone.yRange.upperBound - yPadding
+            let yRange = innerYMin <= innerYMax ? innerYMin...innerYMax : zone.yRange
+            let position = CGPoint(x: rng.next(in: xRange),
+                                   y: rng.next(in: yRange))
+            return WorldPOI(key: key,
+                            regionId: region.id,
+                            zone: zone,
+                            kind: kind,
+                            name: name(for: kind, region: region, zone: zone),
+                            position: position,
+                            reward: reward(for: kind, region: region, zone: zone))
+        }
+    }
+
+    private static func name(for kind: WorldPOIKind, region: Region, zone: DepthZone) -> String {
+        switch kind {
+        case .shipwreck: return "Naufrágio em \(zone.displayName)"
+        case .npc: return "Viajante de \(region.name)"
+        case .minigame: return "Marca de desafio"
+        case .pet: return "Amigo pequeno"
+        case .story: return "Sussurro antigo"
+        }
+    }
+
+    private static func reward(for kind: WorldPOIKind, region: Region, zone: DepthZone) -> Reward {
+        switch kind {
+        case .shipwreck:
+            return .item(id: "fragmento_\(region.id)", title: "fragmento de naufrágio")
+        case .npc:
+            return .temporaryEffect(.eagerCompanion, duration: 3600)
+        case .minigame:
+            return .temporaryEffect(.swiftCurrent, duration: 1800)
+        case .pet:
+            return .temporaryPet(title: "peixinho companheiro", duration: 3600)
+        case .story:
+            return .story("Ela ouviu uma história perdida em \(region.name), \(zone.displayName).")
+        }
+    }
+
+    private struct StableRNG {
+        private var state: UInt64
+
+        init(seed: UInt64) {
+            self.state = seed == 0 ? 0x9E37_79B9_7F4A_7C15 : seed
+        }
+
+        mutating func nextInt() -> UInt64 {
+            state = state &* 6364136223846793005 &+ 1442695040888963407
+            return state
+        }
+
+        mutating func nextUnit() -> CGFloat {
+            CGFloat(nextInt() % 10_000) / 10_000
+        }
+
+        mutating func next(in range: ClosedRange<CGFloat>) -> CGFloat {
+            range.lowerBound + (range.upperBound - range.lowerBound) * nextUnit()
+        }
+    }
+
+    private static func stableHash(_ value: String) -> UInt64 {
+        var hash: UInt64 = 1469598103934665603
+        for byte in value.utf8 {
+            hash ^= UInt64(byte)
+            hash = hash &* 1099511628211
+        }
+        return hash
+    }
+}
+
+final class POISystem {
+    unowned let ctx: GameContext
+    private var scanTimer: CGFloat = 0
+    private var exploreFocusLevel = 0
+    private var focusUntil: Date?
+
+    init(ctx: GameContext) {
+        self.ctx = ctx
+    }
+
+    func update(dt: CGFloat) {
+        if let focusUntil, focusUntil <= Date() {
+            exploreFocusLevel = 0
+            self.focusUntil = nil
+        }
+
+        scanTimer += dt
+        guard scanTimer >= 1 else { return }
+        scanTimer = 0
+        discoverNearbyPOIs()
+    }
+
+    func explorationTargetAfterCommand() -> CGPoint? {
+        exploreFocusLevel = min(5, exploreFocusLevel + 1)
+        focusUntil = Date().addingTimeInterval(45)
+        guard exploreFocusLevel >= 2 else { return nil }
+        return nearestUndiscoveredPOI()?.position
+    }
+
+    private func discoverNearbyPOIs() {
+        guard let region = ctx.regions.currentRegion else { return }
+        let zone = DepthZone.zone(atY: ctx.mermaidPosition.y)
+        let baseRadius: CGFloat = ctx.autonomy.intent == .wandering ? 320 : 240
+        let radius = baseRadius + CGFloat(exploreFocusLevel) * 85
+
+        for poi in WorldPOICatalog.pois(in: region, zone: zone, stats: ctx.stats) {
+            guard !ctx.stats.isPOIDiscovered(poi.key) else { continue }
+            guard poi.position.distance(to: ctx.mermaidPosition) <= radius else { continue }
+            ctx.stats.discoverPOI(poi.key)
+            ctx.stats.revealExpeditionMap(in: region, near: poi.position)
+            ctx.stats.gainXP(18)
+            ctx.stats.boostMood(7)
+            let rewardText = ctx.rewards.grant(poi.reward, source: poi.name)
+            ctx.stats.addMemory("Descobriu \(poi.name)")
+            ctx.say("Descobriu \(poi.name)! \(rewardText)")
+            return
+        }
+    }
+
+    private func nearestUndiscoveredPOI() -> WorldPOI? {
+        guard let region = ctx.regions.currentRegion else { return nil }
+        let zone = DepthZone.zone(atY: ctx.mermaidPosition.y)
+        return WorldPOICatalog.pois(in: region, zone: zone, stats: ctx.stats)
+            .filter { !ctx.stats.isPOIDiscovered($0.key) }
+            .min { lhs, rhs in
+                lhs.position.distance(to: ctx.mermaidPosition) < rhs.position.distance(to: ctx.mermaidPosition)
+            }
+    }
+}
+
 // MARK: - Mini-mapa de expedição
 
 final class ExpeditionMapNode: SKNode {
@@ -346,6 +525,7 @@ final class ExpeditionMapNode: SKNode {
         drawDepthBands(stats: stats)
         drawRevealedCells(stats: stats, region: region)
         drawLockedVeil(stats: stats)
+        drawPOIs(stats: stats, region: region)
         drawCurrentPosition(currentPosition, in: region)
         drawTitle(region.name)
     }
@@ -439,6 +619,53 @@ final class ExpeditionMapNode: SKNode {
         addChild(dot)
     }
 
+    private func drawPOIs(stats: MermaidStats, region: Region) {
+        let reveal = stats.expeditionReveal(for: region.id)
+        for poi in WorldPOICatalog.pois(in: region, stats: stats) {
+            let column = MermaidStats.expeditionColumn(forX: poi.position.x, in: region)
+            let row = MermaidStats.expeditionRow(forY: poi.position.y)
+            let cellKey = MermaidStats.expeditionCellKey(column: column, row: row)
+            guard (reveal[cellKey] ?? 0) > 0.14 else { continue }
+
+            let discovered = stats.isPOIDiscovered(poi.key)
+            let node = SKNode()
+            node.position = poiPoint(for: poi, in: region)
+            node.name = discovered ? "poi_\(poi.key)" : nil
+            addChild(node)
+
+            let diamond = UIBezierPath()
+            diamond.move(to: CGPoint(x: 0, y: 6))
+            diamond.addLine(to: CGPoint(x: 6, y: 0))
+            diamond.addLine(to: CGPoint(x: 0, y: -6))
+            diamond.addLine(to: CGPoint(x: -6, y: 0))
+            diamond.close()
+
+            let marker = SKShapeNode(path: diamond.cgPath)
+            marker.fillColor = discovered
+                ? UIColor(red: 1.0, green: 0.82, blue: 0.34, alpha: 0.94)
+                : UIColor.white.withAlphaComponent(0.22)
+            marker.strokeColor = discovered
+                ? UIColor.white.withAlphaComponent(0.72)
+                : UIColor.white.withAlphaComponent(0.28)
+            marker.lineWidth = 0.8
+            marker.glowWidth = discovered ? 3 : 0
+            marker.name = node.name
+            node.addChild(marker)
+
+            if discovered {
+                let label = SKLabelNode(text: poi.kind.displayName)
+                label.fontName = "AvenirNext-DemiBold"
+                label.fontSize = 7.5
+                label.fontColor = UIColor.white.withAlphaComponent(0.82)
+                label.horizontalAlignmentMode = .left
+                label.verticalAlignmentMode = .center
+                label.position = CGPoint(x: 9, y: 0)
+                label.name = node.name
+                node.addChild(label)
+            }
+        }
+    }
+
     private func drawTitle(_ text: String) {
         let title = SKLabelNode(text: text)
         title.fontName = "AvenirNext-DemiBold"
@@ -464,6 +691,13 @@ final class ExpeditionMapNode: SKNode {
         return World.floorY + (World.surfaceTopY - World.floorY) * t
     }
 
+    private func poiPoint(for poi: WorldPOI, in region: Region) -> CGPoint {
+        let column = MermaidStats.expeditionColumn(forX: poi.position.x, in: region)
+        let x = -mapSize.width / 2
+            + (CGFloat(column) + 0.5) * (mapSize.width / CGFloat(MermaidStats.expeditionMapColumns))
+        return CGPoint(x: x, y: visualY(forWorldY: poi.position.y))
+    }
+
     private func mapColor(for zone: DepthZone) -> UIColor {
         switch zone {
         case .surface: return UIColor(red: 0.76, green: 0.88, blue: 0.96, alpha: 1)
@@ -481,8 +715,10 @@ final class ExpeditionMapNode: SKNode {
 
 final class RegionMenuOverlay: SKNode {
     private let onSelect: (Region) -> Void
+    private let onPOISelect: (WorldPOI) -> Void
     private let onClose: () -> Void
     private var rowRegions: [String: Region] = [:]
+    private var rowPOIs: [String: WorldPOI] = [:]
     private var listNode = SKNode()
     private var listViewportRect: CGRect = .zero
     private var listViewportHeight: CGFloat = 0
@@ -501,8 +737,10 @@ final class RegionMenuOverlay: SKNode {
          destinationId: String?,
          currentPosition: CGPoint?,
          onSelect: @escaping (Region) -> Void,
+         onPOISelect: @escaping (WorldPOI) -> Void,
          onClose: @escaping () -> Void) {
         self.onSelect = onSelect
+        self.onPOISelect = onPOISelect
         self.onClose = onClose
         super.init()
         isUserInteractionEnabled = true
@@ -562,6 +800,10 @@ final class RegionMenuOverlay: SKNode {
             map.position = CGPoint(x: 0, y: panelHeight / 2 - 84 - mapPreviewHeight / 2)
             map.zPosition = 4
             panelContent.addChild(map)
+
+            for poi in WorldPOICatalog.pois(in: previewRegion, stats: stats) where stats.isPOIDiscovered(poi.key) {
+                rowPOIs[poi.key] = poi
+            }
         }
 
         let listTopY = panelHeight / 2 - headerHeight
@@ -721,6 +963,12 @@ final class RegionMenuOverlay: SKNode {
                    let region = rowRegions[String(name.dropFirst(7))] {
                     GameAudio.shared.play(.uiConfirm)
                     onSelect(region)
+                    return
+                }
+                if name.hasPrefix("poi_"),
+                   let poi = rowPOIs[String(name.dropFirst(4))] {
+                    GameAudio.shared.play(.uiConfirm)
+                    onPOISelect(poi)
                     return
                 }
             }
