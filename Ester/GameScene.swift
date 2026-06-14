@@ -680,6 +680,7 @@ class GameScene: SKScene {
                                      stats: stats,
                                      currentRegionId: ctx.regions.currentRegion?.id,
                                      destinationId: stats.destinationRegionId,
+                                     currentPosition: ctx.mermaidPosition,
                                      onSelect: { [weak self] region in
                                          self?.ctx.travel.setDestination(region)
                                          self?.closeRegionMenu()

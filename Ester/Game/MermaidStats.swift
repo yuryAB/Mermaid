@@ -43,6 +43,8 @@ final class MermaidStats: Codable {
     /// Regiões descobertas e progresso de exploração por região.
     var discoveredRegionIds: Set<String> = ["nascente"]
     var regionProgress: [String: CGFloat] = [:]
+    /// Fog of war do mapa de expedição: regionId -> "col,row" -> 0...1.
+    var expeditionRevealByRegion: [String: [String: CGFloat]] = [:]
     /// Destino de viagem atual (id de região), se houver.
     var destinationRegionId: String?
     var speedUpgradeLevel: Int = 0
@@ -61,7 +63,7 @@ final class MermaidStats: Codable {
         case phase, birthDate, phaseStartedAt, adaptationByZone, unlockedZoneKeys
         case maxDepthMeters
         case puzzlesSolved, mealsEaten, memories, lastSaved, hatchProgress
-        case posX, posY, discoveredRegionIds, regionProgress, destinationRegionId
+        case posX, posY, discoveredRegionIds, regionProgress, expeditionRevealByRegion, destinationRegionId
         case speedUpgradeLevel, shellGainUpgradeLevel, feedingUpgradeLevel
         case energyUpgradeLevel, dispositionUpgradeLevel
         case balanceVersion
@@ -101,6 +103,7 @@ final class MermaidStats: Codable {
         posY = try c.decodeIfPresent(CGFloat.self, forKey: .posY) ?? World.startPosition.y
         discoveredRegionIds = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredRegionIds) ?? ["nascente"]
         regionProgress = try c.decodeIfPresent([String: CGFloat].self, forKey: .regionProgress) ?? [:]
+        expeditionRevealByRegion = try c.decodeIfPresent([String: [String: CGFloat]].self, forKey: .expeditionRevealByRegion) ?? [:]
         destinationRegionId = try c.decodeIfPresent(String.self, forKey: .destinationRegionId)
         speedUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .speedUpgradeLevel) ?? 0
         shellGainUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .shellGainUpgradeLevel) ?? 0
@@ -155,6 +158,78 @@ final class MermaidStats: Codable {
 
     func unlock(_ zone: DepthZone) {
         unlockedZoneKeys.insert(zone.storageKey)
+    }
+
+    // MARK: - Mapa de expedição
+
+    static let expeditionMapColumns = 28
+    static let expeditionMapRows = 34
+
+    func expeditionReveal(for regionId: String) -> [String: CGFloat] {
+        expeditionRevealByRegion[regionId] ?? [:]
+    }
+
+    func revealExpeditionMap(in region: Region, near point: CGPoint) {
+        guard phase != .egg else { return }
+
+        let column = Self.expeditionColumn(forX: point.x, in: region)
+        let row = Self.expeditionRow(forY: point.y)
+        let radius = Self.revealRadius(for: phase)
+        guard radius > 0 else { return }
+
+        var reveal = expeditionRevealByRegion[region.id] ?? [:]
+        for dx in -radius...radius {
+            for dy in -radius...radius {
+                let candidateColumn = column + dx
+                let candidateRow = row + dy
+                guard (0..<Self.expeditionMapColumns).contains(candidateColumn),
+                      (0..<Self.expeditionMapRows).contains(candidateRow) else { continue }
+
+                let distance = sqrt(CGFloat(dx * dx + dy * dy))
+                guard distance <= CGFloat(radius) + 0.2 else { continue }
+
+                let falloff = 1 - distance / (CGFloat(radius) + 0.75)
+                let gain = (0.16 + falloff * 0.18).clamped(to: 0.08...0.34)
+                let key = Self.expeditionCellKey(column: candidateColumn, row: candidateRow)
+                reveal[key] = ((reveal[key] ?? 0) + gain).clamped(to: 0...1)
+            }
+        }
+        expeditionRevealByRegion[region.id] = reveal
+    }
+
+    static func expeditionCellKey(column: Int, row: Int) -> String {
+        "\(column),\(row)"
+    }
+
+    static func expeditionCellCoordinates(from key: String) -> (column: Int, row: Int)? {
+        let parts = key.split(separator: ",")
+        guard parts.count == 2,
+              let column = Int(parts[0]),
+              let row = Int(parts[1]) else { return nil }
+        return (column, row)
+    }
+
+    static func expeditionColumn(forX x: CGFloat, in region: Region) -> Int {
+        let width = max(1, region.xRange.upperBound - region.xRange.lowerBound)
+        let t = ((x - region.xRange.lowerBound) / width).clamped(to: 0...1)
+        return Int((t * CGFloat(expeditionMapColumns - 1)).rounded())
+    }
+
+    static func expeditionRow(forY y: CGFloat) -> Int {
+        let height = max(1, World.surfaceTopY - World.floorY)
+        let t = ((y - World.floorY) / height).clamped(to: 0...1)
+        return Int((t * CGFloat(expeditionMapRows - 1)).rounded())
+    }
+
+    private static func revealRadius(for phase: MermaidPhase) -> Int {
+        switch phase {
+        case .egg: return 0
+        case .baby: return 2
+        case .child: return 3
+        case .teen: return 4
+        case .young: return 5
+        case .adult: return 6
+        }
     }
 
     // MARK: - Aprimoramentos
