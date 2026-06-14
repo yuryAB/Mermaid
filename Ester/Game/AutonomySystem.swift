@@ -167,7 +167,7 @@ final class AutonomySystem {
 
         if stats.hunger > GameBalance.requestFoodHungerThreshold(for: stats.phase) {
             var foodScore = stats.hunger * 1.1
-            if ctx.food.nearestFood(to: position, maxDistance: 900) != nil { foodScore += 20 }
+            if ctx.food.nearestFood(to: position, maxDistance: 900, includeShellCurrency: false) != nil { foodScore += 20 }
             scores[.seekingFood] = foodScore
         }
         if stats.energy < 35 {
@@ -235,7 +235,7 @@ final class AutonomySystem {
         case .seekingFood:
             if let food = validTouchFoodTarget() {
                 target = food.position
-            } else if let food = ctx.food.nearestFood(to: position, maxDistance: 1800) {
+            } else if let food = ctx.food.nearestFood(to: position, maxDistance: 1800, includeShellCurrency: false) {
                 target = food.position
             } else {
                 ctx.food.requestSpawn(near: position)
@@ -295,7 +295,7 @@ final class AutonomySystem {
                 touchFoodTarget = nil
                 setIntent(.idle)
                 decisionCooldown = min(decisionCooldown, 1.5)
-            } else if let food = ctx.food.nearestFood(to: position, maxDistance: 1800) {
+            } else if let food = ctx.food.nearestFood(to: position, maxDistance: 1800, includeShellCurrency: false) {
                 target = food.position
                 if position.distance(to: food.position) < 130 { eat(food) }
             } else if intentTime > 6 {
@@ -419,16 +419,24 @@ final class AutonomySystem {
         guard intent != .inChallenge, intent != .enteringRefuge,
               stats.hunger >= GameBalance.autoEatHungerThreshold(for: stats.phase),
               eatCooldown <= 0 else { return }
-        if let food = ctx.food.nearestFood(to: position, maxDistance: 120) {
+        if let food = ctx.food.nearestFood(to: position, maxDistance: 120, includeShellCurrency: false) {
             eat(food)
         }
     }
 
     private func eat(_ food: FoodNode) {
         guard eatCooldown <= 0 else { return }
+        let isShellCurrency = food.kind.isShellCurrency
         eatCooldown = 1.2
         touchFoodTarget = nil
         ctx.food.consume(food)
+        if isShellCurrency {
+            intent = .observing
+            target = nil
+            intentTime = 0
+            showEmotion(.happy, duration: 1.2)
+            return
+        }
         GameAudio.shared.play(.mermaidEat)
         intent = .eating
         target = nil
@@ -764,16 +772,27 @@ final class AutonomySystem {
     @discardableResult
     func requestFoodFromTouch(_ food: FoodNode) -> Bool {
         guard food.parent != nil else { return false }
-        guard isBondRecoveryRequestReady || stats.hunger >= 28 || food.kind.pearls > 0 || food.kind.xp >= 10 else {
+        let isShellCurrency = food.kind.isShellCurrency
+        guard isShellCurrency || isBondRecoveryRequestReady || stats.hunger >= 28 || food.kind.pearls > 0 || food.kind.xp >= 10 else {
             return rejectTouchRequest("Ela viu \(food.kind.name), mas não está com fome agora.")
         }
+        let acceptedMessage = isShellCurrency
+            ? "Ela aceitou coletar \(food.kind.name)..."
+            : "Ela aceitou provar \(food.kind.name)..."
+        let refusalMessages = isShellCurrency
+            ? [
+                "Ela viu \(food.kind.name), mas deixou a concha ali por enquanto.",
+                "Ela olhou para \(food.kind.name) e seguiu nadando.",
+                "Ela fingiu que não viu a concha."
+            ]
+            : [
+                "Ela viu \(food.kind.name), mas não quis comer agora.",
+                "Ela virou o rostinho para longe da comida.",
+                "Ela fingiu que não viu \(food.kind.name)."
+            ]
         guard acceptTouchRequest(for: .seekingFood,
-                                 acceptedMessage: "Ela aceitou provar \(food.kind.name)...",
-                                 refusalMessages: [
-                                    "Ela viu \(food.kind.name), mas não quis comer agora.",
-                                    "Ela virou o rostinho para longe da comida.",
-                                    "Ela fingiu que não viu \(food.kind.name)."
-                                 ]) else { return false }
+                                 acceptedMessage: acceptedMessage,
+                                 refusalMessages: refusalMessages) else { return false }
         touchFoodTarget = food
         commandBias = nil
         setIntent(.seekingFood)

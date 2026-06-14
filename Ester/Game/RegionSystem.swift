@@ -327,7 +327,7 @@ final class RegionDiscoverySystem {
         case "nascente":
             return [
                 FoodKind(name: "plâncton de berço", weight: 4, nutrition: 12, xp: 3, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.72, green: 0.9, blue: 1.0, alpha: 1)),
-                FoodKind(name: "conchinha morna", weight: 2, nutrition: 8, xp: 4, pearls: 1, courage: 0, style: .pearl, color: UIColor(red: 0.95, green: 0.82, blue: 0.92, alpha: 1))
+                FoodKind(name: "conchinha morna", weight: 2, nutrition: 0, xp: 4, pearls: 1, courage: 0, style: .pearl, color: UIColor(red: 0.95, green: 0.82, blue: 0.92, alpha: 1))
             ]
         case "jardim_calmo":
             return [
@@ -362,7 +362,7 @@ final class RegionDiscoverySystem {
         case "ruinas":
             return [
                 FoodKind(name: "semente antiga", weight: 3, nutrition: 16, xp: 6, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.62, green: 0.54, blue: 0.36, alpha: 1)),
-                FoodKind(name: "concha gravada", weight: 2, nutrition: 7, xp: 6, pearls: 2, courage: 0, style: .pearl, color: UIColor(red: 0.76, green: 0.70, blue: 0.58, alpha: 1))
+                FoodKind(name: "concha gravada", weight: 2, nutrition: 0, xp: 6, pearls: 2, courage: 0, style: .pearl, color: UIColor(red: 0.76, green: 0.70, blue: 0.58, alpha: 1))
             ]
         case "abismo_vivo":
             return [
