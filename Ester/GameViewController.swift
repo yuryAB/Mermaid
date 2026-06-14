@@ -17,7 +17,7 @@ class GameViewController: UIViewController {
     }
     
     private func presentGameScene() {
-        let scene = GameScene(size: view.bounds.size)
+        let scene = MapSceneFactory.sceneForSavedMap(size: view.bounds.size)
         scene.scaleMode = .aspectFill
         
         if let view = self.view as! SKView? {

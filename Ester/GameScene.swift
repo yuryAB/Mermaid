@@ -14,7 +14,10 @@ import GameplayKit
 import UIKit
 
 class GameScene: SKScene {
+    class var defaultRegionId: String? { nil }
+
     private let requestedRegionId: String?
+    var shouldAnnounceArrival = false
     private var cameraNode: SKCameraNode!
     private var worldNode: SKNode!
     private var entityManager: EntityManager!
@@ -49,12 +52,13 @@ class GameScene: SKScene {
     // MARK: - Setup
 
     override init(size: CGSize) {
-        requestedRegionId = nil
+        requestedRegionId = Self.defaultRegionId
         super.init(size: size)
     }
 
     init(size: CGSize, regionId: String?) {
         requestedRegionId = regionId
+        shouldAnnounceArrival = true
         super.init(size: size)
     }
 
@@ -102,7 +106,7 @@ class GameScene: SKScene {
             .wait(forDuration: 1.0),
             .run { [weak self] in
                 guard let self else { return }
-                if self.requestedRegionId != nil {
+                if self.shouldAnnounceArrival {
                     GameAudio.shared.play(.travelArrive)
                     if let zone = self.lastEntryTextZone,
                        self.showEntryTextIfNeeded(for: zone) {
@@ -807,7 +811,7 @@ class GameScene: SKScene {
         stats.rememberMapPosition(clampedEntry, in: region)
         stats.save()
 
-        let nextScene = GameScene(size: size, regionId: region.id)
+        let nextScene = MapSceneFactory.scene(for: region.id, size: size, announceArrival: true)
         nextScene.scaleMode = scaleMode
         view?.presentScene(nextScene, transition: .crossFade(withDuration: 0.65))
     }
