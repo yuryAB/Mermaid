@@ -29,6 +29,7 @@ enum GameSound: String, CaseIterable {
     case eggTap
     case eggCrack
     case hatch
+    case firstBirthMusic
     case evolution
 
     case foodRareSpawn
@@ -123,6 +124,7 @@ final class GameAudio {
         .eggTap: .init(file: "Audio/Progression/egg_tap_warm.mp3", volume: 0.36, cooldown: 0.22, maxPolyphony: 2),
         .eggCrack: .init(file: "Audio/Progression/egg_crack_soft.mp3", volume: 0.50, cooldown: 0.25, maxPolyphony: 2),
         .hatch: .init(file: "Audio/Progression/hatch_birth_shimmer.mp3", volume: 0.58, cooldown: 2.0, maxPolyphony: 1),
+        .firstBirthMusic: .init(file: "Audio/Progression/little_siren_birth.mp3", volume: 0.12, cooldown: 86_400, maxPolyphony: 1),
         .evolution: .init(file: "Audio/Progression/evolution_shimmer.mp3", volume: 0.58, cooldown: 2.0, maxPolyphony: 1),
 
         .foodRareSpawn: .init(file: "Audio/World/food_rare_shimmer.mp3", volume: 0.34, cooldown: 1.0, maxPolyphony: 1),
@@ -180,7 +182,7 @@ final class GameAudio {
         guard !configured else { return }
         configured = true
         do {
-            try AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             // Audio remains best-effort; gameplay must never depend on it.
@@ -200,6 +202,7 @@ final class GameAudio {
     }
 
     func play(_ sound: GameSound, volumeMultiplier: Float = 1.0, cooldownOverride: TimeInterval? = nil) {
+        configure()
         guard let spec = soundSpecs[sound] else { return }
         let now = CACurrentMediaTime()
         let cooldown = cooldownOverride ?? spec.cooldown
@@ -220,6 +223,7 @@ final class GameAudio {
     }
 
     private func startAmbience(_ ambience: GameAmbience) {
+        configure()
         guard activeAmbience != ambience else { return }
         activeAmbience.flatMap { ambiencePlayers[$0] }?.setVolume(0, fadeDuration: 0.8)
         activeAmbience = ambience
@@ -273,15 +277,53 @@ final class GameAudio {
     }
 
     private func bundleURL(for path: String) -> URL? {
+        let fileManager = FileManager.default
+        if let url = Bundle.main.url(forResource: path, withExtension: nil),
+           fileManager.fileExists(atPath: url.path) {
+            return url
+        }
+
         let nsPath = path as NSString
         let ext = nsPath.pathExtension
         let name = (nsPath.deletingPathExtension as NSString).lastPathComponent
         let subdirectory = nsPath.deletingLastPathComponent
         if let url = Bundle.main.url(forResource: name,
                                      withExtension: ext,
-                                     subdirectory: subdirectory.isEmpty ? nil : subdirectory) {
+                                     subdirectory: subdirectory.isEmpty ? nil : subdirectory),
+           fileManager.fileExists(atPath: url.path) {
             return url
         }
-        return Bundle.main.url(forResource: name, withExtension: ext)
+
+        if path.hasPrefix("Audio/") {
+            let strippedPath = String(path.dropFirst("Audio/".count))
+            let stripped = strippedPath as NSString
+            let strippedSubdirectory = stripped.deletingLastPathComponent
+            if let url = Bundle.main.url(forResource: name,
+                                         withExtension: ext,
+                                         subdirectory: strippedSubdirectory.isEmpty ? nil : strippedSubdirectory),
+               fileManager.fileExists(atPath: url.path) {
+                return url
+            }
+        }
+
+        if let url = Bundle.main.url(forResource: name, withExtension: ext),
+           fileManager.fileExists(atPath: url.path) {
+            return url
+        }
+
+        if let resourceURL = Bundle.main.resourceURL {
+            let directURL = resourceURL.appendingPathComponent(path)
+            if fileManager.fileExists(atPath: directURL.path) {
+                return directURL
+            }
+            if path.hasPrefix("Audio/") {
+                let strippedURL = resourceURL.appendingPathComponent(String(path.dropFirst("Audio/".count)))
+                if fileManager.fileExists(atPath: strippedURL.path) {
+                    return strippedURL
+                }
+            }
+        }
+
+        return nil
     }
 }
