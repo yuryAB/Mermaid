@@ -217,6 +217,7 @@ final class RegionDiscoverySystem {
         progressTimer += dt
         if progressTimer >= 5 {
             progressTimer = 0
+            ctx.stats.rememberMapPosition(ctx.mermaidPosition, in: region)
             let current = ctx.stats.regionProgress[region.id] ?? 0
             if current < 1 {
                 ctx.stats.regionProgress[region.id] = min(1, current + 5.0 / 1200.0 * ctx.stats.explorationProgressMultiplier)
@@ -283,8 +284,9 @@ final class TravelSystem {
     var targetPoint: CGPoint? {
         guard let destination else { return nil }
         let yRange = ctx.depth.allowedYRange()
-        return CGPoint(x: destination.center.x,
-                       y: destination.center.y.clamped(to: yRange))
+        let saved = ctx.stats.savedMapPosition(for: destination) ?? destination.center
+        return CGPoint(x: saved.x.clamped(to: destination.xRange),
+                       y: saved.y.clamped(to: yRange))
     }
 
     func setDestination(_ region: Region) {
@@ -300,6 +302,9 @@ final class TravelSystem {
             ctx.say("Cansada demais para uma viagem longa... ela precisa descansar.")
             return
         }
+        if let current = ctx.regions.currentRegion {
+            ctx.stats.rememberMapPosition(ctx.mermaidPosition, in: current)
+        }
         ctx.stats.destinationRegionId = region.id
         GameAudio.shared.play(.travelStart)
         ctx.say("Ela partiu rumo a \(region.name) 🌊 A viagem leva tempo...")
@@ -311,8 +316,10 @@ final class TravelSystem {
 
     func update(dt: CGFloat) {
         guard let destination else { return }
-        if destination.contains(ctx.mermaidPosition) {
+        guard let target = targetPoint else { return }
+        if ctx.mermaidPosition.distance(to: target) < 700 {
             clearDestination()
+            ctx.stats.rememberMapPosition(ctx.mermaidPosition, in: destination)
             ctx.stats.gainXP(20)
             let gained = ctx.stats.awardPearls(4)
             ctx.stats.boostMood(8)

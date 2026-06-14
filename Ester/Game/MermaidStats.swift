@@ -48,6 +48,7 @@ final class MermaidStats: Codable {
     var discoveredPOIKeys: Set<String> = []
     var inventoryItems: [String: Int] = [:]
     var activeBuffs: [TimedBuff] = []
+    var mapPositionByRegion: [String: CGPoint] = [:]
     /// Destino de viagem atual (id de região), se houver.
     var destinationRegionId: String?
     var speedUpgradeLevel: Int = 0
@@ -67,7 +68,7 @@ final class MermaidStats: Codable {
         case maxDepthMeters
         case puzzlesSolved, mealsEaten, memories, lastSaved, hatchProgress
         case posX, posY, discoveredRegionIds, regionProgress, expeditionRevealByRegion
-        case discoveredPOIKeys, inventoryItems, activeBuffs, destinationRegionId
+        case discoveredPOIKeys, inventoryItems, activeBuffs, mapPositionByRegion, destinationRegionId
         case speedUpgradeLevel, shellGainUpgradeLevel, feedingUpgradeLevel
         case energyUpgradeLevel, dispositionUpgradeLevel
         case balanceVersion
@@ -111,6 +112,7 @@ final class MermaidStats: Codable {
         discoveredPOIKeys = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredPOIKeys) ?? []
         inventoryItems = try c.decodeIfPresent([String: Int].self, forKey: .inventoryItems) ?? [:]
         activeBuffs = try c.decodeIfPresent([TimedBuff].self, forKey: .activeBuffs) ?? []
+        mapPositionByRegion = try c.decodeIfPresent([String: CGPoint].self, forKey: .mapPositionByRegion) ?? [:]
         destinationRegionId = try c.decodeIfPresent(String.self, forKey: .destinationRegionId)
         speedUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .speedUpgradeLevel) ?? 0
         shellGainUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .shellGainUpgradeLevel) ?? 0
@@ -269,6 +271,16 @@ final class MermaidStats: Codable {
 
     private func pruneExpiredBuffs() {
         activeBuffs.removeAll { $0.expiresAt <= Date() }
+    }
+
+    func rememberMapPosition(_ point: CGPoint, in region: Region) {
+        let x = point.x.clamped(to: region.xRange)
+        let y = point.y.clamped(to: World.floorY...World.surfaceTopY)
+        mapPositionByRegion[region.id] = CGPoint(x: x, y: y)
+    }
+
+    func savedMapPosition(for region: Region) -> CGPoint? {
+        mapPositionByRegion[region.id]
     }
 
     // MARK: - Aprimoramentos

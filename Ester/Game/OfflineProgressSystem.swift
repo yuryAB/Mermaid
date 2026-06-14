@@ -26,15 +26,19 @@ enum OfflineProgressSystem {
         if let destinationId = stats.destinationRegionId,
            let destination = RegionDiscoverySystem.region(withId: destinationId) {
             let current = CGPoint(x: stats.posX, y: stats.posY)
-            let dx = destination.center.x - current.x
-            let dy = destination.center.y - current.y
+            let target = stats.savedMapPosition(for: destination) ?? destination.center
+            let dx = target.x - current.x
+            let dy = target.y - current.y
             let total = max(1, sqrt(dx * dx + dy * dy))
             let step = min(distance, total)
             stats.posX += dx / total * step
             stats.posY += dy / total * step
 
-            if destination.contains(CGPoint(x: stats.posX, y: stats.posY)) {
+            if CGPoint(x: stats.posX, y: stats.posY).distance(to: target) < 700 {
                 stats.destinationRegionId = nil
+                stats.posX = target.x
+                stats.posY = target.y
+                stats.rememberMapPosition(target, in: destination)
                 stats.discoveredRegionIds.insert(destination.id)
                 stats.awardPearls(4)
                 stats.addMemory("Chegou a \(destination.name) durante a sua ausência")
