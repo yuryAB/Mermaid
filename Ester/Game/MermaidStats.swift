@@ -48,7 +48,9 @@ final class MermaidStats: Codable {
     var discoveredPOIKeys: Set<String> = []
     var inventoryItems: [String: Int] = [:]
     var activeBuffs: [TimedBuff] = []
+    var currentRegionId: String = "nascente"
     var mapPositionByRegion: [String: CGPoint] = [:]
+    var mapEntryPointByRegion: [String: CGPoint] = [:]
     /// Destino de viagem atual (id de região), se houver.
     var destinationRegionId: String?
     var speedUpgradeLevel: Int = 0
@@ -68,7 +70,8 @@ final class MermaidStats: Codable {
         case maxDepthMeters
         case puzzlesSolved, mealsEaten, memories, lastSaved, hatchProgress
         case posX, posY, discoveredRegionIds, regionProgress, expeditionRevealByRegion
-        case discoveredPOIKeys, inventoryItems, activeBuffs, mapPositionByRegion, destinationRegionId
+        case discoveredPOIKeys, inventoryItems, activeBuffs, currentRegionId
+        case mapPositionByRegion, mapEntryPointByRegion, destinationRegionId
         case speedUpgradeLevel, shellGainUpgradeLevel, feedingUpgradeLevel
         case energyUpgradeLevel, dispositionUpgradeLevel
         case balanceVersion
@@ -112,7 +115,9 @@ final class MermaidStats: Codable {
         discoveredPOIKeys = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredPOIKeys) ?? []
         inventoryItems = try c.decodeIfPresent([String: Int].self, forKey: .inventoryItems) ?? [:]
         activeBuffs = try c.decodeIfPresent([TimedBuff].self, forKey: .activeBuffs) ?? []
+        currentRegionId = try c.decodeIfPresent(String.self, forKey: .currentRegionId) ?? "nascente"
         mapPositionByRegion = try c.decodeIfPresent([String: CGPoint].self, forKey: .mapPositionByRegion) ?? [:]
+        mapEntryPointByRegion = try c.decodeIfPresent([String: CGPoint].self, forKey: .mapEntryPointByRegion) ?? [:]
         destinationRegionId = try c.decodeIfPresent(String.self, forKey: .destinationRegionId)
         speedUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .speedUpgradeLevel) ?? 0
         shellGainUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .shellGainUpgradeLevel) ?? 0
@@ -219,8 +224,9 @@ final class MermaidStats: Codable {
     }
 
     static func expeditionColumn(forX x: CGFloat, in region: Region) -> Int {
-        let width = max(1, region.xRange.upperBound - region.xRange.lowerBound)
-        let t = ((x - region.xRange.lowerBound) / width).clamped(to: 0...1)
+        let xRange = region.playableXRange
+        let width = max(1, xRange.upperBound - xRange.lowerBound)
+        let t = ((x - xRange.lowerBound) / width).clamped(to: 0...1)
         return Int((t * CGFloat(expeditionMapColumns - 1)).rounded())
     }
 
@@ -274,13 +280,53 @@ final class MermaidStats: Codable {
     }
 
     func rememberMapPosition(_ point: CGPoint, in region: Region) {
-        let x = point.x.clamped(to: region.xRange)
+        let x = point.x.clamped(to: region.playableXRange)
         let y = point.y.clamped(to: World.floorY...World.surfaceTopY)
         mapPositionByRegion[region.id] = CGPoint(x: x, y: y)
     }
 
     func savedMapPosition(for region: Region) -> CGPoint? {
         mapPositionByRegion[region.id]
+    }
+
+    func entryPoint(for region: Region) -> CGPoint {
+        if let point = mapEntryPointByRegion[region.id] {
+            return point
+        }
+
+        var rng = StableMapRNG(seed: stableMapHash("\(region.id)|entry|\(Int(birthDate.timeIntervalSince1970))"))
+        let x = rng.next(in: region.playableXRange)
+        let y = region.entryZone.midY.clamped(to: DepthSystem.allowedYRange(for: self))
+        let point = CGPoint(x: x, y: y)
+        mapEntryPointByRegion[region.id] = point
+        return point
+    }
+
+    private struct StableMapRNG {
+        private var state: UInt64
+
+        init(seed: UInt64) {
+            self.state = seed == 0 ? 0xD1B5_4A32_D192_ED03 : seed
+        }
+
+        mutating func nextInt() -> UInt64 {
+            state = state &* 2862933555777941757 &+ 3037000493
+            return state
+        }
+
+        mutating func next(in range: ClosedRange<CGFloat>) -> CGFloat {
+            let unit = CGFloat(nextInt() % 10_000) / 10_000
+            return range.lowerBound + (range.upperBound - range.lowerBound) * unit
+        }
+    }
+
+    private func stableMapHash(_ value: String) -> UInt64 {
+        var hash: UInt64 = 1469598103934665603
+        for byte in value.utf8 {
+            hash ^= UInt64(byte)
+            hash = hash &* 1099511628211
+        }
+        return hash
     }
 
     // MARK: - Aprimoramentos
@@ -446,6 +492,9 @@ final class MermaidStats: Codable {
             stats.unlock(.shallow)
             stats.unlock(.mid)
             stats.discoveredRegionIds.insert("nascente")
+            if RegionDiscoverySystem.region(withId: stats.currentRegionId) == nil {
+                stats.currentRegionId = "nascente"
+            }
             let range = World.floorY...World.surfaceTopY
             if !range.contains(stats.posY) || !(World.minX...World.maxX).contains(stats.posX) {
                 stats.posX = World.startPosition.x

@@ -564,6 +564,7 @@ struct MermaidPalette {
 final class GameContext {
     var stats: MermaidStats!
     weak var scene: GameScene?
+    var activeRegion: Region!
     var mermaidEntity: MermaidEntity!
     var depth: DepthSystem!
     var autonomy: AutonomySystem!

@@ -27,12 +27,16 @@ struct Region {
     let tideIcons: [String]
 
     var center: CGPoint {
-        CGPoint(x: (xRange.lowerBound + xRange.upperBound) / 2,
+        CGPoint(x: (playableXRange.lowerBound + playableXRange.upperBound) / 2,
                 y: entryZone.midY.clamped(to: yRange))
     }
 
+    var playableXRange: ClosedRange<CGFloat> {
+        World.minX...World.maxX
+    }
+
     func contains(_ point: CGPoint) -> Bool {
-        xRange.contains(point.x) && yRange.contains(point.y)
+        playableXRange.contains(point.x) && yRange.contains(point.y)
     }
 
     func isAccessible(for phase: MermaidPhase) -> Bool {
@@ -190,8 +194,7 @@ final class RegionDiscoverySystem {
     }
 
     var currentRegion: Region? {
-        let p = ctx.mermaidPosition
-        return RegionDiscoverySystem.all.first { $0.contains(p) }
+        ctx.activeRegion
     }
 
     func update(dt: CGFloat) {
@@ -227,7 +230,7 @@ final class RegionDiscoverySystem {
 
     /// Tinta da região misturada na cor da água.
     func waterTint(at point: CGPoint) -> (color: UIColor, strength: CGFloat)? {
-        guard let region = RegionDiscoverySystem.all.first(where: { $0.contains(point) }) else { return nil }
+        guard let region = ctx.activeRegion else { return nil }
         return (region.tint, region.tintStrength)
     }
 
@@ -285,12 +288,12 @@ final class TravelSystem {
         guard let destination else { return nil }
         let yRange = ctx.depth.allowedYRange()
         let saved = ctx.stats.savedMapPosition(for: destination) ?? destination.center
-        return CGPoint(x: saved.x.clamped(to: destination.xRange),
+        return CGPoint(x: saved.x.clamped(to: destination.playableXRange),
                        y: saved.y.clamped(to: yRange))
     }
 
     func setDestination(_ region: Region) {
-        if region.contains(ctx.mermaidPosition) {
+        if ctx.activeRegion?.id == region.id {
             ctx.say("Ela já está em \(region.name).")
             return
         }
@@ -307,7 +310,8 @@ final class TravelSystem {
         }
         ctx.stats.destinationRegionId = region.id
         GameAudio.shared.play(.travelStart)
-        ctx.say("Ela partiu rumo a \(region.name) 🌊 A viagem leva tempo...")
+        ctx.say("Ela seguiu rumo a \(region.name).")
+        ctx.scene?.transitionToMap(region)
     }
 
     func clearDestination() {
@@ -316,17 +320,11 @@ final class TravelSystem {
 
     func update(dt: CGFloat) {
         guard let destination else { return }
-        guard let target = targetPoint else { return }
-        if ctx.mermaidPosition.distance(to: target) < 700 {
+        guard ctx.activeRegion?.id != destination.id else {
             clearDestination()
-            ctx.stats.rememberMapPosition(ctx.mermaidPosition, in: destination)
-            ctx.stats.gainXP(20)
-            let gained = ctx.stats.awardPearls(4)
-            ctx.stats.boostMood(8)
-            ctx.stats.addMemory("Viajou até \(destination.name)")
-            GameAudio.shared.play(.travelArrive)
-            ctx.say("Chegada registrada: \(destination.name). Conchas +\(gained)")
+            return
         }
+        ctx.scene?.transitionToMap(destination)
     }
 }
 
@@ -374,9 +372,9 @@ enum WorldPOICatalog {
             let kind = WorldPOIKind.allCases[kindIndex]
             let key = "\(region.id)|\(zone.storageKey)|\(index)"
             let xPadding: CGFloat = 520
-            let innerXMin = region.xRange.lowerBound + xPadding
-            let innerXMax = region.xRange.upperBound - xPadding
-            let xRange = innerXMin <= innerXMax ? innerXMin...innerXMax : region.xRange
+            let innerXMin = region.playableXRange.lowerBound + xPadding
+            let innerXMax = region.playableXRange.upperBound - xPadding
+            let xRange = innerXMin <= innerXMax ? innerXMin...innerXMax : region.playableXRange
             let yPadding: CGFloat = zone == .surface ? 24 : 220
             let innerYMin = zone.yRange.lowerBound + yPadding
             let innerYMax = zone.yRange.upperBound - yPadding

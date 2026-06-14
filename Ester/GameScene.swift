@@ -14,6 +14,7 @@ import GameplayKit
 import UIKit
 
 class GameScene: SKScene {
+    private let requestedRegionId: String?
     private var cameraNode: SKCameraNode!
     private var worldNode: SKNode!
     private var entityManager: EntityManager!
@@ -38,12 +39,28 @@ class GameScene: SKScene {
 
     private let ctx = GameContext()
     private var stats: MermaidStats!
+    private var activeRegion: Region!
     private var offlineSummary: String?
 
     private var lastUpdateTime: TimeInterval = 0
     private var saveTimer: CGFloat = 0
 
     // MARK: - Setup
+
+    override init(size: CGSize) {
+        requestedRegionId = nil
+        super.init(size: size)
+    }
+
+    init(size: CGSize, regionId: String?) {
+        requestedRegionId = regionId
+        super.init(size: size)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        requestedRegionId = nil
+        super.init(coder: aDecoder)
+    }
 
     override func didMove(to view: SKView) {
         physicsWorld.gravity = .zero
@@ -54,6 +71,7 @@ class GameScene: SKScene {
         offlineSummary = OfflineProgressSystem.apply(stats: stats)
         ctx.stats = stats
         ctx.scene = self
+        configureActiveRegion()
 
         worldNode = SKNode()
         addChild(worldNode)
@@ -82,7 +100,10 @@ class GameScene: SKScene {
             .wait(forDuration: 1.0),
             .run { [weak self] in
                 guard let self else { return }
-                if self.stats.phase == .egg {
+                if self.requestedRegionId != nil {
+                    GameAudio.shared.play(.travelArrive)
+                    self.ctx.say("Chegada registrada: \(self.activeRegion.name).")
+                } else if self.stats.phase == .egg {
                     self.ctx.say("Um ovo misterioso... Toque nele para aquecê-lo! 🥚")
                 } else {
                     self.ctx.say("Bem-vindo de volta! Ela sentiu sua falta. 🌊")
@@ -104,6 +125,33 @@ class GameScene: SKScene {
                 }
             }
         ]))
+    }
+
+    private func configureActiveRegion() {
+        let fallback = RegionDiscoverySystem.region(withId: "nascente")!
+        let requestedId = requestedRegionId ?? stats.currentRegionId
+        let resolved = RegionDiscoverySystem.region(withId: requestedId) ?? fallback
+        let phaseAllowsRegion = stats.phase == .egg
+            ? resolved.id == fallback.id
+            : stats.phase >= resolved.minPhase
+        let region = phaseAllowsRegion ? resolved : fallback
+        let shouldUseStoredPosition = requestedRegionId == nil
+            && region.playableXRange.contains(stats.posX)
+            && (World.floorY...World.surfaceTopY).contains(stats.posY)
+        let destinationPoint = shouldUseStoredPosition
+            ? CGPoint(x: stats.posX, y: stats.posY)
+            : (stats.savedMapPosition(for: region) ?? stats.entryPoint(for: region))
+        let yRange = DepthSystem.allowedYRange(for: stats)
+        let clampedPoint = CGPoint(x: destinationPoint.x.clamped(to: region.playableXRange),
+                                   y: destinationPoint.y.clamped(to: yRange))
+
+        activeRegion = region
+        ctx.activeRegion = region
+        stats.currentRegionId = region.id
+        stats.discoveredRegionIds.insert(region.id)
+        stats.posX = clampedPoint.x
+        stats.posY = clampedPoint.y
+        stats.rememberMapPosition(clampedPoint, in: region)
     }
 
     private func setupMermaid() {
@@ -635,8 +683,18 @@ class GameScene: SKScene {
 
     private func persistAndSave() {
         let position = ctx.mermaidPosition
-        stats.posX = position.x
-        stats.posY = position.y
+        let region = activeRegion ?? ctx.activeRegion ?? RegionDiscoverySystem.region(withId: stats.currentRegionId)
+        if let region {
+            let clampedPoint = CGPoint(x: position.x.clamped(to: region.playableXRange),
+                                       y: position.y.clamped(to: World.floorY...World.surfaceTopY))
+            stats.currentRegionId = region.id
+            stats.posX = clampedPoint.x
+            stats.posY = clampedPoint.y
+            stats.rememberMapPosition(clampedPoint, in: region)
+        } else {
+            stats.posX = position.x
+            stats.posY = position.y
+        }
         stats.save()
     }
 
@@ -681,7 +739,7 @@ class GameScene: SKScene {
         GameAudio.shared.play(.uiOpenPanel)
         let menu = RegionMenuOverlay(size: size,
                                      stats: stats,
-                                     currentRegionId: ctx.regions.currentRegion?.id,
+                                     currentRegionId: activeRegion?.id,
                                      destinationId: stats.destinationRegionId,
                                      currentPosition: ctx.mermaidPosition,
                                      onSelect: { [weak self] region in
@@ -707,6 +765,29 @@ class GameScene: SKScene {
         }
         regionMenu?.removeFromParent()
         regionMenu = nil
+    }
+
+    func transitionToMap(_ region: Region) {
+        guard activeRegion?.id != region.id else {
+            ctx.say("Ela já está em \(region.name).")
+            return
+        }
+
+        persistAndSave()
+        let entryPoint = stats.savedMapPosition(for: region) ?? stats.entryPoint(for: region)
+        let yRange = DepthSystem.allowedYRange(for: stats)
+        let clampedEntry = CGPoint(x: entryPoint.x.clamped(to: region.playableXRange),
+                                   y: entryPoint.y.clamped(to: yRange))
+        stats.currentRegionId = region.id
+        stats.destinationRegionId = nil
+        stats.posX = clampedEntry.x
+        stats.posY = clampedEntry.y
+        stats.rememberMapPosition(clampedEntry, in: region)
+        stats.save()
+
+        let nextScene = GameScene(size: size, regionId: region.id)
+        nextScene.scaleMode = scaleMode
+        view?.presentScene(nextScene, transition: .crossFade(withDuration: 0.65))
     }
 
     // MARK: - Refúgio das Marés (com portal de verdade)
