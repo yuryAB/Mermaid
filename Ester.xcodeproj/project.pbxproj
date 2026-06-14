@@ -68,6 +68,7 @@
 		FAD1F1010000000000000004 /* Nunito-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAD1F0010000000000000004 /* Nunito-Italic.ttf */; };
 		FAD210110000000000000001 /* AudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAD210010000000000000001 /* AudioManager.swift */; };
 		FAD220110000000000000001 /* Audio in Resources */ = {isa = PBXBuildFile; fileRef = FAD220010000000000000001 /* Audio */; };
+		FAD230110000000000000001 /* WorldPOIs.json in Resources */ = {isa = PBXBuildFile; fileRef = FAD230010000000000000001 /* WorldPOIs.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -133,6 +134,7 @@
 		FAD1F0010000000000000004 /* Nunito-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Italic.ttf"; sourceTree = "<group>"; };
 		FAD210010000000000000001 /* AudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioManager.swift; sourceTree = "<group>"; };
 		FAD220010000000000000001 /* Audio */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Audio; sourceTree = "<group>"; };
+		FAD230010000000000000001 /* WorldPOIs.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = GameData/WorldPOIs.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -275,6 +277,7 @@
 				72D020812C1905F9002F11FC /* GameViewController.swift */,
 				72D020832C1905F9002F11FC /* Main.storyboard */,
 				72D020862C1905FC002F11FC /* Assets.xcassets */,
+				FAD230010000000000000001 /* WorldPOIs.json */,
 				FAD220010000000000000001 /* Audio */,
 				FAD1F2010000000000000001 /* Fonts */,
 				72D020882C1905FC002F11FC /* LaunchScreen.storyboard */,
@@ -388,6 +391,7 @@
 				FAD1F1010000000000000003 /* Nunito-Regular.ttf in Resources */,
 				FAD1F1010000000000000004 /* Nunito-Italic.ttf in Resources */,
 				FAD220110000000000000001 /* Audio in Resources */,
+				FAD230110000000000000001 /* WorldPOIs.json in Resources */,
 				72D0208A2C1905FC002F11FC /* Base in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

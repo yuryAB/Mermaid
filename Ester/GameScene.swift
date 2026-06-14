@@ -41,6 +41,7 @@ class GameScene: SKScene {
     private var stats: MermaidStats!
     private var activeRegion: Region!
     private var offlineSummary: String?
+    private var lastEntryTextZone: DepthZone?
 
     private var lastUpdateTime: TimeInterval = 0
     private var saveTimer: CGFloat = 0
@@ -84,6 +85,7 @@ class GameScene: SKScene {
         setupOceanBackdrop()
         setupHUD()
         setupAmbientBubbles()
+        lastEntryTextZone = DepthZone.zone(atY: stats.posY)
 
         ctx.growth.setup()
         snapCameraToTarget()
@@ -102,9 +104,17 @@ class GameScene: SKScene {
                 guard let self else { return }
                 if self.requestedRegionId != nil {
                     GameAudio.shared.play(.travelArrive)
-                    self.ctx.say("Chegada registrada: \(self.activeRegion.name).")
+                    if let zone = self.lastEntryTextZone,
+                       self.showEntryTextIfNeeded(for: zone) {
+                        return
+                    } else {
+                        self.ctx.say("Chegada registrada: \(self.activeRegion.name).")
+                    }
                 } else if self.stats.phase == .egg {
                     self.ctx.say("Um ovo misterioso... Toque nele para aquecê-lo! 🥚")
+                } else if let zone = self.lastEntryTextZone,
+                          self.showEntryTextIfNeeded(for: zone) {
+                    return
                 } else {
                     self.ctx.say("Bem-vindo de volta! Ela sentiu sua falta. 🌊")
                 }
@@ -631,6 +641,10 @@ class GameScene: SKScene {
         ctx.growth.update(dt: dt)
         ctx.autonomy.update(dt: dt)
         ctx.depth.update(dt: dt)
+        if ctx.depth.currentZone != lastEntryTextZone {
+            lastEntryTextZone = ctx.depth.currentZone
+            showEntryTextIfNeeded(for: ctx.depth.currentZone)
+        }
         ctx.food.update(dt: dt)
         ctx.fish.update(dt: dt)
         ctx.events.update(dt: dt)
@@ -748,7 +762,7 @@ class GameScene: SKScene {
                                      },
                                      onPOISelect: { [weak self] poi in
                                          guard let self else { return }
-                                         _ = self.ctx.autonomy.requestPointFromTouch(poi.position)
+                                         _ = self.ctx.pois.requestReturn(to: poi)
                                          self.closeRegionMenu()
                                      },
                                      onClose: { [weak self] in
@@ -765,6 +779,14 @@ class GameScene: SKScene {
         }
         regionMenu?.removeFromParent()
         regionMenu = nil
+    }
+
+    @discardableResult
+    private func showEntryTextIfNeeded(for zone: DepthZone) -> Bool {
+        guard let activeRegion,
+              stats.markEntryTextSeen(region: activeRegion, zone: zone) else { return false }
+        ctx.say(EntryTextCatalog.text(for: activeRegion, zone: zone))
+        return true
     }
 
     func transitionToMap(_ region: Region) {
@@ -788,6 +810,29 @@ class GameScene: SKScene {
         let nextScene = GameScene(size: size, regionId: region.id)
         nextScene.scaleMode = scaleMode
         view?.presentScene(nextScene, transition: .crossFade(withDuration: 0.65))
+    }
+
+    func showRegionDiscoveryCue(for region: Region) {
+        let cue = SKShapeNode(circleOfRadius: 260)
+        cue.position = ctx.mermaidPosition
+        cue.fillColor = region.tint.withAlphaComponent(0.18)
+        cue.strokeColor = UIColor.lerp(region.tint, .white, 0.35).withAlphaComponent(0.75)
+        cue.lineWidth = 2
+        cue.glowWidth = 14
+        cue.zPosition = 6
+        worldNode.addChild(cue)
+
+        cue.run(.sequence([
+            .group([
+                .scale(to: 1.75, duration: 1.4),
+                .fadeAlpha(to: 0.15, duration: 1.4)
+            ]),
+            .group([
+                .scale(to: 2.15, duration: 0.8),
+                .fadeOut(withDuration: 0.8)
+            ]),
+            .removeFromParent()
+        ]))
     }
 
     // MARK: - Refúgio das Marés (com portal de verdade)

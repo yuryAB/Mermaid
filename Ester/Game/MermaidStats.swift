@@ -46,11 +46,18 @@ final class MermaidStats: Codable {
     /// Fog of war do mapa de expedição: regionId -> "col,row" -> 0...1.
     var expeditionRevealByRegion: [String: [String: CGFloat]] = [:]
     var discoveredPOIKeys: Set<String> = []
+    var visitedPOIKeys: Set<String> = []
+    var collectedPOIRewardKeys: Set<String> = []
     var inventoryItems: [String: Int] = [:]
     var activeBuffs: [TimedBuff] = []
     var currentRegionId: String = "nascente"
     var mapPositionByRegion: [String: CGPoint] = [:]
     var mapEntryPointByRegion: [String: CGPoint] = [:]
+    var entryTextKeys: Set<String> = []
+    var pendingRegionDiscoveryId: String?
+    var discoveryRouteRegionId: String?
+    var readyRegionDiscoveryId: String?
+    var discoveryPointByRegion: [String: CGPoint] = [:]
     /// Destino de viagem atual (id de região), se houver.
     var destinationRegionId: String?
     var speedUpgradeLevel: Int = 0
@@ -70,8 +77,11 @@ final class MermaidStats: Codable {
         case maxDepthMeters
         case puzzlesSolved, mealsEaten, memories, lastSaved, hatchProgress
         case posX, posY, discoveredRegionIds, regionProgress, expeditionRevealByRegion
-        case discoveredPOIKeys, inventoryItems, activeBuffs, currentRegionId
-        case mapPositionByRegion, mapEntryPointByRegion, destinationRegionId
+        case discoveredPOIKeys, visitedPOIKeys, collectedPOIRewardKeys
+        case inventoryItems, activeBuffs, currentRegionId
+        case mapPositionByRegion, mapEntryPointByRegion, entryTextKeys
+        case pendingRegionDiscoveryId, discoveryRouteRegionId, readyRegionDiscoveryId
+        case discoveryPointByRegion, destinationRegionId
         case speedUpgradeLevel, shellGainUpgradeLevel, feedingUpgradeLevel
         case energyUpgradeLevel, dispositionUpgradeLevel
         case balanceVersion
@@ -113,11 +123,18 @@ final class MermaidStats: Codable {
         regionProgress = try c.decodeIfPresent([String: CGFloat].self, forKey: .regionProgress) ?? [:]
         expeditionRevealByRegion = try c.decodeIfPresent([String: [String: CGFloat]].self, forKey: .expeditionRevealByRegion) ?? [:]
         discoveredPOIKeys = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredPOIKeys) ?? []
+        visitedPOIKeys = try c.decodeIfPresent(Set<String>.self, forKey: .visitedPOIKeys) ?? []
+        collectedPOIRewardKeys = try c.decodeIfPresent(Set<String>.self, forKey: .collectedPOIRewardKeys) ?? []
         inventoryItems = try c.decodeIfPresent([String: Int].self, forKey: .inventoryItems) ?? [:]
         activeBuffs = try c.decodeIfPresent([TimedBuff].self, forKey: .activeBuffs) ?? []
         currentRegionId = try c.decodeIfPresent(String.self, forKey: .currentRegionId) ?? "nascente"
         mapPositionByRegion = try c.decodeIfPresent([String: CGPoint].self, forKey: .mapPositionByRegion) ?? [:]
         mapEntryPointByRegion = try c.decodeIfPresent([String: CGPoint].self, forKey: .mapEntryPointByRegion) ?? [:]
+        entryTextKeys = try c.decodeIfPresent(Set<String>.self, forKey: .entryTextKeys) ?? []
+        pendingRegionDiscoveryId = try c.decodeIfPresent(String.self, forKey: .pendingRegionDiscoveryId)
+        discoveryRouteRegionId = try c.decodeIfPresent(String.self, forKey: .discoveryRouteRegionId)
+        readyRegionDiscoveryId = try c.decodeIfPresent(String.self, forKey: .readyRegionDiscoveryId)
+        discoveryPointByRegion = try c.decodeIfPresent([String: CGPoint].self, forKey: .discoveryPointByRegion) ?? [:]
         destinationRegionId = try c.decodeIfPresent(String.self, forKey: .destinationRegionId)
         speedUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .speedUpgradeLevel) ?? 0
         shellGainUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .shellGainUpgradeLevel) ?? 0
@@ -260,6 +277,64 @@ final class MermaidStats: Codable {
 
     func isPOIDiscovered(_ key: String) -> Bool {
         discoveredPOIKeys.contains(key)
+    }
+
+    func visitPOI(_ key: String) {
+        visitedPOIKeys.insert(key)
+    }
+
+    func isPOIVisited(_ key: String) -> Bool {
+        visitedPOIKeys.contains(key)
+    }
+
+    func collectPOIReward(_ key: String) {
+        collectedPOIRewardKeys.insert(key)
+    }
+
+    func isPOIRewardCollected(_ key: String) -> Bool {
+        collectedPOIRewardKeys.contains(key)
+    }
+
+    func markEntryTextSeen(region: Region, zone: DepthZone) -> Bool {
+        let key = "\(region.id)|\(zone.storageKey)"
+        guard !entryTextKeys.contains(key) else { return false }
+        entryTextKeys.insert(key)
+        return true
+    }
+
+    func ensureBaselineRegionAccess() {
+        discoveredRegionIds.insert("nascente")
+        if phase >= .baby {
+            discoveredRegionIds.insert("jardim_calmo")
+        }
+    }
+
+    func isRegionKnown(_ region: Region) -> Bool {
+        if region.id == "nascente" { return true }
+        if region.id == "jardim_calmo" && phase >= .baby { return true }
+        return discoveredRegionIds.contains(region.id)
+    }
+
+    func hasDiscoveryLead(for region: Region) -> Bool {
+        pendingRegionDiscoveryId == region.id
+            || discoveryRouteRegionId == region.id
+            || readyRegionDiscoveryId == region.id
+    }
+
+    func discoveryPoint(for destination: Region, from currentRegion: Region) -> CGPoint {
+        if let point = discoveryPointByRegion[destination.id] {
+            return point
+        }
+
+        var rng = StableMapRNG(seed: stableMapHash("\(currentRegion.id)|lead|\(destination.id)|\(Int(birthDate.timeIntervalSince1970))"))
+        let xPadding: CGFloat = 720
+        let innerMin = currentRegion.playableXRange.lowerBound + xPadding
+        let innerMax = currentRegion.playableXRange.upperBound - xPadding
+        let xRange = innerMin <= innerMax ? innerMin...innerMax : currentRegion.playableXRange
+        let y = destination.entryZone.midY.clamped(to: DepthSystem.allowedYRange(for: self))
+        let point = CGPoint(x: rng.next(in: xRange), y: y)
+        discoveryPointByRegion[destination.id] = point
+        return point
     }
 
     func addTimedBuff(_ kind: TimedBuffKind, title: String? = nil, duration: TimeInterval) {
@@ -491,7 +566,7 @@ final class MermaidStats: Codable {
             stats.unlock(.clear)
             stats.unlock(.shallow)
             stats.unlock(.mid)
-            stats.discoveredRegionIds.insert("nascente")
+            stats.ensureBaselineRegionAccess()
             if RegionDiscoverySystem.region(withId: stats.currentRegionId) == nil {
                 stats.currentRegionId = "nascente"
             }
@@ -501,9 +576,12 @@ final class MermaidStats: Codable {
                 stats.posY = World.startPosition.y
             }
             stats.applyBalanceMigrationIfNeeded()
+            stats.ensureBaselineRegionAccess()
             return stats
         }
-        return MermaidStats()
+        let stats = MermaidStats()
+        stats.ensureBaselineRegionAccess()
+        return stats
     }
 
     func save() {

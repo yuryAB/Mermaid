@@ -44,12 +44,45 @@ struct Region {
     }
 }
 
+enum EntryTextCatalog {
+    static func text(for region: Region, zone: DepthZone) -> String {
+        if let specific = specificText["\(region.id)|\(zone.storageKey)"] {
+            return specific
+        }
+
+        switch zone {
+        case .surface:
+            return "\(region.name): a luz da superfície abre reflexos novos sobre a água."
+        case .clear:
+            return "\(region.name): águas claras deixam cada movimento parecer uma descoberta."
+        case .shallow:
+            return "\(region.name): a camada rasa pulsa com vida pequena e curiosa."
+        case .mid:
+            return "\(region.name): o azul médio guarda caminhos calmos e ecos distantes."
+        case .blue:
+            return "\(region.name): a água azul pesa um pouco mais, chamando calma tranquila."
+        case .deep:
+            return "\(region.name): a profundidade abafa o mundo e acende sinais frios."
+        case .abyss:
+            return "\(region.name): no abismo, tudo parece respirar devagar."
+        }
+    }
+
+    private static let specificText: [String: String] = [
+        "nascente|shallow": "Águas de Nascimento: conchas pequenas tremem como lembranças novas.",
+        "nascente|mid": "Águas de Nascimento: no azul médio, ela sente o berço ficando maior.",
+        "jardim_calmo|shallow": "Jardim Calmo: folhas macias balançam sem pressa ao redor dela.",
+        "jardim_calmo|mid": "Jardim Calmo: raízes antigas escondem uma calma que parece responder."
+    ]
+}
+
 // MARK: - Descoberta de regiões
 
 final class RegionDiscoverySystem {
     unowned let ctx: GameContext
     private var progressTimer: CGFloat = 0
     private var mapRevealTimer: CGFloat = 0
+    private var leadTimer: CGFloat = 0
 
     private static let catalogOrder = [
         "nascente",
@@ -200,14 +233,12 @@ final class RegionDiscoverySystem {
     func update(dt: CGFloat) {
         guard let region = currentRegion else { return }
 
-        // descoberta permanente
+        ctx.stats.ensureBaselineRegionAccess()
+
+        // Migração defensiva: se a cena atual veio de um save antigo, mantém o mapa conhecido.
         if !ctx.stats.discoveredRegionIds.contains(region.id) {
             ctx.stats.discoveredRegionIds.insert(region.id)
-            let gained = ctx.stats.awardPearls(8)
-            ctx.stats.gainXP(40)
             ctx.stats.addMemory("Descobriu \(region.name)")
-            GameAudio.shared.play(.regionDiscover)
-            ctx.say("Nova região catalogada: \(region.name). Conchas +\(gained)")
         }
 
         // progresso de exploração lento (0–100% em ~20 min na região)
@@ -226,6 +257,13 @@ final class RegionDiscoverySystem {
                 ctx.stats.regionProgress[region.id] = min(1, current + 5.0 / 1200.0 * ctx.stats.explorationProgressMultiplier)
             }
         }
+
+        leadTimer += dt
+        if leadTimer >= 34 {
+            leadTimer = 0
+            maybeRevealRegionLead(source: "exploração", chance: 0.18)
+        }
+        updateDiscoveryRoute(in: region)
     }
 
     /// Tinta da região misturada na cor da água.
@@ -237,6 +275,14 @@ final class RegionDiscoverySystem {
     /// Paleta de peixes característica da região (nil = paleta da camada).
     static func fishPalette(for regionId: String) -> [UIColor]? {
         switch regionId {
+        case "nascente":
+            return [UIColor(red: 0.60, green: 0.82, blue: 0.98, alpha: 1),
+                    UIColor(red: 0.92, green: 0.72, blue: 0.88, alpha: 1),
+                    UIColor(red: 0.78, green: 0.92, blue: 0.96, alpha: 1)]
+        case "jardim_calmo":
+            return [UIColor(red: 0.38, green: 0.82, blue: 0.68, alpha: 1),
+                    UIColor(red: 0.72, green: 0.88, blue: 0.58, alpha: 1),
+                    UIColor(red: 0.58, green: 0.78, blue: 0.78, alpha: 1)]
         case "recife":
             return [UIColor(red: 0.95, green: 0.5, blue: 0.25, alpha: 1),
                     UIColor(red: 0.7, green: 0.4, blue: 0.85, alpha: 1),
@@ -246,6 +292,30 @@ final class RegionDiscoverySystem {
             return [UIColor(red: 0.55, green: 0.5, blue: 0.35, alpha: 1),
                     UIColor(red: 0.65, green: 0.6, blue: 0.45, alpha: 1),
                     UIColor(red: 0.5, green: 0.55, blue: 0.4, alpha: 1)]
+        case "mar_azul_aberto":
+            return [UIColor(red: 0.22, green: 0.48, blue: 0.92, alpha: 1),
+                    UIColor(red: 0.42, green: 0.68, blue: 0.98, alpha: 1),
+                    UIColor(red: 0.82, green: 0.90, blue: 1.0, alpha: 1)]
+        case "cavernas":
+            return [UIColor(red: 0.18, green: 0.38, blue: 0.48, alpha: 1),
+                    UIColor(red: 0.34, green: 0.58, blue: 0.68, alpha: 1),
+                    UIColor(red: 0.52, green: 0.80, blue: 0.86, alpha: 1)]
+        case "campos_cristal":
+            return [UIColor(red: 0.74, green: 0.92, blue: 1.0, alpha: 1),
+                    UIColor(red: 0.54, green: 0.72, blue: 0.98, alpha: 1),
+                    UIColor(red: 0.92, green: 0.96, blue: 1.0, alpha: 1)]
+        case "ruinas":
+            return [UIColor(red: 0.46, green: 0.40, blue: 0.62, alpha: 1),
+                    UIColor(red: 0.62, green: 0.58, blue: 0.74, alpha: 1),
+                    UIColor(red: 0.78, green: 0.72, blue: 0.62, alpha: 1)]
+        case "abismo_vivo":
+            return [UIColor(red: 0.42, green: 0.18, blue: 0.70, alpha: 1),
+                    UIColor(red: 0.16, green: 0.76, blue: 0.86, alpha: 1),
+                    UIColor(red: 0.88, green: 0.32, blue: 0.68, alpha: 1)]
+        case "superficie_distante":
+            return [UIColor(red: 0.84, green: 0.94, blue: 1.0, alpha: 1),
+                    UIColor(red: 1.0, green: 0.86, blue: 0.52, alpha: 1),
+                    UIColor(red: 0.58, green: 0.76, blue: 0.96, alpha: 1)]
         default:
             return nil
         }
@@ -254,9 +324,19 @@ final class RegionDiscoverySystem {
     /// Comidas extras típicas da região.
     static func extraFood(for regionId: String) -> [FoodKind] {
         switch regionId {
+        case "nascente":
+            return [
+                FoodKind(name: "plâncton de berço", weight: 4, nutrition: 12, xp: 3, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.72, green: 0.9, blue: 1.0, alpha: 1)),
+                FoodKind(name: "conchinha morna", weight: 2, nutrition: 8, xp: 4, pearls: 1, courage: 0, style: .pearl, color: UIColor(red: 0.95, green: 0.82, blue: 0.92, alpha: 1))
+            ]
+        case "jardim_calmo":
+            return [
+                FoodKind(name: "folha doce", weight: 4, nutrition: 14, xp: 3, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.46, green: 0.76, blue: 0.48, alpha: 1)),
+                FoodKind(name: "frutinha d'água", weight: 3, nutrition: 18, xp: 4, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.82, green: 0.58, blue: 0.72, alpha: 1))
+            ]
         case "recife":
             return [
-                FoodKind(name: "baga de coral", weight: 3, nutrition: 20, xp: 5, pearls: 0, courage: 0.3, style: .fruit, color: UIColor(red: 0.95, green: 0.35, blue: 0.55, alpha: 1)),
+                FoodKind(name: "baga de coral", weight: 3, nutrition: 20, xp: 5, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.95, green: 0.35, blue: 0.55, alpha: 1)),
                 FoodKind(name: "alga do recife", weight: 3, nutrition: 15, xp: 3, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.95, green: 0.55, blue: 0.65, alpha: 1))
             ]
         case "delta":
@@ -264,9 +344,119 @@ final class RegionDiscoverySystem {
                 FoodKind(name: "semente de rio", weight: 4, nutrition: 16, xp: 4, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.75, green: 0.65, blue: 0.35, alpha: 1)),
                 FoodKind(name: "folha do delta", weight: 3, nutrition: 13, xp: 3, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.5, green: 0.6, blue: 0.3, alpha: 1))
             ]
+        case "mar_azul_aberto":
+            return [
+                FoodKind(name: "sal azul", weight: 2, nutrition: 9, xp: 5, pearls: 1, courage: 0, style: .crystal, color: UIColor(red: 0.34, green: 0.62, blue: 1.0, alpha: 1)),
+                FoodKind(name: "alga de corrente", weight: 3, nutrition: 17, xp: 4, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.22, green: 0.58, blue: 0.72, alpha: 1))
+            ]
+        case "cavernas":
+            return [
+                FoodKind(name: "musgo de pedra", weight: 4, nutrition: 15, xp: 4, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.26, green: 0.52, blue: 0.46, alpha: 1)),
+                FoodKind(name: "gota luminosa", weight: 2, nutrition: 10, xp: 6, pearls: 1, courage: 0, style: .glow, color: UIColor(red: 0.58, green: 0.86, blue: 0.92, alpha: 1))
+            ]
+        case "campos_cristal":
+            return [
+                FoodKind(name: "fruto de cristal", weight: 2, nutrition: 18, xp: 7, pearls: 1, courage: 0, style: .crystal, color: UIColor(red: 0.74, green: 0.9, blue: 1.0, alpha: 1)),
+                FoodKind(name: "plâncton prismático", weight: 3, nutrition: 12, xp: 5, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.86, green: 0.78, blue: 1.0, alpha: 1))
+            ]
+        case "ruinas":
+            return [
+                FoodKind(name: "semente antiga", weight: 3, nutrition: 16, xp: 6, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.62, green: 0.54, blue: 0.36, alpha: 1)),
+                FoodKind(name: "concha gravada", weight: 2, nutrition: 7, xp: 6, pearls: 2, courage: 0, style: .pearl, color: UIColor(red: 0.76, green: 0.70, blue: 0.58, alpha: 1))
+            ]
+        case "abismo_vivo":
+            return [
+                FoodKind(name: "luz abissal", weight: 2, nutrition: 20, xp: 8, pearls: 1, courage: 0, style: .glow, color: UIColor(red: 0.48, green: 0.92, blue: 1.0, alpha: 1)),
+                FoodKind(name: "cristal vivo", weight: 1, nutrition: 22, xp: 9, pearls: 2, courage: 0, style: .crystal, color: UIColor(red: 0.76, green: 0.32, blue: 0.92, alpha: 1))
+            ]
+        case "superficie_distante":
+            return [
+                FoodKind(name: "gota de sol", weight: 2, nutrition: 18, xp: 7, pearls: 1, courage: 0, style: .glow, color: UIColor(red: 1.0, green: 0.86, blue: 0.46, alpha: 1)),
+                FoodKind(name: "fruta flutuante", weight: 3, nutrition: 20, xp: 5, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.92, green: 0.62, blue: 0.48, alpha: 1))
+            ]
         default:
             return []
         }
+    }
+
+    func canSelect(_ region: Region) -> Bool {
+        guard ctx.stats.phase >= region.minPhase else { return false }
+        return ctx.stats.isRegionKnown(region) || ctx.stats.hasDiscoveryLead(for: region)
+    }
+
+    @discardableResult
+    func maybeRevealRegionLead(source: String, chance: CGFloat) -> Bool {
+        guard CGFloat.random(in: 0...1) <= chance else { return false }
+        return revealNextRegionLead(source: source)
+    }
+
+    @discardableResult
+    func revealNextRegionLead(source: String) -> Bool {
+        guard ctx.stats.pendingRegionDiscoveryId == nil,
+              ctx.stats.discoveryRouteRegionId == nil,
+              ctx.stats.readyRegionDiscoveryId == nil,
+              let current = currentRegion,
+              let destination = nextDiscoverableRegion() else { return false }
+
+        let point = ctx.stats.discoveryPoint(for: destination, from: current)
+        ctx.stats.pendingRegionDiscoveryId = destination.id
+        ctx.stats.revealExpeditionMap(in: current, near: point)
+        ctx.stats.addMemory("Encontrou pista para \(destination.name)")
+        GameAudio.shared.play(.regionDiscover)
+        ctx.say("Um fragmento de corrente aponta para \(destination.name). Abra o mapa para seguir a pista.")
+        return true
+    }
+
+    @discardableResult
+    func startDiscoveryRoute(to region: Region) -> Bool {
+        guard let current = currentRegion,
+              ctx.stats.pendingRegionDiscoveryId == region.id
+                || ctx.stats.discoveryRouteRegionId == region.id else { return false }
+        let point = ctx.stats.discoveryPoint(for: region, from: current)
+        guard ctx.autonomy.requestPointFromTouch(point) else { return false }
+        ctx.stats.pendingRegionDiscoveryId = nil
+        ctx.stats.discoveryRouteRegionId = region.id
+        ctx.stats.revealExpeditionMap(in: current, near: point)
+        ctx.say("Ela aceitou seguir a pista até a borda de \(region.name).")
+        return true
+    }
+
+    @discardableResult
+    func completeDiscovery(for region: Region) -> Bool {
+        guard ctx.stats.readyRegionDiscoveryId == region.id else { return false }
+        ctx.stats.readyRegionDiscoveryId = nil
+        ctx.stats.pendingRegionDiscoveryId = nil
+        ctx.stats.discoveryRouteRegionId = nil
+        ctx.stats.discoveredRegionIds.insert(region.id)
+        ctx.stats.discoveryPointByRegion[region.id] = nil
+        ctx.stats.gainXP(40)
+        let gained = ctx.stats.awardPearls(4)
+        ctx.stats.addMemory("Confirmou rota para \(region.name)")
+        GameAudio.shared.play(.regionDiscover)
+        ctx.say("Rota aberta: \(region.name). Conchas +\(gained)")
+        return true
+    }
+
+    private func nextDiscoverableRegion() -> Region? {
+        RegionDiscoverySystem.menuRegions
+            .filter { region in
+                region.isAccessible(for: ctx.stats.phase)
+                    && !ctx.stats.isRegionKnown(region)
+                    && !ctx.stats.hasDiscoveryLead(for: region)
+            }
+            .randomElement()
+    }
+
+    private func updateDiscoveryRoute(in current: Region) {
+        guard let id = ctx.stats.discoveryRouteRegionId,
+              let destination = RegionDiscoverySystem.region(withId: id) else { return }
+        let point = ctx.stats.discoveryPoint(for: destination, from: current)
+        ctx.stats.revealExpeditionMap(in: current, near: point)
+        guard ctx.mermaidPosition.distance(to: point) < 180 else { return }
+        ctx.stats.discoveryRouteRegionId = nil
+        ctx.stats.readyRegionDiscoveryId = id
+        ctx.scene?.showRegionDiscoveryCue(for: destination)
+        ctx.say("A água mudou de cor. \(destination.name) está logo além; confirme no mapa.")
     }
 }
 
@@ -300,6 +490,17 @@ final class TravelSystem {
         if ctx.stats.phase < region.minPhase {
             ctx.say("Disponível quando ela for \(region.minPhase.mapAccessDisplayName).")
             return
+        }
+        if !ctx.stats.isRegionKnown(region) {
+            if ctx.stats.readyRegionDiscoveryId == region.id {
+                guard ctx.regions.completeDiscovery(for: region) else { return }
+            } else if ctx.stats.hasDiscoveryLead(for: region) {
+                _ = ctx.regions.startDiscoveryRoute(to: region)
+                return
+            } else {
+                ctx.say("Ela ainda precisa encontrar uma pista para \(region.name).")
+                return
+            }
         }
         if ctx.stats.energy < 15 {
             ctx.say("Cansada demais para uma viagem longa... ela precisa descansar.")
@@ -364,6 +565,25 @@ enum WorldPOICatalog {
     }
 
     static func pois(in region: Region, zone: DepthZone, stats: MermaidStats) -> [WorldPOI] {
+        let definitions = configuredDefinitions.filter { $0.mapId == region.id && $0.zone == zone.storageKey }
+        if !definitions.isEmpty {
+            return definitions.enumerated().map { index, definition in
+                let position = configuredPosition(for: definition,
+                                                  index: index,
+                                                  totalCount: definitions.count,
+                                                  region: region,
+                                                  zone: zone,
+                                                  stats: stats)
+                return WorldPOI(key: definition.poiId,
+                                regionId: region.id,
+                                zone: zone,
+                                kind: definition.kind,
+                                name: definition.name,
+                                position: position,
+                                reward: definition.reward)
+            }
+        }
+
         let seedBase = "\(region.id)|\(zone.storageKey)|\(Int(stats.birthDate.timeIntervalSince1970))"
         var rng = StableRNG(seed: stableHash(seedBase))
         return (0..<2).map { index in
@@ -389,6 +609,49 @@ enum WorldPOICatalog {
                             position: position,
                             reward: reward(for: kind, region: region, zone: zone))
         }
+    }
+
+    private struct POIDefinition: Decodable {
+        let poiId: String
+        let mapId: String
+        let zone: String
+        let kind: WorldPOIKind
+        let name: String
+        let reward: Reward
+    }
+
+    private static let configuredDefinitions: [POIDefinition] = {
+        let url = Bundle.main.url(forResource: "WorldPOIs", withExtension: "json")
+            ?? Bundle.main.url(forResource: "WorldPOIs", withExtension: "json", subdirectory: "GameData")
+        guard let url,
+              let data = try? Data(contentsOf: url),
+              let definitions = try? JSONDecoder().decode([POIDefinition].self, from: data) else {
+            return []
+        }
+        return definitions
+    }()
+
+    private static func configuredPosition(for definition: POIDefinition,
+                                           index: Int,
+                                           totalCount: Int,
+                                           region: Region,
+                                           zone: DepthZone,
+                                           stats: MermaidStats) -> CGPoint {
+        let seedBase = "\(definition.poiId)|\(region.id)|\(zone.storageKey)|\(Int(stats.birthDate.timeIntervalSince1970))"
+        var rng = StableRNG(seed: stableHash(seedBase))
+        let xPadding: CGFloat = 520
+        let innerXMin = region.playableXRange.lowerBound + xPadding
+        let innerXMax = region.playableXRange.upperBound - xPadding
+        let xRange = innerXMin <= innerXMax ? innerXMin...innerXMax : region.playableXRange
+        let yPadding: CGFloat = zone == .surface ? 24 : 220
+        let innerYMin = zone.yRange.lowerBound + yPadding
+        let innerYMax = zone.yRange.upperBound - yPadding
+        let yRange = innerYMin <= innerYMax ? innerYMin...innerYMax : zone.yRange
+        let lane = CGFloat(index + 1) / CGFloat(max(2, totalCount + 1))
+        let jitterRange: ClosedRange<CGFloat> = -220...220
+        let x = (xRange.lowerBound + (xRange.upperBound - xRange.lowerBound) * lane
+                 + rng.next(in: jitterRange)).clamped(to: xRange)
+        return CGPoint(x: x, y: rng.next(in: yRange))
     }
 
     private static func name(for kind: WorldPOIKind, region: Region, zone: DepthZone) -> String {
@@ -452,6 +715,7 @@ final class POISystem {
     private var scanTimer: CGFloat = 0
     private var exploreFocusLevel = 0
     private var focusUntil: Date?
+    private var pendingInteraction: WorldPOI?
 
     init(ctx: GameContext) {
         self.ctx = ctx
@@ -467,6 +731,7 @@ final class POISystem {
         guard scanTimer >= 1 else { return }
         scanTimer = 0
         discoverNearbyPOIs()
+        completePendingInteractionIfReached()
     }
 
     func explorationTargetAfterCommand() -> CGPoint? {
@@ -474,6 +739,18 @@ final class POISystem {
         focusUntil = Date().addingTimeInterval(45)
         guard exploreFocusLevel >= 2 else { return nil }
         return nearestUndiscoveredPOI()?.position
+    }
+
+    @discardableResult
+    func requestReturn(to poi: WorldPOI) -> Bool {
+        guard ctx.stats.isPOIDiscovered(poi.key) else {
+            ctx.say("Ela só vê uma silhueta no mapa. Precisa chegar mais perto primeiro.")
+            return false
+        }
+        guard ctx.autonomy.requestPointFromTouch(poi.position) else { return false }
+        pendingInteraction = poi
+        ctx.say("Ela vai tentar voltar a \(poi.name).")
+        return true
     }
 
     private func discoverNearbyPOIs() {
@@ -487,13 +764,30 @@ final class POISystem {
             guard poi.position.distance(to: ctx.mermaidPosition) <= radius else { continue }
             ctx.stats.discoverPOI(poi.key)
             ctx.stats.revealExpeditionMap(in: region, near: poi.position)
-            ctx.stats.gainXP(18)
-            ctx.stats.boostMood(7)
-            let rewardText = ctx.rewards.grant(poi.reward, source: poi.name)
             ctx.stats.addMemory("Descobriu \(poi.name)")
-            ctx.say("Descobriu \(poi.name)! \(rewardText)")
+            ctx.say("Descobriu \(poi.name)! Ficou marcado no mapa.")
             return
         }
+    }
+
+    private func completePendingInteractionIfReached() {
+        guard let poi = pendingInteraction,
+              ctx.regions.currentRegion?.id == poi.regionId,
+              ctx.mermaidPosition.distance(to: poi.position) < 150 else { return }
+        pendingInteraction = nil
+        ctx.stats.visitPOI(poi.key)
+        ctx.stats.revealExpeditionMap(in: ctx.activeRegion, near: poi.position)
+
+        if ctx.stats.isPOIRewardCollected(poi.key) {
+            ctx.say("Ela voltou a \(poi.name) e ficou um pouco por ali.")
+            return
+        }
+
+        ctx.stats.collectPOIReward(poi.key)
+        let rewardText = ctx.rewards.grant(poi.reward, source: poi.name)
+        ctx.stats.addMemory("Interagiu com \(poi.name)")
+        _ = ctx.regions.maybeRevealRegionLead(source: "POI", chance: 0.35)
+        ctx.say("Ela interagiu com \(poi.name)! \(rewardText)")
     }
 
     private func nearestUndiscoveredPOI() -> WorldPOI? {
@@ -658,7 +952,7 @@ final class ExpeditionMapNode: SKNode {
             node.addChild(marker)
 
             if discovered {
-                let label = SKLabelNode(text: poi.kind.displayName)
+                let label = SKLabelNode(text: poi.name)
                 label.fontName = "AvenirNext-DemiBold"
                 label.fontSize = 7.5
                 label.fontColor = UIColor.white.withAlphaComponent(0.82)
@@ -835,13 +1129,19 @@ final class RegionMenuOverlay: SKNode {
 
         for (index, region) in regions.enumerated() {
             let y = listViewportHeight / 2 - rowCardHeight / 2 - CGFloat(index) * rowStep
-            let isLocked = !region.isAccessible(for: stats.phase)
+            let phaseLocked = !region.isAccessible(for: stats.phase)
+            let isKnown = stats.isRegionKnown(region)
+            let hasLead = stats.hasDiscoveryLead(for: region)
+            let isLocked = phaseLocked || (!isKnown && !hasLead)
             let isCurrent = region.id == currentRegionId
             let isDestination = region.id == destinationId
+            let isReadyDiscovery = stats.readyRegionDiscoveryId == region.id
+            let isFollowingLead = stats.discoveryRouteRegionId == region.id
+            let isPendingLead = stats.pendingRegionDiscoveryId == region.id
 
             let rowTint = isDestination
                 ? UIColor(red: 0.5, green: 0.85, blue: 1, alpha: 1)
-                : (isLocked ? UIColor(white: 0.45, alpha: 1) : region.tint)
+                : (isLocked ? UIColor(white: 0.45, alpha: 1) : (hasLead ? GameUI.gold : region.tint))
             let row = GameUI.card(size: CGSize(width: listWidth, height: rowCardHeight),
                                   cornerRadius: 16,
                                   tint: rowTint.withAlphaComponent(isCurrent ? 0.9 : 0.6),
@@ -879,15 +1179,19 @@ final class RegionMenuOverlay: SKNode {
 
             let progress = Int((stats.regionProgress[region.id] ?? 0) * 100)
             let statusText: String
-            if isLocked { statusText = "Disponível quando ela for \(region.minPhase.mapAccessDisplayName)" }
+            if phaseLocked { statusText = "Disponível quando ela for \(region.minPhase.mapAccessDisplayName)" }
             else if isCurrent { statusText = "local atual" }
+            else if isReadyDiscovery { statusText = "confirmar descoberta" }
+            else if isFollowingLead { statusText = "seguindo a pista" }
+            else if isPendingLead { statusText = "pista encontrada" }
+            else if isLocked { statusText = "descubra uma pista explorando" }
             else if isDestination { statusText = "em rota" }
-            else if stats.discoveredRegionIds.contains(region.id) { statusText = "explorada \(progress)%" }
+            else if isKnown { statusText = "explorada \(progress)%" }
             else { statusText = "ainda não visitado" }
             let status = SKLabelNode(text: statusText)
             status.fontName = "AvenirNext-DemiBold"
             status.fontSize = 11
-            status.fontColor = isLocked ? GameUI.mutedInk : (isDestination ? GameUI.gold : GameUI.accent)
+            status.fontColor = isLocked ? GameUI.mutedInk : (hasLead || isDestination ? GameUI.gold : GameUI.accent)
             status.horizontalAlignmentMode = .left
             status.position = CGPoint(x: leftX, y: -28)
             rowContent.addChild(status)

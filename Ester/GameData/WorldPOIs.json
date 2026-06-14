@@ -1,0 +1,194 @@
+[
+  {
+    "poiId": "nascente_shallow_abandoned_egg_nest",
+    "mapId": "nascente",
+    "zone": "shallow",
+    "kind": "story",
+    "name": "Ninho de ovos abandonados",
+    "reward": {
+      "kind": "story",
+      "title": "Memória",
+      "pearlAmount": 0,
+      "itemId": null,
+      "buffKind": null,
+      "duration": 0,
+      "storyText": "Ela reconheceu algo familiar e guardou uma lembrança da própria origem."
+    }
+  },
+  {
+    "poiId": "nascente_shallow_baby_fish_school",
+    "mapId": "nascente",
+    "zone": "shallow",
+    "kind": "pet",
+    "name": "Cardume de peixinhos bebês",
+    "reward": {
+      "kind": "temporaryPet",
+      "title": "cardume pequeno",
+      "pearlAmount": 0,
+      "itemId": null,
+      "buffKind": null,
+      "duration": 2400,
+      "storyText": null
+    }
+  },
+  {
+    "poiId": "nascente_shallow_music_shell",
+    "mapId": "nascente",
+    "zone": "shallow",
+    "kind": "minigame",
+    "name": "Concha gigante com música",
+    "reward": {
+      "kind": "temporaryEffect",
+      "title": "Nado veloz",
+      "pearlAmount": 0,
+      "itemId": null,
+      "buffKind": "swiftCurrent",
+      "duration": 1200,
+      "storyText": null
+    }
+  },
+  {
+    "poiId": "nascente_mid_small_shipwreck",
+    "mapId": "nascente",
+    "zone": "mid",
+    "kind": "shipwreck",
+    "name": "Barco naufragado pequeno",
+    "reward": {
+      "kind": "item",
+      "title": "brilho de naufrágio",
+      "pearlAmount": 0,
+      "itemId": "brilho_de_naufragio",
+      "buffKind": null,
+      "duration": 0,
+      "storyText": null
+    }
+  },
+  {
+    "poiId": "nascente_mid_old_turtle",
+    "mapId": "nascente",
+    "zone": "mid",
+    "kind": "npc",
+    "name": "Tartaruga velha",
+    "reward": {
+      "kind": "story",
+      "title": "Memória",
+      "pearlAmount": 0,
+      "itemId": null,
+      "buffKind": null,
+      "duration": 0,
+      "storyText": "A tartaruga contou que correntes antigas ligam todos os mapas."
+    }
+  },
+  {
+    "poiId": "nascente_mid_warm_current",
+    "mapId": "nascente",
+    "zone": "mid",
+    "kind": "story",
+    "name": "Corrente quente",
+    "reward": {
+      "kind": "temporaryEffect",
+      "title": "Aceitação serena",
+      "pearlAmount": 0,
+      "itemId": null,
+      "buffKind": "eagerCompanion",
+      "duration": 1800,
+      "storyText": null
+    }
+  },
+  {
+    "poiId": "jardim_calmo_shallow_touch_plant",
+    "mapId": "jardim_calmo",
+    "zone": "shallow",
+    "kind": "minigame",
+    "name": "Planta que reage ao toque",
+    "reward": {
+      "kind": "temporaryEffect",
+      "title": "Sem fome",
+      "pearlAmount": 0,
+      "itemId": null,
+      "buffKind": "fullBelly",
+      "duration": 1200,
+      "storyText": null
+    }
+  },
+  {
+    "poiId": "jardim_calmo_shallow_color_fish",
+    "mapId": "jardim_calmo",
+    "zone": "shallow",
+    "kind": "npc",
+    "name": "Peixe colorido",
+    "reward": {
+      "kind": "item",
+      "title": "escama colorida",
+      "pearlAmount": 0,
+      "itemId": "escama_colorida",
+      "buffKind": null,
+      "duration": 0,
+      "storyText": null
+    }
+  },
+  {
+    "poiId": "jardim_calmo_shallow_bubble_cloud",
+    "mapId": "jardim_calmo",
+    "zone": "shallow",
+    "kind": "story",
+    "name": "Nuvem de bolhas subindo",
+    "reward": {
+      "kind": "pearls",
+      "title": "Conchas",
+      "pearlAmount": 3,
+      "itemId": null,
+      "buffKind": null,
+      "duration": 0,
+      "storyText": null
+    }
+  },
+  {
+    "poiId": "jardim_calmo_mid_algae_ruin",
+    "mapId": "jardim_calmo",
+    "zone": "mid",
+    "kind": "story",
+    "name": "Ruína coberta de algas",
+    "reward": {
+      "kind": "story",
+      "title": "Memória",
+      "pearlAmount": 0,
+      "itemId": null,
+      "buffKind": null,
+      "duration": 0,
+      "storyText": "As algas deixam ver símbolos que apontam para mapas de fases futuras."
+    }
+  },
+  {
+    "poiId": "jardim_calmo_mid_hidden_baby_octopus",
+    "mapId": "jardim_calmo",
+    "zone": "mid",
+    "kind": "pet",
+    "name": "Polvo bebê escondido",
+    "reward": {
+      "kind": "temporaryPet",
+      "title": "polvo bebê",
+      "pearlAmount": 0,
+      "itemId": null,
+      "buffKind": null,
+      "duration": 3600,
+      "storyText": null
+    }
+  },
+  {
+    "poiId": "jardim_calmo_mid_sleeping_elder",
+    "mapId": "jardim_calmo",
+    "zone": "mid",
+    "kind": "npc",
+    "name": "Sereia anciã dormindo",
+    "reward": {
+      "kind": "story",
+      "title": "Memória",
+      "pearlAmount": 0,
+      "itemId": null,
+      "buffKind": null,
+      "duration": 0,
+      "storyText": "A anciã sonolenta murmurou nomes de águas que Ester ainda não conhece."
+    }
+  }
+]
