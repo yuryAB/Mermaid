@@ -1092,7 +1092,7 @@ final class ExpeditionMapNode: SKNode {
         guard let position, region.contains(position) else { return }
         let point = mapPoint(for: position, in: region)
 
-        let pulse = SKShapeNode(circleOfRadius: 12)
+        let pulse = SKShapeNode(circleOfRadius: 14)
         pulse.position = point
         pulse.fillColor = GameUI.gold.withAlphaComponent(0.12)
         pulse.strokeColor = GameUI.gold.withAlphaComponent(0.34)
@@ -1100,33 +1100,60 @@ final class ExpeditionMapNode: SKNode {
         pulse.zPosition = 18
         addChild(pulse)
 
-        let ring = SKShapeNode(circleOfRadius: 6.4)
-        ring.position = point
-        ring.fillColor = UIColor(red: 0.03, green: 0.09, blue: 0.12, alpha: 0.94)
-        ring.strokeColor = UIColor.white.withAlphaComponent(0.82)
-        ring.lineWidth = 1.1
-        ring.glowWidth = 1.2
-        ring.zPosition = 19
-        addChild(ring)
+        let pinPath = UIBezierPath()
+        pinPath.move(to: CGPoint(x: 0, y: -14))
+        pinPath.addCurve(to: CGPoint(x: -8.2, y: -1.5),
+                         controlPoint1: CGPoint(x: -5.6, y: -8.8),
+                         controlPoint2: CGPoint(x: -8.2, y: -5.4))
+        pinPath.addCurve(to: CGPoint(x: 0, y: 9.2),
+                         controlPoint1: CGPoint(x: -8.2, y: 5.2),
+                         controlPoint2: CGPoint(x: -4.3, y: 9.2))
+        pinPath.addCurve(to: CGPoint(x: 8.2, y: -1.5),
+                         controlPoint1: CGPoint(x: 4.3, y: 9.2),
+                         controlPoint2: CGPoint(x: 8.2, y: 5.2))
+        pinPath.addCurve(to: CGPoint(x: 0, y: -14),
+                         controlPoint1: CGPoint(x: 8.2, y: -5.4),
+                         controlPoint2: CGPoint(x: 5.6, y: -8.8))
+        pinPath.close()
+        let pin = SKShapeNode(path: pinPath.cgPath)
+        pin.position = point
+        pin.fillColor = UIColor(red: 0.03, green: 0.09, blue: 0.12, alpha: 0.96)
+        pin.strokeColor = UIColor.white.withAlphaComponent(0.82)
+        pin.lineWidth = 1.0
+        pin.glowWidth = 1.2
+        pin.zPosition = 19
+        addChild(pin)
 
-        let dot = SKShapeNode(circleOfRadius: 3.2)
-        dot.position = pulse.position
-        dot.fillColor = GameUI.gold
-        dot.strokeColor = .clear
-        dot.zPosition = 20
-        addChild(dot)
+        let head = SKShapeNode(circleOfRadius: 2.4)
+        head.position = CGPoint(x: point.x, y: point.y + 3.8)
+        head.fillColor = GameUI.gold
+        head.strokeColor = .clear
+        head.zPosition = 20
+        addChild(head)
 
-        let pointerPath = UIBezierPath()
-        pointerPath.move(to: CGPoint(x: 0, y: 8.5))
-        pointerPath.addLine(to: CGPoint(x: 3.4, y: 1.5))
-        pointerPath.addLine(to: CGPoint(x: -3.4, y: 1.5))
-        pointerPath.close()
-        let pointer = SKShapeNode(path: pointerPath.cgPath)
-        pointer.position = point
-        pointer.fillColor = GameUI.gold
-        pointer.strokeColor = .clear
-        pointer.zPosition = 21
-        addChild(pointer)
+        let tailPath = UIBezierPath()
+        tailPath.move(to: CGPoint(x: 0, y: 1.6))
+        tailPath.addCurve(to: CGPoint(x: -2.4, y: -4.8),
+                          controlPoint1: CGPoint(x: -1.7, y: -0.6),
+                          controlPoint2: CGPoint(x: -2.2, y: -2.8))
+        tailPath.addLine(to: CGPoint(x: -6.0, y: -7.6))
+        tailPath.addCurve(to: CGPoint(x: 0, y: -6.0),
+                          controlPoint1: CGPoint(x: -3.6, y: -8.2),
+                          controlPoint2: CGPoint(x: -1.6, y: -7.4))
+        tailPath.addCurve(to: CGPoint(x: 6.0, y: -7.6),
+                          controlPoint1: CGPoint(x: 1.6, y: -7.4),
+                          controlPoint2: CGPoint(x: 3.6, y: -8.2))
+        tailPath.addLine(to: CGPoint(x: 2.4, y: -4.8))
+        tailPath.addCurve(to: CGPoint(x: 0, y: 1.6),
+                          controlPoint1: CGPoint(x: 2.2, y: -2.8),
+                          controlPoint2: CGPoint(x: 1.7, y: -0.6))
+        tailPath.close()
+        let tail = SKShapeNode(path: tailPath.cgPath)
+        tail.position = point
+        tail.fillColor = GameUI.gold
+        tail.strokeColor = .clear
+        tail.zPosition = 20
+        addChild(tail)
     }
 
     private func drawPOIs(stats: MermaidStats, region: Region) {
@@ -1482,17 +1509,13 @@ final class RegionMenuOverlay: SKNode {
         legend.position = CGPoint(x: 0, y: legendY)
         panelContent.addChild(legend)
 
-        panelContent.addChild(legendItem(text: "Ester",
-                                         color: GameUI.gold,
-                                         x: -listWidth / 2 + 22,
-                                         y: legendY))
         panelContent.addChild(legendItem(text: "POI",
                                          color: GameUI.accent,
-                                         x: -listWidth / 2 + 90,
+                                         x: -listWidth / 2 + 26,
                                          y: legendY))
         panelContent.addChild(legendItem(text: "silhueta",
                                          color: GameUI.mutedInk,
-                                         x: -listWidth / 2 + 150,
+                                         x: -listWidth / 2 + 86,
                                          y: legendY,
                                          hollow: true))
 
@@ -1549,7 +1572,7 @@ final class RegionMenuOverlay: SKNode {
                 rowTint = GameUI.gold
                 badgeText = "ATUAL"
                 badgeColor = GameUI.gold
-                actionText = "Ester está aqui"
+                actionText = "mapa atual"
             } else if isDestination {
                 rowTint = UIColor(red: 0.44, green: 0.78, blue: 1, alpha: 1)
                 badgeText = "EM ROTA"
