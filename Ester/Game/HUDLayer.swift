@@ -45,6 +45,8 @@ final class HUDLayer: SKNode {
     private var messageContainer: SKNode!
     private var messageTitleLabel: SKLabelNode!
     private var messageLabel: SKLabelNode!
+    private var activeEffectsShelf: SKNode!
+    private var activeEffectsSignature = ""
     private var touchCooldownChip: SKNode!
     private var touchCooldownLabel: SKLabelNode!
     private var eggModeFocusActive = false
@@ -73,6 +75,7 @@ final class HUDLayer: SKNode {
         HUDTypography.registerBundledFonts()
         isUserInteractionEnabled = true
         buildTopPanel()
+        buildActiveEffectsShelf()
         buildMessageBubble()
         buildIntentChip()
         buildBondRecoveryBanner()
@@ -437,6 +440,145 @@ final class HUDLayer: SKNode {
         }
     }
 
+    private func buildActiveEffectsShelf() {
+        activeEffectsShelf = SKNode()
+        activeEffectsShelf.position = CGPoint(x: 0, y: topPanelBottomY - 24)
+        activeEffectsShelf.zPosition = 8
+        activeEffectsShelf.alpha = 0
+        activeEffectsShelf.isHidden = true
+        addChild(activeEffectsShelf)
+    }
+
+    private func updateActiveEffects(_ buffs: [TimedBuff]) {
+        let active = buffs
+            .filter { $0.expiresAt > Date() }
+            .sorted { $0.expiresAt < $1.expiresAt }
+        let visibleBuffs = Array(active.prefix(3))
+        let signature = visibleBuffs
+            .map { "\($0.kind.rawValue)|\(Int(ceil($0.remaining)))|\(Int($0.duration))" }
+            .joined(separator: ";")
+        guard signature != activeEffectsSignature else { return }
+        activeEffectsSignature = signature
+        activeEffectsShelf.removeAllChildren()
+
+        guard !active.isEmpty else {
+            activeEffectsShelf.isHidden = true
+            activeEffectsShelf.alpha = 0
+            return
+        }
+
+        let gap: CGFloat = 6
+        let shelfWidth = min(sceneSize.width - 44, 360)
+        let chipWidth = (shelfWidth - gap * CGFloat(visibleBuffs.count - 1)) / CGFloat(visibleBuffs.count)
+        let startX = -shelfWidth / 2 + chipWidth / 2
+
+        for (index, buff) in visibleBuffs.enumerated() {
+            let chip = makeEffectChip(buff: buff, size: CGSize(width: chipWidth, height: 30))
+            chip.position = CGPoint(x: startX + CGFloat(index) * (chipWidth + gap), y: 0)
+            activeEffectsShelf.addChild(chip)
+        }
+
+        activeEffectsShelf.isHidden = false
+        activeEffectsShelf.removeAllActions()
+        activeEffectsShelf.run(.fadeAlpha(to: 1, duration: 0.12))
+    }
+
+    private func makeEffectChip(buff: TimedBuff, size: CGSize) -> SKNode {
+        let accent = effectTint(for: buff.kind)
+        let node = HUDLayer.paperCard(size: size,
+                                      cornerRadius: 8,
+                                      fill: HUDPalette.palePaper,
+                                      stroke: accent.withAlphaComponent(0.62),
+                                      shadowAlpha: 0.10)
+
+        let mark = SKShapeNode(circleOfRadius: 8)
+        mark.fillColor = accent.withAlphaComponent(0.18)
+        mark.strokeColor = accent.withAlphaComponent(0.70)
+        mark.lineWidth = 0.8
+        mark.position = CGPoint(x: -size.width / 2 + 16, y: 5)
+        mark.zPosition = 4
+        node.addChild(mark)
+
+        let glyph = makeLabel(text: effectGlyph(for: buff.kind),
+                              fontSize: 8.5,
+                              style: .bodyBold,
+                              color: accent)
+        glyph.horizontalAlignmentMode = .center
+        glyph.verticalAlignmentMode = .center
+        glyph.position = mark.position
+        glyph.zPosition = 5
+        node.addChild(glyph)
+
+        let title = makeLabel(text: buff.title,
+                              fontSize: size.width < 118 ? 8.6 : 9.4,
+                              style: .bodyBold,
+                              color: HUDPalette.ink)
+        title.horizontalAlignmentMode = .left
+        title.verticalAlignmentMode = .center
+        title.preferredMaxLayoutWidth = size.width - 66
+        title.numberOfLines = 1
+        title.lineBreakMode = .byTruncatingTail
+        title.position = CGPoint(x: -size.width / 2 + 30, y: 7)
+        title.zPosition = 5
+        node.addChild(title)
+
+        let time = makeLabel(text: effectRemainingText(buff.remaining),
+                             fontSize: 8.2,
+                             style: .bodyBold,
+                             color: HUDPalette.mutedInk)
+        time.horizontalAlignmentMode = .right
+        time.verticalAlignmentMode = .center
+        time.position = CGPoint(x: size.width / 2 - 9, y: 7)
+        time.zPosition = 5
+        node.addChild(time)
+
+        let barWidth = max(28, size.width - 38)
+        let track = SKShapeNode(rect: CGRect(x: -barWidth / 2, y: -9, width: barWidth, height: 4),
+                                cornerRadius: 2)
+        track.fillColor = HUDPalette.line.withAlphaComponent(0.16)
+        track.strokeColor = .clear
+        track.zPosition = 4
+        node.addChild(track)
+
+        let fillWidth = max(2, barWidth * buff.remainingFraction)
+        let fill = SKShapeNode(rect: CGRect(x: -barWidth / 2, y: -9, width: fillWidth, height: 4),
+                               cornerRadius: 2)
+        fill.fillColor = accent.withAlphaComponent(0.78)
+        fill.strokeColor = .clear
+        fill.zPosition = 5
+        node.addChild(fill)
+
+        return node
+    }
+
+    private func effectTint(for kind: TimedBuffKind) -> UIColor {
+        switch kind {
+        case .fullBelly: return HUDPalette.algae
+        case .eagerCompanion: return HUDPalette.gold
+        case .swiftCurrent: return HUDPalette.energy
+        case .temporaryPet: return HUDPalette.coral
+        }
+    }
+
+    private func effectGlyph(for kind: TimedBuffKind) -> String {
+        switch kind {
+        case .fullBelly: return "F"
+        case .eagerCompanion: return "P"
+        case .swiftCurrent: return "N"
+        case .temporaryPet: return "C"
+        }
+    }
+
+    private func effectRemainingText(_ remaining: TimeInterval) -> String {
+        if remaining >= 3600 {
+            return "\(Int(ceil(remaining / 3600)))h"
+        }
+        if remaining >= 90 {
+            return "\(Int(ceil(remaining / 60)))m"
+        }
+        return "\(max(0, Int(ceil(remaining))))s"
+    }
+
     private func fitLabelToWidth(_ label: SKLabelNode,
                                  maxWidth: CGFloat,
                                  baseSize: CGFloat,
@@ -495,7 +637,7 @@ final class HUDLayer: SKNode {
 
     private func buildMessageBubble() {
         messageContainer = SKNode()
-        messageContainer.position = CGPoint(x: -10, y: topPanelBottomY - 44)
+        messageContainer.position = CGPoint(x: -10, y: topPanelBottomY - 76)
         messageContainer.alpha = 0
         messageContainer.zPosition = 6
         messageContainer.zRotation = -0.018
@@ -573,6 +715,9 @@ final class HUDLayer: SKNode {
             body = cleanFieldText(rawText)
         } else if lower.contains("camada") || lower.contains("profund") {
             title = "Camada observada"
+            body = cleanFieldText(rawText)
+        } else if lower.contains("efeito ativo") || lower.contains("efeito temporário") {
+            title = "Efeito temporário"
             body = cleanFieldText(rawText)
         } else if lower.contains("fome") || lower.contains("faminta") || lower.contains("comer") {
             title = "Sinais biológicos"
@@ -1022,14 +1167,22 @@ final class HUDLayer: SKNode {
         setBar("energy", value: stats.energy / 100)
         setBar("mood", value: stats.disposition / 100)
         setBar("bond", value: eggMode ? evolutionProgress : stats.trust / 100)
+        barLabels["hunger"]?.text = stats.hasActiveBuff(.fullBelly) ? "Fome pausada" : "Alimentação"
         updateEggModeChrome(enabled: eggMode)
+        updateActiveEffects(stats.activeBuffs)
         updateTouchCooldown(remaining: touchCooldownRemaining)
         updateBondRecoveryBanner(state: bondRecoveryState)
 
         if let hunger = bars["hunger"] {
-            hunger.fillColor = nourishment < 0.28
-                ? HUDPalette.coral.withAlphaComponent(0.86)
-                : HUDPalette.algae.withAlphaComponent(0.70)
+            let hungerTint: UIColor
+            if stats.hasActiveBuff(.fullBelly) {
+                hungerTint = HUDPalette.gold.withAlphaComponent(0.82)
+            } else if nourishment < 0.28 {
+                hungerTint = HUDPalette.coral.withAlphaComponent(0.86)
+            } else {
+                hungerTint = HUDPalette.algae.withAlphaComponent(0.70)
+            }
+            hunger.fillColor = hungerTint
         }
 
         if let energy = bars["energy"] {

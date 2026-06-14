@@ -434,7 +434,51 @@ enum TimedBuffKind: String, Codable {
 struct TimedBuff: Codable {
     let kind: TimedBuffKind
     let title: String
+    let startedAt: Date
+    let duration: TimeInterval
     let expiresAt: Date
+
+    init(kind: TimedBuffKind,
+         title: String,
+         duration: TimeInterval,
+         startedAt: Date = Date()) {
+        self.kind = kind
+        self.title = title
+        self.startedAt = startedAt
+        self.duration = max(1, duration)
+        self.expiresAt = startedAt.addingTimeInterval(max(1, duration))
+    }
+
+    var remaining: TimeInterval {
+        max(0, expiresAt.timeIntervalSince(Date()))
+    }
+
+    var remainingFraction: CGFloat {
+        CGFloat(remaining / max(1, duration)).clamped(to: 0...1)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case kind, title, startedAt, duration, expiresAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        kind = try c.decode(TimedBuffKind.self, forKey: .kind)
+        title = try c.decode(String.self, forKey: .title)
+        expiresAt = try c.decode(Date.self, forKey: .expiresAt)
+        startedAt = try c.decodeIfPresent(Date.self, forKey: .startedAt) ?? Date()
+        let fallbackDuration = max(1, expiresAt.timeIntervalSince(startedAt))
+        duration = try c.decodeIfPresent(TimeInterval.self, forKey: .duration) ?? fallbackDuration
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(kind, forKey: .kind)
+        try c.encode(title, forKey: .title)
+        try c.encode(startedAt, forKey: .startedAt)
+        try c.encode(duration, forKey: .duration)
+        try c.encode(expiresAt, forKey: .expiresAt)
+    }
 }
 
 struct Reward: Codable {

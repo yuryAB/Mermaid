@@ -342,7 +342,7 @@ final class MermaidStats: Codable {
     func addTimedBuff(_ kind: TimedBuffKind, title: String? = nil, duration: TimeInterval) {
         let buff = TimedBuff(kind: kind,
                              title: title ?? kind.title,
-                             expiresAt: Date().addingTimeInterval(duration))
+                             duration: duration)
         activeBuffs.removeAll { $0.kind == kind || $0.expiresAt <= Date() }
         activeBuffs.append(buff)
         addMemory("Efeito temporário: \(buff.title)")

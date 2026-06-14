@@ -300,6 +300,18 @@ final class EventSystem {
         }
     }
 
+    private func randomObjectiveEffectReward() -> Reward {
+        let candidates: [(kind: TimedBuffKind, duration: TimeInterval)] = [
+            (.fullBelly, 1200),
+            (.swiftCurrent, 900),
+            (.eagerCompanion, 900)
+        ]
+        let inactive = candidates.filter { !ctx.stats.hasActiveBuff($0.kind) }
+        let pool = inactive.isEmpty ? candidates : inactive
+        let pick = pool.randomElement() ?? candidates[0]
+        return .temporaryEffect(pick.kind, duration: pick.duration)
+    }
+
     private func glowingFood() {
         guard let food = ctx.food.spawnRare(near: ctx.mermaidPosition) else { return }
         GameAudio.shared.play(.foodRareSpawn)
@@ -310,7 +322,7 @@ final class EventSystem {
                          guard let food, food.parent != nil else { return nil }
                          return food.position
                      },
-                     reward: .temporaryEffect(.fullBelly, duration: 1200))
+                     reward: randomObjectiveEffectReward())
     }
 
     private func rareFish() {
