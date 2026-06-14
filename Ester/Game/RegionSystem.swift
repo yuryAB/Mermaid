@@ -1165,10 +1165,11 @@ final class ExpeditionMapNode: SKNode {
             guard (reveal[cellKey] ?? 0) > 0.14 else { continue }
 
             let discovered = stats.isPOIDiscovered(poi.key)
+            let interacted = stats.isPOIVisited(poi.key) || stats.isPOIRewardCollected(poi.key)
             let node = SKNode()
             node.position = poiPoint(for: poi, in: region)
             node.name = discovered ? "poi_\(poi.key)" : nil
-            node.zPosition = discovered ? 16 : 12
+            node.zPosition = interacted ? 17 : (discovered ? 16 : 12)
             addChild(node)
 
             if discovered {
@@ -1179,29 +1180,36 @@ final class ExpeditionMapNode: SKNode {
                 node.addChild(hit)
             }
 
-            let marker = SKShapeNode(circleOfRadius: discovered ? 7.2 : 6.0)
-            marker.fillColor = discovered
-                ? poi.visual.color.withAlphaComponent(0.92)
-                : UIColor.white.withAlphaComponent(0.22)
-            marker.strokeColor = discovered
-                ? UIColor.white.withAlphaComponent(0.72)
-                : UIColor.white.withAlphaComponent(0.28)
+            let marker = SKShapeNode(circleOfRadius: interacted ? 7.8 : (discovered ? 7.2 : 6.4))
+            marker.fillColor = interacted
+                ? poi.visual.color.withAlphaComponent(0.90)
+                : discovered
+                    ? poi.visual.color.withAlphaComponent(0.18)
+                    : UIColor.white.withAlphaComponent(0.10)
+            marker.strokeColor = interacted
+                ? UIColor.white.withAlphaComponent(0.76)
+                : discovered
+                    ? poi.visual.color.withAlphaComponent(0.50)
+                    : UIColor.white.withAlphaComponent(0.24)
             marker.lineWidth = 0.8
-            marker.glowWidth = discovered ? 3 : 0
+            marker.glowWidth = interacted ? 3 : 0
             marker.name = node.name
             node.addChild(marker)
 
-            if discovered {
-                let glyph = SKLabelNode(text: poi.visual.glyph)
-                glyph.fontName = "AvenirNext-DemiBold"
-                glyph.fontSize = 8
-                glyph.fontColor = UIColor.white.withAlphaComponent(0.92)
-                glyph.horizontalAlignmentMode = .center
-                glyph.verticalAlignmentMode = .center
-                glyph.name = node.name
-                glyph.zPosition = 2
-                node.addChild(glyph)
-            }
+            let glyph = SKLabelNode(text: poi.visual.glyph)
+            glyph.fontName = "AvenirNext-DemiBold"
+            glyph.fontSize = interacted ? 9 : 8
+            glyph.fontColor = interacted
+                ? UIColor.white.withAlphaComponent(0.95)
+                : discovered
+                    ? UIColor.white.withAlphaComponent(0.48)
+                    : GameUI.mutedInk.withAlphaComponent(0.46)
+            glyph.alpha = interacted ? 1 : (discovered ? 0.50 : 0.28)
+            glyph.horizontalAlignmentMode = .center
+            glyph.verticalAlignmentMode = .center
+            glyph.name = node.name
+            glyph.zPosition = 2
+            node.addChild(glyph)
         }
     }
 
@@ -1371,22 +1379,73 @@ final class RegionMenuOverlay: SKNode {
             return node
         }
 
-        func legendItem(text: String,
-                        color: UIColor,
-                        x: CGFloat,
-                        y: CGFloat,
-                        hollow: Bool = false) -> SKNode {
+        func poiIndicatorStrip(region: Region?,
+                               stats: MermaidStats,
+                               width: CGFloat,
+                               height: CGFloat) -> SKNode {
             let node = SKNode()
-            node.position = CGPoint(x: x, y: y)
-            let dot = SKShapeNode(circleOfRadius: 4)
-            dot.fillColor = hollow ? color.withAlphaComponent(0.22) : color.withAlphaComponent(0.88)
-            dot.strokeColor = color.withAlphaComponent(0.82)
-            dot.lineWidth = 0.8
-            node.addChild(dot)
+            let bg = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 12)
+            bg.fillColor = GameUI.palePaper.withAlphaComponent(0.74)
+            bg.strokeColor = GameUI.line.withAlphaComponent(0.16)
+            bg.lineWidth = 0.7
+            node.addChild(bg)
 
-            let label = menuLabel(text, fontSize: 8.5, color: GameUI.mutedInk, bold: true)
-            label.position = CGPoint(x: 8, y: 0)
-            node.addChild(label)
+            guard let region = region else { return node }
+            let pois = WorldPOICatalog.pois(in: region, stats: stats)
+                .filter { stats.phase >= $0.zone.minPhase && stats.isUnlocked($0.zone) }
+            guard !pois.isEmpty else { return node }
+
+            let iconDiameter = min(30, max(24, height - 10))
+            let usableWidth = max(iconDiameter, width - 36)
+            let step = pois.count > 1
+                ? min(42, usableWidth / CGFloat(pois.count - 1))
+                : 0
+            let startX = pois.count > 1 ? -step * CGFloat(pois.count - 1) / 2 : 0
+
+            for (index, poi) in pois.enumerated() {
+                let discovered = stats.isPOIDiscovered(poi.key)
+                let interacted = stats.isPOIVisited(poi.key) || stats.isPOIRewardCollected(poi.key)
+                let indicator = SKNode()
+                indicator.position = CGPoint(x: startX + CGFloat(index) * step, y: 0)
+                indicator.zPosition = CGFloat(index + 1)
+                if discovered {
+                    indicator.name = "poi_\(poi.key)"
+                }
+
+                let ring = SKShapeNode(circleOfRadius: iconDiameter / 2)
+                ring.fillColor = interacted
+                    ? poi.visual.color.withAlphaComponent(0.24)
+                    : discovered
+                        ? poi.visual.color.withAlphaComponent(0.09)
+                        : GameUI.mutedInk.withAlphaComponent(0.08)
+                ring.strokeColor = interacted
+                    ? poi.visual.color.withAlphaComponent(0.84)
+                    : discovered
+                        ? poi.visual.color.withAlphaComponent(0.34)
+                        : GameUI.mutedInk.withAlphaComponent(0.22)
+                ring.lineWidth = interacted ? 1.1 : 0.8
+                ring.glowWidth = interacted ? 2 : 0
+                ring.name = indicator.name
+                indicator.addChild(ring)
+
+                let glyph = SKLabelNode(text: poi.visual.glyph)
+                glyph.fontName = "AvenirNext-DemiBold"
+                glyph.fontSize = iconDiameter * 0.62
+                glyph.fontColor = interacted
+                    ? GameUI.ink.withAlphaComponent(0.96)
+                    : discovered
+                        ? GameUI.ink.withAlphaComponent(0.48)
+                        : GameUI.mutedInk.withAlphaComponent(0.52)
+                glyph.alpha = interacted ? 1 : (discovered ? 0.44 : 0.24)
+                glyph.horizontalAlignmentMode = .center
+                glyph.verticalAlignmentMode = .center
+                glyph.name = indicator.name
+                glyph.zPosition = 2
+                indicator.addChild(glyph)
+
+                node.addChild(indicator)
+            }
+
             return node
         }
 
@@ -1397,8 +1456,8 @@ final class RegionMenuOverlay: SKNode {
         let mapPreviewHeight: CGFloat = size.height < 520 ? 124 : min(190, size.height * 0.28)
         let titleHeight: CGFloat = 24
         let currentCardHeight: CGFloat = 64
-        let legendHeight: CGFloat = 24
-        let headerHeight: CGFloat = 20 + titleHeight + 10 + currentCardHeight + 12 + mapPreviewHeight + legendHeight + 10
+        let poiStripHeight: CGFloat = size.height < 520 ? 30 : 36
+        let headerHeight: CGFloat = 20 + titleHeight + 10 + currentCardHeight + 12 + mapPreviewHeight + poiStripHeight + 10
         let footerHeight: CGFloat = 64
         let panelWidth = min(size.width - 24, size.width >= 700 ? 500 : 392)
         let desiredPanelHeight = CGFloat(regions.count) * rowStep + headerHeight + footerHeight
@@ -1485,8 +1544,12 @@ final class RegionMenuOverlay: SKNode {
             panelContent.addChild(route)
         }
 
-        if let previewId = currentRegionId ?? destinationId,
-           let previewRegion = RegionDiscoverySystem.region(withId: previewId) {
+        let previewRegion: Region? = {
+            guard let previewId = currentRegionId ?? destinationId else { return nil }
+            return RegionDiscoverySystem.region(withId: previewId)
+        }()
+
+        if let previewRegion = previewRegion {
             let map = ExpeditionMapNode(size: CGSize(width: listWidth, height: mapPreviewHeight),
                                         stats: stats,
                                         region: previewRegion,
@@ -1500,29 +1563,19 @@ final class RegionMenuOverlay: SKNode {
             }
         }
 
-        let legendY = currentCardY - currentCardHeight / 2 - 12 - mapPreviewHeight - legendHeight / 2 - 4
-        let legend = SKShapeNode(rectOf: CGSize(width: listWidth, height: legendHeight), cornerRadius: 12)
-        legend.fillColor = GameUI.palePaper.withAlphaComponent(0.74)
-        legend.strokeColor = GameUI.line.withAlphaComponent(0.16)
-        legend.lineWidth = 0.7
-        legend.position = CGPoint(x: 0, y: legendY)
-        panelContent.addChild(legend)
-
-        panelContent.addChild(legendItem(text: "POI",
-                                         color: GameUI.accent,
-                                         x: -listWidth / 2 + 26,
-                                         y: legendY))
-        panelContent.addChild(legendItem(text: "silhueta",
-                                         color: GameUI.mutedInk,
-                                         x: -listWidth / 2 + 86,
-                                         y: legendY,
-                                         hollow: true))
+        let poiStripY = currentCardY - currentCardHeight / 2 - 12 - mapPreviewHeight - poiStripHeight / 2 - 4
+        let poiStrip = poiIndicatorStrip(region: previewRegion,
+                                         stats: stats,
+                                         width: listWidth,
+                                         height: poiStripHeight)
+        poiStrip.position = CGPoint(x: 0, y: poiStripY)
+        panelContent.addChild(poiStrip)
 
         let routeHeading = menuLabel("Rotas",
                                      fontSize: 11,
                                      color: GameUI.mutedInk,
                                      bold: true)
-        routeHeading.position = CGPoint(x: -listWidth / 2 + 4, y: legendY - legendHeight / 2 - 12)
+        routeHeading.position = CGPoint(x: -listWidth / 2 + 4, y: poiStripY - poiStripHeight / 2 - 12)
         panelContent.addChild(routeHeading)
 
         let listTopY = panelHeight / 2 - headerHeight
