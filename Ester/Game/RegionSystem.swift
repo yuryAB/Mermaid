@@ -967,6 +967,7 @@ final class POISystem {
 final class ExpeditionMapNode: SKNode {
     private let mapSize: CGSize
     private let zoneOrder: [DepthZone] = [.abyss, .deep, .blue, .mid, .shallow, .clear, .surface]
+    private let mapPadding: CGFloat = 10
 
     init(size: CGSize,
          stats: MermaidStats,
@@ -975,13 +976,7 @@ final class ExpeditionMapNode: SKNode {
         self.mapSize = size
         super.init()
 
-        let frame = SKShapeNode(rectOf: size, cornerRadius: 16)
-        frame.fillColor = UIColor(red: 0.01, green: 0.06, blue: 0.10, alpha: 0.88)
-        frame.strokeColor = region.tint.withAlphaComponent(0.82)
-        frame.lineWidth = 1.6
-        frame.glowWidth = 2
-        addChild(frame)
-
+        drawFrame(region: region)
         drawDepthBands(stats: stats)
         drawRevealedCells(stats: stats, region: region)
         drawLockedVeil(stats: stats)
@@ -993,106 +988,145 @@ final class ExpeditionMapNode: SKNode {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     private var slotHeight: CGFloat {
-        mapSize.height / CGFloat(zoneOrder.count)
+        plotHeight / CGFloat(zoneOrder.count)
+    }
+
+    private var plotWidth: CGFloat {
+        max(1, mapSize.width - mapPadding * 2)
+    }
+
+    private var plotHeight: CGFloat {
+        max(1, mapSize.height - mapPadding * 2)
+    }
+
+    private var plotLeftX: CGFloat {
+        -mapSize.width / 2 + mapPadding
+    }
+
+    private var plotBottomY: CGFloat {
+        -mapSize.height / 2 + mapPadding
+    }
+
+    private func drawFrame(region: Region) {
+        let shadow = SKShapeNode(rectOf: mapSize, cornerRadius: 18)
+        shadow.position = CGPoint(x: 0, y: -4)
+        shadow.fillColor = UIColor(white: 0, alpha: 0.24)
+        shadow.strokeColor = .clear
+        shadow.zPosition = -4
+        addChild(shadow)
+
+        let frame = SKShapeNode(rectOf: mapSize, cornerRadius: 18)
+        frame.fillColor = UIColor(red: 0.01, green: 0.055, blue: 0.09, alpha: 0.94)
+        frame.strokeColor = UIColor.lerp(region.tint, GameUI.gold, 0.22).withAlphaComponent(0.74)
+        frame.lineWidth = 1.2
+        frame.glowWidth = 1.4
+        frame.zPosition = -3
+        addChild(frame)
+
+        let inner = SKShapeNode(rectOf: CGSize(width: mapSize.width - 8,
+                                               height: mapSize.height - 8),
+                                cornerRadius: 15)
+        inner.fillColor = .clear
+        inner.strokeColor = UIColor.white.withAlphaComponent(0.09)
+        inner.lineWidth = 0.8
+        inner.zPosition = 25
+        addChild(inner)
     }
 
     private func drawDepthBands(stats: MermaidStats) {
         for (index, zone) in zoneOrder.enumerated() {
-            let rect = SKShapeNode(rectOf: CGSize(width: mapSize.width, height: slotHeight))
-            rect.position = CGPoint(x: 0, y: -mapSize.height / 2 + slotHeight * (CGFloat(index) + 0.5))
+            let rect = SKShapeNode(rectOf: CGSize(width: plotWidth, height: slotHeight + 0.5),
+                                   cornerRadius: 1.5)
+            rect.position = CGPoint(x: 0, y: plotBottomY + slotHeight * (CGFloat(index) + 0.5))
             let unlocked = stats.isUnlocked(zone) && stats.phase >= zone.minPhase
             rect.fillColor = unlocked
-                ? mapColor(for: zone).withAlphaComponent(0.34)
-                : UIColor(white: 0.18, alpha: 0.66)
-            rect.strokeColor = UIColor.white.withAlphaComponent(0.05)
-            rect.lineWidth = 0.5
+                ? mapColor(for: zone).withAlphaComponent(0.30)
+                : UIColor(red: 0.03, green: 0.055, blue: 0.075, alpha: 0.72)
+            rect.strokeColor = .clear
             addChild(rect)
 
-            let label = SKLabelNode(text: zone.displayName.replacingOccurrences(of: "Camada ", with: ""))
-            label.fontName = "AvenirNext-DemiBold"
-            label.fontSize = 8.5
-            label.fontColor = unlocked ? UIColor.white.withAlphaComponent(0.48) : UIColor.white.withAlphaComponent(0.28)
-            label.horizontalAlignmentMode = .left
-            label.verticalAlignmentMode = .center
-            label.position = CGPoint(x: -mapSize.width / 2 + 10, y: rect.position.y)
-            addChild(label)
+            if index > 0 {
+                let line = SKShapeNode(rectOf: CGSize(width: plotWidth, height: 0.7))
+                line.position = CGPoint(x: 0, y: plotBottomY + slotHeight * CGFloat(index))
+                line.fillColor = UIColor.white.withAlphaComponent(unlocked ? 0.06 : 0.035)
+                line.strokeColor = .clear
+                line.zPosition = 2
+                addChild(line)
+            }
         }
     }
 
     private func drawRevealedCells(stats: MermaidStats, region: Region) {
         let reveal = stats.expeditionReveal(for: region.id)
-        let cellWidth = mapSize.width / CGFloat(MermaidStats.expeditionMapColumns)
-        let cellHeight = max(2.5, mapSize.height / CGFloat(MermaidStats.expeditionMapRows) * 0.82)
+        let cellWidth = plotWidth / CGFloat(MermaidStats.expeditionMapColumns)
+        let cellHeight = max(2.5, plotHeight / CGFloat(MermaidStats.expeditionMapRows) * 0.82)
 
         for (key, amount) in reveal {
             guard amount > 0.04,
                   let cell = MermaidStats.expeditionCellCoordinates(from: key) else { continue }
-            let x = -mapSize.width / 2 + (CGFloat(cell.column) + 0.5) * cellWidth
+            let x = plotLeftX + (CGFloat(cell.column) + 0.5) * cellWidth
             let y = visualY(forWorldY: worldY(forRow: cell.row))
             let node = SKShapeNode(rectOf: CGSize(width: cellWidth + 0.5, height: cellHeight), cornerRadius: 1.2)
             node.position = CGPoint(x: x, y: y)
-            node.fillColor = UIColor(red: 0.76, green: 0.95, blue: 0.92, alpha: 0.16 + amount * 0.50)
+            node.fillColor = UIColor(red: 0.78, green: 0.98, blue: 0.94, alpha: 0.12 + amount * 0.44)
             node.strokeColor = .clear
+            node.zPosition = 5
             addChild(node)
         }
     }
 
     private func drawLockedVeil(stats: MermaidStats) {
         for (index, zone) in zoneOrder.enumerated() where !stats.isUnlocked(zone) || stats.phase < zone.minPhase {
-            let veil = SKShapeNode(rectOf: CGSize(width: mapSize.width, height: slotHeight))
-            veil.position = CGPoint(x: 0, y: -mapSize.height / 2 + slotHeight * (CGFloat(index) + 0.5))
-            veil.fillColor = UIColor(white: 0.05, alpha: 0.36)
-            veil.strokeColor = UIColor.white.withAlphaComponent(0.04)
-            veil.lineWidth = 0.5
+            let veil = SKShapeNode(rectOf: CGSize(width: plotWidth, height: slotHeight + 0.5),
+                                   cornerRadius: 1.5)
+            veil.position = CGPoint(x: 0, y: plotBottomY + slotHeight * (CGFloat(index) + 0.5))
+            veil.fillColor = UIColor(white: 0.01, alpha: 0.40)
+            veil.strokeColor = UIColor.white.withAlphaComponent(0.03)
+            veil.lineWidth = 0.4
+            veil.zPosition = 8
             addChild(veil)
-
-            let lock = SKLabelNode(text: "bloq.")
-            lock.fontName = "AvenirNext-DemiBold"
-            lock.fontSize = 8
-            lock.fontColor = UIColor.white.withAlphaComponent(0.34)
-            lock.horizontalAlignmentMode = .right
-            lock.verticalAlignmentMode = .center
-            lock.position = CGPoint(x: mapSize.width / 2 - 10, y: veil.position.y)
-            addChild(lock)
         }
     }
 
     private func drawCurrentPosition(_ position: CGPoint?, in region: Region) {
         guard let position, region.contains(position) else { return }
-        let column = MermaidStats.expeditionColumn(forX: position.x, in: region)
-        let x = -mapSize.width / 2
-            + (CGFloat(column) + 0.5) * (mapSize.width / CGFloat(MermaidStats.expeditionMapColumns))
-        let y = visualY(forWorldY: position.y)
+        let point = mapPoint(for: position, in: region)
 
-        let pulse = SKShapeNode(circleOfRadius: 8)
-        pulse.position = CGPoint(x: x, y: y)
-        pulse.fillColor = UIColor(red: 1.0, green: 0.82, blue: 0.35, alpha: 0.18)
-        pulse.strokeColor = UIColor(red: 1.0, green: 0.86, blue: 0.42, alpha: 0.58)
+        let pulse = SKShapeNode(circleOfRadius: 12)
+        pulse.position = point
+        pulse.fillColor = GameUI.gold.withAlphaComponent(0.12)
+        pulse.strokeColor = GameUI.gold.withAlphaComponent(0.34)
         pulse.lineWidth = 1
+        pulse.zPosition = 18
         addChild(pulse)
 
-        let dot = SKShapeNode(circleOfRadius: 3.4)
+        let ring = SKShapeNode(circleOfRadius: 6.4)
+        ring.position = point
+        ring.fillColor = UIColor(red: 0.03, green: 0.09, blue: 0.12, alpha: 0.94)
+        ring.strokeColor = UIColor.white.withAlphaComponent(0.82)
+        ring.lineWidth = 1.1
+        ring.glowWidth = 1.2
+        ring.zPosition = 19
+        addChild(ring)
+
+        let dot = SKShapeNode(circleOfRadius: 3.2)
         dot.position = pulse.position
-        dot.fillColor = UIColor(red: 1.0, green: 0.88, blue: 0.45, alpha: 0.95)
-        dot.strokeColor = UIColor.white.withAlphaComponent(0.72)
-        dot.lineWidth = 0.8
+        dot.fillColor = GameUI.gold
+        dot.strokeColor = .clear
+        dot.zPosition = 20
         addChild(dot)
 
-        let labelBg = SKShapeNode(rectOf: CGSize(width: 38, height: 15), cornerRadius: 7.5)
-        labelBg.position = CGPoint(x: x + 28, y: y + 13)
-        labelBg.fillColor = UIColor(red: 0.02, green: 0.07, blue: 0.10, alpha: 0.88)
-        labelBg.strokeColor = GameUI.gold.withAlphaComponent(0.72)
-        labelBg.lineWidth = 0.8
-        addChild(labelBg)
-
-        let label = SKLabelNode(text: "você")
-        label.fontName = "AvenirNext-DemiBold"
-        label.fontSize = 7.5
-        label.fontColor = GameUI.palePaper
-        label.horizontalAlignmentMode = .center
-        label.verticalAlignmentMode = .center
-        label.position = labelBg.position
-        addChild(label)
+        let pointerPath = UIBezierPath()
+        pointerPath.move(to: CGPoint(x: 0, y: 8.5))
+        pointerPath.addLine(to: CGPoint(x: 3.4, y: 1.5))
+        pointerPath.addLine(to: CGPoint(x: -3.4, y: 1.5))
+        pointerPath.close()
+        let pointer = SKShapeNode(path: pointerPath.cgPath)
+        pointer.position = point
+        pointer.fillColor = GameUI.gold
+        pointer.strokeColor = .clear
+        pointer.zPosition = 21
+        addChild(pointer)
     }
 
     private func drawPOIs(stats: MermaidStats, region: Region) {
@@ -1108,7 +1142,16 @@ final class ExpeditionMapNode: SKNode {
             let node = SKNode()
             node.position = poiPoint(for: poi, in: region)
             node.name = discovered ? "poi_\(poi.key)" : nil
+            node.zPosition = discovered ? 16 : 12
             addChild(node)
+
+            if discovered {
+                let hit = SKShapeNode(circleOfRadius: 16)
+                hit.fillColor = UIColor.white.withAlphaComponent(0.001)
+                hit.strokeColor = .clear
+                hit.name = node.name
+                node.addChild(hit)
+            }
 
             let marker = SKShapeNode(circleOfRadius: discovered ? 7.2 : 6.0)
             marker.fillColor = discovered
@@ -1132,49 +1175,36 @@ final class ExpeditionMapNode: SKNode {
                 glyph.name = node.name
                 glyph.zPosition = 2
                 node.addChild(glyph)
-
-                let label = SKLabelNode(text: poi.name)
-                label.fontName = "AvenirNext-DemiBold"
-                label.fontSize = 7.5
-                label.fontColor = UIColor.white.withAlphaComponent(0.82)
-                label.horizontalAlignmentMode = .left
-                label.verticalAlignmentMode = .center
-                label.position = CGPoint(x: 9, y: 0)
-                label.name = node.name
-                node.addChild(label)
             }
         }
     }
 
     private func drawTitle(_ text: String) {
-        let badgeWidth = min(mapSize.width - 24, max(168, CGFloat(text.count) * 6.8 + 72))
-        let badge = SKShapeNode(rectOf: CGSize(width: badgeWidth, height: 34), cornerRadius: 11)
-        badge.fillColor = UIColor(red: 0.01, green: 0.04, blue: 0.07, alpha: 0.92)
-        badge.strokeColor = GameUI.gold.withAlphaComponent(0.58)
-        badge.lineWidth = 1
+        let badgeWidth = min(mapSize.width - 28, max(126, CGFloat(text.count) * 6.2 + 28))
+        let badge = SKShapeNode(rectOf: CGSize(width: badgeWidth, height: 24), cornerRadius: 9)
+        badge.fillColor = UIColor(red: 0.01, green: 0.04, blue: 0.07, alpha: 0.82)
+        badge.strokeColor = UIColor.white.withAlphaComponent(0.12)
+        badge.lineWidth = 0.8
         badge.position = CGPoint(x: -mapSize.width / 2 + 12 + badgeWidth / 2,
-                                 y: mapSize.height / 2 - 23)
+                                 y: mapSize.height / 2 - 20)
         badge.zPosition = 20
         addChild(badge)
 
-        let eyebrow = SKLabelNode(text: "MAPA ATUAL")
-        eyebrow.fontName = "AvenirNext-Heavy"
-        eyebrow.fontSize = 6.5
-        eyebrow.fontColor = GameUI.gold.withAlphaComponent(0.95)
-        eyebrow.horizontalAlignmentMode = .left
-        eyebrow.verticalAlignmentMode = .center
-        eyebrow.position = CGPoint(x: badge.position.x - badgeWidth / 2 + 10,
-                                   y: badge.position.y + 7)
-        eyebrow.zPosition = 21
-        addChild(eyebrow)
+        let dot = SKShapeNode(circleOfRadius: 3.2)
+        dot.position = CGPoint(x: badge.position.x - badgeWidth / 2 + 11,
+                               y: badge.position.y)
+        dot.fillColor = GameUI.gold.withAlphaComponent(0.90)
+        dot.strokeColor = .clear
+        dot.zPosition = 21
+        addChild(dot)
 
         let title = SKLabelNode(text: text)
         title.fontName = "AvenirNext-DemiBold"
-        title.fontSize = 11.5
+        title.fontSize = 10.5
         title.fontColor = GameUI.palePaper
         title.horizontalAlignmentMode = .left
         title.verticalAlignmentMode = .center
-        title.position = CGPoint(x: eyebrow.position.x, y: badge.position.y - 7)
+        title.position = CGPoint(x: dot.position.x + 9, y: badge.position.y)
         title.zPosition = 21
         addChild(title)
     }
@@ -1184,7 +1214,7 @@ final class ExpeditionMapNode: SKNode {
         guard let index = zoneOrder.firstIndex(of: zone) else { return 0 }
         let span = max(1, zone.yRange.upperBound - zone.yRange.lowerBound)
         let t = ((y - zone.yRange.lowerBound) / span).clamped(to: 0...1)
-        return -mapSize.height / 2 + CGFloat(index) * slotHeight + t * slotHeight
+        return plotBottomY + CGFloat(index) * slotHeight + t * slotHeight
     }
 
     private func worldY(forRow row: Int) -> CGFloat {
@@ -1194,10 +1224,17 @@ final class ExpeditionMapNode: SKNode {
     }
 
     private func poiPoint(for poi: WorldPOI, in region: Region) -> CGPoint {
-        let column = MermaidStats.expeditionColumn(forX: poi.position.x, in: region)
-        let x = -mapSize.width / 2
-            + (CGFloat(column) + 0.5) * (mapSize.width / CGFloat(MermaidStats.expeditionMapColumns))
-        return CGPoint(x: x, y: visualY(forWorldY: poi.position.y))
+        mapPoint(for: poi.position, in: region)
+    }
+
+    private func mapPoint(for point: CGPoint, in region: Region) -> CGPoint {
+        let column = MermaidStats.expeditionColumn(forX: point.x, in: region)
+        let x = plotLeftX
+            + (CGFloat(column) + 0.5) * (plotWidth / CGFloat(MermaidStats.expeditionMapColumns))
+        let y = visualY(forWorldY: point.y)
+        let inset: CGFloat = 12
+        return CGPoint(x: x.clamped(to: (-mapSize.width / 2 + inset)...(mapSize.width / 2 - inset)),
+                       y: y.clamped(to: (-mapSize.height / 2 + inset)...(mapSize.height / 2 - inset)))
     }
 
     private func mapColor(for zone: DepthZone) -> UIColor {
@@ -1445,7 +1482,7 @@ final class RegionMenuOverlay: SKNode {
         legend.position = CGPoint(x: 0, y: legendY)
         panelContent.addChild(legend)
 
-        panelContent.addChild(legendItem(text: "você",
+        panelContent.addChild(legendItem(text: "Ester",
                                          color: GameUI.gold,
                                          x: -listWidth / 2 + 22,
                                          y: legendY))
@@ -1512,7 +1549,7 @@ final class RegionMenuOverlay: SKNode {
                 rowTint = GameUI.gold
                 badgeText = "ATUAL"
                 badgeColor = GameUI.gold
-                actionText = "você está aqui"
+                actionText = "Ester está aqui"
             } else if isDestination {
                 rowTint = UIColor(red: 0.44, green: 0.78, blue: 1, alpha: 1)
                 badgeText = "EM ROTA"
