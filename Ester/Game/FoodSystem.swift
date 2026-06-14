@@ -283,6 +283,20 @@ final class FoodSystem {
         removeNode(food)
     }
 
+    @discardableResult
+    func collectShellByPlayer(_ food: FoodNode) -> Int? {
+        guard foods.contains(where: { $0 === food }),
+              food.kind.isShellCurrency else { return nil }
+        removeNode(food)
+
+        let amount = Int.random(in: 10...100)
+        ctx.stats.pearls += amount
+        ctx.stats.gainXP(food.kind.xp)
+        GameAudio.shared.play(.pearlReward)
+        ctx.say("Você coletou \(food.kind.name). Conchas +\(amount)")
+        return amount
+    }
+
     private func removeNode(_ food: FoodNode) {
         foods.removeAll { $0 === food }
         food.run(.sequence([

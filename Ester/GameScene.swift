@@ -1189,6 +1189,13 @@ class GameScene: SKScene {
             return
         }
 
+        if let food = ctx.food.nearestFood(to: location, maxDistance: 150),
+           food.kind.isShellCurrency {
+            let collected = ctx.food.collectShellByPlayer(food) != nil
+            showTouchRipple(at: food.position, accepted: collected)
+            return
+        }
+
         if ctx.autonomy.touchRequestCooldownRemaining > 0 {
             showTouchRipple(at: location, accepted: false)
             ctx.autonomy.showTouchCooldownFeedback()

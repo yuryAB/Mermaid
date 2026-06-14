@@ -825,24 +825,16 @@ final class AutonomySystem {
     func requestFoodFromTouch(_ food: FoodNode) -> Bool {
         notePlayerPressure()
         guard food.parent != nil else { return false }
-        let isShellCurrency = food.kind.isShellCurrency
-        guard isShellCurrency || isBondRecoveryRequestReady || stats.hunger >= 28 || food.kind.pearls > 0 || food.kind.xp >= 10 else {
+        guard !food.kind.isShellCurrency else { return false }
+        guard isBondRecoveryRequestReady || stats.hunger >= 28 || food.kind.pearls > 0 || food.kind.xp >= 10 else {
             return rejectTouchRequest("Ela viu \(food.kind.name), mas não está com fome agora.")
         }
-        let acceptedMessage = isShellCurrency
-            ? "Ela aceitou coletar \(food.kind.name)..."
-            : "Ela aceitou provar \(food.kind.name)..."
-        let refusalMessages = isShellCurrency
-            ? [
-                "Ela viu \(food.kind.name), mas deixou a concha ali por enquanto.",
-                "Ela olhou para \(food.kind.name) e seguiu nadando.",
-                "Ela fingiu que não viu a concha."
-            ]
-            : [
-                "Ela viu \(food.kind.name), mas não quis comer agora.",
-                "Ela virou o rostinho para longe da comida.",
-                "Ela fingiu que não viu \(food.kind.name)."
-            ]
+        let acceptedMessage = "Ela aceitou provar \(food.kind.name)..."
+        let refusalMessages = [
+            "Ela viu \(food.kind.name), mas não quis comer agora.",
+            "Ela virou o rostinho para longe da comida.",
+            "Ela fingiu que não viu \(food.kind.name)."
+        ]
         guard acceptTouchRequest(for: .seekingFood,
                                  acceptedMessage: acceptedMessage,
                                  refusalMessages: refusalMessages) else { return false }
@@ -953,7 +945,7 @@ final class AutonomySystem {
     }
 
     private func touchAcceptanceChance(for desired: MermaidIntent) -> CGFloat {
-        (commandAcceptanceChance(for: desired) / 3).clamped(to: 0.04...0.32)
+        commandAcceptanceChance(for: desired)
     }
 
     private func pointLimitedByEnergy(_ point: CGPoint) -> CGPoint {
