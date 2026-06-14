@@ -976,10 +976,10 @@ final class ExpeditionMapNode: SKNode {
         super.init()
 
         let frame = SKShapeNode(rectOf: size, cornerRadius: 16)
-        frame.fillColor = UIColor(red: 0.02, green: 0.09, blue: 0.13, alpha: 0.58)
-        frame.strokeColor = region.tint.withAlphaComponent(0.52)
-        frame.lineWidth = 1.4
-        frame.glowWidth = 1
+        frame.fillColor = UIColor(red: 0.01, green: 0.06, blue: 0.10, alpha: 0.88)
+        frame.strokeColor = region.tint.withAlphaComponent(0.82)
+        frame.lineWidth = 1.6
+        frame.glowWidth = 2
         addChild(frame)
 
         drawDepthBands(stats: stats)
@@ -1077,6 +1077,22 @@ final class ExpeditionMapNode: SKNode {
         dot.strokeColor = UIColor.white.withAlphaComponent(0.72)
         dot.lineWidth = 0.8
         addChild(dot)
+
+        let labelBg = SKShapeNode(rectOf: CGSize(width: 38, height: 15), cornerRadius: 7.5)
+        labelBg.position = CGPoint(x: x + 28, y: y + 13)
+        labelBg.fillColor = UIColor(red: 0.02, green: 0.07, blue: 0.10, alpha: 0.88)
+        labelBg.strokeColor = GameUI.gold.withAlphaComponent(0.72)
+        labelBg.lineWidth = 0.8
+        addChild(labelBg)
+
+        let label = SKLabelNode(text: "você")
+        label.fontName = "AvenirNext-DemiBold"
+        label.fontSize = 7.5
+        label.fontColor = GameUI.palePaper
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = labelBg.position
+        addChild(label)
     }
 
     private func drawPOIs(stats: MermaidStats, region: Region) {
@@ -1131,13 +1147,35 @@ final class ExpeditionMapNode: SKNode {
     }
 
     private func drawTitle(_ text: String) {
+        let badgeWidth = min(mapSize.width - 24, max(168, CGFloat(text.count) * 6.8 + 72))
+        let badge = SKShapeNode(rectOf: CGSize(width: badgeWidth, height: 34), cornerRadius: 11)
+        badge.fillColor = UIColor(red: 0.01, green: 0.04, blue: 0.07, alpha: 0.92)
+        badge.strokeColor = GameUI.gold.withAlphaComponent(0.58)
+        badge.lineWidth = 1
+        badge.position = CGPoint(x: -mapSize.width / 2 + 12 + badgeWidth / 2,
+                                 y: mapSize.height / 2 - 23)
+        badge.zPosition = 20
+        addChild(badge)
+
+        let eyebrow = SKLabelNode(text: "MAPA ATUAL")
+        eyebrow.fontName = "AvenirNext-Heavy"
+        eyebrow.fontSize = 6.5
+        eyebrow.fontColor = GameUI.gold.withAlphaComponent(0.95)
+        eyebrow.horizontalAlignmentMode = .left
+        eyebrow.verticalAlignmentMode = .center
+        eyebrow.position = CGPoint(x: badge.position.x - badgeWidth / 2 + 10,
+                                   y: badge.position.y + 7)
+        eyebrow.zPosition = 21
+        addChild(eyebrow)
+
         let title = SKLabelNode(text: text)
         title.fontName = "AvenirNext-DemiBold"
-        title.fontSize = 11
-        title.fontColor = GameUI.ink
+        title.fontSize = 11.5
+        title.fontColor = GameUI.palePaper
         title.horizontalAlignmentMode = .left
         title.verticalAlignmentMode = .center
-        title.position = CGPoint(x: -mapSize.width / 2 + 12, y: mapSize.height / 2 - 13)
+        title.position = CGPoint(x: eyebrow.position.x, y: badge.position.y - 7)
+        title.zPosition = 21
         addChild(title)
     }
 
@@ -1215,54 +1253,182 @@ final class RegionMenuOverlay: SKNode {
         backdrop.strokeColor = .clear
         addChild(backdrop)
 
+        func menuLabel(_ text: String,
+                       fontSize: CGFloat,
+                       color: UIColor,
+                       bold: Bool = false,
+                       maxWidth: CGFloat = 0,
+                       lines: Int = 1) -> SKLabelNode {
+            let label = SKLabelNode(text: text)
+            label.fontName = bold ? "AvenirNext-DemiBold" : "AvenirNext-Regular"
+            label.fontSize = fontSize
+            label.fontColor = color
+            label.horizontalAlignmentMode = .left
+            label.verticalAlignmentMode = .center
+            if maxWidth > 0 {
+                label.preferredMaxLayoutWidth = maxWidth
+                label.numberOfLines = lines
+            }
+            return label
+        }
+
+        func stateBadge(text: String, color: UIColor, width: CGFloat = 82) -> SKNode {
+            let node = SKNode()
+            let bg = SKShapeNode(rectOf: CGSize(width: width, height: 24), cornerRadius: 8)
+            bg.fillColor = UIColor.lerp(GameUI.palePaper, color, 0.18)
+            bg.strokeColor = color.withAlphaComponent(0.58)
+            bg.lineWidth = 0.9
+            node.addChild(bg)
+
+            let label = SKLabelNode(text: text)
+            label.fontName = "AvenirNext-Heavy"
+            label.fontSize = 8.5
+            label.fontColor = UIColor.lerp(GameUI.ink, color, 0.28)
+            label.horizontalAlignmentMode = .center
+            label.verticalAlignmentMode = .center
+            label.zPosition = 2
+            node.addChild(label)
+            return node
+        }
+
+        func progressBar(width: CGFloat, progress: CGFloat, color: UIColor) -> SKNode {
+            let node = SKNode()
+            let track = SKShapeNode(rectOf: CGSize(width: width, height: 5), cornerRadius: 2.5)
+            track.fillColor = GameUI.line.withAlphaComponent(0.14)
+            track.strokeColor = .clear
+            node.addChild(track)
+
+            let fillWidth = max(6, width * progress.clamped(to: 0...1))
+            let fill = SKShapeNode(rectOf: CGSize(width: fillWidth, height: 5), cornerRadius: 2.5)
+            fill.fillColor = color.withAlphaComponent(0.78)
+            fill.strokeColor = .clear
+            fill.position.x = -width / 2 + fillWidth / 2
+            fill.zPosition = 2
+            node.addChild(fill)
+            return node
+        }
+
+        func legendItem(text: String,
+                        color: UIColor,
+                        x: CGFloat,
+                        y: CGFloat,
+                        hollow: Bool = false) -> SKNode {
+            let node = SKNode()
+            node.position = CGPoint(x: x, y: y)
+            let dot = SKShapeNode(circleOfRadius: 4)
+            dot.fillColor = hollow ? color.withAlphaComponent(0.22) : color.withAlphaComponent(0.88)
+            dot.strokeColor = color.withAlphaComponent(0.82)
+            dot.lineWidth = 0.8
+            node.addChild(dot)
+
+            let label = menuLabel(text, fontSize: 8.5, color: GameUI.mutedInk, bold: true)
+            label.position = CGPoint(x: 8, y: 0)
+            node.addChild(label)
+            return node
+        }
+
         let regions = RegionDiscoverySystem.menuRegions
-        let rowCardHeight: CGFloat = 78
-        let rowSpacing: CGFloat = 10
+        let rowCardHeight: CGFloat = 92
+        let rowSpacing: CGFloat = 9
         let rowStep = rowCardHeight + rowSpacing
-        let mapPreviewHeight: CGFloat = size.height < 520 ? 0 : 148
-        let headerHeight: CGFloat = 84 + mapPreviewHeight + (mapPreviewHeight > 0 ? 12 : 0)
-        let footerHeight: CGFloat = 72
-        // painel mais estreito, encostado no lado direito da tela
-        let panelWidth = min(size.width - 28, 336)
+        let mapPreviewHeight: CGFloat = size.height < 520 ? 124 : min(190, size.height * 0.28)
+        let titleHeight: CGFloat = 24
+        let currentCardHeight: CGFloat = 64
+        let legendHeight: CGFloat = 24
+        let headerHeight: CGFloat = 20 + titleHeight + 10 + currentCardHeight + 12 + mapPreviewHeight + legendHeight + 10
+        let footerHeight: CGFloat = 64
+        let panelWidth = min(size.width - 24, size.width >= 700 ? 500 : 392)
         let desiredPanelHeight = CGFloat(regions.count) * rowStep + headerHeight + footerHeight
-        let maxPanelHeight = max(280, size.height - 72)
-        let minPanelHeight = min(maxPanelHeight, 320)
+        let maxPanelHeight = max(300, size.height - 42)
+        let minPanelHeight = min(maxPanelHeight, 360)
         let panelHeight = min(maxPanelHeight, max(minPanelHeight, desiredPanelHeight))
 
-        // container deslocado para a direita (o backdrop continua centralizado)
         let content = SKNode()
-        let rightMargin: CGFloat = 14
-        content.position = CGPoint(x: size.width / 2 - panelWidth / 2 - rightMargin, y: 0)
+        content.position = .zero
         addChild(content)
 
         let panel = GameUI.card(size: CGSize(width: panelWidth, height: panelHeight),
-                                cornerRadius: 26,
-                                tint: GameUI.accent.withAlphaComponent(0.5))
+                                cornerRadius: 22,
+                                tint: GameUI.accent.withAlphaComponent(0.62),
+                                baseColors: [UIColor.lerp(GameUI.palePaper, GameUI.accent, 0.06)])
         content.addChild(panel)
 
         let panelContent = SKNode()
         panelContent.zPosition = 5
         panel.addChild(panelContent)
 
-        let title = GameUI.pill(text: "Mapa de expedição",
-                                fontSize: 16,
-                                fill: [GameUI.accent.withAlphaComponent(0.95)],
-                                strokeColor: GameUI.accent.withAlphaComponent(0.55),
-                                textColor: GameUI.ink,
-                                hPadding: 26,
-                                height: 38)
-        title.position = CGPoint(x: 0, y: panelHeight / 2 - 38)
+        let listWidth = panelWidth - 28
+        let titleY = panelHeight / 2 - 20 - titleHeight / 2
+        let currentMapName = currentRegionId
+            .flatMap { RegionDiscoverySystem.region(withId: $0)?.name }
+            ?? "Mapa desconhecido"
+        let title = menuLabel("Expedição",
+                              fontSize: 18,
+                              color: GameUI.ink,
+                              bold: true)
+        title.position = CGPoint(x: -listWidth / 2 + 4, y: titleY)
         panelContent.addChild(title)
 
-        let listWidth = panelWidth - 28
-        if mapPreviewHeight > 0,
-           let previewId = currentRegionId ?? destinationId,
+        let titleBadge = stateBadge(text: "REGISTRO", color: GameUI.accent, width: 84)
+        titleBadge.position = CGPoint(x: listWidth / 2 - 42, y: titleY)
+        panelContent.addChild(titleBadge)
+
+        let currentCardY = titleY - titleHeight / 2 - 10 - currentCardHeight / 2
+        let currentCard = SKShapeNode(rectOf: CGSize(width: listWidth, height: currentCardHeight),
+                                      cornerRadius: 18)
+        currentCard.position = CGPoint(x: 0, y: currentCardY)
+        currentCard.fillColor = UIColor(red: 0.02, green: 0.10, blue: 0.14, alpha: 0.94)
+        currentCard.strokeColor = GameUI.gold.withAlphaComponent(0.50)
+        currentCard.lineWidth = 1.1
+        panelContent.addChild(currentCard)
+
+        let currentEyebrow = menuLabel("MAPA ATUAL",
+                                       fontSize: 8,
+                                       color: GameUI.gold,
+                                       bold: true)
+        currentEyebrow.position = CGPoint(x: -listWidth / 2 + 16, y: currentCardY + 19)
+        panelContent.addChild(currentEyebrow)
+
+        let currentName = menuLabel(currentMapName,
+                                    fontSize: 17,
+                                    color: GameUI.palePaper,
+                                    bold: true,
+                                    maxWidth: listWidth - 126)
+        currentName.position = CGPoint(x: -listWidth / 2 + 16, y: currentCardY + 1)
+        panelContent.addChild(currentName)
+
+        let openCount = regions.filter { stats.isRegionKnown($0) && $0.isAccessible(for: stats.phase) }.count
+        let currentMeta = menuLabel("\(stats.phase.displayName) · \(openCount)/\(regions.count) mapas abertos",
+                                    fontSize: 10,
+                                    color: GameUI.palePaper.withAlphaComponent(0.76),
+                                    bold: false)
+        currentMeta.position = CGPoint(x: -listWidth / 2 + 16, y: currentCardY - 20)
+        panelContent.addChild(currentMeta)
+
+        let currentBadge = stateBadge(text: "ATUAL", color: GameUI.gold, width: 66)
+        currentBadge.position = CGPoint(x: listWidth / 2 - 45, y: currentCardY + 8)
+        panelContent.addChild(currentBadge)
+
+        if let destinationId,
+           let destination = RegionDiscoverySystem.region(withId: destinationId),
+           destination.id != currentRegionId {
+            let route = menuLabel("Rumo a \(destination.name)",
+                                  fontSize: 9.5,
+                                  color: GameUI.gold,
+                                  bold: true,
+                                  maxWidth: 108)
+            route.horizontalAlignmentMode = .right
+            route.position = CGPoint(x: listWidth / 2 - 16, y: currentCardY - 20)
+            panelContent.addChild(route)
+        }
+
+        if let previewId = currentRegionId ?? destinationId,
            let previewRegion = RegionDiscoverySystem.region(withId: previewId) {
             let map = ExpeditionMapNode(size: CGSize(width: listWidth, height: mapPreviewHeight),
                                         stats: stats,
                                         region: previewRegion,
                                         currentPosition: currentPosition)
-            map.position = CGPoint(x: 0, y: panelHeight / 2 - 84 - mapPreviewHeight / 2)
+            map.position = CGPoint(x: 0, y: currentCardY - currentCardHeight / 2 - 12 - mapPreviewHeight / 2)
             map.zPosition = 4
             panelContent.addChild(map)
 
@@ -1270,6 +1436,35 @@ final class RegionMenuOverlay: SKNode {
                 rowPOIs[poi.key] = poi
             }
         }
+
+        let legendY = currentCardY - currentCardHeight / 2 - 12 - mapPreviewHeight - legendHeight / 2 - 4
+        let legend = SKShapeNode(rectOf: CGSize(width: listWidth, height: legendHeight), cornerRadius: 12)
+        legend.fillColor = GameUI.palePaper.withAlphaComponent(0.74)
+        legend.strokeColor = GameUI.line.withAlphaComponent(0.16)
+        legend.lineWidth = 0.7
+        legend.position = CGPoint(x: 0, y: legendY)
+        panelContent.addChild(legend)
+
+        panelContent.addChild(legendItem(text: "você",
+                                         color: GameUI.gold,
+                                         x: -listWidth / 2 + 22,
+                                         y: legendY))
+        panelContent.addChild(legendItem(text: "POI",
+                                         color: GameUI.accent,
+                                         x: -listWidth / 2 + 90,
+                                         y: legendY))
+        panelContent.addChild(legendItem(text: "silhueta",
+                                         color: GameUI.mutedInk,
+                                         x: -listWidth / 2 + 150,
+                                         y: legendY,
+                                         hollow: true))
+
+        let routeHeading = menuLabel("Rotas",
+                                     fontSize: 11,
+                                     color: GameUI.mutedInk,
+                                     bold: true)
+        routeHeading.position = CGPoint(x: -listWidth / 2 + 4, y: legendY - legendHeight / 2 - 12)
+        panelContent.addChild(routeHeading)
 
         let listTopY = panelHeight / 2 - headerHeight
         let listBottomY = -panelHeight / 2 + footerHeight
@@ -1304,13 +1499,58 @@ final class RegionMenuOverlay: SKNode {
             let isFollowingLead = stats.discoveryRouteRegionId == region.id
             let isPendingLead = stats.pendingRegionDiscoveryId == region.id
 
-            let rowTint = isDestination
-                ? UIColor(red: 0.5, green: 0.85, blue: 1, alpha: 1)
-                : (isLocked ? UIColor(white: 0.45, alpha: 1) : (hasLead ? GameUI.gold : region.tint))
+            let rowTint: UIColor
+            let badgeText: String
+            let badgeColor: UIColor
+            let actionText: String
+            if phaseLocked {
+                rowTint = UIColor(white: 0.40, alpha: 1)
+                badgeText = "BLOQUEADO"
+                badgeColor = GameUI.mutedInk
+                actionText = "fase \(region.minPhase.mapAccessDisplayName)"
+            } else if isCurrent {
+                rowTint = GameUI.gold
+                badgeText = "ATUAL"
+                badgeColor = GameUI.gold
+                actionText = "você está aqui"
+            } else if isDestination {
+                rowTint = UIColor(red: 0.44, green: 0.78, blue: 1, alpha: 1)
+                badgeText = "EM ROTA"
+                badgeColor = GameUI.accent
+                actionText = "viagem em andamento"
+            } else if isReadyDiscovery {
+                rowTint = GameUI.gold
+                badgeText = "PRONTO"
+                badgeColor = GameUI.gold
+                actionText = "toque para abrir"
+            } else if isFollowingLead {
+                rowTint = GameUI.gold
+                badgeText = "SEGUINDO"
+                badgeColor = GameUI.gold
+                actionText = "siga até a borda"
+            } else if isPendingLead {
+                rowTint = GameUI.gold
+                badgeText = "PISTA"
+                badgeColor = GameUI.gold
+                actionText = "toque para seguir"
+            } else if isLocked {
+                rowTint = UIColor(white: 0.38, alpha: 1)
+                badgeText = "SEM PISTA"
+                badgeColor = GameUI.mutedInk
+                actionText = "falta pista"
+            } else {
+                rowTint = region.tint
+                badgeText = "ABERTO"
+                badgeColor = region.tint
+                actionText = "toque para viajar"
+            }
+
             let row = GameUI.card(size: CGSize(width: listWidth, height: rowCardHeight),
-                                  cornerRadius: 16,
+                                  cornerRadius: 14,
                                   tint: rowTint.withAlphaComponent(isCurrent ? 0.9 : 0.6),
-                                  baseColors: isLocked ? GameUI.tintedColors(UIColor(white: 0.34, alpha: 1)) : GameUI.tintedColors(region.tint))
+                                  baseColors: isLocked
+                                    ? [UIColor.lerp(GameUI.fadedPaper, UIColor(white: 0.35, alpha: 1), 0.12)]
+                                    : GameUI.tintedColors(isCurrent ? GameUI.gold : region.tint))
             row.position = CGPoint(x: 0, y: y)
             row.name = "region_\(region.id)"
             listNode.addChild(row)
@@ -1321,45 +1561,83 @@ final class RegionMenuOverlay: SKNode {
             let rowContent = SKNode()
             rowContent.zPosition = 5
             row.addChild(rowContent)
-            let leftX = -listWidth / 2 + 18
+            let leftX = -listWidth / 2 + 58
+
+            let stripe = SKShapeNode(rectOf: CGSize(width: 5, height: rowCardHeight - 18), cornerRadius: 2.5)
+            stripe.position = CGPoint(x: -listWidth / 2 + 8, y: 0)
+            stripe.fillColor = rowTint.withAlphaComponent(isLocked ? 0.34 : 0.86)
+            stripe.strokeColor = .clear
+            rowContent.addChild(stripe)
+
+            let emblem = SKShapeNode(circleOfRadius: 18)
+            emblem.position = CGPoint(x: -listWidth / 2 + 32, y: 12)
+            emblem.fillColor = isLocked
+                ? GameUI.fadedPaper.withAlphaComponent(0.62)
+                : UIColor.lerp(GameUI.palePaper, rowTint, 0.20)
+            emblem.strokeColor = rowTint.withAlphaComponent(isLocked ? 0.28 : 0.68)
+            emblem.lineWidth = 1
+            rowContent.addChild(emblem)
+
+            let icon = SKLabelNode(text: isLocked ? "?" : (region.tideIcons.first ?? "○"))
+            icon.fontName = "AvenirNext-DemiBold"
+            icon.fontSize = 16
+            icon.fontColor = isLocked ? GameUI.mutedInk.withAlphaComponent(0.58) : UIColor.lerp(GameUI.ink, rowTint, 0.28)
+            icon.horizontalAlignmentMode = .center
+            icon.verticalAlignmentMode = .center
+            icon.position = emblem.position
+            rowContent.addChild(icon)
 
             let name = SKLabelNode(text: region.name)
             name.fontName = "AvenirNext-DemiBold"
-            name.fontSize = 15
+            name.fontSize = isCurrent ? 15.5 : 14.5
             name.fontColor = isLocked ? GameUI.mutedInk : GameUI.ink
             name.horizontalAlignmentMode = .left
-            name.position = CGPoint(x: leftX, y: 13)
+            name.verticalAlignmentMode = .center
+            name.preferredMaxLayoutWidth = max(130, listWidth - 166)
+            name.numberOfLines = 1
+            name.position = CGPoint(x: leftX, y: 24)
             rowContent.addChild(name)
 
             let blurb = SKLabelNode(text: region.blurb)
             blurb.fontName = "AvenirNext-Regular"
-            blurb.fontSize = 10.5
+            blurb.fontSize = 10
             blurb.fontColor = isLocked ? GameUI.mutedInk.withAlphaComponent(0.72) : GameUI.mutedInk
             blurb.horizontalAlignmentMode = .left
             blurb.verticalAlignmentMode = .center
-            blurb.preferredMaxLayoutWidth = listWidth - 36
+            blurb.preferredMaxLayoutWidth = max(130, listWidth - 166)
             blurb.numberOfLines = 2
-            blurb.position = CGPoint(x: leftX, y: -8)
+            blurb.position = CGPoint(x: leftX, y: 3)
             rowContent.addChild(blurb)
 
             let progress = Int((stats.regionProgress[region.id] ?? 0) * 100)
-            let statusText: String
-            if phaseLocked { statusText = "Disponível quando ela for \(region.minPhase.mapAccessDisplayName)" }
-            else if isCurrent { statusText = "local atual" }
-            else if isReadyDiscovery { statusText = "confirmar descoberta" }
-            else if isFollowingLead { statusText = "seguindo a pista" }
-            else if isPendingLead { statusText = "pista encontrada" }
-            else if isLocked { statusText = "descubra uma pista explorando" }
-            else if isDestination { statusText = "em rota" }
-            else if isKnown { statusText = "explorada \(progress)%" }
-            else { statusText = "ainda não visitado" }
-            let status = SKLabelNode(text: statusText)
-            status.fontName = "AvenirNext-DemiBold"
-            status.fontSize = 11
-            status.fontColor = isLocked ? GameUI.mutedInk : (hasLead || isDestination ? GameUI.gold : GameUI.accent)
-            status.horizontalAlignmentMode = .left
-            status.position = CGPoint(x: leftX, y: -28)
+            let status = menuLabel("\(actionText) · \(progress)%",
+                                   fontSize: 10.5,
+                                   color: isLocked ? GameUI.mutedInk.withAlphaComponent(0.78) : (hasLead || isDestination || isCurrent ? GameUI.gold : GameUI.accent),
+                                   bold: true,
+                                   maxWidth: max(130, listWidth - 166))
+            status.position = CGPoint(x: leftX, y: -22)
             rowContent.addChild(status)
+
+            let barWidth = max(72, min(150, listWidth - 190))
+            let bar = progressBar(width: barWidth,
+                                  progress: CGFloat(progress) / 100,
+                                  color: rowTint)
+            bar.position = CGPoint(x: leftX + barWidth / 2, y: -36)
+            rowContent.addChild(bar)
+
+            let badge = stateBadge(text: badgeText,
+                                   color: badgeColor,
+                                   width: badgeText.count > 7 ? 86 : 70)
+            badge.position = CGPoint(x: listWidth / 2 - (badgeText.count > 7 ? 52 : 44), y: 22)
+            rowContent.addChild(badge)
+
+            let phase = menuLabel(region.minPhase.displayName,
+                                  fontSize: 8.5,
+                                  color: isLocked ? GameUI.mutedInk.withAlphaComponent(0.64) : GameUI.mutedInk,
+                                  bold: true)
+            phase.horizontalAlignmentMode = .right
+            phase.position = CGPoint(x: listWidth / 2 - 18, y: -16)
+            rowContent.addChild(phase)
         }
 
         if listContentHeight > listViewportHeight + 1 {
