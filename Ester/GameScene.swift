@@ -1383,23 +1383,16 @@ private final class OceanParallaxBackdrop: SKNode {
 
         float causticLineA = sin((uv.x * 42.0) + slowCurrent * 1.7 + time * 1.15);
         float causticLineB = sin((uv.y * 36.0) - crossCurrent * 1.2 - time * 0.72);
-        float caustic = smoothstep(0.66, 0.98, causticLineA * causticLineB);
-        caustic *= u_causticAlpha * (1.0 - u_depthDarkness * 0.82) * (0.18 + vertical * 0.82);
-        color += vec3(0.35, 0.82, 0.74) * caustic;
+        float caustic = smoothstep(0.72, 0.995, causticLineA * causticLineB);
+        caustic *= u_causticAlpha * (1.0 - u_depthDarkness) * (0.10 + vertical * 0.55) * 0.18;
+        color += vec3(0.20, 0.54, 0.54) * caustic;
 
         float fogNoise = oceanNoise((p * 3.2) + vec2(time * 0.035, -time * 0.025));
         float fog = (fogNoise * 0.5 + 0.5) * u_fogAlpha;
         color = mix(color, bottomColor, fog * 0.30);
 
-        vec2 snowGrid = vec2(uv.x * 82.0 + sin(time * 0.12 + uv.y * 9.0) * 2.0,
-                             uv.y * 126.0 + time * (1.8 + u_depthDarkness * 2.2));
-        float snowCell = oceanHash(floor(snowGrid));
-        float snow = step(0.986 - u_depthDarkness * 0.008, snowCell);
-        snow *= smoothstep(0.18, 1.0, u_depthDarkness + u_fogAlpha);
-        color += vec3(0.62, 0.98, 0.92) * snow * (0.055 + u_glowIntensity * 0.09);
-
         float glowVeil = oceanNoise((p * 5.8) + vec2(-time * 0.07, time * 0.045));
-        color += vec3(0.08, 0.55, 0.48) * glowVeil * u_glowIntensity * (0.10 + u_biomeEnergy * 0.12);
+        color += vec3(0.05, 0.30, 0.30) * glowVeil * u_glowIntensity * (0.045 + u_biomeEnergy * 0.045);
 
         float depthVignette = smoothstep(0.0, 1.0, u_depthDarkness);
         float edge = distance(uv, vec2(0.5, 0.52));
@@ -1551,8 +1544,8 @@ private final class OceanParallaxBackdrop: SKNode {
                                                y: (-cameraPosition.y * 0.035 + sin(elapsed * 0.18) * 8)
                                                 .clamped(to: -sceneSize.height * 0.18...sceneSize.height * 0.18))
 
-        causticLayer.alpha = environment.causticAlpha * biomeCausticMultiplier(for: biome)
-        planktonLayer.alpha = planktonAlpha(for: zone) * environment.planktonDensity
+        causticLayer.alpha = environment.causticAlpha * biomeCausticMultiplier(for: biome) * causticLayerScale(for: zone)
+        planktonLayer.alpha = planktonAlpha(for: zone) * environment.planktonDensity * 0.18
         distantCanopyLayer.alpha = canopyAlpha(for: zone) * biomeHabitatMultiplier(for: biome)
         distantHabitatLayer.alpha = habitatAlpha(for: zone) * biomeHabitatMultiplier(for: biome)
         lifeLayer.alpha = lifeAlpha(for: zone) * environment.lifeDensity * biomeLifeMultiplier(for: biome)
@@ -1689,16 +1682,19 @@ private final class OceanParallaxBackdrop: SKNode {
             }
 
             let line = SKShapeNode(path: path.cgPath)
-            line.strokeColor = UIColor(white: 1, alpha: CGFloat.random(in: 0.10...0.22))
+            line.strokeColor = UIColor(red: 0.62,
+                                       green: 0.86,
+                                       blue: 0.84,
+                                       alpha: CGFloat.random(in: 0.035...0.08))
             line.fillColor = .clear
-            line.lineWidth = CGFloat.random(in: 1.4...3.2)
-            line.glowWidth = CGFloat.random(in: 3...8)
+            line.lineWidth = CGFloat.random(in: 0.7...1.4)
+            line.glowWidth = CGFloat.random(in: 0...1.5)
             line.blendMode = .add
             line.zRotation = CGFloat.random(in: -0.18...0.18)
             causticLayer.addChild(line)
 
-            let fadeLow = SKAction.fadeAlpha(to: 0.35, duration: Double.random(in: 2.0...4.0))
-            let fadeHigh = SKAction.fadeAlpha(to: 1.0, duration: Double.random(in: 2.0...4.0))
+            let fadeLow = SKAction.fadeAlpha(to: 0.18, duration: Double.random(in: 2.0...4.0))
+            let fadeHigh = SKAction.fadeAlpha(to: 0.45, duration: Double.random(in: 2.0...4.0))
             fadeLow.eaeInEaseOut()
             fadeHigh.eaeInEaseOut()
             line.run(.repeatForever(.sequence([fadeLow, fadeHigh])))
@@ -1708,14 +1704,17 @@ private final class OceanParallaxBackdrop: SKNode {
     private func buildPlankton() {
         let width = sceneSize.width * 2.8
         let height = sceneSize.height * 2.4
-        for _ in 0..<90 {
-            let radius = CGFloat.random(in: 1.0...3.6)
+        for _ in 0..<28 {
+            let radius = CGFloat.random(in: 0.35...0.9)
             let mote = SKShapeNode(circleOfRadius: radius)
-            mote.fillColor = UIColor(red: 0.82, green: 1.0, blue: 0.92, alpha: CGFloat.random(in: 0.18...0.48))
+            mote.fillColor = UIColor(red: 0.56,
+                                     green: 0.78,
+                                     blue: 0.76,
+                                     alpha: CGFloat.random(in: 0.025...0.07))
             mote.strokeColor = .clear
             mote.position = CGPoint(x: CGFloat.random(in: -width / 2...width / 2),
                                     y: CGFloat.random(in: -height / 2...height / 2))
-            mote.glowWidth = CGFloat.random(in: 0...4)
+            mote.glowWidth = 0
             planktonLayer.addChild(mote)
 
             let rise = SKAction.moveBy(x: CGFloat.random(in: -18...18),
@@ -1831,49 +1830,27 @@ private final class OceanParallaxBackdrop: SKNode {
                                     baseHeight: CGFloat,
                                     rng: inout SeededGenerator) -> SKNode {
         let node = SKNode()
-        let layerCount = rng.nextInt(in: 2...3)
-        for layerIndex in 0..<layerCount {
-            let layerWidth = width * rng.nextCGFloat(in: 0.72...1.06)
-            let halfWidth = layerWidth * 0.5
-            let yOffset = -CGFloat(layerIndex) * baseHeight * rng.nextCGFloat(in: 0.10...0.20)
-            let thickness = baseHeight * rng.nextCGFloat(in: 0.28...0.56)
-            let segments = 14
+        let ribbonCount = rng.nextInt(in: 5...9)
+        for ribbonIndex in 0..<ribbonCount {
+            let layerWidth = width * rng.nextCGFloat(in: 0.58...1.02)
+            let yOffset = -CGFloat(ribbonIndex) * baseHeight * rng.nextCGFloat(in: 0.04...0.10)
+            let startX = -layerWidth * 0.5 + rng.nextCGFloat(in: -10...16)
+            let endX = layerWidth * 0.5 + rng.nextCGFloat(in: -16...10)
             let path = UIBezierPath()
-            let leftTip = CGPoint(x: -halfWidth,
-                                  y: yOffset - thickness * rng.nextCGFloat(in: 0.14...0.30))
-            let rightTip = CGPoint(x: halfWidth,
-                                   y: yOffset - thickness * rng.nextCGFloat(in: 0.14...0.30))
-
-            path.move(to: leftTip)
-
-            for step in 1..<segments {
-                let t = CGFloat(step) / CGFloat(segments)
-                let x = -halfWidth + layerWidth * t
-                let crown = sin(t * .pi) * baseHeight * rng.nextCGFloat(in: 0.20...0.54)
-                let y = yOffset + crown + rng.nextCGFloat(in: -baseHeight * 0.10...baseHeight * 0.10)
-                path.addLine(to: CGPoint(x: x, y: y))
-            }
-
-            path.addLine(to: rightTip)
-
-            for step in stride(from: segments - 1, through: 1, by: -1) {
-                let t = CGFloat(step) / CGFloat(segments)
-                let x = -halfWidth + layerWidth * t + rng.nextCGFloat(in: -8...8)
-                let sag = sin(t * .pi) * baseHeight * rng.nextCGFloat(in: 0.04...0.22)
-                let y = yOffset - thickness - sag + rng.nextCGFloat(in: -baseHeight * 0.16...baseHeight * 0.12)
-                path.addLine(to: CGPoint(x: x, y: y))
-            }
-            path.close()
-
-            let mat = SKShapeNode(path: path.cgPath)
-            mat.fillColor = UIColor(red: 0.03,
-                                    green: 0.16,
-                                    blue: 0.18,
-                                    alpha: layerIndex == 0 ? 0.13 : 0.08)
-            mat.strokeColor = UIColor(red: 0.34, green: 0.72, blue: 0.62, alpha: 0.045)
-            mat.lineWidth = 0.8
-            mat.zPosition = CGFloat(layerIndex)
-            node.addChild(mat)
+            path.move(to: CGPoint(x: startX, y: yOffset + rng.nextCGFloat(in: -4...6)))
+            path.addCurve(to: CGPoint(x: endX, y: yOffset + rng.nextCGFloat(in: -5...7)),
+                          controlPoint1: CGPoint(x: startX + layerWidth * rng.nextCGFloat(in: 0.24...0.36),
+                                                 y: yOffset + baseHeight * rng.nextCGFloat(in: -0.18...0.34)),
+                          controlPoint2: CGPoint(x: endX - layerWidth * rng.nextCGFloat(in: 0.24...0.36),
+                                                 y: yOffset + baseHeight * rng.nextCGFloat(in: -0.18...0.34)))
+            let ribbon = SKShapeNode(path: path.cgPath)
+            ribbon.fillColor = .clear
+            ribbon.strokeColor = distantVegetationColor(alpha: rng.nextCGFloat(in: 0.045...0.11))
+            ribbon.lineWidth = rng.nextCGFloat(in: 3.0...8.5)
+            ribbon.lineCap = .round
+            ribbon.lineJoin = .round
+            ribbon.zPosition = CGFloat(ribbonIndex)
+            node.addChild(ribbon)
         }
 
         for _ in 0..<rng.nextInt(in: 5...10) {
@@ -2053,6 +2030,16 @@ private final class OceanParallaxBackdrop: SKNode {
         case .mid: return 0.22
         case .blue: return 0.12
         case .deep, .abyss: return 0.05
+        }
+    }
+
+    private func causticLayerScale(for zone: DepthZone) -> CGFloat {
+        switch zone {
+        case .surface: return 0.42
+        case .clear: return 0.32
+        case .shallow: return 0.18
+        case .mid: return 0.06
+        case .blue, .deep, .abyss: return 0.0
         }
     }
 

@@ -31,9 +31,14 @@ extension WorldStampRenderer {
             let y = floorY - dome + rng.nextCGFloat(in: -8...10)
             path.addLine(to: CGPoint(x: x, y: y))
         }
-        path.addLine(to: CGPoint(x: right + size.width * 0.04, y: floorY + rng.nextCGFloat(in: 2...10)))
-        path.addLine(to: CGPoint(x: right, y: size.height * 0.96))
-        path.addLine(to: CGPoint(x: left, y: size.height * 0.96))
+
+        for i in stride(from: steps, through: 0, by: -1) {
+            let t = CGFloat(i) / CGFloat(steps)
+            let x = left + (right - left) * t + rng.nextCGFloat(in: -8...8)
+            let sag = sin(t * .pi) * rng.nextCGFloat(in: 12...34)
+            let y = floorY + rng.nextCGFloat(in: 16...42) + sag
+            path.addLine(to: CGPoint(x: x, y: min(size.height * 0.96, y)))
+        }
         path.close()
 
         fill(path, in: rect, top: top.withAlphaComponent(0.82), bottom: bottom.withAlphaComponent(0.94), context: context)
@@ -148,44 +153,134 @@ extension WorldStampRenderer {
                               biome: AquaticBiome,
                               rng: inout SeededGenerator) {
         let base = WorldVisualPalette.macroColor(for: zone, biome: biome)
-        let color = UIColor.lerp(base, .black, 0.18).withAlphaComponent(0.74)
+        let color = UIColor.lerp(base, .black, 0.18).withAlphaComponent(0.54)
         switch biome {
         case .ancientRuins:
-            for i in 0..<rng.nextInt(in: 4...7) {
-                let width = rng.nextCGFloat(in: 22...46)
-                let height = rng.nextCGFloat(in: size.height * 0.32...size.height * 0.76)
-                let x = size.width * 0.18 + CGFloat(i) * size.width * 0.12 + rng.nextCGFloat(in: -10...10)
-                let rect = CGRect(x: x, y: size.height * 0.78 - height, width: width, height: height)
-                let column = UIBezierPath(roundedRect: rect, cornerRadius: 4)
-                color.setFill()
-                column.fill()
-            }
+            drawAncientRuinSilhouette(context: context, size: size, color: color, rng: &rng)
         case .cavernMouth, .reefWall:
-            let path = UIBezierPath()
-            path.move(to: CGPoint(x: size.width * 0.04, y: size.height * 0.78))
-            for i in 0...8 {
-                let t = CGFloat(i) / 8
-                path.addLine(to: CGPoint(x: size.width * (0.04 + t * 0.92),
-                                         y: size.height * rng.nextCGFloat(in: 0.28...0.62)))
-            }
-            path.addLine(to: CGPoint(x: size.width * 0.96, y: size.height * 0.94))
-            path.addLine(to: CGPoint(x: size.width * 0.04, y: size.height * 0.94))
-            path.close()
-            color.setFill()
-            path.fill()
+            drawReefWallSilhouette(context: context, size: size, color: color, rng: &rng)
         default:
+            drawDistantForestSilhouette(context: context, size: size, color: color, rng: &rng)
+        }
+    }
+
+    private static func drawAncientRuinSilhouette(context: CGContext,
+                                                  size: CGSize,
+                                                  color: UIColor,
+                                                  rng: inout SeededGenerator) {
+        for i in 0..<rng.nextInt(in: 4...7) {
+            let width = rng.nextCGFloat(in: 16...34)
+            let height = rng.nextCGFloat(in: size.height * 0.28...size.height * 0.68)
+            let x = size.width * 0.18 + CGFloat(i) * size.width * 0.12 + rng.nextCGFloat(in: -10...10)
+            let bottomY = size.height * rng.nextCGFloat(in: 0.76...0.88)
+            let topY = bottomY - height
             let path = UIBezierPath()
-            path.move(to: CGPoint(x: size.width * 0.06, y: size.height * 0.70))
-            for i in 0...10 {
-                let t = CGFloat(i) / 10
-                path.addLine(to: CGPoint(x: size.width * (0.06 + t * 0.88),
-                                         y: size.height * (0.46 + sin(t * CGFloat.pi) * -0.20 + rng.nextCGFloat(in: -0.05...0.08))))
+            path.move(to: CGPoint(x: x, y: bottomY))
+            path.addLine(to: CGPoint(x: x + rng.nextCGFloat(in: -5...5), y: topY + rng.nextCGFloat(in: -8...8)))
+            path.addLine(to: CGPoint(x: x + width, y: topY + rng.nextCGFloat(in: -10...10)))
+            path.addLine(to: CGPoint(x: x + width + rng.nextCGFloat(in: -5...5), y: bottomY + rng.nextCGFloat(in: -8...8)))
+            path.lineCapStyle = .round
+            path.lineJoinStyle = .round
+            stroke(path, color: color.withAlphaComponent(0.26), width: rng.nextCGFloat(in: 6...13))
+            stroke(path, color: UIColor.lerp(color, .white, 0.12).withAlphaComponent(0.18), width: rng.nextCGFloat(in: 1.5...3.0))
+        }
+        drawBrokenRootMass(context: context,
+                           size: size,
+                           color: color.withAlphaComponent(0.14),
+                           yRange: size.height * 0.70...size.height * 0.90,
+                           rng: &rng)
+    }
+
+    private static func drawReefWallSilhouette(context: CGContext,
+                                               size: CGSize,
+                                               color: UIColor,
+                                               rng: inout SeededGenerator) {
+        drawBrokenRootMass(context: context,
+                           size: size,
+                           color: color.withAlphaComponent(0.16),
+                           yRange: size.height * 0.58...size.height * 0.86,
+                           rng: &rng)
+        for _ in 0..<rng.nextInt(in: 12...22) {
+            let x = rng.nextCGFloat(in: size.width * 0.10...size.width * 0.90)
+            let baseY = rng.nextCGFloat(in: size.height * 0.70...size.height * 0.92)
+            let height = rng.nextCGFloat(in: size.height * 0.18...size.height * 0.50)
+            let lean = rng.nextCGFloat(in: -26...26)
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: x, y: baseY))
+            path.addCurve(to: CGPoint(x: x + lean, y: baseY - height),
+                          controlPoint1: CGPoint(x: x - lean * 0.18, y: baseY - height * 0.32),
+                          controlPoint2: CGPoint(x: x + lean * 0.78, y: baseY - height * 0.74))
+            path.lineCapStyle = .round
+            stroke(path, color: color.withAlphaComponent(rng.nextCGFloat(in: 0.10...0.22)), width: rng.nextCGFloat(in: 5...14))
+        }
+    }
+
+    private static func drawDistantForestSilhouette(context: CGContext,
+                                                    size: CGSize,
+                                                    color: UIColor,
+                                                    rng: inout SeededGenerator) {
+        drawBrokenRootMass(context: context,
+                           size: size,
+                           color: color.withAlphaComponent(0.12),
+                           yRange: size.height * 0.62...size.height * 0.88,
+                           rng: &rng)
+        for _ in 0..<rng.nextInt(in: 9...18) {
+            let x = rng.nextCGFloat(in: size.width * 0.12...size.width * 0.88)
+            let baseY = rng.nextCGFloat(in: size.height * 0.68...size.height * 0.90)
+            let height = rng.nextCGFloat(in: size.height * 0.16...size.height * 0.42)
+            let lean = rng.nextCGFloat(in: -22...22)
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: x, y: baseY))
+            path.addCurve(to: CGPoint(x: x + lean, y: baseY - height),
+                          controlPoint1: CGPoint(x: x - lean * 0.24, y: baseY - height * 0.28),
+                          controlPoint2: CGPoint(x: x + lean * 0.70, y: baseY - height * 0.70))
+            path.lineCapStyle = .round
+            stroke(path, color: color.withAlphaComponent(rng.nextCGFloat(in: 0.10...0.20)), width: rng.nextCGFloat(in: 4...11))
+
+            if rng.chance(0.42) {
+                drawEllipse(context: context,
+                            center: CGPoint(x: x + lean * rng.nextCGFloat(in: 0.44...0.86),
+                                            y: baseY - height * rng.nextCGFloat(in: 0.42...0.82)),
+                            size: CGSize(width: rng.nextCGFloat(in: 30...72),
+                                         height: rng.nextCGFloat(in: 16...42)),
+                            angle: rng.nextCGFloat(in: -0.45...0.45),
+                            fill: color.withAlphaComponent(rng.nextCGFloat(in: 0.05...0.10)),
+                            stroke: .clear,
+                            lineWidth: 0)
             }
-            path.addLine(to: CGPoint(x: size.width * 0.94, y: size.height * 0.82))
-            path.addLine(to: CGPoint(x: size.width * 0.06, y: size.height * 0.84))
-            path.close()
-            color.setFill()
-            path.fill()
+        }
+    }
+
+    private static func drawBrokenRootMass(context: CGContext,
+                                           size: CGSize,
+                                           color: UIColor,
+                                           yRange: ClosedRange<CGFloat>,
+                                           rng: inout SeededGenerator) {
+        for _ in 0..<rng.nextInt(in: 5...9) {
+            let width = rng.nextCGFloat(in: size.width * 0.10...size.width * 0.28)
+            let center = CGPoint(x: rng.nextCGFloat(in: size.width * 0.12...size.width * 0.88),
+                                 y: rng.nextCGFloat(in: yRange))
+            drawEllipse(context: context,
+                        center: center,
+                        size: CGSize(width: width,
+                                     height: rng.nextCGFloat(in: size.height * 0.035...size.height * 0.085)),
+                        angle: rng.nextCGFloat(in: -0.22...0.22),
+                        fill: color.withAlphaComponent(rng.nextCGFloat(in: 0.08...0.20)),
+                        stroke: .clear,
+                        lineWidth: 0)
+        }
+
+        for _ in 0..<rng.nextInt(in: 8...16) {
+            let x = rng.nextCGFloat(in: size.width * 0.10...size.width * 0.90)
+            let y = rng.nextCGFloat(in: yRange)
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: x, y: y))
+            path.addCurve(to: CGPoint(x: x + rng.nextCGFloat(in: -22...22),
+                                      y: y + rng.nextCGFloat(in: 18...58)),
+                          controlPoint1: CGPoint(x: x + rng.nextCGFloat(in: -12...12), y: y + 10),
+                          controlPoint2: CGPoint(x: x + rng.nextCGFloat(in: -18...18), y: y + 34))
+            path.lineCapStyle = .round
+            stroke(path, color: color.withAlphaComponent(rng.nextCGFloat(in: 0.10...0.24)), width: rng.nextCGFloat(in: 1.2...3.2))
         }
     }
 }
