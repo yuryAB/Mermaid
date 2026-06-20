@@ -442,7 +442,7 @@ final class HUDLayer: SKNode {
 
     private func buildActiveEffectsShelf() {
         activeEffectsShelf = SKNode()
-        activeEffectsShelf.position = CGPoint(x: 0, y: topPanelBottomY - 24)
+        activeEffectsShelf.position = CGPoint(x: 0, y: topPanelBottomY - 18)
         activeEffectsShelf.zPosition = 8
         activeEffectsShelf.alpha = 0
         activeEffectsShelf.isHidden = true
@@ -474,13 +474,13 @@ final class HUDLayer: SKNode {
             return
         }
 
-        let gap: CGFloat = 6
-        let shelfWidth = min(sceneSize.width - 44, 360)
+        let gap: CGFloat = 5
+        let shelfWidth = min(sceneSize.width - 52, 344)
         let chipWidth = (shelfWidth - gap * CGFloat(visibleBuffs.count - 1)) / CGFloat(visibleBuffs.count)
         let startX = -shelfWidth / 2 + chipWidth / 2
 
         for (index, buff) in visibleBuffs.enumerated() {
-            let chip = makeEffectChip(buff: buff, size: CGSize(width: chipWidth, height: 30))
+            let chip = makeEffectChip(buff: buff, size: CGSize(width: chipWidth, height: 24))
             chip.position = CGPoint(x: startX + CGFloat(index) * (chipWidth + gap), y: 0)
             activeEffectsShelf.addChild(chip)
         }
@@ -496,18 +496,18 @@ final class HUDLayer: SKNode {
                                       cornerRadius: 8,
                                       fill: HUDPalette.palePaper,
                                       stroke: accent.withAlphaComponent(0.62),
-                                      shadowAlpha: 0.10)
+                                      shadowAlpha: 0.07)
 
-        let mark = SKShapeNode(circleOfRadius: 8)
+        let mark = SKShapeNode(circleOfRadius: 6.5)
         mark.fillColor = accent.withAlphaComponent(0.18)
         mark.strokeColor = accent.withAlphaComponent(0.70)
         mark.lineWidth = 0.8
-        mark.position = CGPoint(x: -size.width / 2 + 16, y: 5)
+        mark.position = CGPoint(x: -size.width / 2 + 14, y: 3)
         mark.zPosition = 4
         node.addChild(mark)
 
         let glyph = makeLabel(text: effectGlyph(for: buff.kind),
-                              fontSize: 8.5,
+                              fontSize: 7.8,
                               style: .bodyBold,
                               color: accent)
         glyph.horizontalAlignmentMode = .center
@@ -516,46 +516,55 @@ final class HUDLayer: SKNode {
         glyph.zPosition = 5
         node.addChild(glyph)
 
-        let title = makeLabel(text: buff.title,
-                              fontSize: size.width < 118 ? 8.6 : 9.4,
+        let title = makeLabel(text: compactEffectTitle(for: buff),
+                              fontSize: size.width < 118 ? 8.2 : 9.0,
                               style: .bodyBold,
                               color: HUDPalette.ink)
         title.horizontalAlignmentMode = .left
         title.verticalAlignmentMode = .center
-        title.preferredMaxLayoutWidth = size.width - 66
+        title.preferredMaxLayoutWidth = size.width - 58
         title.numberOfLines = 1
         title.lineBreakMode = .byTruncatingTail
-        title.position = CGPoint(x: -size.width / 2 + 30, y: 7)
+        title.position = CGPoint(x: -size.width / 2 + 27, y: 4)
         title.zPosition = 5
         node.addChild(title)
 
         let time = makeLabel(text: effectRemainingText(buff.remaining),
-                             fontSize: 8.2,
+                             fontSize: 7.8,
                              style: .bodyBold,
                              color: HUDPalette.mutedInk)
         time.horizontalAlignmentMode = .right
         time.verticalAlignmentMode = .center
-        time.position = CGPoint(x: size.width / 2 - 9, y: 7)
+        time.position = CGPoint(x: size.width / 2 - 8, y: 4)
         time.zPosition = 5
         node.addChild(time)
 
-        let barWidth = max(28, size.width - 38)
-        let track = SKShapeNode(rect: CGRect(x: -barWidth / 2, y: -9, width: barWidth, height: 4),
-                                cornerRadius: 2)
+        let barWidth = max(28, size.width - 28)
+        let track = SKShapeNode(rect: CGRect(x: -barWidth / 2, y: -9, width: barWidth, height: 3),
+                                cornerRadius: 1.5)
         track.fillColor = HUDPalette.line.withAlphaComponent(0.16)
         track.strokeColor = .clear
         track.zPosition = 4
         node.addChild(track)
 
         let fillWidth = max(2, barWidth * buff.remainingFraction)
-        let fill = SKShapeNode(rect: CGRect(x: -barWidth / 2, y: -9, width: fillWidth, height: 4),
-                               cornerRadius: 2)
+        let fill = SKShapeNode(rect: CGRect(x: -barWidth / 2, y: -9, width: fillWidth, height: 3),
+                               cornerRadius: 1.5)
         fill.fillColor = accent.withAlphaComponent(0.78)
         fill.strokeColor = .clear
         fill.zPosition = 5
         node.addChild(fill)
 
         return node
+    }
+
+    private func compactEffectTitle(for buff: TimedBuff) -> String {
+        switch buff.kind {
+        case .fishGuide: return "Segue peixe"
+        case .fishPlay: return "Brinca com peixe"
+        case .temporaryPet: return "Companhia"
+        default: return buff.title
+        }
     }
 
     private func effectSortPriority(_ kind: TimedBuffKind) -> Int {
@@ -659,37 +668,38 @@ final class HUDLayer: SKNode {
 
     private func buildMessageBubble() {
         messageContainer = SKNode()
-        messageContainer.position = CGPoint(x: -10, y: topPanelBottomY - 76)
+        messageContainer.position = CGPoint(x: -8, y: topPanelBottomY - 64)
         messageContainer.alpha = 0
         messageContainer.zPosition = 6
-        messageContainer.zRotation = -0.018
+        messageContainer.zRotation = -0.012
         addChild(messageContainer)
 
-        let bubbleSize = CGSize(width: sceneSize.width - 62, height: 64)
+        let bubbleSize = CGSize(width: sceneSize.width - 66, height: 48)
         let bubble = HUDLayer.paperCard(size: bubbleSize,
                                         cornerRadius: 8,
                                         fill: HUDPalette.palePaper,
                                         stroke: HUDPalette.teal.withAlphaComponent(0.58),
-                                        shadowAlpha: 0.16)
+                                        shadowAlpha: 0.11)
         messageContainer.addChild(bubble)
 
         let halfW = bubbleSize.width / 2
         let wave = HUDLayer.iconNode(kind: .wave, color: HUDPalette.teal)
-        wave.position = CGPoint(x: -halfW + 25, y: -2)
+        wave.setScale(0.82)
+        wave.position = CGPoint(x: -halfW + 22, y: -1)
         wave.zPosition = 5
         messageContainer.addChild(wave)
 
-        messageTitleLabel = makeLabel(fontSize: 10, style: .bodyBold, color: HUDPalette.teal)
+        messageTitleLabel = makeLabel(fontSize: 8.4, style: .bodyBold, color: HUDPalette.teal)
         messageTitleLabel.horizontalAlignmentMode = .left
-        messageTitleLabel.position = CGPoint(x: -halfW + 48, y: 14)
+        messageTitleLabel.position = CGPoint(x: -halfW + 42, y: 12)
         messageTitleLabel.zPosition = 5
         messageContainer.addChild(messageTitleLabel)
 
-        messageLabel = makeLabel(fontSize: 12, style: .body, color: HUDPalette.ink)
+        messageLabel = makeLabel(fontSize: 11.2, style: .body, color: HUDPalette.ink)
         messageLabel.horizontalAlignmentMode = .left
         messageLabel.verticalAlignmentMode = .center
-        messageLabel.position = CGPoint(x: -halfW + 48, y: -10)
-        messageLabel.preferredMaxLayoutWidth = bubbleSize.width - 68
+        messageLabel.position = CGPoint(x: -halfW + 42, y: -8)
+        messageLabel.preferredMaxLayoutWidth = bubbleSize.width - 58
         messageLabel.numberOfLines = 2
         messageLabel.zPosition = 5
         messageContainer.addChild(messageLabel)
@@ -715,34 +725,34 @@ final class HUDLayer: SKNode {
 
     private func fieldNote(from rawText: String) -> (title: String, body: String) {
         let lower = rawText.lowercased()
-        var title = "Observação rápida"
+        var title = "Observação"
         var body = rawText
 
         if lower.contains("ovo") || lower.contains("choco") || lower.contains("nasceu") || lower.contains("nascendo") {
             title = "Incubação"
             body = cleanFieldText(rawText)
         } else if lower.contains("correnteza") {
-            title = "Registro do ambiente"
+            title = "Ambiente"
             body = "Correnteza registrada na região."
         } else if lower.contains("objetivo disponivel") || lower.contains("objetivo disponível") {
-            title = "Nova observação"
+            title = "Novo registro"
             body = cleanFieldText(rawText)
                 .replacingOccurrences(of: "(Objetivo disponivel)", with: "Objetivo disponível.")
                 .replacingOccurrences(of: "(Objetivo disponível)", with: "Objetivo disponível.")
         } else if lower.contains("refugio") || lower.contains("refúgio") {
-            title = "Registro do refúgio"
+            title = "Refúgio"
             body = cleanFieldText(rawText)
         } else if lower.contains("desafio") || lower.contains("trama") {
-            title = "Desafio registrado"
+            title = "Desafio"
             body = cleanFieldText(rawText)
         } else if lower.contains("camada") || lower.contains("profund") {
-            title = "Camada observada"
+            title = "Camada"
             body = cleanFieldText(rawText)
         } else if lower.contains("efeito ativo") || lower.contains("efeito temporário") {
-            title = "Efeito temporário"
+            title = "Efeito"
             body = cleanFieldText(rawText)
         } else if lower.contains("fome") || lower.contains("faminta") || lower.contains("comer") {
-            title = "Sinais biológicos"
+            title = "Sinais"
             body = cleanFieldText(rawText)
         } else {
             body = cleanFieldText(rawText)

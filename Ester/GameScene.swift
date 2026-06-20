@@ -1545,12 +1545,12 @@ private final class OceanParallaxBackdrop: SKNode {
         var rng = SeededGenerator(seed: 0xC0A57A7C5EED5678)
         for index in 0..<clusterCount {
             let stride = distantHabitatTileSpan / CGFloat(clusterCount)
-            let width = rng.nextCGFloat(in: 220...430)
+            let width = rng.nextCGFloat(in: 260...520)
             let x = -distantHabitatTileSpan / 2
                 + stride * (CGFloat(index) + 0.5)
-                + rng.nextCGFloat(in: -stride * 0.18...stride * 0.18)
+                + rng.nextCGFloat(in: -stride * 0.12...stride * 0.12)
             let rowOffset = CGFloat(index % 2) * sceneSize.height * 0.075
-            let y = -sceneSize.height * 0.50
+            let y = -sceneSize.height * 0.54
                 + rowOffset
                 + rng.nextCGFloat(in: -sceneSize.height * 0.025...sceneSize.height * 0.035)
             let cluster = makeDistantHabitatCluster(width: width, rng: &rng)
@@ -1586,25 +1586,9 @@ private final class OceanParallaxBackdrop: SKNode {
         let node = SKNode()
 
         let baseHeight = rng.nextCGFloat(in: 24...56)
-        let base = UIBezierPath()
-        base.move(to: CGPoint(x: -width * 0.54, y: 0))
-        for step in 0...12 {
-            let t = CGFloat(step) / 12
-            let x = -width * 0.54 + width * 1.08 * t
-            let mound = sin(t * .pi) * baseHeight * rng.nextCGFloat(in: 0.72...1.08)
-            base.addLine(to: CGPoint(x: x,
-                                     y: mound + rng.nextCGFloat(in: -baseHeight * 0.16...baseHeight * 0.14)))
-        }
-        base.addLine(to: CGPoint(x: width * 0.56, y: -baseHeight * 0.30))
-        base.addLine(to: CGPoint(x: -width * 0.56, y: -baseHeight * 0.34))
-        base.close()
-
-        let shelf = SKShapeNode(path: base.cgPath)
-        shelf.fillColor = UIColor(red: 0.03, green: 0.16, blue: 0.18, alpha: 0.26)
-        shelf.strokeColor = UIColor(red: 0.34, green: 0.72, blue: 0.62, alpha: 0.12)
-        shelf.lineWidth = 1.2
-        shelf.zPosition = 0
-        node.addChild(shelf)
+        let rootMat = makeDistantRootMat(width: width, baseHeight: baseHeight, rng: &rng)
+        rootMat.zPosition = 0
+        node.addChild(rootMat)
 
         let skirtCount = rng.nextInt(in: 14...26)
         for _ in 0..<skirtCount {
@@ -1629,6 +1613,70 @@ private final class OceanParallaxBackdrop: SKNode {
 
         node.alpha = rng.nextCGFloat(in: 0.62...0.90)
         node.setScale(rng.nextCGFloat(in: 0.76...1.16))
+        return node
+    }
+
+    private func makeDistantRootMat(width: CGFloat,
+                                    baseHeight: CGFloat,
+                                    rng: inout SeededGenerator) -> SKNode {
+        let node = SKNode()
+        let layerCount = rng.nextInt(in: 2...3)
+        for layerIndex in 0..<layerCount {
+            let layerWidth = width * rng.nextCGFloat(in: 0.72...1.06)
+            let halfWidth = layerWidth * 0.5
+            let yOffset = -CGFloat(layerIndex) * baseHeight * rng.nextCGFloat(in: 0.10...0.20)
+            let thickness = baseHeight * rng.nextCGFloat(in: 0.28...0.56)
+            let segments = 14
+            let path = UIBezierPath()
+            let leftTip = CGPoint(x: -halfWidth,
+                                  y: yOffset - thickness * rng.nextCGFloat(in: 0.14...0.30))
+            let rightTip = CGPoint(x: halfWidth,
+                                   y: yOffset - thickness * rng.nextCGFloat(in: 0.14...0.30))
+
+            path.move(to: leftTip)
+
+            for step in 1..<segments {
+                let t = CGFloat(step) / CGFloat(segments)
+                let x = -halfWidth + layerWidth * t
+                let crown = sin(t * .pi) * baseHeight * rng.nextCGFloat(in: 0.20...0.54)
+                let y = yOffset + crown + rng.nextCGFloat(in: -baseHeight * 0.10...baseHeight * 0.10)
+                path.addLine(to: CGPoint(x: x, y: y))
+            }
+
+            path.addLine(to: rightTip)
+
+            for step in stride(from: segments - 1, through: 1, by: -1) {
+                let t = CGFloat(step) / CGFloat(segments)
+                let x = -halfWidth + layerWidth * t + rng.nextCGFloat(in: -8...8)
+                let sag = sin(t * .pi) * baseHeight * rng.nextCGFloat(in: 0.04...0.22)
+                let y = yOffset - thickness - sag + rng.nextCGFloat(in: -baseHeight * 0.16...baseHeight * 0.12)
+                path.addLine(to: CGPoint(x: x, y: y))
+            }
+            path.close()
+
+            let mat = SKShapeNode(path: path.cgPath)
+            mat.fillColor = UIColor(red: 0.03,
+                                    green: 0.16,
+                                    blue: 0.18,
+                                    alpha: layerIndex == 0 ? 0.13 : 0.08)
+            mat.strokeColor = UIColor(red: 0.34, green: 0.72, blue: 0.62, alpha: 0.045)
+            mat.lineWidth = 0.8
+            mat.zPosition = CGFloat(layerIndex)
+            node.addChild(mat)
+        }
+
+        for _ in 0..<rng.nextInt(in: 5...10) {
+            let patch = SKShapeNode(ellipseOf: CGSize(width: rng.nextCGFloat(in: 20...58),
+                                                      height: rng.nextCGFloat(in: 5...14)))
+            patch.fillColor = distantVegetationColor(alpha: rng.nextCGFloat(in: 0.05...0.12))
+            patch.strokeColor = .clear
+            patch.position = CGPoint(x: rng.nextCGFloat(in: -width * 0.42...width * 0.42),
+                                     y: rng.nextCGFloat(in: -baseHeight * 0.22...baseHeight * 0.42))
+            patch.zRotation = rng.nextCGFloat(in: -0.20...0.20)
+            patch.zPosition = 4
+            node.addChild(patch)
+        }
+
         return node
     }
 
