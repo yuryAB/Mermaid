@@ -1,0 +1,7722 @@
+{
+  "id": "mossy-terrain-256",
+  "name": "Mossy Terrain 256",
+  "source": "/Users/yuryantony/Downloads/Mossy Tileset/Mossy - TileSet.png",
+  "tileSize": 256,
+  "columns": 14,
+  "rows": 14,
+  "totalTiles": 228,
+  "usableTiles": 224,
+  "tiles": [
+    {
+      "id": "mossy-terrain-r01-c01",
+      "name": "R01 C01",
+      "file": "mossy-terrain-r01-c01.png",
+      "row": 1,
+      "column": 1,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.621521,
+      "usable": true,
+      "bounds": {
+        "x": 34,
+        "y": 33,
+        "width": 222,
+        "height": 223
+      },
+      "fingerprint": "d56820775f7a91af108c90699aab3c7b228b892c0f6e0d99e07640484e87d218",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.868164,
+        "south": 0.831543,
+        "west": 0.0
+      },
+      "connectionMask": 6,
+      "cornerAlpha": {
+        "topLeft": 0.052344,
+        "topRight": 0.461875,
+        "bottomLeft": 0.349531,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r01-c02",
+      "name": "R01 C02",
+      "file": "mossy-terrain-r01-c02.png",
+      "row": 1,
+      "column": 2,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.810928,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 256,
+        "height": 227
+      },
+      "fingerprint": "8ede6f5163c0327003df79dc4e0539871e2e77d97757b893dddce16b195e4c85",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.73584,
+        "south": 1.0,
+        "west": 0.871094
+      },
+      "connectionMask": 14,
+      "cornerAlpha": {
+        "topLeft": 0.443437,
+        "topRight": 0.338438,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r01-c03",
+      "name": "R01 C03",
+      "file": "mossy-terrain-r01-c03.png",
+      "row": 1,
+      "column": 3,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.800385,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 35,
+        "width": 256,
+        "height": 221
+      },
+      "fingerprint": "8837e12e11091a756254a3711f11949a15f194ee5b0f1f38861c9e8d7dc530a5",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.822754,
+        "south": 1.0,
+        "west": 0.742188
+      },
+      "connectionMask": 14,
+      "cornerAlpha": {
+        "topLeft": 0.353125,
+        "topRight": 0.3975,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r01-c04",
+      "name": "R01 C04",
+      "file": "mossy-terrain-r01-c04.png",
+      "row": 1,
+      "column": 4,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.805862,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 256,
+        "height": 227
+      },
+      "fingerprint": "f86d96b4c1881be7556fa8be02a9a0e341d8564847213115c27934e0c4aa085c",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.73584,
+        "south": 1.0,
+        "west": 0.827148
+      },
+      "connectionMask": 14,
+      "cornerAlpha": {
+        "topLeft": 0.394688,
+        "topRight": 0.338438,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r01-c05",
+      "name": "R01 C05",
+      "file": "mossy-terrain-r01-c05.png",
+      "row": 1,
+      "column": 5,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.801651,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 35,
+        "width": 256,
+        "height": 221
+      },
+      "fingerprint": "91b2723fa2196bb09df8bb8acad84287fddf48ff366210d6ec0f2a15d21cb92a",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.823242,
+        "south": 1.0,
+        "west": 0.742188
+      },
+      "connectionMask": 14,
+      "cornerAlpha": {
+        "topLeft": 0.353125,
+        "topRight": 0.410469,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r01-c06",
+      "name": "R01 C06",
+      "file": "mossy-terrain-r01-c06.png",
+      "row": 1,
+      "column": 6,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.652145,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 224,
+        "height": 227
+      },
+      "fingerprint": "d70cf69e673058e7d926301c9855023052f7f94ac7ec4b6a9c4b56f5e3e6fc40",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.0,
+        "south": 0.873047,
+        "west": 0.833496
+      },
+      "connectionMask": 12,
+      "cornerAlpha": {
+        "topLeft": 0.543438,
+        "topRight": 0.0625,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.413281
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r01-c07",
+      "name": "R01 C07",
+      "file": "mossy-terrain-r01-c07.png",
+      "row": 1,
+      "column": 7,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.619324,
+      "usable": true,
+      "bounds": {
+        "x": 34,
+        "y": 34,
+        "width": 222,
+        "height": 222
+      },
+      "fingerprint": "bdbbb51296ba1c26288a6ca81a04e0c50ed9a553a492e072dc92aeb99c82bda1",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.833008,
+        "south": 0.831543,
+        "west": 0.0
+      },
+      "connectionMask": 6,
+      "cornerAlpha": {
+        "topLeft": 0.052344,
+        "topRight": 0.439375,
+        "bottomLeft": 0.349531,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r01-c08",
+      "name": "R01 C08",
+      "file": "mossy-terrain-r01-c08.png",
+      "row": 1,
+      "column": 8,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.65213,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 224,
+        "height": 227
+      },
+      "fingerprint": "aae42fa8ce9b608ac33ebe9802d0ab9099ac993366a57161913c3aee9ea79875",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.0,
+        "south": 0.873047,
+        "west": 0.833008
+      },
+      "connectionMask": 12,
+      "cornerAlpha": {
+        "topLeft": 0.543281,
+        "topRight": 0.0625,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.413281
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r01-c09",
+      "name": "R01 C09",
+      "file": "mossy-terrain-r01-c09.png",
+      "row": 1,
+      "column": 9,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "a1fdd3cc791993ea401c995aa71b8985ba47956ea2b2d3ec707d41b51de756e6",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r01-c10",
+      "name": "R01 C10",
+      "file": "mossy-terrain-r01-c10.png",
+      "row": 1,
+      "column": 10,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "920ffc3f7c0b1c0dc3892023c01720dbec812d841ec8f060c7110c3b47456a86",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r01-c11",
+      "name": "R01 C11",
+      "file": "mossy-terrain-r01-c11.png",
+      "row": 1,
+      "column": 11,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r01-c12",
+      "name": "R01 C12",
+      "file": "mossy-terrain-r01-c12.png",
+      "row": 1,
+      "column": 12,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r01-c13",
+      "name": "R01 C13",
+      "file": "mossy-terrain-r01-c13.png",
+      "row": 1,
+      "column": 13,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d6fede2a2808622bb1b683b0cd788036a3f136f165826b411e836a319c581c29",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.745117,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.73584
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.666094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r01-c14",
+      "name": "R01 C14",
+      "file": "mossy-terrain-r01-c14.png",
+      "row": 1,
+      "column": 14,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964493,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "4e70cfa66815a053a4e3f1ac08ae63a6ec4ba1b32f5ec22320e71b22f2633697",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.77832,
+        "east": 0.743164,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.636406,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r02-c01",
+      "name": "R02 C01",
+      "file": "mossy-terrain-r02-c01.png",
+      "row": 2,
+      "column": 1,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.784241,
+      "usable": true,
+      "bounds": {
+        "x": 37,
+        "y": 0,
+        "width": 219,
+        "height": 256
+      },
+      "fingerprint": "1a3f0f1174682c297713fb48780ffc06682e0d2d655494e95dc58a5dc125010f",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.820312,
+        "east": 1.0,
+        "south": 0.734375,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.287187,
+        "topRight": 1.0,
+        "bottomLeft": 0.328125,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r02-c02",
+      "name": "R02 C02",
+      "file": "mossy-terrain-r02-c02.png",
+      "row": 2,
+      "column": 2,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r02-c03",
+      "name": "R02 C03",
+      "file": "mossy-terrain-r02-c03.png",
+      "row": 2,
+      "column": 3,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r02-c04",
+      "name": "R02 C04",
+      "file": "mossy-terrain-r02-c04.png",
+      "row": 2,
+      "column": 4,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r02-c05",
+      "name": "R02 C05",
+      "file": "mossy-terrain-r02-c05.png",
+      "row": 2,
+      "column": 5,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r02-c06",
+      "name": "R02 C06",
+      "file": "mossy-terrain-r02-c06.png",
+      "row": 2,
+      "column": 6,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.797363,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 224,
+        "height": 256
+      },
+      "fingerprint": "d8d1af480be37369915d8252f20c4a0822067e12b7df9621b73f44fb2ae23569",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.874512,
+        "east": 0.0,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.332031,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.326719
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r02-c07",
+      "name": "R02 C07",
+      "file": "mossy-terrain-r02-c07.png",
+      "row": 2,
+      "column": 7,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.784439,
+      "usable": true,
+      "bounds": {
+        "x": 37,
+        "y": 0,
+        "width": 219,
+        "height": 256
+      },
+      "fingerprint": "581fc45a93b51f5541bb411e5143cbbea5d08e320924022d44f2bce742a9e4a6",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.820312,
+        "east": 1.0,
+        "south": 0.734375,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.289219,
+        "topRight": 1.0,
+        "bottomLeft": 0.328125,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r02-c08",
+      "name": "R02 C08",
+      "file": "mossy-terrain-r02-c08.png",
+      "row": 2,
+      "column": 8,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.805893,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 226,
+        "height": 256
+      },
+      "fingerprint": "902dd4d9ef523c19d6930c0ad8ddf0a85b6873eb2462876f33a220106f1fe2b7",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.874512,
+        "east": 0.0,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.421563,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.326719
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r02-c09",
+      "name": "R02 C09",
+      "file": "mossy-terrain-r02-c09.png",
+      "row": 2,
+      "column": 9,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "8a5c5f223fd90565bf11d5b0ff7f09b43898034ec1ccd922a744bfb0e1acecc3",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r02-c10",
+      "name": "R02 C10",
+      "file": "mossy-terrain-r02-c10.png",
+      "row": 2,
+      "column": 10,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "3a85a09599fb2ac2adbf3ca823ee575aee2a676760897d5c5f6da0b87aadbde1",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.516094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r02-c11",
+      "name": "R02 C11",
+      "file": "mossy-terrain-r02-c11.png",
+      "row": 2,
+      "column": 11,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "e8ffb6f1663aba22132d61f35d23302d26a97883e5145839913347fd4d3f8e4c",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.741699,
+        "west": 0.674805
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.115156,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r02-c12",
+      "name": "R02 C12",
+      "file": "mossy-terrain-r02-c12.png",
+      "row": 2,
+      "column": 12,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r02-c13",
+      "name": "R02 C13",
+      "file": "mossy-terrain-r02-c13.png",
+      "row": 2,
+      "column": 13,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r02-c14",
+      "name": "R02 C14",
+      "file": "mossy-terrain-r02-c14.png",
+      "row": 2,
+      "column": 14,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r03-c01",
+      "name": "R03 C01",
+      "file": "mossy-terrain-r03-c01.png",
+      "row": 3,
+      "column": 1,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.79805,
+      "usable": true,
+      "bounds": {
+        "x": 31,
+        "y": 0,
+        "width": 225,
+        "height": 256
+      },
+      "fingerprint": "36106759aaaaadf6980ca94e3296c09bd4000c1178d6169434af89606c13d35f",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.728027,
+        "east": 1.0,
+        "south": 0.819336,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.315156,
+        "topRight": 1.0,
+        "bottomLeft": 0.372344,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r03-c02",
+      "name": "R03 C02",
+      "file": "mossy-terrain-r03-c02.png",
+      "row": 3,
+      "column": 2,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r03-c03",
+      "name": "R03 C03",
+      "file": "mossy-terrain-r03-c03.png",
+      "row": 3,
+      "column": 3,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r03-c04",
+      "name": "R03 C04",
+      "file": "mossy-terrain-r03-c04.png",
+      "row": 3,
+      "column": 4,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r03-c05",
+      "name": "R03 C05",
+      "file": "mossy-terrain-r03-c05.png",
+      "row": 3,
+      "column": 5,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r03-c06",
+      "name": "R03 C06",
+      "file": "mossy-terrain-r03-c06.png",
+      "row": 3,
+      "column": 6,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.796478,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 220,
+        "height": 256
+      },
+      "fingerprint": "8fbb41f4ca4d32a94d5264a94587c8e3b0810bd0a97e48733bbe8a25d0438b29",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.738281,
+        "east": 0.0,
+        "south": 0.818848,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.340625,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.385
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r03-c07",
+      "name": "R03 C07",
+      "file": "mossy-terrain-r03-c07.png",
+      "row": 3,
+      "column": 7,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.79805,
+      "usable": true,
+      "bounds": {
+        "x": 31,
+        "y": 0,
+        "width": 225,
+        "height": 256
+      },
+      "fingerprint": "e23db8fa5076d861ed3c488a8550f139441a17fb9b84aa3d83bb3a885f261554",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.728027,
+        "east": 1.0,
+        "south": 0.819336,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.315156,
+        "topRight": 1.0,
+        "bottomLeft": 0.372344,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r03-c08",
+      "name": "R03 C08",
+      "file": "mossy-terrain-r03-c08.png",
+      "row": 3,
+      "column": 8,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.796478,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 220,
+        "height": 256
+      },
+      "fingerprint": "c5d0f14c07a622f865c1d81c1a9d942cc9466488e6f918c169bfd5cfd21da902",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.738281,
+        "east": 0.0,
+        "south": 0.818848,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.340625,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.385
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r03-c09",
+      "name": "R03 C09",
+      "file": "mossy-terrain-r03-c09.png",
+      "row": 3,
+      "column": 9,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b3ef5ff7cee8bb7bc92f8465b38577d7928bf9e181d2af7fe1b8ff61aaf34587",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r03-c10",
+      "name": "R03 C10",
+      "file": "mossy-terrain-r03-c10.png",
+      "row": 3,
+      "column": 10,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964783,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "703c1ea3c224abe94a5bd6908cb5966f071cea8860dded2bc1a5e114ddb1c658",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.77832,
+        "east": 0.743164,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.639375,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r03-c11",
+      "name": "R03 C11",
+      "file": "mossy-terrain-r03-c11.png",
+      "row": 3,
+      "column": 11,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d6fede2a2808622bb1b683b0cd788036a3f136f165826b411e836a319c581c29",
+      "duplicateOf": "mossy-terrain-r01-c13",
+      "edgeAlpha": {
+        "north": 0.745117,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.73584
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.666094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r03-c12",
+      "name": "R03 C12",
+      "file": "mossy-terrain-r03-c12.png",
+      "row": 3,
+      "column": 12,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r03-c13",
+      "name": "R03 C13",
+      "file": "mossy-terrain-r03-c13.png",
+      "row": 3,
+      "column": 13,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d6fede2a2808622bb1b683b0cd788036a3f136f165826b411e836a319c581c29",
+      "duplicateOf": "mossy-terrain-r01-c13",
+      "edgeAlpha": {
+        "north": 0.745117,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.73584
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.666094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r03-c14",
+      "name": "R03 C14",
+      "file": "mossy-terrain-r03-c14.png",
+      "row": 3,
+      "column": 14,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r04-c01",
+      "name": "R04 C01",
+      "file": "mossy-terrain-r04-c01.png",
+      "row": 4,
+      "column": 1,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.792572,
+      "usable": true,
+      "bounds": {
+        "x": 37,
+        "y": 0,
+        "width": 219,
+        "height": 256
+      },
+      "fingerprint": "81763388edb76b88701e49b4418ec25bd561314e5f9aa5a4c7797272f423143b",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.814941,
+        "east": 1.0,
+        "south": 0.734375,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.3725,
+        "topRight": 1.0,
+        "bottomLeft": 0.328125,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r04-c02",
+      "name": "R04 C02",
+      "file": "mossy-terrain-r04-c02.png",
+      "row": 4,
+      "column": 2,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r04-c03",
+      "name": "R04 C03",
+      "file": "mossy-terrain-r04-c03.png",
+      "row": 4,
+      "column": 3,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r04-c04",
+      "name": "R04 C04",
+      "file": "mossy-terrain-r04-c04.png",
+      "row": 4,
+      "column": 4,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r04-c05",
+      "name": "R04 C05",
+      "file": "mossy-terrain-r04-c05.png",
+      "row": 4,
+      "column": 5,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r04-c06",
+      "name": "R04 C06",
+      "file": "mossy-terrain-r04-c06.png",
+      "row": 4,
+      "column": 6,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.801956,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 226,
+        "height": 256
+      },
+      "fingerprint": "25308ee714576e8ea7621fa53be972d049433af90e93ab67d672eb85c612ab34",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.823242,
+        "east": 0.0,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.383437,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.326719
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r04-c07",
+      "name": "R04 C07",
+      "file": "mossy-terrain-r04-c07.png",
+      "row": 4,
+      "column": 7,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.792572,
+      "usable": true,
+      "bounds": {
+        "x": 37,
+        "y": 0,
+        "width": 219,
+        "height": 256
+      },
+      "fingerprint": "28d4fccba35d4a8b9f1c55baa68a0c9fe021b0afa5df737154fcb3c84b5aa62f",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.814941,
+        "east": 1.0,
+        "south": 0.734375,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.3725,
+        "topRight": 1.0,
+        "bottomLeft": 0.328125,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r04-c08",
+      "name": "R04 C08",
+      "file": "mossy-terrain-r04-c08.png",
+      "row": 4,
+      "column": 8,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.801971,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d9ccdccd98ed2b0e6204cc55b39ac8473d72684ed3997a7735a95d9721c48cab",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.823242,
+        "east": 0.000488,
+        "south": 0.732422,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.383437,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.326875
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r04-c09",
+      "name": "R04 C09",
+      "file": "mossy-terrain-r04-c09.png",
+      "row": 4,
+      "column": 9,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "bcb968a5540a311794bbdf07f6cb54954e85e005e6bca347a15aa71aad4b4cba",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r04-c10",
+      "name": "R04 C10",
+      "file": "mossy-terrain-r04-c10.png",
+      "row": 4,
+      "column": 10,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r04-c11",
+      "name": "R04 C11",
+      "file": "mossy-terrain-r04-c11.png",
+      "row": 4,
+      "column": 11,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r04-c12",
+      "name": "R04 C12",
+      "file": "mossy-terrain-r04-c12.png",
+      "row": 4,
+      "column": 12,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r04-c13",
+      "name": "R04 C13",
+      "file": "mossy-terrain-r04-c13.png",
+      "row": 4,
+      "column": 13,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "e8ffb6f1663aba22132d61f35d23302d26a97883e5145839913347fd4d3f8e4c",
+      "duplicateOf": "mossy-terrain-r02-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.741699,
+        "west": 0.674805
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.115156,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r04-c14",
+      "name": "R04 C14",
+      "file": "mossy-terrain-r04-c14.png",
+      "row": 4,
+      "column": 14,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r05-c01",
+      "name": "R05 C01",
+      "file": "mossy-terrain-r05-c01.png",
+      "row": 5,
+      "column": 1,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.781265,
+      "usable": true,
+      "bounds": {
+        "x": 33,
+        "y": 0,
+        "width": 223,
+        "height": 256
+      },
+      "fingerprint": "24b9b9abca9680d491acff02186463a2fb49bca10e4e10ecb1c306725413a852",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.728027,
+        "east": 1.0,
+        "south": 0.609375,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.315156,
+        "topRight": 1.0,
+        "bottomLeft": 0.249219,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r05-c02",
+      "name": "R05 C02",
+      "file": "mossy-terrain-r05-c02.png",
+      "row": 5,
+      "column": 2,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r05-c03",
+      "name": "R05 C03",
+      "file": "mossy-terrain-r05-c03.png",
+      "row": 5,
+      "column": 3,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r05-c04",
+      "name": "R05 C04",
+      "file": "mossy-terrain-r05-c04.png",
+      "row": 5,
+      "column": 4,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r05-c05",
+      "name": "R05 C05",
+      "file": "mossy-terrain-r05-c05.png",
+      "row": 5,
+      "column": 5,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r05-c06",
+      "name": "R05 C06",
+      "file": "mossy-terrain-r05-c06.png",
+      "row": 5,
+      "column": 6,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.799423,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 225,
+        "height": 256
+      },
+      "fingerprint": "626bb8abfde8437ecf662456bb41890a36eacf342678e447098fcd7c8e097b50",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.738281,
+        "east": 0.0,
+        "south": 0.670898,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.340625,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.418125
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r05-c07",
+      "name": "R05 C07",
+      "file": "mossy-terrain-r05-c07.png",
+      "row": 5,
+      "column": 7,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.781326,
+      "usable": true,
+      "bounds": {
+        "x": 33,
+        "y": 0,
+        "width": 223,
+        "height": 256
+      },
+      "fingerprint": "33ff444f7f7d25defea2b5f97af46cf1aba7d5bc7f0f1eadbd6c62adbf066910",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.728027,
+        "east": 1.0,
+        "south": 0.609375,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.315156,
+        "topRight": 1.0,
+        "bottomLeft": 0.249219,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r05-c08",
+      "name": "R05 C08",
+      "file": "mossy-terrain-r05-c08.png",
+      "row": 5,
+      "column": 8,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.799423,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 225,
+        "height": 256
+      },
+      "fingerprint": "983f6113ca8cea469df29f9b190e18845be0aecfff155b17d8d62b80d45a3993",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.738281,
+        "east": 0.0,
+        "south": 0.670898,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.340625,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.418125
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r05-c09",
+      "name": "R05 C09",
+      "file": "mossy-terrain-r05-c09.png",
+      "row": 5,
+      "column": 9,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d6fede2a2808622bb1b683b0cd788036a3f136f165826b411e836a319c581c29",
+      "duplicateOf": "mossy-terrain-r01-c13",
+      "edgeAlpha": {
+        "north": 0.745117,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.73584
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.666094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r05-c10",
+      "name": "R05 C10",
+      "file": "mossy-terrain-r05-c10.png",
+      "row": 5,
+      "column": 10,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964493,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "4e70cfa66815a053a4e3f1ac08ae63a6ec4ba1b32f5ec22320e71b22f2633697",
+      "duplicateOf": "mossy-terrain-r01-c14",
+      "edgeAlpha": {
+        "north": 0.77832,
+        "east": 0.743164,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.636406,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r05-c11",
+      "name": "R05 C11",
+      "file": "mossy-terrain-r05-c11.png",
+      "row": 5,
+      "column": 11,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d6fede2a2808622bb1b683b0cd788036a3f136f165826b411e836a319c581c29",
+      "duplicateOf": "mossy-terrain-r01-c13",
+      "edgeAlpha": {
+        "north": 0.745117,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.73584
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.666094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r05-c12",
+      "name": "R05 C12",
+      "file": "mossy-terrain-r05-c12.png",
+      "row": 5,
+      "column": 12,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r05-c13",
+      "name": "R05 C13",
+      "file": "mossy-terrain-r05-c13.png",
+      "row": 5,
+      "column": 13,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b3ef5ff7cee8bb7bc92f8465b38577d7928bf9e181d2af7fe1b8ff61aaf34587",
+      "duplicateOf": "mossy-terrain-r03-c09",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r05-c14",
+      "name": "R05 C14",
+      "file": "mossy-terrain-r05-c14.png",
+      "row": 5,
+      "column": 14,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964783,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "703c1ea3c224abe94a5bd6908cb5966f071cea8860dded2bc1a5e114ddb1c658",
+      "duplicateOf": "mossy-terrain-r03-c10",
+      "edgeAlpha": {
+        "north": 0.77832,
+        "east": 0.743164,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.639375,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r06-c01",
+      "name": "R06 C01",
+      "file": "mossy-terrain-r06-c01.png",
+      "row": 6,
+      "column": 1,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.306854,
+      "usable": true,
+      "bounds": {
+        "x": 85,
+        "y": 0,
+        "width": 171,
+        "height": 203
+      },
+      "fingerprint": "5572b38f45eb0f54ea77c2a630e7fbd02004083b33aa656dcab4e983c8f2e599",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.611328,
+        "east": 0.617676,
+        "south": 0.0,
+        "west": 0.0
+      },
+      "connectionMask": 3,
+      "cornerAlpha": {
+        "topLeft": 0.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.109844
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r06-c02",
+      "name": "R06 C02",
+      "file": "mossy-terrain-r06-c02.png",
+      "row": 6,
+      "column": 2,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.732864,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 225
+      },
+      "fingerprint": "f03f77a35d3ede27e20099f0de2a9f2d3c2e916da86351489976ac19d878e65f",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.0,
+        "west": 0.641602
+      },
+      "connectionMask": 11,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.070625,
+        "bottomRight": 0.090625
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r06-c03",
+      "name": "R06 C03",
+      "file": "mossy-terrain-r06-c03.png",
+      "row": 6,
+      "column": 3,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.656708,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 196
+      },
+      "fingerprint": "1a89214452f5fc592a86a6e29e6b3cd3ca8f4a97e873d8dc7803c1ceb08d7198",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.596191,
+        "south": 0.0,
+        "west": 0.674805
+      },
+      "connectionMask": 11,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.077969,
+        "bottomRight": 0.015625
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r06-c04",
+      "name": "R06 C04",
+      "file": "mossy-terrain-r06-c04.png",
+      "row": 6,
+      "column": 4,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.750504,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 225
+      },
+      "fingerprint": "7b3df65ba359b7cef075bf12405cec414357336b632a66c6e535151c779460dc",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.0,
+        "west": 0.748535
+      },
+      "connectionMask": 11,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.231719,
+        "bottomRight": 0.090625
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r06-c05",
+      "name": "R06 C05",
+      "file": "mossy-terrain-r06-c05.png",
+      "row": 6,
+      "column": 5,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.659348,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 196
+      },
+      "fingerprint": "67f2d3074c8d19242177dfae8ad36fed57af900fd1bffc9374088cb5d316d542",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.638672,
+        "south": 0.0,
+        "west": 0.674805
+      },
+      "connectionMask": 11,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.077969,
+        "bottomRight": 0.015625
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r06-c06",
+      "name": "R06 C06",
+      "file": "mossy-terrain-r06-c06.png",
+      "row": 6,
+      "column": 6,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.339508,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 185,
+        "height": 180
+      },
+      "fingerprint": "38e96e882a8e4fc98f19771de5c3a852841d87d8dbdb5460e7c6ec558903f9a3",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.659668,
+        "east": 0.0,
+        "south": 0.0,
+        "west": 0.674805
+      },
+      "connectionMask": 9,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.014375,
+        "bottomLeft": 0.009375,
+        "bottomRight": 0.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r06-c07",
+      "name": "R06 C07",
+      "file": "mossy-terrain-r06-c07.png",
+      "row": 6,
+      "column": 7,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.307602,
+      "usable": true,
+      "bounds": {
+        "x": 85,
+        "y": 0,
+        "width": 171,
+        "height": 203
+      },
+      "fingerprint": "4f0447163bbf5e9467626e33396db15e45dfbde081b43e64d2dde9be474704f1",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.611328,
+        "east": 0.641602,
+        "south": 0.0,
+        "west": 0.0
+      },
+      "connectionMask": 3,
+      "cornerAlpha": {
+        "topLeft": 0.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.109844
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r06-c08",
+      "name": "R06 C08",
+      "file": "mossy-terrain-r06-c08.png",
+      "row": 6,
+      "column": 8,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.339218,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 185,
+        "height": 180
+      },
+      "fingerprint": "132c789c9df2a93534d00069b8609e5295304fdc3996ae755567af2df459417a",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.659668,
+        "east": 0.0,
+        "south": 0.0,
+        "west": 0.671387
+      },
+      "connectionMask": 9,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.014375,
+        "bottomLeft": 0.007656,
+        "bottomRight": 0.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r06-c09",
+      "name": "R06 C09",
+      "file": "mossy-terrain-r06-c09.png",
+      "row": 6,
+      "column": 9,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "bcb968a5540a311794bbdf07f6cb54954e85e005e6bca347a15aa71aad4b4cba",
+      "duplicateOf": "mossy-terrain-r04-c09",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r06-c10",
+      "name": "R06 C10",
+      "file": "mossy-terrain-r06-c10.png",
+      "row": 6,
+      "column": 10,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "3a85a09599fb2ac2adbf3ca823ee575aee2a676760897d5c5f6da0b87aadbde1",
+      "duplicateOf": "mossy-terrain-r02-c10",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.516094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r06-c11",
+      "name": "R06 C11",
+      "file": "mossy-terrain-r06-c11.png",
+      "row": 6,
+      "column": 11,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "e8ffb6f1663aba22132d61f35d23302d26a97883e5145839913347fd4d3f8e4c",
+      "duplicateOf": "mossy-terrain-r02-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.741699,
+        "west": 0.674805
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.115156,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r06-c12",
+      "name": "R06 C12",
+      "file": "mossy-terrain-r06-c12.png",
+      "row": 6,
+      "column": 12,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "3a85a09599fb2ac2adbf3ca823ee575aee2a676760897d5c5f6da0b87aadbde1",
+      "duplicateOf": "mossy-terrain-r02-c10",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.516094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r06-c13",
+      "name": "R06 C13",
+      "file": "mossy-terrain-r06-c13.png",
+      "row": 6,
+      "column": 13,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "8a5c5f223fd90565bf11d5b0ff7f09b43898034ec1ccd922a744bfb0e1acecc3",
+      "duplicateOf": "mossy-terrain-r02-c09",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r06-c14",
+      "name": "R06 C14",
+      "file": "mossy-terrain-r06-c14.png",
+      "row": 6,
+      "column": 14,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "3a85a09599fb2ac2adbf3ca823ee575aee2a676760897d5c5f6da0b87aadbde1",
+      "duplicateOf": "mossy-terrain-r02-c10",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.516094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r07-c01",
+      "name": "R07 C01",
+      "file": "mossy-terrain-r07-c01.png",
+      "row": 7,
+      "column": 1,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.00563,
+      "usable": false,
+      "bounds": {
+        "x": 244,
+        "y": 99,
+        "width": 12,
+        "height": 157
+      },
+      "fingerprint": "84275a2bf7ce2bc0233de2bc6ed04a62bd03439e81a061d5ee7be7e719695f74",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.150879,
+        "south": 0.01123,
+        "west": 0.0
+      },
+      "connectionMask": 0,
+      "cornerAlpha": {
+        "topLeft": 0.0,
+        "topRight": 0.0,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.040938
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r07-c02",
+      "name": "R07 C02",
+      "file": "mossy-terrain-r07-c02.png",
+      "row": 7,
+      "column": 2,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.760651,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 32,
+        "width": 256,
+        "height": 224
+      },
+      "fingerprint": "15746dc79e67205372ed70bc752e0ecdfeef79537f929a5b44e35875ab77444f",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.73584,
+        "south": 1.0,
+        "west": 0.264648
+      },
+      "connectionMask": 6,
+      "cornerAlpha": {
+        "topLeft": 0.229219,
+        "topRight": 0.42625,
+        "bottomLeft": 0.874531,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r07-c03",
+      "name": "R07 C03",
+      "file": "mossy-terrain-r07-c03.png",
+      "row": 7,
+      "column": 3,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.800385,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 35,
+        "width": 256,
+        "height": 221
+      },
+      "fingerprint": "8837e12e11091a756254a3711f11949a15f194ee5b0f1f38861c9e8d7dc530a5",
+      "duplicateOf": "mossy-terrain-r01-c03",
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.822754,
+        "south": 1.0,
+        "west": 0.742188
+      },
+      "connectionMask": 14,
+      "cornerAlpha": {
+        "topLeft": 0.353125,
+        "topRight": 0.3975,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r07-c04",
+      "name": "R07 C04",
+      "file": "mossy-terrain-r07-c04.png",
+      "row": 7,
+      "column": 4,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.805862,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 256,
+        "height": 227
+      },
+      "fingerprint": "f86d96b4c1881be7556fa8be02a9a0e341d8564847213115c27934e0c4aa085c",
+      "duplicateOf": "mossy-terrain-r01-c04",
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.73584,
+        "south": 1.0,
+        "west": 0.827148
+      },
+      "connectionMask": 14,
+      "cornerAlpha": {
+        "topLeft": 0.394688,
+        "topRight": 0.338438,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r07-c05",
+      "name": "R07 C05",
+      "file": "mossy-terrain-r07-c05.png",
+      "row": 7,
+      "column": 5,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.772964,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 31,
+        "width": 256,
+        "height": 225
+      },
+      "fingerprint": "f1a219710ea40c3bd784ca4fc73f5aef86e53b61149d5c096a89c7034b810b2b",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.397949,
+        "south": 1.0,
+        "west": 0.742188
+      },
+      "connectionMask": 12,
+      "cornerAlpha": {
+        "topLeft": 0.369688,
+        "topRight": 0.263594,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.926562
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r07-c06",
+      "name": "R07 C06",
+      "file": "mossy-terrain-r07-c06.png",
+      "row": 7,
+      "column": 6,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.010696,
+      "usable": false,
+      "bounds": {
+        "x": 0,
+        "y": 95,
+        "width": 14,
+        "height": 161
+      },
+      "fingerprint": "2b3c5f799046c442e27114b6b2cc4cf8317c8a55fef94ffb3786b3f9fbb42ee3",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.0,
+        "south": 0.052734,
+        "west": 0.291504
+      },
+      "connectionMask": 0,
+      "cornerAlpha": {
+        "topLeft": 0.0,
+        "topRight": 0.0,
+        "bottomLeft": 0.061719,
+        "bottomRight": 0.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r07-c07",
+      "name": "R07 C07",
+      "file": "mossy-terrain-r07-c07.png",
+      "row": 7,
+      "column": 7,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.707352,
+      "usable": true,
+      "bounds": {
+        "x": 11,
+        "y": 31,
+        "width": 245,
+        "height": 225
+      },
+      "fingerprint": "6bc64c52301b1f94cf2c2e070ba507d9e261a2f7d22159ec680fd7e85d6af62d",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.73584,
+        "south": 0.797852,
+        "west": 0.0
+      },
+      "connectionMask": 6,
+      "cornerAlpha": {
+        "topLeft": 0.143906,
+        "topRight": 0.389375,
+        "bottomLeft": 0.617656,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r07-c08",
+      "name": "R07 C08",
+      "file": "mossy-terrain-r07-c08.png",
+      "row": 7,
+      "column": 8,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.716507,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 32,
+        "width": 252,
+        "height": 224
+      },
+      "fingerprint": "6970a02e24dd00b15ce0457b24b8b9509f53646c1842e157c5433cc40716bccb",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.020508,
+        "south": 0.854492,
+        "west": 0.742188
+      },
+      "connectionMask": 12,
+      "cornerAlpha": {
+        "topLeft": 0.412656,
+        "topRight": 0.179375,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.618125
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r07-c09",
+      "name": "R07 C09",
+      "file": "mossy-terrain-r07-c09.png",
+      "row": 7,
+      "column": 9,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r07-c10",
+      "name": "R07 C10",
+      "file": "mossy-terrain-r07-c10.png",
+      "row": 7,
+      "column": 10,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964783,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "703c1ea3c224abe94a5bd6908cb5966f071cea8860dded2bc1a5e114ddb1c658",
+      "duplicateOf": "mossy-terrain-r03-c10",
+      "edgeAlpha": {
+        "north": 0.77832,
+        "east": 0.743164,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.639375,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r07-c11",
+      "name": "R07 C11",
+      "file": "mossy-terrain-r07-c11.png",
+      "row": 7,
+      "column": 11,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d6fede2a2808622bb1b683b0cd788036a3f136f165826b411e836a319c581c29",
+      "duplicateOf": "mossy-terrain-r01-c13",
+      "edgeAlpha": {
+        "north": 0.745117,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.73584
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.666094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r07-c12",
+      "name": "R07 C12",
+      "file": "mossy-terrain-r07-c12.png",
+      "row": 7,
+      "column": 12,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964783,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "703c1ea3c224abe94a5bd6908cb5966f071cea8860dded2bc1a5e114ddb1c658",
+      "duplicateOf": "mossy-terrain-r03-c10",
+      "edgeAlpha": {
+        "north": 0.77832,
+        "east": 0.743164,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.639375,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r07-c13",
+      "name": "R07 C13",
+      "file": "mossy-terrain-r07-c13.png",
+      "row": 7,
+      "column": 13,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r07-c14",
+      "name": "R07 C14",
+      "file": "mossy-terrain-r07-c14.png",
+      "row": 7,
+      "column": 14,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "920ffc3f7c0b1c0dc3892023c01720dbec812d841ec8f060c7110c3b47456a86",
+      "duplicateOf": "mossy-terrain-r01-c10",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r08-c01",
+      "name": "R08 C01",
+      "file": "mossy-terrain-r08-c01.png",
+      "row": 8,
+      "column": 1,
+      "width": 256,
+      "height": 256,
+      "occupancy": 4.6e-05,
+      "usable": false,
+      "bounds": {
+        "x": 255,
+        "y": 0,
+        "width": 1,
+        "height": 3
+      },
+      "fingerprint": "8ca6243d7ed22436183d5dea84c5502372e630be40b3d2d2a81e5c1f75c2fcbc",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.001465,
+        "east": 0.001465,
+        "south": 0.0,
+        "west": 0.0
+      },
+      "connectionMask": 0,
+      "cornerAlpha": {
+        "topLeft": 0.0,
+        "topRight": 0.000469,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r08-c02",
+      "name": "R08 C02",
+      "file": "mossy-terrain-r08-c02.png",
+      "row": 8,
+      "column": 2,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.53714,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 203
+      },
+      "fingerprint": "8f18afb9c3e99c03298e6671a84c175ef3ab834af1ac3fa275e1b912ac754dde",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.996094,
+        "east": 0.685059,
+        "south": 0.0,
+        "west": 0.032227
+      },
+      "connectionMask": 3,
+      "cornerAlpha": {
+        "topLeft": 0.562813,
+        "topRight": 1.0,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.110156
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r08-c03",
+      "name": "R08 C03",
+      "file": "mossy-terrain-r08-c03.png",
+      "row": 8,
+      "column": 3,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.65654,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 196
+      },
+      "fingerprint": "f25495f115945fa994275229dd867c0a222bd62c319b18aba6faec047e9dd19b",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.601562,
+        "south": 0.0,
+        "west": 0.673828
+      },
+      "connectionMask": 11,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.077969,
+        "bottomRight": 0.013437
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r08-c04",
+      "name": "R08 C04",
+      "file": "mossy-terrain-r08-c04.png",
+      "row": 8,
+      "column": 4,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.750671,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 225
+      },
+      "fingerprint": "d910bdb029fed0688fd081534be0f0f62a032ec1ce880c7d391ec187f1dfbd24",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.685059,
+        "south": 0.0,
+        "west": 0.771973
+      },
+      "connectionMask": 11,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.23375,
+        "bottomRight": 0.090625
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r08-c05",
+      "name": "R08 C05",
+      "file": "mossy-terrain-r08-c05.png",
+      "row": 8,
+      "column": 5,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.557953,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 196
+      },
+      "fingerprint": "ef768c5131f034137f215fccc6520d8a7021b253fec2bd9b4c87e6b817cdbc11",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.050781,
+        "south": 0.0,
+        "west": 0.673828
+      },
+      "connectionMask": 9,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.599844,
+        "bottomLeft": 0.082656,
+        "bottomRight": 0.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r08-c06",
+      "name": "R08 C06",
+      "file": "mossy-terrain-r08-c06.png",
+      "row": 8,
+      "column": 6,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.001694,
+      "usable": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 14,
+        "height": 12
+      },
+      "fingerprint": "5e7d28e0a1fc97ee7569ccaf0fa02515ed7578d57866ceafb28c0b0a5cf76b2c",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.044922,
+        "east": 0.0,
+        "south": 0.0,
+        "west": 0.040527
+      },
+      "connectionMask": 0,
+      "cornerAlpha": {
+        "topLeft": 0.017344,
+        "topRight": 0.0,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r08-c07",
+      "name": "R08 C07",
+      "file": "mossy-terrain-r08-c07.png",
+      "row": 8,
+      "column": 7,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.500519,
+      "usable": true,
+      "bounds": {
+        "x": 25,
+        "y": 0,
+        "width": 231,
+        "height": 196
+      },
+      "fingerprint": "cd1b9bda8121e62969b1453f5f7fe4978b2a75428cbec152a2e62b61408f8223",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.788574,
+        "east": 0.67041,
+        "south": 0.0,
+        "west": 0.0
+      },
+      "connectionMask": 3,
+      "cornerAlpha": {
+        "topLeft": 0.274531,
+        "topRight": 1.0,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.078437
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r08-c08",
+      "name": "R08 C08",
+      "file": "mossy-terrain-r08-c08.png",
+      "row": 8,
+      "column": 8,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.504089,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 224,
+        "height": 202
+      },
+      "fingerprint": "d1a8531a773efb4a6eba5940427d26383ab27a4be30ef4b7beced41b8bb1e2ae",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.805664,
+        "east": 0.0,
+        "south": 0.0,
+        "west": 0.676758
+      },
+      "connectionMask": 9,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.322813,
+        "bottomLeft": 0.101562,
+        "bottomRight": 0.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r08-c09",
+      "name": "R08 C09",
+      "file": "mossy-terrain-r08-c09.png",
+      "row": 8,
+      "column": 9,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "e8ffb6f1663aba22132d61f35d23302d26a97883e5145839913347fd4d3f8e4c",
+      "duplicateOf": "mossy-terrain-r02-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.741699,
+        "west": 0.674805
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.115156,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r08-c10",
+      "name": "R08 C10",
+      "file": "mossy-terrain-r08-c10.png",
+      "row": 8,
+      "column": 10,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "3a85a09599fb2ac2adbf3ca823ee575aee2a676760897d5c5f6da0b87aadbde1",
+      "duplicateOf": "mossy-terrain-r02-c10",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.516094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r08-c11",
+      "name": "R08 C11",
+      "file": "mossy-terrain-r08-c11.png",
+      "row": 8,
+      "column": 11,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "e8ffb6f1663aba22132d61f35d23302d26a97883e5145839913347fd4d3f8e4c",
+      "duplicateOf": "mossy-terrain-r02-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.741699,
+        "west": 0.674805
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.115156,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r08-c12",
+      "name": "R08 C12",
+      "file": "mossy-terrain-r08-c12.png",
+      "row": 8,
+      "column": 12,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r08-c13",
+      "name": "R08 C13",
+      "file": "mossy-terrain-r08-c13.png",
+      "row": 8,
+      "column": 13,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "e8ffb6f1663aba22132d61f35d23302d26a97883e5145839913347fd4d3f8e4c",
+      "duplicateOf": "mossy-terrain-r02-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.741699,
+        "west": 0.674805
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.115156,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r08-c14",
+      "name": "R08 C14",
+      "file": "mossy-terrain-r08-c14.png",
+      "row": 8,
+      "column": 14,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "3a85a09599fb2ac2adbf3ca823ee575aee2a676760897d5c5f6da0b87aadbde1",
+      "duplicateOf": "mossy-terrain-r02-c10",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.516094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r09-c01",
+      "name": "R09 C01",
+      "file": "mossy-terrain-r09-c01.png",
+      "row": 9,
+      "column": 1,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.79805,
+      "usable": true,
+      "bounds": {
+        "x": 31,
+        "y": 0,
+        "width": 225,
+        "height": 256
+      },
+      "fingerprint": "36106759aaaaadf6980ca94e3296c09bd4000c1178d6169434af89606c13d35f",
+      "duplicateOf": "mossy-terrain-r03-c01",
+      "edgeAlpha": {
+        "north": 0.728027,
+        "east": 1.0,
+        "south": 0.819336,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.315156,
+        "topRight": 1.0,
+        "bottomLeft": 0.372344,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r09-c02",
+      "name": "R09 C02",
+      "file": "mossy-terrain-r09-c02.png",
+      "row": 9,
+      "column": 2,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r09-c03",
+      "name": "R09 C03",
+      "file": "mossy-terrain-r09-c03.png",
+      "row": 9,
+      "column": 3,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r09-c04",
+      "name": "R09 C04",
+      "file": "mossy-terrain-r09-c04.png",
+      "row": 9,
+      "column": 4,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.796478,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 220,
+        "height": 256
+      },
+      "fingerprint": "8fbb41f4ca4d32a94d5264a94587c8e3b0810bd0a97e48733bbe8a25d0438b29",
+      "duplicateOf": "mossy-terrain-r03-c06",
+      "edgeAlpha": {
+        "north": 0.738281,
+        "east": 0.0,
+        "south": 0.818848,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.340625,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.385
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r09-c05",
+      "name": "R09 C05",
+      "file": "mossy-terrain-r09-c05.png",
+      "row": 9,
+      "column": 5,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.800385,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 35,
+        "width": 256,
+        "height": 221
+      },
+      "fingerprint": "8837e12e11091a756254a3711f11949a15f194ee5b0f1f38861c9e8d7dc530a5",
+      "duplicateOf": "mossy-terrain-r01-c03",
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.822754,
+        "south": 1.0,
+        "west": 0.742188
+      },
+      "connectionMask": 14,
+      "cornerAlpha": {
+        "topLeft": 0.353125,
+        "topRight": 0.3975,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r09-c06",
+      "name": "R09 C06",
+      "file": "mossy-terrain-r09-c06.png",
+      "row": 9,
+      "column": 6,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.805862,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 256,
+        "height": 227
+      },
+      "fingerprint": "f86d96b4c1881be7556fa8be02a9a0e341d8564847213115c27934e0c4aa085c",
+      "duplicateOf": "mossy-terrain-r01-c04",
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.73584,
+        "south": 1.0,
+        "west": 0.827148
+      },
+      "connectionMask": 14,
+      "cornerAlpha": {
+        "topLeft": 0.394688,
+        "topRight": 0.338438,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r09-c07",
+      "name": "R09 C07",
+      "file": "mossy-terrain-r09-c07.png",
+      "row": 9,
+      "column": 7,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.800385,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 35,
+        "width": 256,
+        "height": 221
+      },
+      "fingerprint": "8837e12e11091a756254a3711f11949a15f194ee5b0f1f38861c9e8d7dc530a5",
+      "duplicateOf": "mossy-terrain-r01-c03",
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.822754,
+        "south": 1.0,
+        "west": 0.742188
+      },
+      "connectionMask": 14,
+      "cornerAlpha": {
+        "topLeft": 0.353125,
+        "topRight": 0.3975,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r09-c08",
+      "name": "R09 C08",
+      "file": "mossy-terrain-r09-c08.png",
+      "row": 9,
+      "column": 8,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.805862,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 256,
+        "height": 227
+      },
+      "fingerprint": "f86d96b4c1881be7556fa8be02a9a0e341d8564847213115c27934e0c4aa085c",
+      "duplicateOf": "mossy-terrain-r01-c04",
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.73584,
+        "south": 1.0,
+        "west": 0.827148
+      },
+      "connectionMask": 14,
+      "cornerAlpha": {
+        "topLeft": 0.394688,
+        "topRight": 0.338438,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r09-c09",
+      "name": "R09 C09",
+      "file": "mossy-terrain-r09-c09.png",
+      "row": 9,
+      "column": 9,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.621521,
+      "usable": true,
+      "bounds": {
+        "x": 34,
+        "y": 33,
+        "width": 222,
+        "height": 223
+      },
+      "fingerprint": "d56820775f7a91af108c90699aab3c7b228b892c0f6e0d99e07640484e87d218",
+      "duplicateOf": "mossy-terrain-r01-c01",
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.868164,
+        "south": 0.831543,
+        "west": 0.0
+      },
+      "connectionMask": 6,
+      "cornerAlpha": {
+        "topLeft": 0.052344,
+        "topRight": 0.461875,
+        "bottomLeft": 0.349531,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r09-c10",
+      "name": "R09 C10",
+      "file": "mossy-terrain-r09-c10.png",
+      "row": 9,
+      "column": 10,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.810928,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 256,
+        "height": 227
+      },
+      "fingerprint": "8ede6f5163c0327003df79dc4e0539871e2e77d97757b893dddce16b195e4c85",
+      "duplicateOf": "mossy-terrain-r01-c02",
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.73584,
+        "south": 1.0,
+        "west": 0.871094
+      },
+      "connectionMask": 14,
+      "cornerAlpha": {
+        "topLeft": 0.443437,
+        "topRight": 0.338438,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r09-c11",
+      "name": "R09 C11",
+      "file": "mossy-terrain-r09-c11.png",
+      "row": 9,
+      "column": 11,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.800385,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 35,
+        "width": 256,
+        "height": 221
+      },
+      "fingerprint": "8837e12e11091a756254a3711f11949a15f194ee5b0f1f38861c9e8d7dc530a5",
+      "duplicateOf": "mossy-terrain-r01-c03",
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.822754,
+        "south": 1.0,
+        "west": 0.742188
+      },
+      "connectionMask": 14,
+      "cornerAlpha": {
+        "topLeft": 0.353125,
+        "topRight": 0.3975,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r09-c12",
+      "name": "R09 C12",
+      "file": "mossy-terrain-r09-c12.png",
+      "row": 9,
+      "column": 12,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.805862,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 256,
+        "height": 227
+      },
+      "fingerprint": "f86d96b4c1881be7556fa8be02a9a0e341d8564847213115c27934e0c4aa085c",
+      "duplicateOf": "mossy-terrain-r01-c04",
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.73584,
+        "south": 1.0,
+        "west": 0.827148
+      },
+      "connectionMask": 14,
+      "cornerAlpha": {
+        "topLeft": 0.394688,
+        "topRight": 0.338438,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r09-c13",
+      "name": "R09 C13",
+      "file": "mossy-terrain-r09-c13.png",
+      "row": 9,
+      "column": 13,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.801651,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 35,
+        "width": 256,
+        "height": 221
+      },
+      "fingerprint": "91b2723fa2196bb09df8bb8acad84287fddf48ff366210d6ec0f2a15d21cb92a",
+      "duplicateOf": "mossy-terrain-r01-c05",
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.823242,
+        "south": 1.0,
+        "west": 0.742188
+      },
+      "connectionMask": 14,
+      "cornerAlpha": {
+        "topLeft": 0.353125,
+        "topRight": 0.410469,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r09-c14",
+      "name": "R09 C14",
+      "file": "mossy-terrain-r09-c14.png",
+      "row": 9,
+      "column": 14,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.652145,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 224,
+        "height": 227
+      },
+      "fingerprint": "d70cf69e673058e7d926301c9855023052f7f94ac7ec4b6a9c4b56f5e3e6fc40",
+      "duplicateOf": "mossy-terrain-r01-c06",
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.0,
+        "south": 0.873047,
+        "west": 0.833496
+      },
+      "connectionMask": 12,
+      "cornerAlpha": {
+        "topLeft": 0.543438,
+        "topRight": 0.0625,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.413281
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r10-c01",
+      "name": "R10 C01",
+      "file": "mossy-terrain-r10-c01.png",
+      "row": 10,
+      "column": 1,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.792572,
+      "usable": true,
+      "bounds": {
+        "x": 37,
+        "y": 0,
+        "width": 219,
+        "height": 256
+      },
+      "fingerprint": "81763388edb76b88701e49b4418ec25bd561314e5f9aa5a4c7797272f423143b",
+      "duplicateOf": "mossy-terrain-r04-c01",
+      "edgeAlpha": {
+        "north": 0.814941,
+        "east": 1.0,
+        "south": 0.734375,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.3725,
+        "topRight": 1.0,
+        "bottomLeft": 0.328125,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r10-c02",
+      "name": "R10 C02",
+      "file": "mossy-terrain-r10-c02.png",
+      "row": 10,
+      "column": 2,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "a3a35c95f080a913180bdae85a346e294c3417cae93384c7c67a0a1c8111cd1c",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.516094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r10-c03",
+      "name": "R10 C03",
+      "file": "mossy-terrain-r10-c03.png",
+      "row": 10,
+      "column": 3,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "149c8477fc4f0adca6e18ebd3223c3f9e34e77fcea8ad6bdf88c94fd05afb60c",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.741699,
+        "west": 0.674805
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.115156,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r10-c04",
+      "name": "R10 C04",
+      "file": "mossy-terrain-r10-c04.png",
+      "row": 10,
+      "column": 4,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.801956,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 226,
+        "height": 256
+      },
+      "fingerprint": "25308ee714576e8ea7621fa53be972d049433af90e93ab67d672eb85c612ab34",
+      "duplicateOf": "mossy-terrain-r04-c06",
+      "edgeAlpha": {
+        "north": 0.823242,
+        "east": 0.0,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.383437,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.326719
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r10-c05",
+      "name": "R10 C05",
+      "file": "mossy-terrain-r10-c05.png",
+      "row": 10,
+      "column": 5,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "f0ccd90349e93e813e0ce258307e922e6a94ec5ddd37d1848acb6ba1556b1d6c",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r10-c06",
+      "name": "R10 C06",
+      "file": "mossy-terrain-r10-c06.png",
+      "row": 10,
+      "column": 6,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "f9e0727e9399dad5646a88a4426dd1c1564a7fa15bcab296edb7a2360c82c291",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.516094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r10-c07",
+      "name": "R10 C07",
+      "file": "mossy-terrain-r10-c07.png",
+      "row": 10,
+      "column": 7,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "ddffdbc837c3dd2c590e45a7c473da8c874656cdd07f5ec923a49bd56d5da0a8",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.741699,
+        "west": 0.674805
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.115156,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r10-c08",
+      "name": "R10 C08",
+      "file": "mossy-terrain-r10-c08.png",
+      "row": 10,
+      "column": 8,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r10-c09",
+      "name": "R10 C09",
+      "file": "mossy-terrain-r10-c09.png",
+      "row": 10,
+      "column": 9,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.784241,
+      "usable": true,
+      "bounds": {
+        "x": 37,
+        "y": 0,
+        "width": 219,
+        "height": 256
+      },
+      "fingerprint": "1a3f0f1174682c297713fb48780ffc06682e0d2d655494e95dc58a5dc125010f",
+      "duplicateOf": "mossy-terrain-r02-c01",
+      "edgeAlpha": {
+        "north": 0.820312,
+        "east": 1.0,
+        "south": 0.734375,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.287187,
+        "topRight": 1.0,
+        "bottomLeft": 0.328125,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r10-c10",
+      "name": "R10 C10",
+      "file": "mossy-terrain-r10-c10.png",
+      "row": 10,
+      "column": 10,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "3a85a09599fb2ac2adbf3ca823ee575aee2a676760897d5c5f6da0b87aadbde1",
+      "duplicateOf": "mossy-terrain-r02-c10",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.516094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r10-c11",
+      "name": "R10 C11",
+      "file": "mossy-terrain-r10-c11.png",
+      "row": 10,
+      "column": 11,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "e8ffb6f1663aba22132d61f35d23302d26a97883e5145839913347fd4d3f8e4c",
+      "duplicateOf": "mossy-terrain-r02-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.741699,
+        "west": 0.674805
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.115156,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r10-c12",
+      "name": "R10 C12",
+      "file": "mossy-terrain-r10-c12.png",
+      "row": 10,
+      "column": 12,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "3a85a09599fb2ac2adbf3ca823ee575aee2a676760897d5c5f6da0b87aadbde1",
+      "duplicateOf": "mossy-terrain-r02-c10",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.516094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r10-c13",
+      "name": "R10 C13",
+      "file": "mossy-terrain-r10-c13.png",
+      "row": 10,
+      "column": 13,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "e8ffb6f1663aba22132d61f35d23302d26a97883e5145839913347fd4d3f8e4c",
+      "duplicateOf": "mossy-terrain-r02-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.741699,
+        "west": 0.674805
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.115156,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r10-c14",
+      "name": "R10 C14",
+      "file": "mossy-terrain-r10-c14.png",
+      "row": 10,
+      "column": 14,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.797363,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 224,
+        "height": 256
+      },
+      "fingerprint": "d8d1af480be37369915d8252f20c4a0822067e12b7df9621b73f44fb2ae23569",
+      "duplicateOf": "mossy-terrain-r02-c06",
+      "edgeAlpha": {
+        "north": 0.874512,
+        "east": 0.0,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.332031,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.326719
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r11-c01",
+      "name": "R11 C01",
+      "file": "mossy-terrain-r11-c01.png",
+      "row": 11,
+      "column": 1,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.79805,
+      "usable": true,
+      "bounds": {
+        "x": 31,
+        "y": 0,
+        "width": 225,
+        "height": 256
+      },
+      "fingerprint": "36106759aaaaadf6980ca94e3296c09bd4000c1178d6169434af89606c13d35f",
+      "duplicateOf": "mossy-terrain-r03-c01",
+      "edgeAlpha": {
+        "north": 0.728027,
+        "east": 1.0,
+        "south": 0.819336,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.315156,
+        "topRight": 1.0,
+        "bottomLeft": 0.372344,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r11-c02",
+      "name": "R11 C02",
+      "file": "mossy-terrain-r11-c02.png",
+      "row": 11,
+      "column": 2,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964783,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "e358f225499a71801c545e515487836addf916f898ddda60552f9287f3686cd3",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.77832,
+        "east": 0.743164,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.639375,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r11-c03",
+      "name": "R11 C03",
+      "file": "mossy-terrain-r11-c03.png",
+      "row": 11,
+      "column": 3,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d6fede2a2808622bb1b683b0cd788036a3f136f165826b411e836a319c581c29",
+      "duplicateOf": "mossy-terrain-r01-c13",
+      "edgeAlpha": {
+        "north": 0.745117,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.73584
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.666094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r11-c04",
+      "name": "R11 C04",
+      "file": "mossy-terrain-r11-c04.png",
+      "row": 11,
+      "column": 4,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.796478,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 220,
+        "height": 256
+      },
+      "fingerprint": "8fbb41f4ca4d32a94d5264a94587c8e3b0810bd0a97e48733bbe8a25d0438b29",
+      "duplicateOf": "mossy-terrain-r03-c06",
+      "edgeAlpha": {
+        "north": 0.738281,
+        "east": 0.0,
+        "south": 0.818848,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.340625,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.385
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r11-c05",
+      "name": "R11 C05",
+      "file": "mossy-terrain-r11-c05.png",
+      "row": 11,
+      "column": 5,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b3ef5ff7cee8bb7bc92f8465b38577d7928bf9e181d2af7fe1b8ff61aaf34587",
+      "duplicateOf": "mossy-terrain-r03-c09",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r11-c06",
+      "name": "R11 C06",
+      "file": "mossy-terrain-r11-c06.png",
+      "row": 11,
+      "column": 6,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964783,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "703c1ea3c224abe94a5bd6908cb5966f071cea8860dded2bc1a5e114ddb1c658",
+      "duplicateOf": "mossy-terrain-r03-c10",
+      "edgeAlpha": {
+        "north": 0.77832,
+        "east": 0.743164,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.639375,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r11-c07",
+      "name": "R11 C07",
+      "file": "mossy-terrain-r11-c07.png",
+      "row": 11,
+      "column": 7,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d6fede2a2808622bb1b683b0cd788036a3f136f165826b411e836a319c581c29",
+      "duplicateOf": "mossy-terrain-r01-c13",
+      "edgeAlpha": {
+        "north": 0.745117,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.73584
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.666094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r11-c08",
+      "name": "R11 C08",
+      "file": "mossy-terrain-r11-c08.png",
+      "row": 11,
+      "column": 8,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r11-c09",
+      "name": "R11 C09",
+      "file": "mossy-terrain-r11-c09.png",
+      "row": 11,
+      "column": 9,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.79805,
+      "usable": true,
+      "bounds": {
+        "x": 31,
+        "y": 0,
+        "width": 225,
+        "height": 256
+      },
+      "fingerprint": "563add29f81299c04d67125377771db8b6d78830052992b68d695626268df51e",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.728027,
+        "east": 1.0,
+        "south": 0.819336,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.315156,
+        "topRight": 1.0,
+        "bottomLeft": 0.372344,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r11-c10",
+      "name": "R11 C10",
+      "file": "mossy-terrain-r11-c10.png",
+      "row": 11,
+      "column": 10,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964783,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "703c1ea3c224abe94a5bd6908cb5966f071cea8860dded2bc1a5e114ddb1c658",
+      "duplicateOf": "mossy-terrain-r03-c10",
+      "edgeAlpha": {
+        "north": 0.77832,
+        "east": 0.743164,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.639375,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r11-c11",
+      "name": "R11 C11",
+      "file": "mossy-terrain-r11-c11.png",
+      "row": 11,
+      "column": 11,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d6fede2a2808622bb1b683b0cd788036a3f136f165826b411e836a319c581c29",
+      "duplicateOf": "mossy-terrain-r01-c13",
+      "edgeAlpha": {
+        "north": 0.745117,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.73584
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.666094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r11-c12",
+      "name": "R11 C12",
+      "file": "mossy-terrain-r11-c12.png",
+      "row": 11,
+      "column": 12,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964493,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "4e70cfa66815a053a4e3f1ac08ae63a6ec4ba1b32f5ec22320e71b22f2633697",
+      "duplicateOf": "mossy-terrain-r01-c14",
+      "edgeAlpha": {
+        "north": 0.77832,
+        "east": 0.743164,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.636406,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r11-c13",
+      "name": "R11 C13",
+      "file": "mossy-terrain-r11-c13.png",
+      "row": 11,
+      "column": 13,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d6fede2a2808622bb1b683b0cd788036a3f136f165826b411e836a319c581c29",
+      "duplicateOf": "mossy-terrain-r01-c13",
+      "edgeAlpha": {
+        "north": 0.745117,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.73584
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.666094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r11-c14",
+      "name": "R11 C14",
+      "file": "mossy-terrain-r11-c14.png",
+      "row": 11,
+      "column": 14,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.796478,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 220,
+        "height": 256
+      },
+      "fingerprint": "8fbb41f4ca4d32a94d5264a94587c8e3b0810bd0a97e48733bbe8a25d0438b29",
+      "duplicateOf": "mossy-terrain-r03-c06",
+      "edgeAlpha": {
+        "north": 0.738281,
+        "east": 0.0,
+        "south": 0.818848,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.340625,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.385
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r12-c01",
+      "name": "R12 C01",
+      "file": "mossy-terrain-r12-c01.png",
+      "row": 12,
+      "column": 1,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.792572,
+      "usable": true,
+      "bounds": {
+        "x": 37,
+        "y": 0,
+        "width": 219,
+        "height": 256
+      },
+      "fingerprint": "81763388edb76b88701e49b4418ec25bd561314e5f9aa5a4c7797272f423143b",
+      "duplicateOf": "mossy-terrain-r04-c01",
+      "edgeAlpha": {
+        "north": 0.814941,
+        "east": 1.0,
+        "south": 0.734375,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.3725,
+        "topRight": 1.0,
+        "bottomLeft": 0.328125,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r12-c02",
+      "name": "R12 C02",
+      "file": "mossy-terrain-r12-c02.png",
+      "row": 12,
+      "column": 2,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r12-c03",
+      "name": "R12 C03",
+      "file": "mossy-terrain-r12-c03.png",
+      "row": 12,
+      "column": 3,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r12-c04",
+      "name": "R12 C04",
+      "file": "mossy-terrain-r12-c04.png",
+      "row": 12,
+      "column": 4,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.801956,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 226,
+        "height": 256
+      },
+      "fingerprint": "25308ee714576e8ea7621fa53be972d049433af90e93ab67d672eb85c612ab34",
+      "duplicateOf": "mossy-terrain-r04-c06",
+      "edgeAlpha": {
+        "north": 0.823242,
+        "east": 0.0,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.383437,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.326719
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r12-c05",
+      "name": "R12 C05",
+      "file": "mossy-terrain-r12-c05.png",
+      "row": 12,
+      "column": 5,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.656708,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 196
+      },
+      "fingerprint": "1a89214452f5fc592a86a6e29e6b3cd3ca8f4a97e873d8dc7803c1ceb08d7198",
+      "duplicateOf": "mossy-terrain-r06-c03",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.596191,
+        "south": 0.0,
+        "west": 0.674805
+      },
+      "connectionMask": 11,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.077969,
+        "bottomRight": 0.015625
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r12-c06",
+      "name": "R12 C06",
+      "file": "mossy-terrain-r12-c06.png",
+      "row": 12,
+      "column": 6,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.750504,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 225
+      },
+      "fingerprint": "7b3df65ba359b7cef075bf12405cec414357336b632a66c6e535151c779460dc",
+      "duplicateOf": "mossy-terrain-r06-c04",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.0,
+        "west": 0.748535
+      },
+      "connectionMask": 11,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.231719,
+        "bottomRight": 0.090625
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r12-c07",
+      "name": "R12 C07",
+      "file": "mossy-terrain-r12-c07.png",
+      "row": 12,
+      "column": 7,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.656708,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 196
+      },
+      "fingerprint": "1a89214452f5fc592a86a6e29e6b3cd3ca8f4a97e873d8dc7803c1ceb08d7198",
+      "duplicateOf": "mossy-terrain-r06-c03",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.596191,
+        "south": 0.0,
+        "west": 0.674805
+      },
+      "connectionMask": 11,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.077969,
+        "bottomRight": 0.015625
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r12-c08",
+      "name": "R12 C08",
+      "file": "mossy-terrain-r12-c08.png",
+      "row": 12,
+      "column": 8,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.750504,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 225
+      },
+      "fingerprint": "7b3df65ba359b7cef075bf12405cec414357336b632a66c6e535151c779460dc",
+      "duplicateOf": "mossy-terrain-r06-c04",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.0,
+        "west": 0.748535
+      },
+      "connectionMask": 11,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.231719,
+        "bottomRight": 0.090625
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r12-c09",
+      "name": "R12 C09",
+      "file": "mossy-terrain-r12-c09.png",
+      "row": 12,
+      "column": 9,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.792572,
+      "usable": true,
+      "bounds": {
+        "x": 37,
+        "y": 0,
+        "width": 219,
+        "height": 256
+      },
+      "fingerprint": "eccb00b089056031aeb9a5d91378a08bc0da442a65f48786bf9dec2faa1f10da",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.814941,
+        "east": 1.0,
+        "south": 0.734375,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.3725,
+        "topRight": 1.0,
+        "bottomLeft": 0.328125,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r12-c10",
+      "name": "R12 C10",
+      "file": "mossy-terrain-r12-c10.png",
+      "row": 12,
+      "column": 10,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "01d874020b74cbda3822a07b0d5b8de6a6c3b98107401f0a76351f40d5612a8f",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.516094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r12-c11",
+      "name": "R12 C11",
+      "file": "mossy-terrain-r12-c11.png",
+      "row": 12,
+      "column": 11,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "e8ffb6f1663aba22132d61f35d23302d26a97883e5145839913347fd4d3f8e4c",
+      "duplicateOf": "mossy-terrain-r02-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.741699,
+        "west": 0.674805
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.115156,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r12-c12",
+      "name": "R12 C12",
+      "file": "mossy-terrain-r12-c12.png",
+      "row": 12,
+      "column": 12,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "3a85a09599fb2ac2adbf3ca823ee575aee2a676760897d5c5f6da0b87aadbde1",
+      "duplicateOf": "mossy-terrain-r02-c10",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.516094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r12-c13",
+      "name": "R12 C13",
+      "file": "mossy-terrain-r12-c13.png",
+      "row": 12,
+      "column": 13,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "e8ffb6f1663aba22132d61f35d23302d26a97883e5145839913347fd4d3f8e4c",
+      "duplicateOf": "mossy-terrain-r02-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.741699,
+        "west": 0.674805
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.115156,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r12-c14",
+      "name": "R12 C14",
+      "file": "mossy-terrain-r12-c14.png",
+      "row": 12,
+      "column": 14,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.801956,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 226,
+        "height": 256
+      },
+      "fingerprint": "25308ee714576e8ea7621fa53be972d049433af90e93ab67d672eb85c612ab34",
+      "duplicateOf": "mossy-terrain-r04-c06",
+      "edgeAlpha": {
+        "north": 0.823242,
+        "east": 0.0,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.383437,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.326719
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r13-c01",
+      "name": "R13 C01",
+      "file": "mossy-terrain-r13-c01.png",
+      "row": 13,
+      "column": 1,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "3a85a09599fb2ac2adbf3ca823ee575aee2a676760897d5c5f6da0b87aadbde1",
+      "duplicateOf": "mossy-terrain-r02-c10",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.516094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r13-c02",
+      "name": "R13 C02",
+      "file": "mossy-terrain-r13-c02.png",
+      "row": 13,
+      "column": 2,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "e8ffb6f1663aba22132d61f35d23302d26a97883e5145839913347fd4d3f8e4c",
+      "duplicateOf": "mossy-terrain-r02-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.741699,
+        "west": 0.674805
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.115156,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r13-c03",
+      "name": "R13 C03",
+      "file": "mossy-terrain-r13-c03.png",
+      "row": 13,
+      "column": 3,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "bfa656f3b08885fd081026930bbe2062b1fa690a57fdd1ed16144db4d6bf4f43",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.73584,
+        "south": 0.745117,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.666094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r13-c04",
+      "name": "R13 C04",
+      "file": "mossy-terrain-r13-c04.png",
+      "row": 13,
+      "column": 4,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964783,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "305932b6f7933f75eaa58975e139407fbd8dd7837ec06f1f275b93a5b95e5f3b",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.77832,
+        "west": 0.743164
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.639375,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r13-c05",
+      "name": "R13 C05",
+      "file": "mossy-terrain-r13-c05.png",
+      "row": 13,
+      "column": 5,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r13-c06",
+      "name": "R13 C06",
+      "file": "mossy-terrain-r13-c06.png",
+      "row": 13,
+      "column": 6,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964783,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "703c1ea3c224abe94a5bd6908cb5966f071cea8860dded2bc1a5e114ddb1c658",
+      "duplicateOf": "mossy-terrain-r03-c10",
+      "edgeAlpha": {
+        "north": 0.77832,
+        "east": 0.743164,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.639375,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r13-c07",
+      "name": "R13 C07",
+      "file": "mossy-terrain-r13-c07.png",
+      "row": 13,
+      "column": 7,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d6fede2a2808622bb1b683b0cd788036a3f136f165826b411e836a319c581c29",
+      "duplicateOf": "mossy-terrain-r01-c13",
+      "edgeAlpha": {
+        "north": 0.745117,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.73584
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.666094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r13-c08",
+      "name": "R13 C08",
+      "file": "mossy-terrain-r13-c08.png",
+      "row": 13,
+      "column": 8,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r13-c09",
+      "name": "R13 C09",
+      "file": "mossy-terrain-r13-c09.png",
+      "row": 13,
+      "column": 9,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.781265,
+      "usable": true,
+      "bounds": {
+        "x": 33,
+        "y": 0,
+        "width": 223,
+        "height": 256
+      },
+      "fingerprint": "24b9b9abca9680d491acff02186463a2fb49bca10e4e10ecb1c306725413a852",
+      "duplicateOf": "mossy-terrain-r05-c01",
+      "edgeAlpha": {
+        "north": 0.728027,
+        "east": 1.0,
+        "south": 0.609375,
+        "west": 0.0
+      },
+      "connectionMask": 7,
+      "cornerAlpha": {
+        "topLeft": 0.315156,
+        "topRight": 1.0,
+        "bottomLeft": 0.249219,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r13-c10",
+      "name": "R13 C10",
+      "file": "mossy-terrain-r13-c10.png",
+      "row": 13,
+      "column": 10,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964783,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "703c1ea3c224abe94a5bd6908cb5966f071cea8860dded2bc1a5e114ddb1c658",
+      "duplicateOf": "mossy-terrain-r03-c10",
+      "edgeAlpha": {
+        "north": 0.77832,
+        "east": 0.743164,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.639375,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r13-c11",
+      "name": "R13 C11",
+      "file": "mossy-terrain-r13-c11.png",
+      "row": 13,
+      "column": 11,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d6fede2a2808622bb1b683b0cd788036a3f136f165826b411e836a319c581c29",
+      "duplicateOf": "mossy-terrain-r01-c13",
+      "edgeAlpha": {
+        "north": 0.745117,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.73584
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.666094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r13-c12",
+      "name": "R13 C12",
+      "file": "mossy-terrain-r13-c12.png",
+      "row": 13,
+      "column": 12,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964783,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "703c1ea3c224abe94a5bd6908cb5966f071cea8860dded2bc1a5e114ddb1c658",
+      "duplicateOf": "mossy-terrain-r03-c10",
+      "edgeAlpha": {
+        "north": 0.77832,
+        "east": 0.743164,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.639375,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r13-c13",
+      "name": "R13 C13",
+      "file": "mossy-terrain-r13-c13.png",
+      "row": 13,
+      "column": 13,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d6fede2a2808622bb1b683b0cd788036a3f136f165826b411e836a319c581c29",
+      "duplicateOf": "mossy-terrain-r01-c13",
+      "edgeAlpha": {
+        "north": 0.745117,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.73584
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.666094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r13-c14",
+      "name": "R13 C14",
+      "file": "mossy-terrain-r13-c14.png",
+      "row": 13,
+      "column": 14,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.799423,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 225,
+        "height": 256
+      },
+      "fingerprint": "626bb8abfde8437ecf662456bb41890a36eacf342678e447098fcd7c8e097b50",
+      "duplicateOf": "mossy-terrain-r05-c06",
+      "edgeAlpha": {
+        "north": 0.738281,
+        "east": 0.0,
+        "south": 0.670898,
+        "west": 1.0
+      },
+      "connectionMask": 13,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.340625,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.418125
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r14-c01",
+      "name": "R14 C01",
+      "file": "mossy-terrain-r14-c01.png",
+      "row": 14,
+      "column": 1,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.964783,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "703c1ea3c224abe94a5bd6908cb5966f071cea8860dded2bc1a5e114ddb1c658",
+      "duplicateOf": "mossy-terrain-r03-c10",
+      "edgeAlpha": {
+        "north": 0.77832,
+        "east": 0.743164,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.639375,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r14-c02",
+      "name": "R14 C02",
+      "file": "mossy-terrain-r14-c02.png",
+      "row": 14,
+      "column": 2,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.966843,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "d6fede2a2808622bb1b683b0cd788036a3f136f165826b411e836a319c581c29",
+      "duplicateOf": "mossy-terrain-r01-c13",
+      "edgeAlpha": {
+        "north": 0.745117,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.73584
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.666094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r14-c03",
+      "name": "R14 C03",
+      "file": "mossy-terrain-r14-c03.png",
+      "row": 14,
+      "column": 3,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "53ad39403e1544f2707f113859a644d874cb12c5da5e228a3d2ac9cfe9bc0e01",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.741699,
+        "east": 0.674805,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.115156,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 2
+    },
+    {
+      "id": "mossy-terrain-r14-c04",
+      "name": "R14 C04",
+      "file": "mossy-terrain-r14-c04.png",
+      "row": 14,
+      "column": 4,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b3339ba1c8d0d36bb0cafac8fb27d838c0739404c7e0a30b0ef027db40058354",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.731934,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 0.686523
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 0.516094,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 1
+    },
+    {
+      "id": "mossy-terrain-r14-c05",
+      "name": "R14 C05",
+      "file": "mossy-terrain-r14-c05.png",
+      "row": 14,
+      "column": 5,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.902985,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "e8ffb6f1663aba22132d61f35d23302d26a97883e5145839913347fd4d3f8e4c",
+      "duplicateOf": "mossy-terrain-r02-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 0.741699,
+        "west": 0.674805
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.115156,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 4
+    },
+    {
+      "id": "mossy-terrain-r14-c06",
+      "name": "R14 C06",
+      "file": "mossy-terrain-r14-c06.png",
+      "row": 14,
+      "column": 6,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r14-c07",
+      "name": "R14 C07",
+      "file": "mossy-terrain-r14-c07.png",
+      "row": 14,
+      "column": 7,
+      "width": 256,
+      "height": 256,
+      "occupancy": 1.0,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "b7997c60612a8f60f104b19583162aaac7dde1f1ab2e8ef7c9b935550e2b0aa8",
+      "duplicateOf": "mossy-terrain-r01-c11",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 1.0,
+        "south": 1.0,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 1.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r14-c08",
+      "name": "R14 C08",
+      "file": "mossy-terrain-r14-c08.png",
+      "row": 14,
+      "column": 8,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.950882,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 256
+      },
+      "fingerprint": "3a85a09599fb2ac2adbf3ca823ee575aee2a676760897d5c5f6da0b87aadbde1",
+      "duplicateOf": "mossy-terrain-r02-c10",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.731934,
+        "west": 1.0
+      },
+      "connectionMask": 15,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 1.0,
+        "bottomRight": 0.516094
+      },
+      "innerCornerMask": 8
+    },
+    {
+      "id": "mossy-terrain-r14-c09",
+      "name": "R14 C09",
+      "file": "mossy-terrain-r14-c09.png",
+      "row": 14,
+      "column": 9,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.306854,
+      "usable": true,
+      "bounds": {
+        "x": 85,
+        "y": 0,
+        "width": 171,
+        "height": 203
+      },
+      "fingerprint": "5572b38f45eb0f54ea77c2a630e7fbd02004083b33aa656dcab4e983c8f2e599",
+      "duplicateOf": "mossy-terrain-r06-c01",
+      "edgeAlpha": {
+        "north": 0.611328,
+        "east": 0.617676,
+        "south": 0.0,
+        "west": 0.0
+      },
+      "connectionMask": 3,
+      "cornerAlpha": {
+        "topLeft": 0.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.109844
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r14-c10",
+      "name": "R14 C10",
+      "file": "mossy-terrain-r14-c10.png",
+      "row": 14,
+      "column": 10,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.732864,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 225
+      },
+      "fingerprint": "f03f77a35d3ede27e20099f0de2a9f2d3c2e916da86351489976ac19d878e65f",
+      "duplicateOf": "mossy-terrain-r06-c02",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.0,
+        "west": 0.641602
+      },
+      "connectionMask": 11,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.070625,
+        "bottomRight": 0.090625
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r14-c11",
+      "name": "R14 C11",
+      "file": "mossy-terrain-r14-c11.png",
+      "row": 14,
+      "column": 11,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.656708,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 196
+      },
+      "fingerprint": "1a89214452f5fc592a86a6e29e6b3cd3ca8f4a97e873d8dc7803c1ceb08d7198",
+      "duplicateOf": "mossy-terrain-r06-c03",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.596191,
+        "south": 0.0,
+        "west": 0.674805
+      },
+      "connectionMask": 11,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.077969,
+        "bottomRight": 0.015625
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r14-c12",
+      "name": "R14 C12",
+      "file": "mossy-terrain-r14-c12.png",
+      "row": 14,
+      "column": 12,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.750504,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 225
+      },
+      "fingerprint": "7b3df65ba359b7cef075bf12405cec414357336b632a66c6e535151c779460dc",
+      "duplicateOf": "mossy-terrain-r06-c04",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.686523,
+        "south": 0.0,
+        "west": 0.748535
+      },
+      "connectionMask": 11,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.231719,
+        "bottomRight": 0.090625
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r14-c13",
+      "name": "R14 C13",
+      "file": "mossy-terrain-r14-c13.png",
+      "row": 14,
+      "column": 13,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.659348,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 256,
+        "height": 196
+      },
+      "fingerprint": "67f2d3074c8d19242177dfae8ad36fed57af900fd1bffc9374088cb5d316d542",
+      "duplicateOf": "mossy-terrain-r06-c05",
+      "edgeAlpha": {
+        "north": 1.0,
+        "east": 0.638672,
+        "south": 0.0,
+        "west": 0.674805
+      },
+      "connectionMask": 11,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 1.0,
+        "bottomLeft": 0.077969,
+        "bottomRight": 0.015625
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-r14-c14",
+      "name": "R14 C14",
+      "file": "mossy-terrain-r14-c14.png",
+      "row": 14,
+      "column": 14,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.339508,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 185,
+        "height": 180
+      },
+      "fingerprint": "38e96e882a8e4fc98f19771de5c3a852841d87d8dbdb5460e7c6ec558903f9a3",
+      "duplicateOf": "mossy-terrain-r06-c06",
+      "edgeAlpha": {
+        "north": 0.659668,
+        "east": 0.0,
+        "south": 0.0,
+        "west": 0.674805
+      },
+      "connectionMask": 9,
+      "cornerAlpha": {
+        "topLeft": 1.0,
+        "topRight": 0.014375,
+        "bottomLeft": 0.009375,
+        "bottomRight": 0.0
+      },
+      "innerCornerMask": 0
+    },
+    {
+      "id": "mossy-terrain-auto-ew-01",
+      "name": "Auto EW 01",
+      "file": "mossy-terrain-auto-ew-01.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.543793,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 256,
+        "height": 196
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r01-c02",
+        "mossy-terrain-r06-c02"
+      ],
+      "connectionMask": 10,
+      "innerCornerMask": 0,
+      "fingerprint": "3427a5a06876e261bc9fd2f710ca5aba15d9651df8c9bd48c935bdd9076df1b6",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.422363,
+        "south": 0.0,
+        "west": 0.512695
+      },
+      "cornerAlpha": {
+        "topLeft": 0.443437,
+        "topRight": 0.338438,
+        "bottomLeft": 0.070625,
+        "bottomRight": 0.090625
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-ns-01",
+      "name": "Auto NS 01",
+      "file": "mossy-terrain-auto-ns-01.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.581604,
+      "usable": true,
+      "bounds": {
+        "x": 37,
+        "y": 0,
+        "width": 187,
+        "height": 256
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r02-c01",
+        "mossy-terrain-r02-c06"
+      ],
+      "connectionMask": 5,
+      "innerCornerMask": 0,
+      "fingerprint": "671b8281b82c7d80d69b7038d04823d7504a00b0f25ed418ffaab880f9ab925f",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.694824,
+        "east": 0.0,
+        "south": 0.466309,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.287187,
+        "topRight": 0.332031,
+        "bottomLeft": 0.328125,
+        "bottomRight": 0.326719
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-ew-02",
+      "name": "Auto EW 02",
+      "file": "mossy-terrain-auto-ew-02.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.550888,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 35,
+        "width": 256,
+        "height": 190
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r01-c03",
+        "mossy-terrain-r06-c04"
+      ],
+      "connectionMask": 10,
+      "innerCornerMask": 0,
+      "fingerprint": "ed5e04236f917ec8c6bfc65e7e1faaab2ab98ce22ac14ca9b176e4f838853fe5",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.509277,
+        "south": 0.0,
+        "west": 0.490723
+      },
+      "cornerAlpha": {
+        "topLeft": 0.353125,
+        "topRight": 0.3975,
+        "bottomLeft": 0.231719,
+        "bottomRight": 0.090625
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-ns-02",
+      "name": "Auto NS 02",
+      "file": "mossy-terrain-auto-ns-02.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.580917,
+      "usable": true,
+      "bounds": {
+        "x": 37,
+        "y": 0,
+        "width": 183,
+        "height": 256
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r02-c07",
+        "mossy-terrain-r03-c06"
+      ],
+      "connectionMask": 5,
+      "innerCornerMask": 0,
+      "fingerprint": "69fdee3eed2f336f05fc962404f45765426179d603b410bbcd496afc620d6ad1",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.558594,
+        "east": 0.0,
+        "south": 0.553223,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.289219,
+        "topRight": 0.340625,
+        "bottomLeft": 0.328125,
+        "bottomRight": 0.385
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-ew-03",
+      "name": "Auto EW 03",
+      "file": "mossy-terrain-auto-ew-03.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.462753,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 256,
+        "height": 167
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r01-c04",
+        "mossy-terrain-r08-c03"
+      ],
+      "connectionMask": 10,
+      "innerCornerMask": 0,
+      "fingerprint": "3e29c5f93c7dffcaa4970ad3a9da1d1fca88e23ac2ca71edb3db863f0c025293",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.337402,
+        "south": 0.0,
+        "west": 0.500977
+      },
+      "cornerAlpha": {
+        "topLeft": 0.394688,
+        "topRight": 0.338438,
+        "bottomLeft": 0.077969,
+        "bottomRight": 0.013437
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-ns-03",
+      "name": "Auto NS 03",
+      "file": "mossy-terrain-auto-ns-03.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.600006,
+      "usable": true,
+      "bounds": {
+        "x": 31,
+        "y": 0,
+        "width": 195,
+        "height": 256
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r03-c01",
+        "mossy-terrain-r04-c06"
+      ],
+      "connectionMask": 5,
+      "innerCornerMask": 0,
+      "fingerprint": "a141470858b6125bafaacffa60d02584fca2058695711eb8e7e9637e478c6c21",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.55127,
+        "east": 0.0,
+        "south": 0.55127,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.315156,
+        "topRight": 0.383437,
+        "bottomLeft": 0.372344,
+        "bottomRight": 0.326719
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-ew-04",
+      "name": "Auto EW 04",
+      "file": "mossy-terrain-auto-ew-04.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.534515,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 35,
+        "width": 256,
+        "height": 190
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r01-c05",
+        "mossy-terrain-r06-c02"
+      ],
+      "connectionMask": 10,
+      "innerCornerMask": 0,
+      "fingerprint": "bc6f10bb9afe14e362924ba64d07e92d19b54f41d09585af3d587771c092b3ab",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.509766,
+        "south": 0.0,
+        "west": 0.383789
+      },
+      "cornerAlpha": {
+        "topLeft": 0.353125,
+        "topRight": 0.410469,
+        "bottomLeft": 0.070625,
+        "bottomRight": 0.090625
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-ns-04",
+      "name": "Auto NS 04",
+      "file": "mossy-terrain-auto-ns-04.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.597473,
+      "usable": true,
+      "bounds": {
+        "x": 31,
+        "y": 0,
+        "width": 194,
+        "height": 256
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r03-c07",
+        "mossy-terrain-r05-c06"
+      ],
+      "connectionMask": 5,
+      "innerCornerMask": 0,
+      "fingerprint": "f5bd02d5b4982ee84b8eacd22090d840239a7295752a184699963716ad306432",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.466309,
+        "east": 0.0,
+        "south": 0.490234,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.315156,
+        "topRight": 0.340625,
+        "bottomLeft": 0.372344,
+        "bottomRight": 0.418125
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-ew-05",
+      "name": "Auto EW 05",
+      "file": "mossy-terrain-auto-ew-05.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.561432,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 256,
+        "height": 196
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r01-c02",
+        "mossy-terrain-r06-c04"
+      ],
+      "connectionMask": 10,
+      "innerCornerMask": 0,
+      "fingerprint": "24bfe37a592f03d547fb26608a12279237c25e1c6122c52d839d8c3abe7a5e73",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.422363,
+        "south": 0.0,
+        "west": 0.619629
+      },
+      "cornerAlpha": {
+        "topLeft": 0.443437,
+        "topRight": 0.338438,
+        "bottomLeft": 0.231719,
+        "bottomRight": 0.090625
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-ns-05",
+      "name": "Auto NS 05",
+      "file": "mossy-terrain-auto-ns-05.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.589935,
+      "usable": true,
+      "bounds": {
+        "x": 37,
+        "y": 0,
+        "width": 187,
+        "height": 256
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r04-c01",
+        "mossy-terrain-r02-c06"
+      ],
+      "connectionMask": 5,
+      "innerCornerMask": 0,
+      "fingerprint": "fc9e42c371c3777e2d8d38e3dc202b16d3e20054d242edd5c7575b22fedc3b40",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.689453,
+        "east": 0.0,
+        "south": 0.466309,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.3725,
+        "topRight": 0.332031,
+        "bottomLeft": 0.328125,
+        "bottomRight": 0.326719
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-ew-06",
+      "name": "Auto EW 06",
+      "file": "mossy-terrain-auto-ew-06.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.457275,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 35,
+        "width": 256,
+        "height": 161
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r01-c03",
+        "mossy-terrain-r08-c03"
+      ],
+      "connectionMask": 10,
+      "innerCornerMask": 0,
+      "fingerprint": "82af40e2516f3849f4e14f01229c8108c197b340ff2d303f79b485a58fc4b96f",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.424316,
+        "south": 0.0,
+        "west": 0.416016
+      },
+      "cornerAlpha": {
+        "topLeft": 0.353125,
+        "topRight": 0.3975,
+        "bottomLeft": 0.077969,
+        "bottomRight": 0.013437
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-ns-06",
+      "name": "Auto NS 06",
+      "file": "mossy-terrain-auto-ns-06.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.58905,
+      "usable": true,
+      "bounds": {
+        "x": 37,
+        "y": 0,
+        "width": 183,
+        "height": 256
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r04-c07",
+        "mossy-terrain-r03-c06"
+      ],
+      "connectionMask": 5,
+      "innerCornerMask": 0,
+      "fingerprint": "75c0826b48275b884f7dfe78bed697f0e8d160a23f671fe058d54563f0e9d5dc",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.553223,
+        "east": 0.0,
+        "south": 0.553223,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.3725,
+        "topRight": 0.340625,
+        "bottomLeft": 0.328125,
+        "bottomRight": 0.385
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-e-01",
+      "name": "Auto E 01",
+      "file": "mossy-terrain-auto-e-01.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.277603,
+      "usable": true,
+      "bounds": {
+        "x": 38,
+        "y": 33,
+        "width": 218,
+        "height": 170
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r01-c01",
+        "mossy-terrain-r06-c01"
+      ],
+      "connectionMask": 2,
+      "innerCornerMask": 0,
+      "fingerprint": "8b5d4d7d0a4d1643e5fa363acfb64fdfd7166c98c31871f7d39a916371c01c83",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.48584,
+        "south": 0.0,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.052344,
+        "topRight": 0.461875,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.109844
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-w-01",
+      "name": "Auto W 01",
+      "file": "mossy-terrain-auto-w-01.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.295456,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 219,
+        "height": 151
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r01-c06",
+        "mossy-terrain-r06-c06"
+      ],
+      "connectionMask": 8,
+      "innerCornerMask": 0,
+      "fingerprint": "2542b918906f73679c6e577f9e30bc7139cec81d43af6874a412cd8f311076b6",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.0,
+        "south": 0.0,
+        "west": 0.508301
+      },
+      "cornerAlpha": {
+        "topLeft": 0.543438,
+        "topRight": 0.0625,
+        "bottomLeft": 0.009375,
+        "bottomRight": 0.0
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-n-01",
+      "name": "Auto N 01",
+      "file": "mossy-terrain-auto-n-01.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.090256,
+      "usable": true,
+      "bounds": {
+        "x": 85,
+        "y": 0,
+        "width": 100,
+        "height": 90
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r06-c01",
+        "mossy-terrain-r06-c06"
+      ],
+      "connectionMask": 1,
+      "innerCornerMask": 0,
+      "fingerprint": "f777ac016f0adbe88212cb68efdf55ee850901375fef22783a695dd1d5a3f564",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.270996,
+        "east": 0.0,
+        "south": 0.0,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.0,
+        "topRight": 0.014375,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.0
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-s-01",
+      "name": "Auto S 01",
+      "file": "mossy-terrain-auto-s-01.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.451263,
+      "usable": true,
+      "bounds": {
+        "x": 34,
+        "y": 39,
+        "width": 190,
+        "height": 217
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r01-c01",
+        "mossy-terrain-r01-c06"
+      ],
+      "connectionMask": 4,
+      "innerCornerMask": 0,
+      "fingerprint": "99490f7d3b531a214acf82f173a1973960e0358dbe0fdeb3b09fd1b5451a2692",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.0,
+        "south": 0.70459,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.052344,
+        "topRight": 0.0625,
+        "bottomLeft": 0.349531,
+        "bottomRight": 0.413281
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-e-02",
+      "name": "Auto E 02",
+      "file": "mossy-terrain-auto-e-02.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.354248,
+      "usable": true,
+      "bounds": {
+        "x": 38,
+        "y": 34,
+        "width": 218,
+        "height": 169
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r01-c07",
+        "mossy-terrain-r08-c02"
+      ],
+      "connectionMask": 2,
+      "innerCornerMask": 0,
+      "fingerprint": "d431e1c0fd7d14ccd7b6192aedcf4995fe2bbbb2a17715392239b85da160a615",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.518066,
+        "south": 0.0,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.052344,
+        "topRight": 0.439375,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.110156
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-w-02",
+      "name": "Auto W 02",
+      "file": "mossy-terrain-auto-w-02.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.37648,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 29,
+        "width": 219,
+        "height": 167
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r01-c08",
+        "mossy-terrain-r08-c05"
+      ],
+      "connectionMask": 8,
+      "innerCornerMask": 0,
+      "fingerprint": "46cb90004cd871ce2e8c284c81583b54411ac26c2905cf7a65b45fe162478feb",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.0,
+        "south": 0.0,
+        "west": 0.506836
+      },
+      "cornerAlpha": {
+        "topLeft": 0.543281,
+        "topRight": 0.0625,
+        "bottomLeft": 0.082656,
+        "bottomRight": 0.0
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-n-02",
+      "name": "Auto N 02",
+      "file": "mossy-terrain-auto-n-02.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.245743,
+      "usable": true,
+      "bounds": {
+        "x": 85,
+        "y": 0,
+        "width": 171,
+        "height": 174
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r06-c07",
+        "mossy-terrain-r08-c05"
+      ],
+      "connectionMask": 1,
+      "innerCornerMask": 0,
+      "fingerprint": "6cee13c5f9d4a47b0bb6326b3b81bce779c0f849b7c5e905d98f4c68fbacdbfa",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.611328,
+        "east": 0.050781,
+        "south": 0.0,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.0,
+        "topRight": 0.599844,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.0
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-s-02",
+      "name": "Auto S 02",
+      "file": "mossy-terrain-auto-s-02.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.58316,
+      "usable": true,
+      "bounds": {
+        "x": 34,
+        "y": 39,
+        "width": 222,
+        "height": 217
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r01-c07",
+        "mossy-terrain-r07-c05"
+      ],
+      "connectionMask": 4,
+      "innerCornerMask": 0,
+      "fingerprint": "d87d10af9e831c3137e66ce355e2809ebb2d42befc625ee1ccba0236da4529ab",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.397949,
+        "south": 0.831543,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.052344,
+        "topRight": 0.263594,
+        "bottomLeft": 0.349531,
+        "bottomRight": 0.926562
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-e-03",
+      "name": "Auto E 03",
+      "file": "mossy-terrain-auto-e-03.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.330872,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 32,
+        "width": 256,
+        "height": 171
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r07-c02",
+        "mossy-terrain-r06-c01"
+      ],
+      "connectionMask": 2,
+      "innerCornerMask": 0,
+      "fingerprint": "9d5780044c47a71e675dad4c1c8bfdaab4525951fe132ea2c30161ac075c679a",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.353516,
+        "south": 0.0,
+        "west": 0.091797
+      },
+      "cornerAlpha": {
+        "topLeft": 0.229219,
+        "topRight": 0.42625,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.109844
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-w-03",
+      "name": "Auto W 03",
+      "file": "mossy-terrain-auto-w-03.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.335205,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 31,
+        "width": 256,
+        "height": 149
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r07-c05",
+        "mossy-terrain-r06-c06"
+      ],
+      "connectionMask": 8,
+      "innerCornerMask": 0,
+      "fingerprint": "b9c1cce36353faeeafa719843526a1d3d95d6497c29d0e7adb4792efb0161484",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.094727,
+        "south": 0.0,
+        "west": 0.416992
+      },
+      "cornerAlpha": {
+        "topLeft": 0.369688,
+        "topRight": 0.263594,
+        "bottomLeft": 0.009375,
+        "bottomRight": 0.0
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-n-03",
+      "name": "Auto N 03",
+      "file": "mossy-terrain-auto-n-03.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.242966,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 185,
+        "height": 169
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r08-c02",
+        "mossy-terrain-r06-c06"
+      ],
+      "connectionMask": 1,
+      "innerCornerMask": 0,
+      "fingerprint": "34f3a3b3deb22341c83daa88cfa689407b55153907c343b2d0db7bdbbc4cfe48",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.655762,
+        "east": 0.0,
+        "south": 0.0,
+        "west": 0.032227
+      },
+      "cornerAlpha": {
+        "topLeft": 0.562813,
+        "topRight": 0.014375,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.0
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-s-03",
+      "name": "Auto S 03",
+      "file": "mossy-terrain-auto-s-03.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.585403,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 39,
+        "width": 224,
+        "height": 217
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r07-c02",
+        "mossy-terrain-r01-c06"
+      ],
+      "connectionMask": 4,
+      "innerCornerMask": 0,
+      "fingerprint": "0d4339baf162285b2689c9cb9c8da09d82c53731d2d441366b28ef4e0af06149",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.0,
+        "south": 0.873047,
+        "west": 0.264648
+      },
+      "cornerAlpha": {
+        "topLeft": 0.229219,
+        "topRight": 0.0625,
+        "bottomLeft": 0.874531,
+        "bottomRight": 0.413281
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-e-04",
+      "name": "Auto E 04",
+      "file": "mossy-terrain-auto-e-04.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.389832,
+      "usable": true,
+      "bounds": {
+        "x": 14,
+        "y": 31,
+        "width": 242,
+        "height": 172
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r07-c07",
+        "mossy-terrain-r08-c02"
+      ],
+      "connectionMask": 2,
+      "innerCornerMask": 0,
+      "fingerprint": "2156d02bdbec5e9e8e6657d615972bcc28d116e86b316f10f28a4a476f2b0371",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.420898,
+        "south": 0.0,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.143906,
+        "topRight": 0.389375,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.110156
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-w-04",
+      "name": "Auto W 04",
+      "file": "mossy-terrain-auto-w-04.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.402267,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 32,
+        "width": 252,
+        "height": 164
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r07-c08",
+        "mossy-terrain-r08-c05"
+      ],
+      "connectionMask": 8,
+      "innerCornerMask": 0,
+      "fingerprint": "58ec966f60aac58dda3b3bc017b7658375a3284fd5fe389b54eb5756122e5d6c",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.020508,
+        "south": 0.0,
+        "west": 0.416016
+      },
+      "cornerAlpha": {
+        "topLeft": 0.412656,
+        "topRight": 0.179375,
+        "bottomLeft": 0.082656,
+        "bottomRight": 0.0
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-n-04",
+      "name": "Auto N 04",
+      "file": "mossy-terrain-auto-n-04.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.368683,
+      "usable": true,
+      "bounds": {
+        "x": 25,
+        "y": 0,
+        "width": 231,
+        "height": 174
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r08-c07",
+        "mossy-terrain-r08-c05"
+      ],
+      "connectionMask": 1,
+      "innerCornerMask": 0,
+      "fingerprint": "11cd9a65f41bdd0268d3b0eeca9275c9a8adce84cd3c2cac7449baef3d2b8535",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.788574,
+        "east": 0.050781,
+        "south": 0.0,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.274531,
+        "topRight": 0.599844,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.0
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-s-04",
+      "name": "Auto S 04",
+      "file": "mossy-terrain-auto-s-04.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.667542,
+      "usable": true,
+      "bounds": {
+        "x": 11,
+        "y": 39,
+        "width": 245,
+        "height": 217
+      },
+      "generated": true,
+      "generatedFrom": [
+        "mossy-terrain-r07-c07",
+        "mossy-terrain-r07-c05"
+      ],
+      "connectionMask": 4,
+      "innerCornerMask": 0,
+      "fingerprint": "f81b2abc085e50e6d0a05ce5fd1e598316fb99c62e0b4ee29b6b6acd521fa857",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.397949,
+        "south": 0.797852,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.143906,
+        "topRight": 0.263594,
+        "bottomLeft": 0.617656,
+        "bottomRight": 0.926562
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-none-01",
+      "name": "Auto None 01",
+      "file": "mossy-terrain-auto-none-01.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.431885,
+      "usable": true,
+      "bounds": {
+        "x": 18,
+        "y": 13,
+        "width": 238,
+        "height": 189
+      },
+      "generated": true,
+      "generatedFrom": [
+        "Mossy - FloatingPlatforms.png#03-04_01-02"
+      ],
+      "connectionMask": 0,
+      "innerCornerMask": 0,
+      "fingerprint": "aba64098cbd814a745cc9a9a1fd0ef744e3107edd3cde187a8bd55081075f95f",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.143555,
+        "south": 0.0,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.387969,
+        "topRight": 0.220781,
+        "bottomLeft": 0.045156,
+        "bottomRight": 0.018594
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-none-02",
+      "name": "Auto None 02",
+      "file": "mossy-terrain-auto-none-02.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.248367,
+      "usable": true,
+      "bounds": {
+        "x": 56,
+        "y": 23,
+        "width": 200,
+        "height": 164
+      },
+      "generated": true,
+      "generatedFrom": [
+        "Mossy - FloatingPlatforms.png#01-02_01-02"
+      ],
+      "connectionMask": 0,
+      "innerCornerMask": 0,
+      "fingerprint": "9e3be07f27b3831d58435d7bf9b7631a66177ae2da32d2cf4bb4e58b4860ada1",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.287109,
+        "south": 0.0,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.064062,
+        "topRight": 0.071406,
+        "bottomLeft": 0.0,
+        "bottomRight": 0.0
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-none-03",
+      "name": "Auto None 03",
+      "file": "mossy-terrain-auto-none-03.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.25972,
+      "usable": true,
+      "bounds": {
+        "x": 54,
+        "y": 41,
+        "width": 202,
+        "height": 174
+      },
+      "generated": true,
+      "generatedFrom": [
+        "Mossy - FloatingPlatforms.png#05-06_01-02"
+      ],
+      "connectionMask": 0,
+      "innerCornerMask": 0,
+      "fingerprint": "44b9ef515cc0971312c1f7ca44c422ff7c498064b540c15577a25af9d10e090c",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.0,
+        "east": 0.568848,
+        "south": 0.0,
+        "west": 0.0
+      },
+      "cornerAlpha": {
+        "topLeft": 0.04375,
+        "topRight": 0.140469,
+        "bottomLeft": 0.000937,
+        "bottomRight": 0.032344
+      }
+    },
+    {
+      "id": "mossy-terrain-auto-none-04",
+      "name": "Auto None 04",
+      "file": "mossy-terrain-auto-none-04.png",
+      "row": null,
+      "column": null,
+      "width": 256,
+      "height": 256,
+      "occupancy": 0.592056,
+      "usable": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 255,
+        "height": 239
+      },
+      "generated": true,
+      "generatedFrom": [
+        "Mossy - FloatingPlatforms.png#03-04_07-08"
+      ],
+      "connectionMask": 0,
+      "innerCornerMask": 0,
+      "fingerprint": "218a1194de5ed66783feec40a0a238c18534b8397b1c8f388f3147b34c869d7c",
+      "duplicateOf": null,
+      "edgeAlpha": {
+        "north": 0.730957,
+        "east": 0.055176,
+        "south": 0.0,
+        "west": 0.050781
+      },
+      "cornerAlpha": {
+        "topLeft": 0.538906,
+        "topRight": 0.820781,
+        "bottomLeft": 0.000937,
+        "bottomRight": 0.129688
+      }
+    }
+  ],
+  "edgeThreshold": 0.55,
+  "cornerThreshold": 0.82,
+  "uniqueTiles": 102,
+  "duplicateTiles": 126,
+  "connectionMaskCounts": {
+    "0": 8,
+    "1": 4,
+    "2": 4,
+    "3": 5,
+    "4": 4,
+    "5": 6,
+    "6": 5,
+    "7": 16,
+    "8": 4,
+    "9": 5,
+    "10": 6,
+    "11": 14,
+    "12": 5,
+    "13": 16,
+    "14": 14,
+    "15": 112
+  },
+  "innerCornerMaskCounts": {
+    "0": 168,
+    "1": 15,
+    "2": 15,
+    "4": 15,
+    "8": 15
+  },
+  "generatedTiles": 32
+}
