@@ -161,8 +161,8 @@ enum CheatSystem {
             let clamped = clamp(amount, to: 1...999_999)
             stats.beginCheatSessionIfNeeded()
             stats.pearls += clamped
-            stats.addMemory("Cheat usado: conchas +\(clamped)")
-            return "Cheat de sessao aplicado: conchas +\(clamped)."
+            stats.addMemory("Cheat usado: conchas +\(GameUI.shellAmountText(clamped))")
+            return "Cheat de sessao aplicado: conchas +\(GameUI.shellAmountText(clamped))."
         }
         if let value = numberSuffix(in: code, prefix: "sethunger", fallback: 0) {
             stats.beginCheatSessionIfNeeded()

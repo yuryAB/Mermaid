@@ -97,7 +97,7 @@ enum OfflineProgressSystem {
         let pearlGain = stats.phase == .baby ? (hours >= 6 ? 1 : 0) : Int(min(4, hours / 2))
         if pearlGain > 0 {
             let gained = stats.awardPearls(pearlGain)
-            lines.append("juntou 🐚\(gained)")
+            lines.append("juntou 🐚\(GameUI.shellAmountText(gained))")
         }
         if hours >= 3 && Int.random(in: 0..<3) == 0 {
             stats.addMemory("Viu um cardume raro enquanto você estava fora")

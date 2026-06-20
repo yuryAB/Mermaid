@@ -581,7 +581,7 @@ final class RewardSystem {
         case .pearls:
             let gained = stats.awardPearls(reward.pearlAmount)
             GameAudio.shared.play(.pearlReward)
-            return "Recompensa: \(gained) concha\(gained == 1 ? "" : "s")."
+            return "Recompensa: \(GameUI.shellAmountText(gained)) concha\(gained == 1 ? "" : "s")."
         case .temporaryPet:
             stats.addTimedBuff(.temporaryPet,
                                title: reward.title,
@@ -749,6 +749,27 @@ enum GameUI {
     private static var gradientCache: [String: SKTexture] = [:]
     private static var paperCache: [String: SKTexture] = [:]
     private static var iconCache: [String: SKTexture] = [:]
+
+    static func shellAmountText(_ amount: Int) -> String {
+        let suffixes = ["", "k", "M", "B", "T"]
+        let sign = amount < 0 ? "-" : ""
+        var value = abs(Double(amount))
+        var suffixIndex = 0
+
+        while value >= 999.95 && suffixIndex < suffixes.count - 1 {
+            value /= 1_000
+            suffixIndex += 1
+        }
+
+        guard suffixIndex > 0 else { return "\(amount)" }
+
+        let rounded = (value * 10).rounded() / 10
+        let whole = rounded.rounded(.towardZero)
+        if rounded == whole {
+            return "\(sign)\(Int(whole))\(suffixes[suffixIndex])"
+        }
+        return "\(sign)\(String(format: "%.1f", rounded))\(suffixes[suffixIndex])"
+    }
 
     /// Retorna uma lavagem suave, não um gradiente escuro.
     static func tintedColors(_ tint: UIColor) -> [UIColor] {

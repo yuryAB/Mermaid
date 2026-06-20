@@ -251,10 +251,10 @@ enum ChallengeChrome {
             let eased = t * t * (3 - 2 * t)
             let shownPoints = Int((CGFloat(points) * eased).rounded())
             let shownPearls = Int((CGFloat(pearls) * eased).rounded())
-            label.text = "\(shownPoints) pontos = \(shownPearls) conchas"
+            label.text = "\(shownPoints) pontos = \(GameUI.shellAmountText(shownPearls)) conchas"
         }
         let settle = SKAction.run {
-            label.text = "\(points) pontos = \(pearls) conchas"
+            label.text = "\(points) pontos = \(GameUI.shellAmountText(pearls)) conchas"
         }
         let pulseStep = SKAction.sequence([
             .scale(to: 1.08, duration: 0.12),

@@ -129,7 +129,7 @@ final class GrowthSystem {
         }
         let shellGrowthCost = GameBalance.growthShellCost(for: ctx.stats.phase)
         guard ctx.stats.pearls >= shellGrowthCost else {
-            ctx.say("Acelerar crescimento custa \(shellGrowthCost) conchas. Faltam \(shellGrowthCost - ctx.stats.pearls) conchas.")
+            ctx.say("Acelerar crescimento custa \(GameUI.shellAmountText(shellGrowthCost)) conchas. Faltam \(GameUI.shellAmountText(shellGrowthCost - ctx.stats.pearls)) conchas.")
             return false
         }
 
@@ -714,7 +714,7 @@ final class GrowthSystem {
             ]))
         }
 
-        ctx.say("✨ Ela evoluiu: agora é \(next.displayName)! 🐚+\(gained)")
+        ctx.say("✨ Ela evoluiu: agora é \(next.displayName)! 🐚+\(GameUI.shellAmountText(gained))")
         ctx.stats.save()
     }
 }

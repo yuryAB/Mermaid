@@ -238,7 +238,7 @@ final class DepthSystem {
             ctx.stats.maxDepthMeters = meters
             let gained = ctx.stats.awardPearls(1)
             GameAudio.shared.play(.depthRecord)
-            ctx.say("Ela nadou mais fundo do que nunca! 🐚+\(gained)")
+            ctx.say("Ela nadou mais fundo do que nunca! 🐚+\(GameUI.shellAmountText(gained))")
         }
 
         var forcePaletteUpdate = false
@@ -280,7 +280,7 @@ final class DepthSystem {
             let gained = ctx.stats.awardPearls(8)
             ctx.stats.addMemory("Alcançou a \(zone.displayName)")
             GameAudio.shared.play(.zoneUnlock)
-            ctx.say("🌊 Nova camada alcançável: \(zone.displayName)! 🐚+\(gained)")
+            ctx.say("🌊 Nova camada alcançável: \(zone.displayName)! 🐚+\(GameUI.shellAmountText(gained))")
         }
     }
 

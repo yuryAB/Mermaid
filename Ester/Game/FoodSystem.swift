@@ -272,9 +272,9 @@ final class FoodSystem {
             let gained = stats.awardPearls(food.kind.pearls)
             GameAudio.shared.play(.pearlReward)
             if food.kind.isShellCurrency {
-                ctx.say("Ela coletou \(food.kind.name). Conchas +\(gained)")
+                ctx.say("Ela coletou \(food.kind.name). Conchas +\(GameUI.shellAmountText(gained))")
             } else {
-                ctx.say("Ela encontrou \(food.kind.name). Conchas +\(gained)")
+                ctx.say("Ela encontrou \(food.kind.name). Conchas +\(GameUI.shellAmountText(gained))")
             }
         } else if Int.random(in: 0..<4) == 0 {
             ctx.say("Nham... \(food.kind.name) 😋")
@@ -295,7 +295,7 @@ final class FoodSystem {
         let amount = Int.random(in: 10...100)
         ctx.stats.pearls += amount
         GameAudio.shared.play(.pearlReward)
-        ctx.say("Você coletou \(food.kind.name). Conchas +\(amount)")
+        ctx.say("Você coletou \(food.kind.name). Conchas +\(GameUI.shellAmountText(amount))")
         return amount
     }
 

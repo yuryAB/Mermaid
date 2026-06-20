@@ -1182,7 +1182,7 @@ final class HUDLayer: SKNode {
         } else {
             depthLabel.text = "Camada atual: \(zoneText)"
         }
-        pearlsLabel.text = "Conchas \(stats.pearls)"
+        pearlsLabel.text = "Conchas \(GameUI.shellAmountText(stats.pearls))"
         fitLabelToWidth(pearlsLabel,
                         maxWidth: topPanelPearlsMaxWidth,
                         baseSize: 10,

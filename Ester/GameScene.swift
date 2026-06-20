@@ -1145,8 +1145,8 @@ class GameScene: SKScene {
             poiCompletion(result)
         } else {
             ctx.say(result.reachedTarget
-                    ? "Ela adorou o \(result.kind.title)! 🐚+\(gainedPearls)"
-                    : "Quase! Ainda assim ganhou 🐚+\(gainedPearls)")
+                    ? "Ela adorou o \(result.kind.title)! 🐚+\(GameUI.shellAmountText(gainedPearls))"
+                    : "Quase! Ainda assim ganhou 🐚+\(GameUI.shellAmountText(gainedPearls))")
         }
     }
 

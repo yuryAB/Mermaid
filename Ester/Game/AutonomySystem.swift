@@ -1360,7 +1360,7 @@ final class AutonomySystem {
         stats.boostMood(6)
         if Int.random(in: 0..<12) == 0 {
             let gained = stats.awardPearls(1)
-            ctx.say("O peixinho deixou conchas! 🐚+\(gained)")
+            ctx.say("O peixinho deixou conchas! 🐚+\(GameUI.shellAmountText(gained))")
         }
         setIntent(.observing)
         decisionCooldown = 4

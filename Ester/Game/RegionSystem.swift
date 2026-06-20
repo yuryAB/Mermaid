@@ -431,7 +431,7 @@ final class RegionDiscoverySystem {
         let gained = ctx.stats.awardPearls(4)
         ctx.stats.addMemory("Confirmou rota para \(region.name)")
         GameAudio.shared.play(.regionDiscover)
-        ctx.say("Rota aberta: \(region.name). Conchas +\(gained)")
+        ctx.say("Rota aberta: \(region.name). Conchas +\(GameUI.shellAmountText(gained))")
         return true
     }
 

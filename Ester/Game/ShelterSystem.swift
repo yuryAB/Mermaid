@@ -533,7 +533,7 @@ final class RefugeOverlay: SKNode {
         statusLabel.text = "\(stats.phase.displayName) · \(stats.ageText) · repouso observado"
         foodLabel.text = ctx.growth.evolutionNote()
         careLabel.text = "Energia \(Int(stats.energy))% · Alimentação \(Int(100 - stats.hunger))%"
-        pearlsLabel.text = "Conchas \(stats.pearls)"
+        pearlsLabel.text = "Conchas \(GameUI.shellAmountText(stats.pearls))"
         upgradeLabel.text = "Aprimoramentos"
     }
 
@@ -571,7 +571,7 @@ final class RefugeOverlay: SKNode {
                 if let cost = ctx.stats.upgradeCost(for: kind) {
                     guard ctx.stats.pearls >= cost else {
                         GameAudio.shared.play(.uiUpgradeFail)
-                        ctx.say("\(kind.title) custa \(cost) conchas. Faltam \(cost - ctx.stats.pearls) conchas.")
+                        ctx.say("\(kind.title) custa \(GameUI.shellAmountText(cost)) conchas. Faltam \(GameUI.shellAmountText(cost - ctx.stats.pearls)) conchas.")
                         return
                     }
                     if ctx.stats.buyUpgrade(kind) {
@@ -641,7 +641,7 @@ final class RefugeEnhancementsOverlay: SKNode {
         subtitle.zPosition = 2
         addChild(subtitle)
 
-        let pearlLine = makeLabel(text: "Conchas \(stats.pearls)", fontSize: 13, bold: true, color: GameUI.gold)
+        let pearlLine = makeLabel(text: "Conchas \(GameUI.shellAmountText(stats.pearls))", fontSize: 13, bold: true, color: GameUI.gold)
         pearlLine.position = CGPoint(x: 0, y: top - 92)
         pearlLine.zPosition = 2
         addChild(pearlLine)
@@ -724,7 +724,7 @@ final class RefugeEnhancementsOverlay: SKNode {
 
         let buttonText: String
         if let cost = stats.upgradeCost(for: kind) {
-            buttonText = "comprar\n\(cost) conchas"
+            buttonText = "comprar\n\(GameUI.shellAmountText(cost)) conchas"
         } else {
             buttonText = "nível\nmáximo"
         }
@@ -777,24 +777,12 @@ final class RefugeEnhancementsOverlay: SKNode {
         button.addChild(buttonBg)
 
         let cost = GameBalance.growthShellCost(for: stats.phase)
-        let label = makeLabel(text: "\(Self.shellCostText(cost))\nconchas", fontSize: 10.5, bold: true, color: GameUI.ink)
+        let label = makeLabel(text: "\(GameUI.shellAmountText(cost))\nconchas", fontSize: 10.5, bold: true, color: GameUI.ink)
         label.name = actionName
         label.numberOfLines = 2
         label.verticalAlignmentMode = .center
         label.zPosition = 5
         button.addChild(label)
-    }
-
-    private static func shellCostText(_ cost: Int) -> String {
-        let digits = String(cost)
-        var groups: [String] = []
-        var end = digits.endIndex
-        while end > digits.startIndex {
-            let start = digits.index(end, offsetBy: -3, limitedBy: digits.startIndex) ?? digits.startIndex
-            groups.insert(String(digits[start..<end]), at: 0)
-            end = start
-        }
-        return groups.joined(separator: ".")
     }
 
     private func makeLabel(text: String,
