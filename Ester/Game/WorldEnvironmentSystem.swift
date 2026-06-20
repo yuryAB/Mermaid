@@ -11,7 +11,7 @@ import SpriteKit
 
 final class WorldChunkManager {
     private let rootNode = SKNode()
-    private let activeRadius = 2
+    private let activeRadius = 1
     private var chunks: [WorldChunkCoord: SKNode] = [:]
     private var updateAccumulator: CGFloat = 0
     private var lastCenter: WorldChunkCoord?

@@ -191,31 +191,29 @@ final class DepthSystem {
         }
     }
 
-    /// Paleta do corpo: clara só junto à superfície, padrão na imensa
-    /// faixa do meio, escura apenas nas camadas realmente profundas.
+    /// Paleta do corpo: algumas camadas mudam oficialmente a cor da sereia.
+    /// O flash de limite ainda usa `BoundaryPaletteEffect`, separado desta base.
     func mermaidPalette(atY y: CGFloat) -> MermaidPalette {
         normalMermaidPalette(atY: y)
     }
 
     private func normalMermaidPalette(atY y: CGFloat) -> MermaidPalette {
-        switch ctx.stats.phase {
-        case .baby, .child:
-            return .main
-        case .egg, .teen, .young, .adult:
-            return continuousMermaidPalette(atY: y)
-        }
+        zoneMermaidPalette(for: DepthZone.zone(atY: y))
     }
 
-    private func continuousMermaidPalette(atY y: CGFloat) -> MermaidPalette {
-        if y >= -1500 { return .upper }
-        if y >= -5000 {
-            return .lerp(.upper, .main, (-y - 1500) / 3500)
+    private func zoneMermaidPalette(for zone: DepthZone) -> MermaidPalette {
+        switch zone {
+        case .surface, .clear:
+            return .upper
+        case .shallow:
+            return .lerp(.upper, .main, 0.35)
+        case .mid, .blue:
+            return .main
+        case .deep:
+            return .lerp(.main, .abyss, 0.45)
+        case .abyss:
+            return .abyss
         }
-        if y >= -24000 { return .main }
-        if y >= -34000 {
-            return .lerp(.main, .abyss, (-y - 24000) / 10000)
-        }
-        return .abyss
     }
 
     // MARK: - Atualização
@@ -389,9 +387,9 @@ final class DepthSystem {
     private func paletteForBoundary(_ edge: DepthBoundaryEdge) -> MermaidPalette {
         switch edge {
         case .upper:
-            return continuousMermaidPalette(atY: World.waterlineY)
+            return .upper
         case .lower:
-            return continuousMermaidPalette(atY: World.floorY)
+            return .abyss
         }
     }
 

@@ -28,7 +28,23 @@ final class RefugePortalNode: SKNode {
     private let core = SKShapeNode(ellipseOf: CGSize(width: 18, height: 42))
     private let threadLayer = SKNode()
     private let orbitLayer = SKNode()
+    private let shaderTimeUniform = SKUniform(name: "u_time", float: 0)
     private var particleEmitters: [(node: SKEmitterNode, birthRate: CGFloat)] = []
+
+    private static let portalShaderSource = """
+    void main() {
+        vec2 uv = v_tex_coord - vec2(0.5);
+        uv.y *= 1.45;
+        float d = length(uv);
+        float angle = atan(uv.y, uv.x);
+        float swirl = sin(angle * 3.0 + d * 18.0 - u_time * 2.1) * 0.5 + 0.5;
+        float core = smoothstep(0.52, 0.0, d);
+        float rim = smoothstep(0.42, 0.24, abs(d - 0.31));
+        float alpha = (core * 0.34 + rim * 0.16 + swirl * core * 0.10);
+        vec3 color = mix(vec3(0.10, 0.72, 0.86), vec3(0.74, 0.46, 0.96), swirl);
+        gl_FragColor = vec4(color * alpha, alpha);
+    }
+    """
 
     override init() {
         super.init()
@@ -75,6 +91,9 @@ final class RefugePortalNode: SKNode {
         tideWell.lineWidth = 0.9
         tideWell.glowWidth = 5
         tideWell.zPosition = 3
+        let portalShader = SKShader(source: Self.portalShaderSource)
+        portalShader.uniforms = [shaderTimeUniform]
+        tideWell.fillShader = portalShader
         addChild(tideWell)
 
         core.fillColor = UIColor(red: 0.95, green: 1.0, blue: 0.88, alpha: 0.56)
@@ -99,6 +118,9 @@ final class RefugePortalNode: SKNode {
     /// Abre devagar, com um giro suave — nada de pressa.
     func open() {
         setEmittersActive(true)
+        run(.repeatForever(.customAction(withDuration: 12.0) { [weak self] _, elapsed in
+            self?.shaderTimeUniform.floatValue = Float(elapsed)
+        }), withKey: "portal_shader_time")
 
         let grow = SKAction.scale(to: 1.0, duration: 1.05)
         grow.eaeInEaseOut()
@@ -132,7 +154,10 @@ final class RefugePortalNode: SKNode {
     func close(after delay: TimeInterval = 0) {
         run(.sequence([
             .wait(forDuration: delay),
-            .run { [weak self] in self?.setEmittersActive(false) },
+            .run { [weak self] in
+                self?.setEmittersActive(false)
+                self?.removeAction(forKey: "portal_shader_time")
+            },
             .group([.scale(to: 0.01, duration: 0.5), .fadeOut(withDuration: 0.5)]),
             .removeFromParent()
         ]))

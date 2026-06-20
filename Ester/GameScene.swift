@@ -263,6 +263,9 @@ class GameScene: SKScene {
     private var rigDebugTool: MermaidRigDebugTool?
     private var oceanBackdrop: OceanParallaxBackdrop?
     private var worldChunkManager: WorldChunkManager?
+    private var oceanDebugPanel: OceanVisualDebugPanel?
+    private var lastRipplePosition: CGPoint?
+    private var rippleCooldown: CGFloat = 0
     private var temporaryCompanionNode: SKNode?
     private var temporaryCompanionTitle: String?
     private var temporaryCompanionPhase: CGFloat = 0
@@ -323,6 +326,7 @@ class GameScene: SKScene {
         setupCamera()
         setupOceanBackdrop()
         setupHUD()
+        setupOceanDebugPanel()
         setupAmbientBubbles()
         lastEntryTextZone = DepthZone.zone(atY: stats.posY)
 
@@ -416,6 +420,7 @@ class GameScene: SKScene {
             mermaid.setForm(for: stats.phase)
         }
         mermaid.setAnimationMode(.idle)
+        lastRipplePosition = mermaidEntity.mermaid.base.position
     }
 
     private func setupSystems() {
@@ -472,6 +477,21 @@ class GameScene: SKScene {
         }
         ctx.hud = hud
         cameraNode.addChild(hud)
+    }
+
+    private func setupOceanDebugPanel() {
+        guard showDebugControls else { return }
+        let panel = OceanVisualDebugPanel(size: size,
+                                          insets: view?.safeAreaInsets ?? .zero,
+                                          onChange: { [weak self] in
+                                              self?.ctx.say("FX visual ajustado.")
+                                          },
+                                          onClose: { [weak self] in
+                                              self?.oceanDebugPanel?.removeFromParent()
+                                              self?.oceanDebugPanel = nil
+                                          })
+        cameraNode.addChild(panel)
+        oceanDebugPanel = panel
     }
 
     private func openMermaidNameEditor() {
@@ -650,6 +670,8 @@ class GameScene: SKScene {
 
         let mermaidPosition = ctx.mermaidPosition
         let environment = ctx.depth.environment(atY: mermaidPosition.y)
+        updateMermaidVisualEffects(dt: dt,
+                                   position: mermaidPosition)
         var water = environment.waterColor
         if let tint = ctx.regions.waterTint(at: mermaidPosition) {
             water = .lerp(water, tint.color, tint.strength)
@@ -724,6 +746,30 @@ class GameScene: SKScene {
         let blend = min(1, dt * 3.8)
         companion.position = CGPoint(x: companion.position.x + (target.x - companion.position.x) * blend,
                                      y: companion.position.y + (target.y - companion.position.y) * blend)
+    }
+
+    private func updateMermaidVisualEffects(dt: CGFloat,
+                                            position: CGPoint) {
+        guard refugeOverlay == nil, !isChallengeOpen, stats.phase != .egg else {
+            lastRipplePosition = position
+            return
+        }
+
+        rippleCooldown -= dt
+        let previous = lastRipplePosition ?? position
+        let moved = previous.distance(to: position)
+        guard moved > 92, rippleCooldown <= 0 else { return }
+
+        let direction = CGPoint(x: (position.x - previous.x) / max(moved, 1),
+                                y: (position.y - previous.y) / max(moved, 1))
+        let origin = CGPoint(x: position.x - direction.x * 28,
+                             y: position.y - direction.y * 20)
+        let rippleSize = (stats.phase == .baby ? CGFloat(92) : CGFloat(124)) * max(0.8, stats.phase.scale)
+        worldNode.addChild(WaterRippleNode(position: origin,
+                                           zone: ctx.depth.currentZone,
+                                           size: rippleSize))
+        lastRipplePosition = position
+        rippleCooldown = 0.46
     }
 
     private func makeTemporaryCompanionNode(title: String) -> SKNode {
@@ -905,22 +951,44 @@ class GameScene: SKScene {
 
     func showRegionDiscoveryCue(for region: Region) {
         let cue = SKShapeNode(circleOfRadius: 260)
+        let shaderTime = SKUniform(name: "u_time", float: 0)
         cue.position = ctx.mermaidPosition
         cue.fillColor = region.tint.withAlphaComponent(0.18)
         cue.strokeColor = UIColor.lerp(region.tint, .white, 0.35).withAlphaComponent(0.75)
         cue.lineWidth = 2
         cue.glowWidth = 14
         cue.zPosition = 6
+        let shader = SKShader(source: """
+        void main() {
+            vec2 uv = v_tex_coord - vec2(0.5);
+            float d = length(uv);
+            float wave = sin(d * 28.0 - u_time * 5.0) * 0.5 + 0.5;
+            float core = smoothstep(0.52, 0.0, d);
+            float ring = smoothstep(0.045, 0.0, abs(d - mix(0.18, 0.48, fract(u_time * 0.34))));
+            vec4 base = v_color_mix;
+            float alpha = base.a * (core * 0.62 + ring * 0.34 + wave * core * 0.08);
+            gl_FragColor = vec4(base.rgb * (0.70 + wave * 0.28), alpha);
+        }
+        """)
+        shader.uniforms = [shaderTime]
+        cue.fillShader = shader
         worldNode.addChild(cue)
 
         cue.run(.sequence([
             .group([
-                .scale(to: 1.75, duration: 1.4),
-                .fadeAlpha(to: 0.15, duration: 1.4)
-            ]),
-            .group([
-                .scale(to: 2.15, duration: 0.8),
-                .fadeOut(withDuration: 0.8)
+                .customAction(withDuration: 2.2) { _, elapsed in
+                    shaderTime.floatValue = Float(elapsed)
+                },
+                .sequence([
+                    .group([
+                        .scale(to: 1.75, duration: 1.4),
+                        .fadeAlpha(to: 0.15, duration: 1.4)
+                    ]),
+                    .group([
+                        .scale(to: 2.15, duration: 0.8),
+                        .fadeOut(withDuration: 0.8)
+                    ])
+                ])
             ]),
             .removeFromParent()
         ]))
@@ -1124,9 +1192,22 @@ class GameScene: SKScene {
         node.zPosition = 190
         node.position = CGPoint(x: 0, y: -modalDropOffset)
 
+        let shaderTime = SKUniform(name: "u_time", float: 0)
         let veil = SKShapeNode(rectOf: CGSize(width: size.width * 2.4, height: size.height * 2.4))
         veil.fillColor = UIColor.black.withAlphaComponent(0.54)
         veil.strokeColor = .clear
+        let shader = SKShader(source: """
+        void main() {
+            vec2 uv = v_tex_coord;
+            float wave = sin((uv.x + uv.y) * 18.0 + u_time * 1.6) * 0.5 + 0.5;
+            vec4 base = v_color_mix;
+            float alpha = base.a * (0.86 + wave * 0.08);
+            vec3 tint = mix(base.rgb, vec3(0.05, 0.22, 0.24), 0.26 + wave * 0.08);
+            gl_FragColor = vec4(tint * alpha, alpha);
+        }
+        """)
+        shader.uniforms = [shaderTime]
+        veil.fillShader = shader
         node.addChild(veil)
 
         for _ in 0..<18 {
@@ -1140,6 +1221,9 @@ class GameScene: SKScene {
         }
 
         cameraNode.addChild(node)
+        node.run(.repeatForever(.customAction(withDuration: 10.0) { _, elapsed in
+            shaderTime.floatValue = Float(elapsed)
+        }))
         challengeBackdrop = node
     }
 
@@ -1306,6 +1390,305 @@ private enum OceanPalette {
     }
 }
 
+private enum OceanVisualTuning {
+    static var shaderIntensity: CGFloat = 0.42
+    static var fog: CGFloat = 0.58
+    static var caustics: CGFloat = 0.46
+    static var particles: CGFloat = 0.26
+
+    static func reset() {
+        shaderIntensity = 0.42
+        fog = 0.58
+        caustics = 0.46
+        particles = 0.26
+    }
+
+    static func adjust(_ channel: Channel, delta: CGFloat) {
+        switch channel {
+        case .shader:
+            shaderIntensity = (shaderIntensity + delta).clamped(to: 0...1.4)
+        case .fog:
+            fog = (fog + delta).clamped(to: 0...1.4)
+        case .caustics:
+            caustics = (caustics + delta).clamped(to: 0...1.4)
+        case .particles:
+            particles = (particles + delta).clamped(to: 0...1.4)
+        }
+    }
+
+    enum Channel: CaseIterable, Hashable {
+        case shader
+        case fog
+        case caustics
+        case particles
+
+        var title: String {
+            switch self {
+            case .shader: return "grade"
+            case .fog: return "fog"
+            case .caustics: return "luz"
+            case .particles: return "part"
+            }
+        }
+
+        var value: CGFloat {
+            switch self {
+            case .shader: return OceanVisualTuning.shaderIntensity
+            case .fog: return OceanVisualTuning.fog
+            case .caustics: return OceanVisualTuning.caustics
+            case .particles: return OceanVisualTuning.particles
+            }
+        }
+    }
+}
+
+private final class WaterRippleNode: SKNode {
+    private let sprite: SKSpriteNode
+    private let progressUniform = SKUniform(name: "u_progress", float: 0)
+    private let depthUniform: SKUniform
+
+    private static let shaderBaseTexture: SKTexture = {
+        let size = CGSize(width: 4, height: 4)
+        let format = UIGraphicsImageRendererFormat()
+        format.opaque = false
+        format.scale = 1
+        let image = UIGraphicsImageRenderer(size: size, format: format).image { renderer in
+            renderer.cgContext.clear(CGRect(origin: .zero, size: size))
+        }
+        let texture = SKTexture(image: image)
+        texture.filteringMode = .linear
+        return texture
+    }()
+
+    private static let shaderSource = """
+    void main() {
+        vec2 uv = v_tex_coord - vec2(0.5);
+        uv.y *= 1.45;
+        float d = length(uv);
+        float ring = smoothstep(0.035, 0.0, abs(d - mix(0.12, 0.43, u_progress)));
+        float wake = smoothstep(0.55, 0.0, d) * (1.0 - u_progress) * 0.08;
+        float alpha = (ring * 0.12 + wake) * (1.0 - u_progress) * (0.45 + u_depth * 0.22);
+        vec3 color = mix(vec3(0.48, 0.92, 0.88), vec3(0.36, 0.64, 0.86), u_depth);
+        gl_FragColor = vec4(color * alpha, alpha);
+    }
+    """
+
+    init(position: CGPoint, zone: DepthZone, size: CGFloat) {
+        let depth = Self.depthValue(for: zone)
+        depthUniform = SKUniform(name: "u_depth", float: Float(depth))
+        sprite = SKSpriteNode(texture: Self.shaderBaseTexture)
+        super.init()
+        self.position = position
+        zPosition = 8.6
+        isUserInteractionEnabled = false
+
+        let shader = SKShader(source: Self.shaderSource)
+        shader.uniforms = [progressUniform, depthUniform]
+        sprite.shader = shader
+        sprite.size = CGSize(width: size, height: size * 0.62)
+        sprite.blendMode = .add
+        addChild(sprite)
+
+        run(.sequence([
+            .customAction(withDuration: 0.95) { [weak self] _, elapsed in
+                guard let self else { return }
+                let progress = CGFloat(elapsed / 0.95).clamped(to: 0...1)
+                self.progressUniform.floatValue = Float(progress)
+                self.alpha = 1 - progress
+                self.setScale(0.82 + progress * 0.38)
+            },
+            .removeFromParent()
+        ]))
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    private static func depthValue(for zone: DepthZone) -> CGFloat {
+        switch zone {
+        case .surface, .clear: return 0.08
+        case .shallow: return 0.16
+        case .mid: return 0.34
+        case .blue: return 0.50
+        case .deep: return 0.68
+        case .abyss: return 0.82
+        }
+    }
+}
+
+private final class OceanVisualDebugPanel: SKNode {
+    private let onChange: () -> Void
+    private let onClose: () -> Void
+    private var valueLabels: [OceanVisualTuning.Channel: SKLabelNode] = [:]
+    private var isExpanded = false
+
+    init(size: CGSize,
+         insets: UIEdgeInsets,
+         onChange: @escaping () -> Void,
+         onClose: @escaping () -> Void) {
+        self.onChange = onChange
+        self.onClose = onClose
+        super.init()
+        isUserInteractionEnabled = true
+        zPosition = 245
+        position = CGPoint(x: -size.width / 2 + insets.left + 94,
+                           y: size.height / 2 - insets.top - 58)
+        rebuild()
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    private func rebuild() {
+        removeAllChildren()
+        valueLabels.removeAll()
+        if isExpanded {
+            buildExpanded()
+        } else {
+            buildCollapsed()
+        }
+        refresh()
+    }
+
+    private func buildCollapsed() {
+        addChild(makeButton(name: "ocean_fx_expand",
+                            title: "fx",
+                            position: .zero,
+                            size: CGSize(width: 42, height: 28),
+                            tint: UIColor(red: 0.72, green: 1.0, blue: 0.92, alpha: 0.86)))
+    }
+
+    private func buildExpanded() {
+        let width: CGFloat = 162
+        let height: CGFloat = 142
+        let bg = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 8)
+        bg.fillColor = UIColor(red: 0.03, green: 0.12, blue: 0.15, alpha: 0.62)
+        bg.strokeColor = UIColor(red: 0.58, green: 0.92, blue: 0.88, alpha: 0.28)
+        bg.lineWidth = 1
+        addChild(bg)
+
+        let title = makeLabel("fx", size: 10, color: UIColor(red: 0.72, green: 1.0, blue: 0.92, alpha: 0.86))
+        title.position = CGPoint(x: -width / 2 + 18, y: height / 2 - 18)
+        title.horizontalAlignmentMode = .left
+        addChild(title)
+
+        let reset = makeButton(name: "ocean_fx_reset",
+                               title: "0",
+                               position: CGPoint(x: width / 2 - 46, y: height / 2 - 18),
+                               tint: UIColor(red: 0.86, green: 0.96, blue: 0.92, alpha: 0.85))
+        addChild(reset)
+        let close = makeButton(name: "ocean_fx_close",
+                               title: "x",
+                               position: CGPoint(x: width / 2 - 18, y: height / 2 - 18),
+                               tint: UIColor(red: 1.0, green: 0.84, blue: 0.78, alpha: 0.88))
+        addChild(close)
+
+        for (index, channel) in OceanVisualTuning.Channel.allCases.enumerated() {
+            let y = height / 2 - 44 - CGFloat(index) * 26
+            let label = makeLabel(channel.title, size: 9, color: UIColor.white.withAlphaComponent(0.78))
+            label.horizontalAlignmentMode = .left
+            label.position = CGPoint(x: -width / 2 + 12, y: y - 4)
+            addChild(label)
+
+            let minus = makeButton(name: buttonName(channel: channel, delta: -1),
+                                   title: "-",
+                                   position: CGPoint(x: 48, y: y),
+                                   tint: UIColor(red: 0.60, green: 0.80, blue: 0.82, alpha: 0.8))
+            addChild(minus)
+
+            let value = makeLabel("", size: 8, color: UIColor(red: 0.76, green: 1.0, blue: 0.92, alpha: 0.88))
+            value.horizontalAlignmentMode = .center
+            value.position = CGPoint(x: 72, y: y - 4)
+            addChild(value)
+            valueLabels[channel] = value
+
+            let plus = makeButton(name: buttonName(channel: channel, delta: 1),
+                                  title: "+",
+                                  position: CGPoint(x: 96, y: y),
+                                  tint: UIColor(red: 0.78, green: 0.96, blue: 0.86, alpha: 0.86))
+            addChild(plus)
+        }
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        var node: SKNode? = atPoint(touch.location(in: self))
+        while let current = node {
+            if let name = current.name {
+                if name == "ocean_fx_expand" {
+                    isExpanded = true
+                    rebuild()
+                    return
+                }
+                if name == "ocean_fx_close" {
+                    onClose()
+                    return
+                }
+                if name == "ocean_fx_reset" {
+                    OceanVisualTuning.reset()
+                    refresh()
+                    onChange()
+                    return
+                }
+                for channel in OceanVisualTuning.Channel.allCases {
+                    if name == buttonName(channel: channel, delta: -1) {
+                        OceanVisualTuning.adjust(channel, delta: -0.08)
+                        refresh()
+                        onChange()
+                        return
+                    }
+                    if name == buttonName(channel: channel, delta: 1) {
+                        OceanVisualTuning.adjust(channel, delta: 0.08)
+                        refresh()
+                        onChange()
+                        return
+                    }
+                }
+            }
+            node = current.parent
+        }
+    }
+
+    private func refresh() {
+        for channel in OceanVisualTuning.Channel.allCases {
+            valueLabels[channel]?.text = String(format: "%.2f", channel.value)
+        }
+    }
+
+    private func buttonName(channel: OceanVisualTuning.Channel, delta: Int) -> String {
+        "ocean_fx_\(channel.title)_\(delta < 0 ? "minus" : "plus")"
+    }
+
+    private func makeButton(name: String,
+                            title: String,
+                            position: CGPoint,
+                            size: CGSize = CGSize(width: 20, height: 18),
+                            tint: UIColor) -> SKNode {
+        let node = SKNode()
+        node.name = name
+        node.position = position
+        let bg = SKShapeNode(rectOf: size, cornerRadius: 5)
+        bg.name = name
+        bg.fillColor = tint.withAlphaComponent(0.18)
+        bg.strokeColor = tint.withAlphaComponent(0.60)
+        bg.lineWidth = 0.8
+        node.addChild(bg)
+        let label = makeLabel(title, size: 11, color: tint)
+        label.name = name
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: 0, y: 0)
+        node.addChild(label)
+        return node
+    }
+
+    private func makeLabel(_ text: String, size: CGFloat, color: UIColor) -> SKLabelNode {
+        let label = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        label.text = text
+        label.fontSize = size
+        label.fontColor = color
+        label.verticalAlignmentMode = .center
+        return label
+    }
+}
+
 private final class OceanParallaxBackdrop: SKNode {
     private let sceneSize: CGSize
     private let depthShaderWash: SKSpriteNode
@@ -1339,11 +1722,10 @@ private final class OceanParallaxBackdrop: SKNode {
     private static let shaderBaseTexture: SKTexture = {
         let size = CGSize(width: 4, height: 4)
         let format = UIGraphicsImageRendererFormat()
-        format.opaque = true
+        format.opaque = false
         format.scale = 1
-        let image = UIGraphicsImageRenderer(size: size, format: format).image { _ in
-            UIColor.white.setFill()
-            UIBezierPath(rect: CGRect(origin: .zero, size: size)).fill()
+        let image = UIGraphicsImageRenderer(size: size, format: format).image { renderer in
+            renderer.cgContext.clear(CGRect(origin: .zero, size: size))
         }
         let texture = SKTexture(image: image)
         texture.filteringMode = .linear
@@ -1398,8 +1780,11 @@ private final class OceanParallaxBackdrop: SKNode {
         float edge = distance(uv, vec2(0.5, 0.52));
         color = mix(color, bottomColor * 0.72, smoothstep(0.42, 0.78, edge) * depthVignette * 0.46);
         color = mix(color, vec3(0.0, 0.018, 0.045), u_depthDarkness * 0.10);
+        float luma = dot(color, vec3(0.299, 0.587, 0.114));
+        color = mix(vec3(luma), color, 0.92 - u_depthDarkness * 0.12);
+        color = (color - vec3(0.5)) * (1.0 + u_depthDarkness * 0.08) + vec3(0.5);
 
-        float alpha = 0.88 + u_fogAlpha * 0.20 + (1.0 - u_visibility) * 0.12;
+        float alpha = 0.42 + u_fogAlpha * 0.16 + (1.0 - u_visibility) * 0.10;
         vec3 finalColor = clamp(color, 0.0, 1.0);
         float finalAlpha = clamp(alpha, 0.0, 1.0);
         gl_FragColor = vec4(finalColor * finalAlpha, finalAlpha);
@@ -1517,6 +1902,7 @@ private final class OceanParallaxBackdrop: SKNode {
                 biome: AquaticBiome) {
         elapsed += dt
         position = cameraPosition
+        depthShaderWash.alpha = OceanVisualTuning.shaderIntensity
         updateDepthShader(cameraPosition: cameraPosition,
                           waterColor: waterColor,
                           zone: zone,
@@ -1527,6 +1913,7 @@ private final class OceanParallaxBackdrop: SKNode {
         gradientWash.colorBlendFactor = 0.12
         gradientWash.alpha = gradientAlpha(for: zone) * 0.42 + environment.fogAlpha * 0.18
 
+        farLayer.alpha = OceanVisualTuning.particles
         farLayer.position = CGPoint(x: wrapped(-cameraPosition.x * 0.025, span: sceneSize.width),
                                     y: wrapped(-cameraPosition.y * 0.012, span: sceneSize.height))
         causticLayer.position = CGPoint(x: wrapped(-cameraPosition.x * 0.04 + elapsed * 10, span: sceneSize.width),
@@ -1544,8 +1931,14 @@ private final class OceanParallaxBackdrop: SKNode {
                                                y: (-cameraPosition.y * 0.035 + sin(elapsed * 0.18) * 8)
                                                 .clamped(to: -sceneSize.height * 0.18...sceneSize.height * 0.18))
 
-        causticLayer.alpha = environment.causticAlpha * biomeCausticMultiplier(for: biome) * causticLayerScale(for: zone)
-        planktonLayer.alpha = planktonAlpha(for: zone) * environment.planktonDensity * 0.18
+        causticLayer.alpha = environment.causticAlpha
+            * biomeCausticMultiplier(for: biome)
+            * causticLayerScale(for: zone)
+            * OceanVisualTuning.caustics
+        planktonLayer.alpha = planktonAlpha(for: zone)
+            * environment.planktonDensity
+            * 0.18
+            * OceanVisualTuning.particles
         distantCanopyLayer.alpha = canopyAlpha(for: zone) * biomeHabitatMultiplier(for: biome)
         distantHabitatLayer.alpha = habitatAlpha(for: zone) * biomeHabitatMultiplier(for: biome)
         lifeLayer.alpha = lifeAlpha(for: zone) * environment.lifeDensity * biomeLifeMultiplier(for: biome)
@@ -1580,9 +1973,11 @@ private final class OceanParallaxBackdrop: SKNode {
         shaderCameraYUniform.floatValue = Float(cameraPosition.y)
         shaderSceneWidthUniform.floatValue = Float(max(1, sceneSize.width))
         shaderSceneHeightUniform.floatValue = Float(max(1, sceneSize.height))
-        shaderFogUniform.floatValue = Float(environment.fogAlpha)
-        shaderCausticUniform.floatValue = Float(environment.causticAlpha)
-        shaderGlowUniform.floatValue = Float(environment.glowIntensity)
+        shaderFogUniform.floatValue = Float(environment.fogAlpha * OceanVisualTuning.fog)
+        shaderCausticUniform.floatValue = Float(environment.causticAlpha
+            * OceanVisualTuning.caustics
+            * causticShaderScale(for: zone))
+        shaderGlowUniform.floatValue = Float(environment.glowIntensity * OceanVisualTuning.shaderIntensity)
         shaderDarknessUniform.floatValue = Float(darkness)
         shaderVisibilityUniform.floatValue = Float(environment.maxVisibleDistance)
         shaderBiomeUniform.floatValue = Float(biomeShaderEnergy(for: biome))
@@ -2037,9 +2432,15 @@ private final class OceanParallaxBackdrop: SKNode {
         switch zone {
         case .surface: return 0.42
         case .clear: return 0.32
-        case .shallow: return 0.18
-        case .mid: return 0.06
-        case .blue, .deep, .abyss: return 0.0
+        case .shallow, .mid, .blue, .deep, .abyss: return 0.0
+        }
+    }
+
+    private func causticShaderScale(for zone: DepthZone) -> CGFloat {
+        switch zone {
+        case .surface: return 1.0
+        case .clear: return 0.72
+        case .shallow, .mid, .blue, .deep, .abyss: return 0.0
         }
     }
 

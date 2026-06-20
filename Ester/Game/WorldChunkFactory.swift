@@ -21,6 +21,11 @@ enum WorldChunkFactory {
     }
 
     static func makeChunk(_ coord: WorldChunkCoord) -> SKNode {
+        return makeProceduralChunk(coord, includeAmbientEmitters: true)
+    }
+
+    private static func makeProceduralChunk(_ coord: WorldChunkCoord,
+                                            includeAmbientEmitters: Bool) -> SKNode {
         let node = SKNode()
         node.name = "world_chunk_\(coord.x)_\(coord.y)"
         node.zPosition = CGFloat((coord.x ^ coord.y) % 5) - 2
@@ -30,7 +35,9 @@ enum WorldChunkFactory {
         addMacroforms(to: node, coord: coord, zone: zone, biome: biome)
         addCurrents(to: node, coord: coord, zone: zone, biome: biome)
         addReefs(to: node, coord: coord, zone: zone, biome: biome)
-        addAmbientEmitters(to: node, coord: coord, zone: zone, biome: biome)
+        if includeAmbientEmitters {
+            addAmbientEmitters(to: node, coord: coord, zone: zone, biome: biome)
+        }
         return node
     }
 
