@@ -906,7 +906,7 @@ final class POISystem {
     }
 
     private func isReachable(_ poi: WorldPOI) -> Bool {
-        ctx.stats.phase >= poi.zone.minPhase && ctx.stats.isUnlocked(poi.zone)
+        ctx.stats.canAccess(poi.zone)
     }
 
     private func guidanceRank(for poi: WorldPOI) -> Int {
@@ -1075,7 +1075,7 @@ final class ExpeditionMapNode: SKNode {
             let rect = SKShapeNode(rectOf: CGSize(width: plotWidth, height: slotHeight + 0.5),
                                    cornerRadius: 1.5)
             rect.position = CGPoint(x: 0, y: plotBottomY + slotHeight * (CGFloat(index) + 0.5))
-            let unlocked = stats.isUnlocked(zone) && stats.phase >= zone.minPhase
+            let unlocked = stats.canAccess(zone)
             rect.fillColor = unlocked
                 ? mapColor(for: zone).withAlphaComponent(0.30)
                 : UIColor(red: 0.03, green: 0.055, blue: 0.075, alpha: 0.72)
@@ -1113,7 +1113,7 @@ final class ExpeditionMapNode: SKNode {
     }
 
     private func drawLockedVeil(stats: MermaidStats) {
-        for (index, zone) in zoneOrder.enumerated() where !stats.isUnlocked(zone) || stats.phase < zone.minPhase {
+        for (index, zone) in zoneOrder.enumerated() where !stats.canAccess(zone) {
             let veil = SKShapeNode(rectOf: CGSize(width: plotWidth, height: slotHeight + 0.5),
                                    cornerRadius: 1.5)
             veil.position = CGPoint(x: 0, y: plotBottomY + slotHeight * (CGFloat(index) + 0.5))
@@ -1196,7 +1196,7 @@ final class ExpeditionMapNode: SKNode {
     private func drawPOIs(stats: MermaidStats, region: Region) {
         let reveal = stats.expeditionReveal(for: region.id)
         for poi in WorldPOICatalog.pois(in: region, stats: stats) {
-            guard stats.phase >= poi.zone.minPhase && stats.isUnlocked(poi.zone) else { continue }
+            guard stats.canAccess(poi.zone) else { continue }
             let column = MermaidStats.expeditionColumn(forX: poi.position.x, in: region)
             let row = MermaidStats.expeditionRow(forY: poi.position.y)
             let cellKey = MermaidStats.expeditionCellKey(column: column, row: row)
@@ -1430,7 +1430,7 @@ final class RegionMenuOverlay: SKNode {
 
             guard let region = region else { return node }
             let pois = WorldPOICatalog.pois(in: region, stats: stats)
-                .filter { stats.phase >= $0.zone.minPhase && stats.isUnlocked($0.zone) }
+                .filter { stats.canAccess($0.zone) }
             guard !pois.isEmpty else { return node }
 
             let iconDiameter = min(30, max(24, height - 10))

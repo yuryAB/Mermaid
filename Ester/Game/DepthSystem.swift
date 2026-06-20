@@ -396,7 +396,7 @@ final class DepthSystem {
     }
 
     private static func canAccess(_ zone: DepthZone, with stats: MermaidStats) -> Bool {
-        stats.isUnlocked(zone) && stats.phase >= zone.minPhase
+        stats.canAccess(zone)
     }
 
     private static func smoothStep(_ value: CGFloat) -> CGFloat {

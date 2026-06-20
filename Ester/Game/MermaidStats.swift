@@ -69,6 +69,7 @@ final class MermaidStats: Codable {
     // Cheats sao apenas da sessao em memoria. Eles nao entram no save.
     var cheatSuperSpeedEnabled: Bool = false
     var cheatAlwaysAcceptCommandsEnabled: Bool = false
+    var cheatDepthAccessEnabled: Bool = false
     var babyGuaranteedRequestsUsed: Int = 0
     var balanceVersion: Int = GameBalance.currentVersion
 
@@ -198,6 +199,10 @@ final class MermaidStats: Codable {
         unlockedZoneKeys.contains(zone.storageKey)
     }
 
+    func canAccess(_ zone: DepthZone) -> Bool {
+        isUnlocked(zone) && (cheatDepthAccessEnabled || phase >= zone.minPhase)
+    }
+
     func unlock(_ zone: DepthZone) {
         unlockedZoneKeys.insert(zone.storageKey)
     }
@@ -226,7 +231,7 @@ final class MermaidStats: Codable {
 
         for row in 0..<Self.expeditionMapRows {
             let zone = DepthZone.zone(atY: Self.expeditionWorldY(forRow: row))
-            guard phase >= zone.minPhase, isUnlocked(zone) else { continue }
+            guard canAccess(zone) else { continue }
 
             for column in 0..<Self.expeditionMapColumns {
                 let key = Self.expeditionCellKey(column: column, row: row)
@@ -253,7 +258,7 @@ final class MermaidStats: Codable {
 
     private func reachablePOIs(in region: Region) -> [WorldPOI] {
         WorldPOICatalog.pois(in: region, stats: self)
-            .filter { phase >= $0.zone.minPhase && isUnlocked($0.zone) }
+            .filter { canAccess($0.zone) }
     }
 
     func revealExpeditionMap(in region: Region, near point: CGPoint) {
@@ -689,15 +694,18 @@ final class MermaidStats: Codable {
         guard !cheatSessionPersistenceBlocked else { return }
         let previousSuperSpeed = cheatSuperSpeedEnabled
         let previousAlwaysAccept = cheatAlwaysAcceptCommandsEnabled
+        let previousDepthAccess = cheatDepthAccessEnabled
 
         cheatSuperSpeedEnabled = false
         cheatAlwaysAcceptCommandsEnabled = false
+        cheatDepthAccessEnabled = false
         lastSaved = Date()
         cheatSessionBaselineData = try? JSONEncoder().encode(self)
         cheatSessionPersistenceBlocked = true
 
         cheatSuperSpeedEnabled = previousSuperSpeed
         cheatAlwaysAcceptCommandsEnabled = previousAlwaysAccept
+        cheatDepthAccessEnabled = previousDepthAccess
 
         if let cheatSessionBaselineData {
             UserDefaults.standard.set(cheatSessionBaselineData, forKey: MermaidStats.saveKey)

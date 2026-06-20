@@ -35,7 +35,7 @@ enum CheatSystem {
         Suggestion(code: "phaseteen", description: "Fase adolescente"),
         Suggestion(code: "phaseyoung", description: "Fase jovem"),
         Suggestion(code: "phaseadult", description: "Fase adulta"),
-        Suggestion(code: "unlockdepths", description: "Libera profundidades"),
+        Suggestion(code: "unlockdepths", description: "Libera profundidades sem mudar fase"),
         Suggestion(code: "unlockmaps", description: "Descobre mapas"),
         Suggestion(code: "revealmap", description: "Revela mapa atual"),
         Suggestion(code: "revealallmaps", description: "Revela todos os mapas"),
@@ -128,9 +128,8 @@ enum CheatSystem {
         case "unlockdepths":
             stats.beginCheatSessionIfNeeded()
             applyAllDepthAccess(to: stats)
-            applyPhase(.adult, context: ctx)
             stats.addMemory("Cheat usado: camadas liberadas")
-            return "Cheat de sessao aplicado: todas as profundidades liberadas."
+            return "Cheat de sessao aplicado: todas as profundidades liberadas sem mudar fase."
         case "unlockmaps":
             stats.beginCheatSessionIfNeeded()
             discoverAllRegions(stats)
@@ -258,6 +257,7 @@ enum CheatSystem {
     }
 
     private static func applyAllDepthAccess(to stats: MermaidStats) {
+        stats.cheatDepthAccessEnabled = true
         for zone in DepthZone.allCases {
             stats.unlock(zone)
             stats.setAdaptation(100, for: zone)
