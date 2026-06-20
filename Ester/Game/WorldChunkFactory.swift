@@ -177,8 +177,10 @@ enum WorldChunkFactory {
         let kelpCount = kelpCount(for: zone, biome: biome, rng: &rng)
         for _ in 0..<kelpCount {
             let kelp = makeKelpSprite(zone: zone, rng: &rng)
-            kelp.position = CGPoint(x: rng.nextCGFloat(in: -baseSize.width * 0.45...baseSize.width * 0.45),
-                                    y: baseSize.height * 0.25)
+            let x = rng.nextCGFloat(in: -baseSize.width * 0.45...baseSize.width * 0.45)
+            let surfaceY = plantingSurfaceY(localX: x, baseSize: baseSize, rng: &rng)
+            kelp.position = CGPoint(x: x,
+                                    y: surfaceY - rootSink(for: kelp, rng: &rng))
             kelp.zPosition = rng.nextCGFloat(in: -1...2)
             cluster.addChild(kelp)
         }
@@ -186,8 +188,10 @@ enum WorldChunkFactory {
         let detailCount = detailCount(for: zone, biome: biome, rng: &rng)
         for _ in 0..<detailCount {
             let detail = makeDetailSprite(zone: zone, biome: biome, rng: &rng)
-            detail.position = CGPoint(x: rng.nextCGFloat(in: -baseSize.width * 0.42...baseSize.width * 0.42),
-                                      y: baseSize.height * 0.28)
+            let x = rng.nextCGFloat(in: -baseSize.width * 0.42...baseSize.width * 0.42)
+            let surfaceY = plantingSurfaceY(localX: x, baseSize: baseSize, rng: &rng)
+            detail.position = CGPoint(x: x,
+                                      y: surfaceY - rootSink(for: detail, rng: &rng))
             detail.zPosition = 2
             cluster.addChild(detail)
         }
@@ -244,7 +248,7 @@ enum WorldChunkFactory {
         let kelp = SKSpriteNode(texture: texture)
         kelp.size = CGSize(width: height * rng.nextCGFloat(in: 0.24...0.48),
                            height: height)
-        kelp.anchorPoint = CGPoint(x: 0.5, y: 0.04)
+        kelp.anchorPoint = CGPoint(x: 0.5, y: rootAnchorY(for: kind))
         kelp.alpha = rng.nextCGFloat(in: 0.58...0.86)
         kelp.zRotation = rng.nextCGFloat(in: -0.12...0.12)
         if rng.chance(0.55) {
@@ -270,7 +274,7 @@ enum WorldChunkFactory {
                                                        variant: rng.nextInt(in: 0...11))
         let detail = SKSpriteNode(texture: texture)
         detail.size = detailSize(for: kind, zone: zone, biome: biome, rng: &rng)
-        detail.anchorPoint = CGPoint(x: 0.5, y: 0)
+        detail.anchorPoint = CGPoint(x: 0.5, y: rootAnchorY(for: kind))
         detail.alpha = rng.nextCGFloat(in: 0.58...0.90)
         detail.zRotation = rng.nextCGFloat(in: -0.22...0.22)
         if kind == .crystalCluster || kind == .ventStack || zone == .deep || zone == .abyss {
@@ -278,6 +282,46 @@ enum WorldChunkFactory {
             detail.alpha *= kind == .ventStack ? 0.86 : 0.72
         }
         return detail
+    }
+
+    private static func plantingSurfaceY(localX: CGFloat,
+                                         baseSize: CGSize,
+                                         rng: inout SeededGenerator) -> CGFloat {
+        let halfWidth = max(1, baseSize.width * 0.5)
+        let edgeAmount = (abs(localX) / halfWidth).clamped(to: 0...1)
+        let dome = 1 - pow(edgeAmount, 1.65)
+        let ripple = sin((localX / max(1, baseSize.width)) * .pi * 3) * baseSize.height * 0.025
+        let jitter = rng.nextCGFloat(in: -0.025...0.025) * baseSize.height
+        let y = baseSize.height * (0.08 + 0.30 * dome) + ripple + jitter
+        return y.clamped(to: baseSize.height * 0.04...baseSize.height * 0.40)
+    }
+
+    private static func rootSink(for sprite: SKSpriteNode,
+                                 rng: inout SeededGenerator) -> CGFloat {
+        min(9, sprite.size.height * rng.nextCGFloat(in: 0.018...0.045))
+    }
+
+    private static func rootAnchorY(for kind: WorldStampKind) -> CGFloat {
+        switch kind {
+        case .kelpRibbon, .kelpBlade, .kelpBush:
+            return 0.06
+        case .coralFan:
+            return 0.12
+        case .coralBranch:
+            return 0.10
+        case .coralTube:
+            return 0.09
+        case .spongePatch:
+            return 0.10
+        case .crystalCluster:
+            return 0.10
+        case .ventStack:
+            return 0.08
+        case .ruinShard:
+            return 0.10
+        default:
+            return 0.08
+        }
     }
 
     private static func detailStampKind(for zone: DepthZone,
