@@ -29,10 +29,24 @@ enum ChallengeKind: String, CaseIterable, Codable {
 
     var title: String { "Desafio: \(shortName)" }
 
+    var blurb: String {
+        switch self {
+        case .plot: return "Combine correntes, faça sequências e junte conchas."
+        case .ascent: return "Suba pelas bolhas antes que o fôlego acabe."
+        }
+    }
+
     var icon: String {
         switch self {
         case .plot: return "≈"
         case .ascent: return "○"
+        }
+    }
+
+    var tint: UIColor {
+        switch self {
+        case .plot: return GameUI.accent
+        case .ascent: return UIColor(red: 0.38, green: 0.58, blue: 0.90, alpha: 1)
         }
     }
 }
@@ -98,13 +112,19 @@ final class ChallengeSystem {
 
     /// Garante que existe um peixe com desafio por perto (botão "Desafio").
     @discardableResult
-    func ensureGiver(near point: CGPoint) -> FishNode? {
-        if let existing = nearestGiver(to: point, maxDistance: 2200) {
+    func ensureGiver(near point: CGPoint, kind preferredKind: ChallengeKind? = nil) -> FishNode? {
+        if let preferredKind,
+           let existing = nearbyGivers(to: point, maxDistance: 2200)
+            .filter({ $0.offeredChallenge == preferredKind })
+            .min(by: { $0.position.distance(to: point) < $1.position.distance(to: point) }) {
+            return existing
+        }
+        if preferredKind == nil, let existing = nearestGiver(to: point, maxDistance: 2200) {
             return existing
         }
         let zone = DepthZone.zone(atY: point.y)
         guard let fish = ctx.fish.spawnFish(zone: zone, near: point) else { return nil }
-        fish.offeredChallenge = ChallengeKind.allCases.randomElement()
+        fish.offeredChallenge = preferredKind ?? ChallengeKind.allCases.randomElement()
         return fish
     }
 
@@ -119,6 +139,177 @@ final class ChallengeSystem {
     func consumeChallenge(of giver: ChallengeGiver) {
         giver.offeredChallenge = nil
         giver.isSpecialChallenge = false
+    }
+}
+
+// MARK: - Escolha de desafio
+
+final class ChallengeChoiceOverlay: SKNode {
+    private let onSelect: (ChallengeKind) -> Void
+    private let onClose: () -> Void
+    private var choiceKinds: [String: ChallengeKind] = [:]
+
+    init(size: CGSize,
+         kinds: [ChallengeKind] = ChallengeKind.allCases,
+         onSelect: @escaping (ChallengeKind) -> Void,
+         onClose: @escaping () -> Void) {
+        self.onSelect = onSelect
+        self.onClose = onClose
+        super.init()
+        isUserInteractionEnabled = true
+
+        let backdrop = SKShapeNode(rectOf: CGSize(width: size.width * 2.2, height: size.height * 2.2))
+        backdrop.fillColor = UIColor(white: 0, alpha: 0.54)
+        backdrop.strokeColor = .clear
+        backdrop.name = "challenge_choice_close"
+        addChild(backdrop)
+
+        let panelWidth = min(size.width - 32, size.width >= 700 ? 444 : 368)
+        let rowHeight: CGFloat = 82
+        let rowSpacing: CGFloat = 10
+        let panelHeight = min(size.height - 52,
+                              148 + CGFloat(kinds.count) * rowHeight + CGFloat(max(0, kinds.count - 1)) * rowSpacing)
+
+        let panel = GameUI.card(size: CGSize(width: panelWidth, height: panelHeight),
+                                cornerRadius: 22,
+                                tint: GameUI.gold.withAlphaComponent(0.74),
+                                baseColors: [UIColor.lerp(GameUI.palePaper, GameUI.gold, 0.05)])
+        addChild(panel)
+
+        let content = SKNode()
+        content.zPosition = 8
+        panel.addChild(content)
+
+        let title = makeLabel("Desafios", fontSize: 20, color: GameUI.ink, bold: true)
+        title.position = CGPoint(x: -panelWidth / 2 + 24, y: panelHeight / 2 - 32)
+        content.addChild(title)
+
+        let subtitle = makeLabel("Qual chamado enviar para ela?",
+                                 fontSize: 12,
+                                 color: GameUI.mutedInk,
+                                 maxWidth: panelWidth - 48)
+        subtitle.position = CGPoint(x: -panelWidth / 2 + 24, y: panelHeight / 2 - 56)
+        content.addChild(subtitle)
+
+        let rowWidth = panelWidth - 32
+        let firstRowY = panelHeight / 2 - 102
+        for (index, kind) in kinds.enumerated() {
+            let key = kind.rawValue
+            let rowName = "challenge_choice_\(key)"
+            choiceKinds[key] = kind
+
+            let row = GameUI.card(size: CGSize(width: rowWidth, height: rowHeight),
+                                  cornerRadius: 14,
+                                  tint: kind.tint.withAlphaComponent(0.72),
+                                  baseColors: GameUI.tintedColors(kind.tint))
+            row.name = rowName
+            row.position = CGPoint(x: 0, y: firstRowY - CGFloat(index) * (rowHeight + rowSpacing))
+            content.addChild(row)
+
+            let rowContent = SKNode()
+            rowContent.zPosition = 6
+            row.addChild(rowContent)
+
+            let iconRing = SKShapeNode(circleOfRadius: 22)
+            iconRing.fillColor = UIColor.lerp(GameUI.palePaper, kind.tint, 0.18)
+            iconRing.strokeColor = kind.tint.withAlphaComponent(0.68)
+            iconRing.lineWidth = 1.1
+            iconRing.position = CGPoint(x: -rowWidth / 2 + 38, y: 8)
+            rowContent.addChild(iconRing)
+
+            let icon = SKLabelNode(text: kind.icon)
+            icon.fontName = "AvenirNext-Heavy"
+            icon.fontSize = 22
+            icon.fontColor = UIColor.lerp(GameUI.ink, kind.tint, 0.26)
+            icon.horizontalAlignmentMode = .center
+            icon.verticalAlignmentMode = .center
+            icon.position = iconRing.position
+            icon.zPosition = 3
+            rowContent.addChild(icon)
+
+            let name = makeLabel(kind.title,
+                                 fontSize: 15,
+                                 color: GameUI.ink,
+                                 bold: true,
+                                 maxWidth: rowWidth - 152)
+            name.position = CGPoint(x: -rowWidth / 2 + 74, y: 20)
+            rowContent.addChild(name)
+
+            let blurb = makeLabel(kind.blurb,
+                                  fontSize: 10.8,
+                                  color: GameUI.mutedInk,
+                                  maxWidth: rowWidth - 152,
+                                  lines: 2)
+            blurb.position = CGPoint(x: -rowWidth / 2 + 74, y: -7)
+            rowContent.addChild(blurb)
+
+            let action = GameUI.pill(text: "Pedir",
+                                     fontSize: 12,
+                                     fill: [kind.tint.withAlphaComponent(0.92)],
+                                     strokeColor: kind.tint.withAlphaComponent(0.55),
+                                     minWidth: 72,
+                                     height: 30)
+            action.name = rowName
+            action.position = CGPoint(x: rowWidth / 2 - 48, y: -20)
+            action.zPosition = 7
+            rowContent.addChild(action)
+        }
+
+        let close = GameUI.pill(text: "Voltar",
+                                fontSize: 13,
+                                bold: false,
+                                fill: [GameUI.coral.withAlphaComponent(0.92)],
+                                strokeColor: GameUI.coral.withAlphaComponent(0.55),
+                                minWidth: 104,
+                                height: 32)
+        close.name = "challenge_choice_close"
+        close.position = CGPoint(x: 0, y: -panelHeight / 2 + 30)
+        close.zPosition = 12
+        content.addChild(close)
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        let location = touch.location(in: self)
+
+        var node: SKNode? = atPoint(location)
+        while let current = node {
+            if let name = current.name {
+                if name == "challenge_choice_close" {
+                    onClose()
+                    return
+                }
+                if name.hasPrefix("challenge_choice_") {
+                    let key = String(name.dropFirst("challenge_choice_".count))
+                    if let kind = choiceKinds[key] {
+                        onSelect(kind)
+                        return
+                    }
+                }
+            }
+            node = current.parent
+        }
+    }
+
+    private func makeLabel(_ text: String,
+                           fontSize: CGFloat,
+                           color: UIColor,
+                           bold: Bool = false,
+                           maxWidth: CGFloat = 0,
+                           lines: Int = 1) -> SKLabelNode {
+        let label = SKLabelNode(text: text)
+        label.fontName = bold ? "AvenirNext-DemiBold" : "AvenirNext-Regular"
+        label.fontSize = fontSize
+        label.fontColor = color
+        label.horizontalAlignmentMode = .left
+        label.verticalAlignmentMode = .center
+        if maxWidth > 0 {
+            label.preferredMaxLayoutWidth = maxWidth
+            label.numberOfLines = lines
+        }
+        return label
     }
 }
 

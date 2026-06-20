@@ -256,6 +256,7 @@ class GameScene: SKScene {
     private var climbOverlay: BubbleClimbOverlay?
     private var pendingPOIChallengeCompletion: ((ChallengeResult) -> Void)?
     private var challengeBackdrop: SKNode?
+    private var challengeChoiceMenu: ChallengeChoiceOverlay?
     private var regionMenu: RegionMenuOverlay?
     private var refugeOverlay: RefugeOverlay?
     private var refugePortal: RefugePortalNode?
@@ -808,7 +809,7 @@ class GameScene: SKScene {
     // MARK: - Menu de regiões
 
     func openRegionMenu() {
-        guard regionMenu == nil, !isChallengeOpen, refugeOverlay == nil else { return }
+        guard regionMenu == nil, challengeChoiceMenu == nil, !isChallengeOpen, refugeOverlay == nil else { return }
         GameAudio.shared.play(.uiOpenPanel)
         let menu = RegionMenuOverlay(size: size,
                                      stats: stats,
@@ -838,6 +839,37 @@ class GameScene: SKScene {
         }
         regionMenu?.removeFromParent()
         regionMenu = nil
+    }
+
+    // MARK: - Menu de desafios
+
+    func openChallengeChoiceMenu() {
+        guard challengeChoiceMenu == nil,
+              regionMenu == nil,
+              !isChallengeOpen,
+              refugeOverlay == nil,
+              rigDebugTool == nil else { return }
+        GameAudio.shared.play(.uiOpenPanel)
+        let menu = ChallengeChoiceOverlay(size: size,
+                                          onSelect: { [weak self] kind in
+                                              guard let self else { return }
+                                              self.closeChallengeChoiceMenu(playSound: false)
+                                              _ = self.ctx.autonomy.requestChallenge(kind: kind)
+                                          },
+                                          onClose: { [weak self] in
+                                              self?.closeChallengeChoiceMenu()
+                                          })
+        menu.zPosition = 190
+        cameraNode.addChild(menu)
+        challengeChoiceMenu = menu
+    }
+
+    private func closeChallengeChoiceMenu(playSound: Bool = true) {
+        if playSound && challengeChoiceMenu != nil {
+            GameAudio.shared.play(.uiClosePanel)
+        }
+        challengeChoiceMenu?.removeFromParent()
+        challengeChoiceMenu = nil
     }
 
     @discardableResult
@@ -984,7 +1016,7 @@ class GameScene: SKScene {
 
     /// Abre o desafio oferecido por um NPC (hoje, um peixe).
     func openChallenge(giver: FishNode) {
-        guard !isChallengeOpen, refugeOverlay == nil else { return }
+        guard !isChallengeOpen, challengeChoiceMenu == nil, refugeOverlay == nil else { return }
         guard let kind = giver.offeredChallenge else { return }
         GameAudio.shared.play(.challengeOpen)
         let special = giver.isSpecialChallenge
@@ -995,7 +1027,7 @@ class GameScene: SKScene {
 
     /// Durante o ovo: o Desafio: Trama abre direto (energia de nascimento).
     func openHatchingChallenge() {
-        guard !isChallengeOpen, refugeOverlay == nil else { return }
+        guard !isChallengeOpen, challengeChoiceMenu == nil, refugeOverlay == nil else { return }
         GameAudio.shared.play(.challengeOpen)
         presentChallenge(kind: .plot, special: false, giverDisplay: nil, hatching: true)
     }
@@ -1003,7 +1035,7 @@ class GameScene: SKScene {
     @discardableResult
     func openPOIChallenge(for poi: WorldPOI,
                           onCompletion: @escaping (ChallengeResult) -> Void) -> Bool {
-        guard !isChallengeOpen, refugeOverlay == nil else { return false }
+        guard !isChallengeOpen, challengeChoiceMenu == nil, refugeOverlay == nil else { return false }
         pendingPOIChallengeCompletion = onCompletion
         GameAudio.shared.play(.challengeOpen)
         presentChallenge(kind: .plot,
@@ -1037,6 +1069,7 @@ class GameScene: SKScene {
                                   giverDisplay: SKNode?,
                                   hatching: Bool = false) {
         closeRegionMenu()
+        closeChallengeChoiceMenu(playSound: false)
         let zone = ctx.depth.currentZone
         stats.energy = max(0, stats.energy - 8)
         ctx.autonomy.paused = true
@@ -1153,7 +1186,7 @@ class GameScene: SKScene {
     // MARK: - Toques no mundo
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard !isChallengeOpen, regionMenu == nil, refugeOverlay == nil, rigDebugTool == nil,
+        guard !isChallengeOpen, challengeChoiceMenu == nil, regionMenu == nil, refugeOverlay == nil, rigDebugTool == nil,
               let touch = touches.first else { return }
         let location = touch.location(in: self)
 
@@ -1275,6 +1308,7 @@ private enum OceanPalette {
 
 private final class OceanParallaxBackdrop: SKNode {
     private let sceneSize: CGSize
+    private let depthShaderWash: SKSpriteNode
     private let gradientWash: SKSpriteNode
     private let farLayer = SKNode()
     private let causticLayer = SKNode()
@@ -1285,6 +1319,99 @@ private final class OceanParallaxBackdrop: SKNode {
     private let distantHabitatTileSpan: CGFloat
     private var ambientLife: [AmbientLifeNode] = []
     private var elapsed: CGFloat = 0
+    private let shaderTimeUniform = SKUniform(name: "u_oceanTime", float: 0)
+    private let shaderCameraXUniform = SKUniform(name: "u_cameraX", float: 0)
+    private let shaderCameraYUniform = SKUniform(name: "u_cameraY", float: 0)
+    private let shaderSceneWidthUniform = SKUniform(name: "u_sceneWidth", float: 1)
+    private let shaderSceneHeightUniform = SKUniform(name: "u_sceneHeight", float: 1)
+    private let shaderTopRedUniform = SKUniform(name: "u_topRed", float: 0)
+    private let shaderTopGreenUniform = SKUniform(name: "u_topGreen", float: 0)
+    private let shaderTopBlueUniform = SKUniform(name: "u_topBlue", float: 0)
+    private let shaderBottomRedUniform = SKUniform(name: "u_bottomRed", float: 0)
+    private let shaderBottomGreenUniform = SKUniform(name: "u_bottomGreen", float: 0)
+    private let shaderBottomBlueUniform = SKUniform(name: "u_bottomBlue", float: 0)
+    private let shaderFogUniform = SKUniform(name: "u_fogAlpha", float: 0)
+    private let shaderCausticUniform = SKUniform(name: "u_causticAlpha", float: 0)
+    private let shaderGlowUniform = SKUniform(name: "u_glowIntensity", float: 0)
+    private let shaderDarknessUniform = SKUniform(name: "u_depthDarkness", float: 0)
+    private let shaderVisibilityUniform = SKUniform(name: "u_visibility", float: 1)
+    private let shaderBiomeUniform = SKUniform(name: "u_biomeEnergy", float: 0.5)
+    private static let shaderBaseTexture: SKTexture = {
+        let size = CGSize(width: 4, height: 4)
+        let format = UIGraphicsImageRendererFormat()
+        format.opaque = true
+        format.scale = 1
+        let image = UIGraphicsImageRenderer(size: size, format: format).image { _ in
+            UIColor.white.setFill()
+            UIBezierPath(rect: CGRect(origin: .zero, size: size)).fill()
+        }
+        let texture = SKTexture(image: image)
+        texture.filteringMode = .linear
+        return texture
+    }()
+    private static let depthShaderSource = """
+    float oceanHash(vec2 p) {
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+    }
+
+    float oceanNoise(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        float a = oceanHash(i);
+        float b = oceanHash(i + vec2(1.0, 0.0));
+        float c = oceanHash(i + vec2(0.0, 1.0));
+        float d = oceanHash(i + vec2(1.0, 1.0));
+        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+    }
+
+    void main() {
+        vec2 uv = v_tex_coord;
+        float aspect = u_sceneWidth / max(u_sceneHeight, 1.0);
+        vec2 p = vec2(uv.x * aspect, uv.y);
+        float time = u_oceanTime;
+
+        float vertical = smoothstep(0.0, 1.0, uv.y);
+        vec3 topColor = vec3(u_topRed, u_topGreen, u_topBlue);
+        vec3 bottomColor = vec3(u_bottomRed, u_bottomGreen, u_bottomBlue);
+        vec3 color = mix(bottomColor, topColor, vertical);
+
+        float slowCurrent = sin((p.x * 7.0) + (p.y * 14.0) + time * 0.42 + u_cameraY * 0.00018);
+        float crossCurrent = sin((p.x * 24.0) - (p.y * 9.0) - time * 0.28 + u_cameraX * 0.00016);
+        float current = (slowCurrent * 0.65 + crossCurrent * 0.35);
+        color += vec3(0.020, 0.060, 0.070) * current * (0.35 + u_biomeEnergy * 0.35);
+
+        float causticLineA = sin((uv.x * 42.0) + slowCurrent * 1.7 + time * 1.15);
+        float causticLineB = sin((uv.y * 36.0) - crossCurrent * 1.2 - time * 0.72);
+        float caustic = smoothstep(0.66, 0.98, causticLineA * causticLineB);
+        caustic *= u_causticAlpha * (1.0 - u_depthDarkness * 0.82) * (0.18 + vertical * 0.82);
+        color += vec3(0.35, 0.82, 0.74) * caustic;
+
+        float fogNoise = oceanNoise((p * 3.2) + vec2(time * 0.035, -time * 0.025));
+        float fog = (fogNoise * 0.5 + 0.5) * u_fogAlpha;
+        color = mix(color, bottomColor, fog * 0.30);
+
+        vec2 snowGrid = vec2(uv.x * 82.0 + sin(time * 0.12 + uv.y * 9.0) * 2.0,
+                             uv.y * 126.0 + time * (1.8 + u_depthDarkness * 2.2));
+        float snowCell = oceanHash(floor(snowGrid));
+        float snow = step(0.986 - u_depthDarkness * 0.008, snowCell);
+        snow *= smoothstep(0.18, 1.0, u_depthDarkness + u_fogAlpha);
+        color += vec3(0.62, 0.98, 0.92) * snow * (0.055 + u_glowIntensity * 0.09);
+
+        float glowVeil = oceanNoise((p * 5.8) + vec2(-time * 0.07, time * 0.045));
+        color += vec3(0.08, 0.55, 0.48) * glowVeil * u_glowIntensity * (0.10 + u_biomeEnergy * 0.12);
+
+        float depthVignette = smoothstep(0.0, 1.0, u_depthDarkness);
+        float edge = distance(uv, vec2(0.5, 0.52));
+        color = mix(color, bottomColor * 0.72, smoothstep(0.42, 0.78, edge) * depthVignette * 0.46);
+        color = mix(color, vec3(0.0, 0.018, 0.045), u_depthDarkness * 0.10);
+
+        float alpha = 0.88 + u_fogAlpha * 0.20 + (1.0 - u_visibility) * 0.12;
+        vec3 finalColor = clamp(color, 0.0, 1.0);
+        float finalAlpha = clamp(alpha, 0.0, 1.0);
+        gl_FragColor = vec4(finalColor * finalAlpha, finalAlpha);
+    }
+    """
     private static let softMistTexture: SKTexture = {
         let size = CGSize(width: 64, height: 64)
         let format = UIGraphicsImageRendererFormat()
@@ -1320,6 +1447,7 @@ private final class OceanParallaxBackdrop: SKNode {
     init(size: CGSize) {
         sceneSize = size
         distantHabitatTileSpan = max(size.width * 2.8, 1400)
+        depthShaderWash = SKSpriteNode(texture: Self.shaderBaseTexture)
         let washTexture = GameUI.gradientTexture(size: CGSize(width: 8, height: 512),
                                                  colors: [
                                                     UIColor(white: 1, alpha: 0.18),
@@ -1333,6 +1461,7 @@ private final class OceanParallaxBackdrop: SKNode {
         super.init()
         isUserInteractionEnabled = false
 
+        configureDepthShaderWash()
         addChild(gradientWash)
         addChild(farLayer)
         addChild(causticLayer)
@@ -1357,6 +1486,36 @@ private final class OceanParallaxBackdrop: SKNode {
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
+    private func configureDepthShaderWash() {
+        depthShaderWash.size = CGSize(width: max(1, sceneSize.width * 3.2),
+                                      height: max(1, sceneSize.height * 3.2))
+        depthShaderWash.zPosition = -120
+        depthShaderWash.blendMode = .alpha
+
+        let shader = SKShader(source: Self.depthShaderSource)
+        shader.uniforms = [
+            shaderTimeUniform,
+            shaderCameraXUniform,
+            shaderCameraYUniform,
+            shaderSceneWidthUniform,
+            shaderSceneHeightUniform,
+            shaderTopRedUniform,
+            shaderTopGreenUniform,
+            shaderTopBlueUniform,
+            shaderBottomRedUniform,
+            shaderBottomGreenUniform,
+            shaderBottomBlueUniform,
+            shaderFogUniform,
+            shaderCausticUniform,
+            shaderGlowUniform,
+            shaderDarknessUniform,
+            shaderVisibilityUniform,
+            shaderBiomeUniform
+        ]
+        depthShaderWash.shader = shader
+        addChild(depthShaderWash)
+    }
+
     func update(dt: CGFloat,
                 cameraPosition: CGPoint,
                 waterColor: UIColor,
@@ -1365,10 +1524,15 @@ private final class OceanParallaxBackdrop: SKNode {
                 biome: AquaticBiome) {
         elapsed += dt
         position = cameraPosition
+        updateDepthShader(cameraPosition: cameraPosition,
+                          waterColor: waterColor,
+                          zone: zone,
+                          environment: environment,
+                          biome: biome)
 
         gradientWash.color = UIColor.lerp(waterColor, .white, 0.05)
         gradientWash.colorBlendFactor = 0.12
-        gradientWash.alpha = gradientAlpha(for: zone) + environment.fogAlpha * 0.35
+        gradientWash.alpha = gradientAlpha(for: zone) * 0.42 + environment.fogAlpha * 0.18
 
         farLayer.position = CGPoint(x: wrapped(-cameraPosition.x * 0.025, span: sceneSize.width),
                                     y: wrapped(-cameraPosition.y * 0.012, span: sceneSize.height))
@@ -1396,6 +1560,53 @@ private final class OceanParallaxBackdrop: SKNode {
         for node in ambientLife {
             node.update(dt: dt, bounds: sceneSize)
         }
+    }
+
+    private func updateDepthShader(cameraPosition: CGPoint,
+                                   waterColor: UIColor,
+                                   zone: DepthZone,
+                                   environment: DepthEnvironment,
+                                   biome: AquaticBiome) {
+        let darkness = shaderDarkness(for: zone)
+        let topLift = (0.26 - darkness * 0.18).clamped(to: 0.04...0.26)
+        let bottomDrop = (0.22 + darkness * 0.58).clamped(to: 0.22...0.82)
+        let topColor = UIColor.lerp(waterColor, .white, topLift)
+        let bottomColor = UIColor.lerp(waterColor, .black, bottomDrop)
+
+        setRGBUniforms(topColor,
+                       red: shaderTopRedUniform,
+                       green: shaderTopGreenUniform,
+                       blue: shaderTopBlueUniform)
+        setRGBUniforms(bottomColor,
+                       red: shaderBottomRedUniform,
+                       green: shaderBottomGreenUniform,
+                       blue: shaderBottomBlueUniform)
+
+        shaderTimeUniform.floatValue = Float(elapsed)
+        shaderCameraXUniform.floatValue = Float(cameraPosition.x)
+        shaderCameraYUniform.floatValue = Float(cameraPosition.y)
+        shaderSceneWidthUniform.floatValue = Float(max(1, sceneSize.width))
+        shaderSceneHeightUniform.floatValue = Float(max(1, sceneSize.height))
+        shaderFogUniform.floatValue = Float(environment.fogAlpha)
+        shaderCausticUniform.floatValue = Float(environment.causticAlpha)
+        shaderGlowUniform.floatValue = Float(environment.glowIntensity)
+        shaderDarknessUniform.floatValue = Float(darkness)
+        shaderVisibilityUniform.floatValue = Float(environment.maxVisibleDistance)
+        shaderBiomeUniform.floatValue = Float(biomeShaderEnergy(for: biome))
+    }
+
+    private func setRGBUniforms(_ color: UIColor,
+                                red: SKUniform,
+                                green: SKUniform,
+                                blue: SKUniform) {
+        var r: CGFloat = 0
+        var g: CGFloat = 0
+        var b: CGFloat = 0
+        var a: CGFloat = 0
+        color.getRed(&r, green: &g, blue: &b, alpha: &a)
+        red.floatValue = Float(r)
+        green.floatValue = Float(g)
+        blue.floatValue = Float(b)
     }
 
     private func buildDistantParticleMist() {
@@ -1792,6 +2003,35 @@ private final class OceanParallaxBackdrop: SKNode {
 
     private func distantVegetationColor(alpha: CGFloat) -> UIColor {
         UIColor(red: 0.08, green: 0.42, blue: 0.38, alpha: alpha)
+    }
+
+    private func shaderDarkness(for zone: DepthZone) -> CGFloat {
+        switch zone {
+        case .surface: return 0.02
+        case .clear: return 0.08
+        case .shallow: return 0.18
+        case .mid: return 0.36
+        case .blue: return 0.54
+        case .deep: return 0.74
+        case .abyss: return 0.92
+        }
+    }
+
+    private func biomeShaderEnergy(for biome: AquaticBiome) -> CGFloat {
+        switch biome {
+        case .coralGarden, .kelpForest:
+            return 0.92
+        case .crystalField, .deepVents:
+            return 0.78
+        case .reefWall:
+            return 0.66
+        case .openWater:
+            return 0.42
+        case .abyssPlain:
+            return 0.30
+        default:
+            return 0.54
+        }
     }
 
     private func gradientAlpha(for zone: DepthZone) -> CGFloat {

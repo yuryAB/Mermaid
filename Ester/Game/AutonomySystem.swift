@@ -643,6 +643,80 @@ final class AutonomySystem {
 
     // MARK: - Desafios
 
+    @discardableResult
+    func requestChallenge(kind: ChallengeKind) -> Bool {
+        clearExpiredCommandCooldowns()
+
+        let guaranteedByBabyStart = stats.canUseBabyGuaranteedRequest
+        let guaranteedByCheat = stats.cheatAlwaysAcceptCommandsEnabled
+        if !guaranteedByBabyStart,
+           !guaranteedByCheat,
+           let until = commandCooldownUntil[.challenge],
+           until > Date() {
+            return false
+        }
+
+        notePlayerPressure()
+
+        guard stats.phase != .egg else {
+            ctx.scene?.openHatchingChallenge()
+            return true
+        }
+        guard intent != .inChallenge, intent != .enteringRefuge else { return false }
+
+        let guaranteedByBondRecovery = isBondRecoveryRequestReady
+        let requestIsGuaranteed = guaranteedByBabyStart
+            || guaranteedByBondRecovery
+            || guaranteedByCheat
+            || stats.hasActiveBuff(.eagerCompanion)
+
+        let hungerLimit: CGFloat = stats.phase == .baby ? 65 : 92
+        let energyLimit: CGFloat = stats.phase == .baby ? 35 : 8
+        if !requestIsGuaranteed && stats.hunger > hungerLimit {
+            penalizeTrust(TrustBalance.unmetNeedRefusal)
+            refuse(.challenge, saying: "Faminta demais para o \(kind.title)... me ajuda a comer algo?")
+            return false
+        }
+        if !requestIsGuaranteed && stats.energy < energyLimit {
+            penalizeTrust(TrustBalance.exhaustedRefusal)
+            refuse(.challenge, saying: "Preciso descansar antes do \(kind.title)... 😴")
+            return false
+        }
+
+        guard let giver = ctx.challenges.ensureGiver(near: position, kind: kind) else {
+            refuse(.challenge, saying: "Nenhum peixe conseguiu trazer o \(kind.title) agora...")
+            return false
+        }
+
+        let desired = MermaidIntent.seekingChallenge
+        let chance = commandAcceptanceChance(for: desired)
+        if requestIsGuaranteed || CGFloat.random(in: 0...1) <= chance {
+            rewardAcceptedRequest(baseGain: TrustBalance.acceptedCommand,
+                                  guaranteedByBondRecovery: guaranteedByBondRecovery,
+                                  guaranteedByBabyStart: guaranteedByBabyStart)
+            touchChallengeTarget = giver
+            commandBias = (desired, Date().addingTimeInterval(30))
+            setIntent(desired)
+            decisionCooldown = .random(in: 6...10)
+            GameAudio.shared.play(.uiConfirm)
+            if guaranteedByBondRecovery {
+                ctx.say("Ela aceitou seu pedido. O vínculo entre vocês ficou mais forte.")
+            } else {
+                ctx.say("Ela aceitou tentar o \(kind.title)... 🏆")
+            }
+            return true
+        }
+
+        penalizeTrust(TrustBalance.generalRefusal)
+        let excuses = [
+            "Ela pensou no \(kind.title), mas recusou por enquanto.",
+            "Ela olhou o \(kind.shortName) e balançou a cabeça: agora não.",
+            "Ela chegou perto da ideia do \(kind.shortName)... mas mudou de vontade."
+        ]
+        refuse(.challenge, saying: excuses.randomElement()!)
+        return false
+    }
+
     func enterChallenge() {
         intent = .inChallenge
         target = nil
@@ -742,7 +816,10 @@ final class AutonomySystem {
 
     func give(_ command: PlayerCommand) {
         clearExpiredCommandCooldowns()
-        notePlayerPressure()
+        let shouldDeferPressure = command == .challenge && stats.phase != .egg
+        if !shouldDeferPressure {
+            notePlayerPressure()
+        }
         let guaranteedByBabyStart = stats.canUseBabyGuaranteedRequest
         let guaranteedByCheat = stats.cheatAlwaysAcceptCommandsEnabled
         if !guaranteedByBabyStart,
@@ -809,23 +886,8 @@ final class AutonomySystem {
             ctx.scene?.beginRefugeEntry()
             return
         case .challenge:
-            let hungerLimit: CGFloat = stats.phase == .baby ? 65 : 92
-            let energyLimit: CGFloat = stats.phase == .baby ? 35 : 8
-            if !requestIsGuaranteed && stats.hunger > hungerLimit {
-                penalizeTrust(TrustBalance.unmetNeedRefusal)
-                refuse(command, saying: "Faminta demais para um desafio... me ajuda a comer algo?")
-                return
-            }
-            if !requestIsGuaranteed && stats.energy < energyLimit {
-                penalizeTrust(TrustBalance.exhaustedRefusal)
-                refuse(command, saying: "Preciso descansar antes de um desafio... 😴")
-                return
-            }
-            guard ctx.challenges.ensureGiver(near: position) != nil else {
-                refuse(command, saying: "Nenhum peixe com desafio por perto agora...")
-                return
-            }
-            desired = .seekingChallenge
+            ctx.scene?.openChallengeChoiceMenu()
+            return
         case .objective:
             guard let objective = ctx.events.currentObjective,
                   objective.position() != nil else {
