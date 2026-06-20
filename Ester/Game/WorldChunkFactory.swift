@@ -9,6 +9,17 @@ import Foundation
 import SpriteKit
 
 enum WorldChunkFactory {
+    private struct ReefCluster {
+        let node: SKNode
+        let terrainFootprint: CGSize
+    }
+
+    private struct PlacedReefCluster {
+        let position: CGPoint
+        let terrainFootprint: CGSize
+        let scale: CGFloat
+    }
+
     static func makeChunk(_ coord: WorldChunkCoord) -> SKNode {
         let node = SKNode()
         node.name = "world_chunk_\(coord.x)_\(coord.y)"
@@ -84,27 +95,92 @@ enum WorldChunkFactory {
     }
 
     private static func addReefs(to node: SKNode,
-                          coord: WorldChunkCoord,
-                          zone: DepthZone,
-                          biome: AquaticBiome) {
+                                 coord: WorldChunkCoord,
+                                 zone: DepthZone,
+                                 biome: AquaticBiome) {
         var rng = SeededGenerator(seed: WorldSeed.seedForChunk(coord, layer: .reef))
         let density = reefDensity(for: zone, biome: biome, rng: &rng)
         let count = Int((density * 7).rounded())
         guard count > 0 else { return }
 
-        for _ in 0..<count {
+        var placedClusters: [PlacedReefCluster] = []
+        var placedCount = 0
+        var attempts = 0
+        let maxAttempts = max(12, count * 12)
+
+        while placedCount < count && attempts < maxAttempts {
+            attempts += 1
             let cluster = makeReefCluster(zone: zone, biome: biome, rng: &rng)
-            cluster.position = randomPoint(in: coord.rect, margin: 180, rng: &rng)
-            cluster.zPosition = rng.nextCGFloat(in: -6...2)
-            cluster.setScale(rng.nextCGFloat(in: 0.72...1.45))
-            node.addChild(cluster)
+            let scale = rng.nextCGFloat(in: 0.72...1.45)
+            guard let position = reefClusterPosition(for: cluster,
+                                                     scale: scale,
+                                                     in: coord.rect,
+                                                     placedClusters: placedClusters,
+                                                     rng: &rng) else {
+                continue
+            }
+
+            cluster.node.position = position
+            cluster.node.zPosition = reefClusterZPosition(for: position, in: coord.rect, rng: &rng)
+            cluster.node.setScale(scale)
+            node.addChild(cluster.node)
+            placedClusters.append(PlacedReefCluster(position: position,
+                                                    terrainFootprint: cluster.terrainFootprint,
+                                                    scale: scale))
+            placedCount += 1
         }
     }
 
+    private static func reefClusterPosition(for cluster: ReefCluster,
+                                            scale: CGFloat,
+                                            in rect: CGRect,
+                                            placedClusters: [PlacedReefCluster],
+                                            rng: inout SeededGenerator) -> CGPoint? {
+        let horizontalMargin = min(rect.width * 0.44,
+                                   max(180, cluster.terrainFootprint.width * scale * 0.58))
+        let verticalMargin = min(rect.height * 0.44,
+                                 max(180, cluster.terrainFootprint.height * scale * 0.78))
+
+        for _ in 0..<12 {
+            let position = CGPoint(x: rng.nextCGFloat(in: (rect.minX + horizontalMargin)...(rect.maxX - horizontalMargin)),
+                                   y: rng.nextCGFloat(in: (rect.minY + verticalMargin)...(rect.maxY - verticalMargin)))
+            if !hasVerticalConflict(position: position,
+                                    terrainFootprint: cluster.terrainFootprint,
+                                    scale: scale,
+                                    placedClusters: placedClusters) {
+                return position
+            }
+        }
+
+        return nil
+    }
+
+    private static func hasVerticalConflict(position: CGPoint,
+                                            terrainFootprint: CGSize,
+                                            scale: CGFloat,
+                                            placedClusters: [PlacedReefCluster]) -> Bool {
+        let candidateHeight = terrainFootprint.height * scale
+        for placed in placedClusters {
+            let placedHeight = placed.terrainFootprint.height * placed.scale
+            let minimumVerticalGap = max(CGFloat(230), (candidateHeight + placedHeight) * 0.70)
+            if abs(position.y - placed.position.y) < minimumVerticalGap {
+                return true
+            }
+        }
+        return false
+    }
+
+    private static func reefClusterZPosition(for position: CGPoint,
+                                             in rect: CGRect,
+                                             rng: inout SeededGenerator) -> CGFloat {
+        let depthInChunk = ((rect.maxY - position.y) / rect.height).clamped(to: 0...1)
+        return -6 + depthInChunk * 4 + rng.nextCGFloat(in: -0.18...0.18)
+    }
+
     private static func addAmbientEmitters(to node: SKNode,
-                                    coord: WorldChunkCoord,
-                                    zone: DepthZone,
-                                    biome: AquaticBiome) {
+                                           coord: WorldChunkCoord,
+                                           zone: DepthZone,
+                                           biome: AquaticBiome) {
         guard zone != .surface else { return }
         var rng = SeededGenerator(seed: WorldSeed.seedForChunk(coord, layer: .particles))
         let emitter = SKEmitterNode()
@@ -131,11 +207,13 @@ enum WorldChunkFactory {
     }
 
     private static func makeReefCluster(zone: DepthZone,
-                                 biome: AquaticBiome,
-                                 rng: inout SeededGenerator) -> SKNode {
+                                        biome: AquaticBiome,
+                                        rng: inout SeededGenerator) -> ReefCluster {
         let cluster = SKNode()
         let baseSize = CGSize(width: rng.nextCGFloat(in: 170...380),
                               height: rng.nextCGFloat(in: 58...112))
+        var terrainWidth = baseSize.width
+        var terrainHeight = baseSize.height * 1.65
         let rock = makeRockSprite(zone: zone, biome: biome, size: baseSize, rng: &rng)
         rock.alpha = rng.nextCGFloat(in: 0.54...0.82)
         rock.zRotation = rng.nextCGFloat(in: -0.08...0.08)
@@ -152,23 +230,26 @@ enum WorldChunkFactory {
         if rng.chance(0.38) {
             let shelfSize = CGSize(width: baseSize.width * rng.nextCGFloat(in: 0.46...0.72),
                                    height: baseSize.height * rng.nextCGFloat(in: 0.56...0.78))
+            let shelfSide: CGFloat = rng.chance(0.5) ? -1 : 1
             let shelf = makeRockSprite(zone: zone,
                                        biome: biome,
                                        size: shelfSize,
                                        rng: &rng)
-            shelf.position = CGPoint(x: rng.nextCGFloat(in: -baseSize.width * 0.18...baseSize.width * 0.22),
-                                     y: baseSize.height * rng.nextCGFloat(in: 0.18...0.38))
+            shelf.position = CGPoint(x: shelfSide * rng.nextCGFloat(in: baseSize.width * 0.34...baseSize.width * 0.52),
+                                     y: -baseSize.height * rng.nextCGFloat(in: 0.02...0.12))
             shelf.zRotation = rng.nextCGFloat(in: -0.11...0.11)
-            shelf.zPosition = -1
-            shelf.alpha = rng.nextCGFloat(in: 0.42...0.64)
+            shelf.zPosition = -2.35
+            shelf.alpha = rng.nextCGFloat(in: 0.34...0.54)
             cluster.addChild(shelf)
+            terrainWidth = max(terrainWidth, abs(shelf.position.x) * 2 + shelfSize.width)
+            terrainHeight = max(terrainHeight, baseSize.height + shelfSize.height * 0.82)
 
             if rng.chance(0.64) {
                 let shelfSkirt = makeReefSkirtSprite(zone: zone, biome: biome, size: shelfSize, rng: &rng)
                 shelfSkirt.position = CGPoint(x: shelf.position.x,
                                               y: shelf.position.y - shelfSize.height * rng.nextCGFloat(in: 0.05...0.16))
                 shelfSkirt.zRotation = shelf.zRotation + rng.nextCGFloat(in: -0.025...0.025)
-                shelfSkirt.zPosition = -0.62
+                shelfSkirt.zPosition = -2.05
                 shelfSkirt.alpha *= 0.76
                 cluster.addChild(shelfSkirt)
             }
@@ -176,8 +257,8 @@ enum WorldChunkFactory {
 
         let kelpCount = kelpCount(for: zone, biome: biome, rng: &rng)
         for _ in 0..<kelpCount {
-            let kelp = makeKelpSprite(zone: zone, rng: &rng)
-            let x = rng.nextCGFloat(in: -baseSize.width * 0.45...baseSize.width * 0.45)
+            let kelp = makeKelpSprite(zone: zone, baseSize: baseSize, rng: &rng)
+            let x = plantingX(for: kelp, baseSize: baseSize, rng: &rng)
             let surfaceY = plantingSurfaceY(localX: x, baseSize: baseSize, rng: &rng)
             kelp.position = CGPoint(x: x,
                                     y: surfaceY - rootSink(for: kelp, rng: &rng))
@@ -187,8 +268,8 @@ enum WorldChunkFactory {
 
         let detailCount = detailCount(for: zone, biome: biome, rng: &rng)
         for _ in 0..<detailCount {
-            let detail = makeDetailSprite(zone: zone, biome: biome, rng: &rng)
-            let x = rng.nextCGFloat(in: -baseSize.width * 0.42...baseSize.width * 0.42)
+            let detail = makeDetailSprite(zone: zone, biome: biome, baseSize: baseSize, rng: &rng)
+            let x = plantingX(for: detail, baseSize: baseSize, rng: &rng)
             let surfaceY = plantingSurfaceY(localX: x, baseSize: baseSize, rng: &rng)
             detail.position = CGPoint(x: x,
                                       y: surfaceY - rootSink(for: detail, rng: &rng))
@@ -196,13 +277,15 @@ enum WorldChunkFactory {
             cluster.addChild(detail)
         }
 
-        return cluster
+        return ReefCluster(node: cluster,
+                           terrainFootprint: CGSize(width: terrainWidth,
+                                                    height: terrainHeight))
     }
 
     private static func makeRockSprite(zone: DepthZone,
-                                biome: AquaticBiome,
-                                size: CGSize,
-                                rng: inout SeededGenerator) -> SKSpriteNode {
+                                       biome: AquaticBiome,
+                                       size: CGSize,
+                                       rng: inout SeededGenerator) -> SKSpriteNode {
         let texture = WorldTextureCache.shared.texture(kind: .rockBase,
                                                        zone: zone,
                                                        biome: biome,
@@ -214,9 +297,9 @@ enum WorldChunkFactory {
     }
 
     private static func makeReefSkirtSprite(zone: DepthZone,
-                                     biome: AquaticBiome,
-                                     size: CGSize,
-                                     rng: inout SeededGenerator) -> SKSpriteNode {
+                                            biome: AquaticBiome,
+                                            size: CGSize,
+                                            rng: inout SeededGenerator) -> SKSpriteNode {
         let texture = WorldTextureCache.shared.texture(kind: .reefSkirt,
                                                        zone: zone,
                                                        biome: biome,
@@ -230,7 +313,9 @@ enum WorldChunkFactory {
         return skirt
     }
 
-    private static func makeKelpSprite(zone: DepthZone, rng: inout SeededGenerator) -> SKSpriteNode {
+    private static func makeKelpSprite(zone: DepthZone,
+                                       baseSize: CGSize,
+                                       rng: inout SeededGenerator) -> SKSpriteNode {
         let height = WorldVisualPalette.kelpHeight(for: zone) * rng.nextCGFloat(in: 0.65...1.18)
         let kind: WorldStampKind
         let roll = rng.nextCGFloat(in: 0...1)
@@ -249,6 +334,7 @@ enum WorldChunkFactory {
         kelp.size = CGSize(width: height * rng.nextCGFloat(in: 0.24...0.48),
                            height: height)
         kelp.anchorPoint = CGPoint(x: 0.5, y: rootAnchorY(for: kind))
+        fitPlantSprite(kelp, kind: kind, baseSize: baseSize)
         kelp.alpha = rng.nextCGFloat(in: 0.58...0.86)
         kelp.zRotation = rng.nextCGFloat(in: -0.12...0.12)
         if rng.chance(0.55) {
@@ -265,8 +351,9 @@ enum WorldChunkFactory {
     }
 
     private static func makeDetailSprite(zone: DepthZone,
-                                  biome: AquaticBiome,
-                                  rng: inout SeededGenerator) -> SKSpriteNode {
+                                         biome: AquaticBiome,
+                                         baseSize: CGSize,
+                                         rng: inout SeededGenerator) -> SKSpriteNode {
         let kind = detailStampKind(for: zone, biome: biome, rng: &rng)
         let texture = WorldTextureCache.shared.texture(kind: kind,
                                                        zone: zone,
@@ -275,6 +362,7 @@ enum WorldChunkFactory {
         let detail = SKSpriteNode(texture: texture)
         detail.size = detailSize(for: kind, zone: zone, biome: biome, rng: &rng)
         detail.anchorPoint = CGPoint(x: 0.5, y: rootAnchorY(for: kind))
+        fitPlantSprite(detail, kind: kind, baseSize: baseSize)
         detail.alpha = rng.nextCGFloat(in: 0.58...0.90)
         detail.zRotation = rng.nextCGFloat(in: -0.22...0.22)
         if kind == .crystalCluster || kind == .ventStack || zone == .deep || zone == .abyss {
@@ -282,6 +370,52 @@ enum WorldChunkFactory {
             detail.alpha *= kind == .ventStack ? 0.86 : 0.72
         }
         return detail
+    }
+
+    private static func fitPlantSprite(_ sprite: SKSpriteNode,
+                                       kind: WorldStampKind,
+                                       baseSize: CGSize) {
+        let widthRatio: CGFloat
+        let heightRatio: CGFloat
+        switch kind {
+        case .kelpRibbon, .kelpBlade, .kelpBush:
+            widthRatio = 0.34
+            heightRatio = 2.55
+        case .coralFan, .coralBranch:
+            widthRatio = 0.40
+            heightRatio = 1.85
+        case .coralTube, .spongePatch:
+            widthRatio = 0.44
+            heightRatio = 1.55
+        case .crystalCluster, .ventStack, .ruinShard:
+            widthRatio = 0.42
+            heightRatio = 2.10
+        default:
+            widthRatio = 0.40
+            heightRatio = 1.80
+        }
+
+        let maxWidth = max(36, baseSize.width * widthRatio)
+        let maxHeight = max(54, baseSize.height * heightRatio)
+        let widthScale = maxWidth / max(1, sprite.size.width)
+        let heightScale = maxHeight / max(1, sprite.size.height)
+        let scale = min(1, widthScale, heightScale)
+        if scale < 1 {
+            sprite.size = CGSize(width: sprite.size.width * scale,
+                                 height: sprite.size.height * scale)
+        }
+    }
+
+    private static func plantingX(for sprite: SKSpriteNode,
+                                  baseSize: CGSize,
+                                  rng: inout SeededGenerator) -> CGFloat {
+        let plantableHalfWidth = baseSize.width * 0.40
+        let horizontalClearance = max(18, sprite.size.width * 0.56 + sprite.size.height * 0.08)
+        let maxAbsX = max(0, plantableHalfWidth - horizontalClearance)
+        guard maxAbsX > 1 else {
+            return rng.nextCGFloat(in: -baseSize.width * 0.035...baseSize.width * 0.035)
+        }
+        return rng.nextCGFloat(in: -maxAbsX...maxAbsX)
     }
 
     private static func plantingSurfaceY(localX: CGFloat,
@@ -292,13 +426,13 @@ enum WorldChunkFactory {
         let dome = 1 - pow(edgeAmount, 1.65)
         let ripple = sin((localX / max(1, baseSize.width)) * .pi * 3) * baseSize.height * 0.025
         let jitter = rng.nextCGFloat(in: -0.025...0.025) * baseSize.height
-        let y = baseSize.height * (0.08 + 0.30 * dome) + ripple + jitter
-        return y.clamped(to: baseSize.height * 0.04...baseSize.height * 0.40)
+        let y = baseSize.height * (0.07 + 0.26 * dome) + ripple + jitter
+        return y.clamped(to: baseSize.height * 0.03...baseSize.height * 0.34)
     }
 
     private static func rootSink(for sprite: SKSpriteNode,
                                  rng: inout SeededGenerator) -> CGFloat {
-        min(9, sprite.size.height * rng.nextCGFloat(in: 0.018...0.045))
+        min(14, sprite.size.height * rng.nextCGFloat(in: 0.030...0.060))
     }
 
     private static func rootAnchorY(for kind: WorldStampKind) -> CGFloat {
