@@ -412,15 +412,18 @@ final class EventSystem {
         guard let world = worldNode else { return }
         let x = (ctx.mermaidPosition.x + .random(in: -250...250)).clamped(to: World.minX...World.maxX)
         let landingY = max(ctx.mermaidPosition.y, -2200) - .random(in: 0...150)
+        let rawLandingPoint = CGPoint(x: x, y: landingY)
+        let landingPoint = CGPoint(x: rawLandingPoint.x,
+                                   y: rawLandingPoint.y.clamped(to: ctx.depth.allowedYRange()))
 
         let object = SKShapeNode(rectOf: CGSize(width: 30, height: 30), cornerRadius: 6)
         object.fillColor = UIColor(red: 0.7, green: 0.72, blue: 0.78, alpha: 1)
         object.strokeColor = .white
         object.zPosition = 9
-        object.position = CGPoint(x: x, y: World.waterlineY + 200)
+        object.position = CGPoint(x: landingPoint.x, y: World.waterlineY + 200)
         world.addChild(object)
 
-        let fall = SKAction.move(to: CGPoint(x: x, y: landingY), duration: 2.4)
+        let fall = SKAction.move(to: landingPoint, duration: 2.4)
         fall.eaeInEaseOut()
         object.run(.sequence([
             fall,
@@ -437,7 +440,6 @@ final class EventSystem {
         ]))
         ctx.say("Algo caiu da superfície! 📦 (Objetivo disponível)")
 
-        let landingPoint = CGPoint(x: x, y: landingY)
         setObjective(label: "o objeto que caiu",
                      duration: 75,
                      position: { landingPoint },

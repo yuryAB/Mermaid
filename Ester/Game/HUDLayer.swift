@@ -329,7 +329,7 @@ final class HUDLayer: SKNode {
         clip.zPosition = 7
         panelContent.addChild(clip)
 
-        titleLabel = makeLabel(text: "Registro da Eistrelinha",
+        titleLabel = makeLabel(text: "Registro da sereia",
                                fontSize: 16,
                                style: .noteBold,
                                color: HUDPalette.ink)

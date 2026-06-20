@@ -87,7 +87,8 @@ final class ChallengeSystem {
 
     func nearbyGivers(to point: CGPoint, maxDistance: CGFloat) -> [FishNode] {
         ctx.fish.fishes.filter {
-            $0.offeredChallenge != nil && $0.position.distance(to: point) <= maxDistance
+            $0.offeredChallenge != nil
+                && $0.position.distance(to: point) <= maxDistance
         }
     }
 

@@ -13,6 +13,235 @@ import SpriteKit
 import GameplayKit
 import UIKit
 
+private final class MermaidNameEditorViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate {
+    var onSubmit: ((String) -> Void)?
+
+    private let currentName: String
+    private let panelView = UIView()
+    private let textField = UITextField()
+    private let tableView = UITableView(frame: .zero, style: .plain)
+    private let saveButton = UIButton(type: .system)
+    private var suggestionHeightConstraint: NSLayoutConstraint!
+    private var panelBottomConstraint: NSLayoutConstraint!
+    private var panelCenterYConstraint: NSLayoutConstraint!
+    private var visibleSuggestions: [CheatSystem.Suggestion] = []
+
+    init(currentName: String) {
+        self.currentName = currentName
+        super.init(nibName: nil, bundle: nil)
+        modalPresentationStyle = .overFullScreen
+        modalTransitionStyle = .crossDissolve
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        buildView()
+        registerForKeyboardChanges()
+        updateSuggestions()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        textField.becomeFirstResponder()
+    }
+
+    private func buildView() {
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.46)
+
+        panelView.translatesAutoresizingMaskIntoConstraints = false
+        panelView.backgroundColor = UIColor(red: 0.98, green: 0.97, blue: 0.90, alpha: 1)
+        panelView.layer.cornerRadius = 8
+        panelView.layer.shadowColor = UIColor.black.cgColor
+        panelView.layer.shadowOpacity = 0.26
+        panelView.layer.shadowRadius = 18
+        panelView.layer.shadowOffset = CGSize(width: 0, height: 10)
+        view.addSubview(panelView)
+
+        let titleLabel = UILabel()
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.text = "Nome da sereia"
+        titleLabel.font = .preferredFont(forTextStyle: .headline)
+        titleLabel.textColor = UIColor(red: 0.04, green: 0.12, blue: 0.16, alpha: 1)
+
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.text = currentName
+        textField.placeholder = MermaidStats.defaultMermaidName
+        textField.borderStyle = .roundedRect
+        textField.clearButtonMode = .whileEditing
+        textField.autocapitalizationType = .none
+        textField.autocorrectionType = .no
+        textField.returnKeyType = .done
+        textField.delegate = self
+        textField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
+
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 14, bottom: 0, right: 14)
+        tableView.layer.cornerRadius = 8
+        tableView.isScrollEnabled = true
+        tableView.isHidden = true
+
+        let cancelButton = UIButton(type: .system)
+        cancelButton.translatesAutoresizingMaskIntoConstraints = false
+        cancelButton.setTitle("Cancelar", for: .normal)
+        cancelButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
+
+        saveButton.translatesAutoresizingMaskIntoConstraints = false
+        saveButton.setTitle("Salvar", for: .normal)
+        saveButton.titleLabel?.font = .preferredFont(forTextStyle: .headline)
+        saveButton.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
+
+        let buttonRow = UIStackView(arrangedSubviews: [cancelButton, saveButton])
+        buttonRow.translatesAutoresizingMaskIntoConstraints = false
+        buttonRow.axis = .horizontal
+        buttonRow.alignment = .center
+        buttonRow.distribution = .fillEqually
+        buttonRow.spacing = 12
+
+        panelView.addSubview(titleLabel)
+        panelView.addSubview(textField)
+        panelView.addSubview(tableView)
+        panelView.addSubview(buttonRow)
+
+        suggestionHeightConstraint = tableView.heightAnchor.constraint(equalToConstant: 0)
+        panelCenterYConstraint = panelView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -70)
+        panelCenterYConstraint.priority = .defaultHigh
+        panelBottomConstraint = panelView.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor,
+                                                                  constant: -20)
+        NSLayoutConstraint.activate([
+            panelView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            panelView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            panelCenterYConstraint,
+            panelBottomConstraint,
+
+            titleLabel.topAnchor.constraint(equalTo: panelView.topAnchor, constant: 18),
+            titleLabel.leadingAnchor.constraint(equalTo: panelView.leadingAnchor, constant: 18),
+            titleLabel.trailingAnchor.constraint(equalTo: panelView.trailingAnchor, constant: -18),
+
+            textField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 14),
+            textField.leadingAnchor.constraint(equalTo: panelView.leadingAnchor, constant: 18),
+            textField.trailingAnchor.constraint(equalTo: panelView.trailingAnchor, constant: -18),
+            textField.heightAnchor.constraint(equalToConstant: 42),
+
+            tableView.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 10),
+            tableView.leadingAnchor.constraint(equalTo: textField.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: textField.trailingAnchor),
+            suggestionHeightConstraint,
+
+            buttonRow.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 14),
+            buttonRow.leadingAnchor.constraint(equalTo: panelView.leadingAnchor, constant: 18),
+            buttonRow.trailingAnchor.constraint(equalTo: panelView.trailingAnchor, constant: -18),
+            buttonRow.heightAnchor.constraint(equalToConstant: 42),
+            buttonRow.bottomAnchor.constraint(equalTo: panelView.bottomAnchor, constant: -16)
+        ])
+    }
+
+    @objc private func textDidChange() {
+        updateSuggestions()
+    }
+
+    private func updateSuggestions() {
+        let text = textField.text ?? ""
+        visibleSuggestions = CheatSystem.suggestions(matching: text)
+        let shouldShow = CheatSystem.isCheatEntry(text) && !visibleSuggestions.isEmpty
+        tableView.isHidden = !shouldShow
+        suggestionHeightConstraint.constant = shouldShow ? min(220, CGFloat(visibleSuggestions.count) * 54) : 0
+        saveButton.setTitle(CheatSystem.isCheatEntry(text) ? "Executar" : "Salvar", for: .normal)
+        tableView.reloadData()
+    }
+
+    private func registerForKeyboardChanges() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillChangeFrame),
+                                               name: UIResponder.keyboardWillChangeFrameNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillHide),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
+    }
+
+    @objc private func keyboardWillChangeFrame(_ notification: Notification) {
+        updatePanelPosition(for: notification, hidingKeyboard: false)
+    }
+
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        updatePanelPosition(for: notification, hidingKeyboard: true)
+    }
+
+    private func updatePanelPosition(for notification: Notification, hidingKeyboard: Bool) {
+        let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval ?? 0.25
+        if hidingKeyboard {
+            panelBottomConstraint.constant = -20
+        } else if let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+            let keyboardFrame = view.convert(frame, from: nil)
+            let safeBottom = view.bounds.height - view.safeAreaInsets.bottom
+            let overlap = max(0, safeBottom - keyboardFrame.minY)
+            panelBottomConstraint.constant = -(overlap + 12)
+        }
+        UIView.animate(withDuration: duration) {
+            self.view.layoutIfNeeded()
+        }
+    }
+
+    @objc private func cancelTapped() {
+        dismiss(animated: true)
+    }
+
+    @objc private func saveTapped() {
+        let text = textField.text ?? ""
+        guard !CheatSystem.isCheatEntry(text) || CheatSystem.isCheat(text) else {
+            updateSuggestions()
+            return
+        }
+        submit(text)
+    }
+
+    private func submit(_ text: String) {
+        let onSubmit = onSubmit
+        dismiss(animated: true) {
+            onSubmit?(text)
+        }
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        saveTapped()
+        return true
+    }
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        visibleSuggestions.count
+    }
+
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cheat")
+            ?? UITableViewCell(style: .subtitle, reuseIdentifier: "cheat")
+        let suggestion = visibleSuggestions[indexPath.row]
+        cell.textLabel?.text = "\(CheatSystem.commandPrefix)\(suggestion.code)"
+        cell.detailTextLabel?.text = suggestion.description
+        cell.textLabel?.font = .monospacedSystemFont(ofSize: 14, weight: .semibold)
+        cell.detailTextLabel?.font = .preferredFont(forTextStyle: .caption1)
+        cell.backgroundColor = .clear
+        cell.selectionStyle = .default
+        return cell
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let suggestion = visibleSuggestions[indexPath.row]
+        submit("\(CheatSystem.commandPrefix)\(suggestion.code)")
+    }
+}
+
 class GameScene: SKScene {
     class var defaultRegionId: String? { nil }
 
@@ -163,7 +392,6 @@ class GameScene: SKScene {
         let yRange = DepthSystem.allowedYRange(for: stats)
         let clampedPoint = CGPoint(x: destinationPoint.x.clamped(to: region.playableXRange),
                                    y: destinationPoint.y.clamped(to: yRange))
-
         activeRegion = region
         ctx.activeRegion = region
         stats.currentRegionId = region.id
@@ -247,23 +475,21 @@ class GameScene: SKScene {
 
     private func openMermaidNameEditor() {
         guard let presenter = view?.window?.rootViewController else { return }
-        let alert = UIAlertController(title: "Nome da sereia",
-                                      message: nil,
-                                      preferredStyle: .alert)
-        alert.addTextField { [weak self] field in
-            field.text = self?.stats.mermaidName
-            field.placeholder = "Eistrelinha"
-            field.clearButtonMode = .whileEditing
+        let editor = MermaidNameEditorViewController(currentName: stats.mermaidName)
+        editor.onSubmit = { [weak self] rawText in
+            self?.handleMermaidNameEditorSubmission(rawText)
         }
-        alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
-        alert.addAction(UIAlertAction(title: "Salvar", style: .default) { [weak self, weak alert] _ in
-            guard let self else { return }
-            let rawName = alert?.textFields?.first?.text ?? ""
-            let trimmed = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
-            self.stats.mermaidName = trimmed.isEmpty ? "Eistrelinha" : trimmed
-            self.persistAndSave()
-        })
-        presenter.present(alert, animated: true)
+        presenter.present(editor, animated: true)
+    }
+
+    private func handleMermaidNameEditorSubmission(_ rawText: String) {
+        let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if CheatSystem.isCheat(trimmed) {
+            ctx.say(CheatSystem.run(trimmed, context: ctx))
+            return
+        }
+        stats.mermaidName = trimmed.isEmpty ? MermaidStats.defaultMermaidName : trimmed
+        persistAndSave()
     }
 
     private func openRigDebugTool() {
@@ -1196,7 +1422,8 @@ class GameScene: SKScene {
             return
         }
 
-        if ctx.autonomy.touchRequestCooldownRemaining > 0 {
+        if ctx.autonomy.touchRequestCooldownRemaining > 0,
+           !stats.cheatAlwaysAcceptCommandsEnabled {
             showTouchRipple(at: location, accepted: false)
             ctx.autonomy.showTouchCooldownFeedback()
             return

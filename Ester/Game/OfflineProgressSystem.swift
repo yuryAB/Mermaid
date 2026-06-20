@@ -29,7 +29,9 @@ enum OfflineProgressSystem {
         if let routeId = stats.discoveryRouteRegionId,
            let current = startingRegion,
            let destination = RegionDiscoverySystem.region(withId: routeId) {
-            let target = stats.discoveryPoint(for: destination, from: current)
+            let target = boundedPoint(stats.discoveryPoint(for: destination, from: current),
+                                      in: current,
+                                      stats: stats)
             move(stats: stats, toward: target, maxDistance: distance)
             if CGPoint(x: stats.posX, y: stats.posY).distance(to: target) < 180 {
                 stats.discoveryRouteRegionId = nil
@@ -41,7 +43,8 @@ enum OfflineProgressSystem {
         } else if let destinationId = stats.destinationRegionId,
            let destination = RegionDiscoverySystem.region(withId: destinationId) {
             _ = CGPoint(x: stats.posX, y: stats.posY)
-            let target = stats.savedMapPosition(for: destination) ?? destination.center
+            let rawTarget = stats.savedMapPosition(for: destination) ?? destination.center
+            let target = boundedPoint(rawTarget, in: destination, stats: stats)
             move(stats: stats, toward: target, maxDistance: distance)
 
             if CGPoint(x: stats.posX, y: stats.posY).distance(to: target) < 700 {
@@ -68,7 +71,11 @@ enum OfflineProgressSystem {
         // manter a posição dentro das camadas liberadas
         stats.posY = stats.posY.clamped(to: DepthSystem.allowedYRange(for: stats))
         if let region = RegionDiscoverySystem.region(withId: stats.currentRegionId) ?? startingRegion {
-            let endPoint = CGPoint(x: stats.posX, y: stats.posY)
+            let endPoint = boundedPoint(CGPoint(x: stats.posX, y: stats.posY),
+                                        in: region,
+                                        stats: stats)
+            stats.posX = endPoint.x
+            stats.posY = endPoint.y
             let revealedPOIs = applyOfflinePathReveal(stats: stats,
                                                       from: startPoint,
                                                       to: endPoint,
@@ -111,6 +118,14 @@ enum OfflineProgressSystem {
         let step = min(maxDistance, total)
         stats.posX += dx / total * step
         stats.posY += dy / total * step
+    }
+
+    private static func boundedPoint(_ point: CGPoint,
+                                     in region: Region,
+                                     stats: MermaidStats) -> CGPoint {
+        let yRange = DepthSystem.allowedYRange(for: stats)
+        return CGPoint(x: point.x.clamped(to: region.playableXRange),
+                       y: point.y.clamped(to: yRange))
     }
 
     private static func applyOfflinePathReveal(stats: MermaidStats,

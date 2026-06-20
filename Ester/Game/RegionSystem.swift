@@ -32,7 +32,7 @@ struct Region {
     }
 
     var playableXRange: ClosedRange<CGFloat> {
-        World.minX...World.maxX
+        xRange
     }
 
     func contains(_ point: CGPoint) -> Bool {
@@ -397,7 +397,7 @@ final class RegionDiscoverySystem {
               let current = currentRegion,
               let destination = nextDiscoverableRegion() else { return false }
 
-        let point = ctx.stats.discoveryPoint(for: destination, from: current)
+        let point = discoveryRoutePoint(for: destination, from: current)
         ctx.stats.pendingRegionDiscoveryId = destination.id
         ctx.stats.revealExpeditionMap(in: current, near: point)
         ctx.stats.addMemory("Encontrou pista para \(destination.name)")
@@ -411,7 +411,7 @@ final class RegionDiscoverySystem {
         guard let current = currentRegion,
               ctx.stats.pendingRegionDiscoveryId == region.id
                 || ctx.stats.discoveryRouteRegionId == region.id else { return false }
-        let point = ctx.stats.discoveryPoint(for: region, from: current)
+        let point = discoveryRoutePoint(for: region, from: current)
         guard ctx.autonomy.requestPointFromTouch(point) else { return false }
         ctx.stats.pendingRegionDiscoveryId = nil
         ctx.stats.discoveryRouteRegionId = region.id
@@ -449,13 +449,19 @@ final class RegionDiscoverySystem {
     private func updateDiscoveryRoute(in current: Region) {
         guard let id = ctx.stats.discoveryRouteRegionId,
               let destination = RegionDiscoverySystem.region(withId: id) else { return }
-        let point = ctx.stats.discoveryPoint(for: destination, from: current)
+        let point = discoveryRoutePoint(for: destination, from: current)
         ctx.stats.revealExpeditionMap(in: current, near: point)
         guard ctx.mermaidPosition.distance(to: point) < 180 else { return }
         ctx.stats.discoveryRouteRegionId = nil
         ctx.stats.readyRegionDiscoveryId = id
         ctx.scene?.showRegionDiscoveryCue(for: destination)
         ctx.say("A água mudou de cor. \(destination.name) está logo além; confirme no mapa.")
+    }
+
+    private func discoveryRoutePoint(for destination: Region, from current: Region) -> CGPoint {
+        let rawPoint = ctx.stats.discoveryPoint(for: destination, from: current)
+        return CGPoint(x: rawPoint.x.clamped(to: current.playableXRange),
+                       y: rawPoint.y.clamped(to: DepthSystem.allowedYRange(for: ctx.stats)))
     }
 }
 
@@ -477,8 +483,9 @@ final class TravelSystem {
         guard let destination else { return nil }
         let yRange = ctx.depth.allowedYRange()
         let saved = ctx.stats.savedMapPosition(for: destination) ?? destination.center
-        return CGPoint(x: saved.x.clamped(to: destination.playableXRange),
-                       y: saved.y.clamped(to: yRange))
+        let clamped = CGPoint(x: saved.x.clamped(to: destination.playableXRange),
+                              y: saved.y.clamped(to: yRange))
+        return clamped
     }
 
     func setDestination(_ region: Region) {
@@ -606,12 +613,13 @@ enum WorldPOICatalog {
         let definitions = configuredDefinitions.filter { $0.mapId == region.id && $0.zone == zone.storageKey }
         if !definitions.isEmpty {
             return definitions.enumerated().map { index, definition in
-                let position = configuredPosition(for: definition,
-                                                  index: index,
-                                                  totalCount: definitions.count,
-                                                  region: region,
-                                                  zone: zone,
-                                                  stats: stats)
+                let rawPosition = configuredPosition(for: definition,
+                                                     index: index,
+                                                     totalCount: definitions.count,
+                                                     region: region,
+                                                     zone: zone,
+                                                     stats: stats)
+                let position = boundedPosition(rawPosition, region: region, zone: zone)
                 return WorldPOI(key: definition.poiId,
                                 regionId: region.id,
                                 zone: zone,
@@ -638,8 +646,9 @@ enum WorldPOICatalog {
             let innerYMin = zone.yRange.lowerBound + yPadding
             let innerYMax = zone.yRange.upperBound - yPadding
             let yRange = innerYMin <= innerYMax ? innerYMin...innerYMax : zone.yRange
-            let position = CGPoint(x: rng.next(in: xRange),
-                                   y: rng.next(in: yRange))
+            let rawPosition = CGPoint(x: rng.next(in: xRange),
+                                      y: rng.next(in: yRange))
+            let position = boundedPosition(rawPosition, region: region, zone: zone)
             return WorldPOI(key: key,
                             regionId: region.id,
                             zone: zone,
@@ -693,6 +702,17 @@ enum WorldPOICatalog {
         let x = (xRange.lowerBound + (xRange.upperBound - xRange.lowerBound) * lane
                  + rng.next(in: jitterRange)).clamped(to: xRange)
         return CGPoint(x: x, y: rng.next(in: yRange))
+    }
+
+    private static func boundedPosition(_ position: CGPoint,
+                                        region: Region,
+                                        zone: DepthZone) -> CGPoint {
+        let yPadding: CGFloat = zone == .surface ? 24 : 220
+        let innerYMin = zone.yRange.lowerBound + yPadding
+        let innerYMax = zone.yRange.upperBound - yPadding
+        let yRange = innerYMin <= innerYMax ? innerYMin...innerYMax : zone.yRange
+        return CGPoint(x: position.x.clamped(to: region.playableXRange),
+                       y: position.y.clamped(to: yRange))
     }
 
     private static func name(for kind: WorldPOIKind, region: Region, zone: DepthZone) -> String {

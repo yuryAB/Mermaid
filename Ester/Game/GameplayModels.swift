@@ -451,9 +451,9 @@ enum TimedBuffKind: String, Codable {
         case .temporaryPet:
             return "Uma companhia segue a exploração enquanto o efeito durar."
         case .fishGuide:
-            return "O peixe guia Ester para perto de um ponto de interesse."
+            return "O peixe guia a sereia para perto de um ponto de interesse."
         case .fishPlay:
-            return "Ester e o peixe ficam brincando juntos por um tempo."
+            return "A sereia e o peixe ficam brincando juntos por um tempo."
         }
     }
 }
@@ -683,6 +683,7 @@ final class GameContext {
     func say(_ text: String) {
         hud?.showMessage(text)
     }
+
 }
 
 // MARK: - Helpers

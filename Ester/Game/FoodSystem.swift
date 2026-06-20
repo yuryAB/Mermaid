@@ -218,20 +218,22 @@ final class FoodSystem {
         let zone = DepthZone.zone(atY: point.y)
         let kind = weightedKind(for: zone)
 
+        let yRange = ctx.depth.allowedYRange()
         let angle = CGFloat.random(in: 0...(2 * .pi))
         let distance = CGFloat.random(in: 350...maxDistance)
-        let yRange = ctx.depth.allowedYRange()
-        let position = CGPoint(
+        let candidate = CGPoint(
             x: (point.x + cos(angle) * distance).clamped(to: World.minX...World.maxX),
             y: (point.y + sin(angle) * distance).clamped(to: yRange)
         )
-        return spawn(kind: kind, at: position, in: world)
+        return spawn(kind: kind, at: candidate, in: world)
     }
 
     @discardableResult
     func spawn(kind: FoodKind, at position: CGPoint, in world: SKNode) -> FoodNode {
         let node = FoodNode(kind: kind)
-        node.position = position
+        let xRange = ctx.activeRegion?.playableXRange ?? (World.minX...World.maxX)
+        node.position = CGPoint(x: position.x.clamped(to: xRange),
+                                y: position.y.clamped(to: ctx.depth.allowedYRange()))
         node.zPosition = 5
         node.alpha = 0
         node.run(.fadeIn(withDuration: 0.6))
@@ -246,11 +248,12 @@ final class FoodSystem {
         guard let world = worldNode else { return nil }
         let zone = DepthZone.zone(atY: point.y)
         let rare = FoodSystem.kinds(for: zone).max { $0.xp < $1.xp } ?? FoodSystem.kinds(for: zone)[0]
-        let position = CGPoint(
+        let yRange = ctx.depth.allowedYRange()
+        let candidate = CGPoint(
             x: (point.x + .random(in: -350...350)).clamped(to: World.minX...World.maxX),
-            y: (point.y + .random(in: -250...250)).clamped(to: ctx.depth.allowedYRange())
+            y: (point.y + .random(in: -250...250)).clamped(to: yRange)
         )
-        return spawn(kind: rare, at: position, in: world)
+        return spawn(kind: rare, at: candidate, in: world)
     }
 
     /// Consome comida ou coleta recurso, aplicando os efeitos do tipo.

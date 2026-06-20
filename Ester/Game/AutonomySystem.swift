@@ -29,6 +29,8 @@ final class AutonomySystem {
     private var commandCooldownUntil: [PlayerCommand: Date] = [:]
     private var touchRequestCooldownUntil: Date?
     private var touchPointTarget: CGPoint?
+    private var touchDirection: CGVector?
+    private var touchDirectionUntil: Date?
     private weak var touchFoodTarget: FoodNode?
     private weak var touchFishTarget: FishNode?
     private weak var touchChallengeTarget: FishNode?
@@ -108,6 +110,12 @@ final class AutonomySystem {
         static let retreatPaddingRange: ClosedRange<CGFloat> = 1_400...2_300
         static let wanderPadding: CGFloat = 700
         static let verticalJitterRange: ClosedRange<CGFloat> = -260...260
+    }
+
+    private enum TouchDirectionBalance {
+        static let duration: TimeInterval = 9
+        static let targetDistance: CGFloat = 2_200
+        static let minimumGestureDistance: CGFloat = 48
     }
 
     private enum BondRecoveryState {
@@ -224,6 +232,7 @@ final class AutonomySystem {
         guard stats.phase != .egg, stats.trust < 100 else { return }
         guard commandBias == nil,
               touchPointTarget == nil,
+              touchDirection == nil,
               touchFoodTarget == nil,
               touchFishTarget == nil,
               touchChallengeTarget == nil,
@@ -354,7 +363,7 @@ final class AutonomySystem {
         case .idle, .observing, .resting, .eating, .inChallenge, .avoidingDanger, .returningHome:
             if newIntent != .avoidingDanger { target = nil }
         case .wandering:
-            target = touchPointTarget ?? randomWanderPoint()
+            target = directionalTouchTarget() ?? touchPointTarget ?? randomWanderPoint()
         case .seekingFood:
             if let food = validTouchFoodTarget() {
                 target = food.position
@@ -378,7 +387,8 @@ final class AutonomySystem {
             } else {
                 y = position.y - 1600
             }
-            target = CGPoint(x: (position.x + .random(in: -800...800)).clamped(to: horizontalRange), y: y)
+            target = boundedTarget(CGPoint(x: position.x + .random(in: -800...800), y: y),
+                                   yRange: ctx.depth.allowedYRange())
         case .goingUp:
             let y: CGFloat
             if let zone = currentZone.shallower, ctx.depth.isUnlocked(zone) {
@@ -388,7 +398,8 @@ final class AutonomySystem {
             } else {
                 y = position.y + 1600
             }
-            target = CGPoint(x: (position.x + .random(in: -800...800)).clamped(to: horizontalRange), y: y)
+            target = boundedTarget(CGPoint(x: position.x + .random(in: -800...800), y: y),
+                                   yRange: ctx.depth.allowedYRange())
         case .traveling:
             target = ctx.travel.targetPoint
         case .followingFish:
@@ -413,11 +424,37 @@ final class AutonomySystem {
         }
     }
 
+    private func boundedTarget(_ point: CGPoint,
+                               yRange: ClosedRange<CGFloat>) -> CGPoint {
+        let clampedPoint = CGPoint(x: point.x.clamped(to: horizontalRange),
+                                   y: point.y.clamped(to: yRange))
+        return clampedPoint
+    }
+
+    private func directionalTouchTarget() -> CGPoint? {
+        guard let direction = touchDirection,
+              let until = touchDirectionUntil else { return nil }
+        guard Date() < until else {
+            clearTouchDirection()
+            return nil
+        }
+
+        let range = ctx.depth.allowedYRange()
+        let candidate = CGPoint(x: position.x + direction.dx * TouchDirectionBalance.targetDistance,
+                                y: position.y + direction.dy * TouchDirectionBalance.targetDistance)
+        return boundedTarget(candidate, yRange: range)
+    }
+
+    private func clearTouchDirection() {
+        touchDirection = nil
+        touchDirectionUntil = nil
+    }
+
     private func randomWanderPoint() -> CGPoint {
         let range = ctx.depth.allowedYRange()
-        let x = (position.x + .random(in: -1100...1100)).clamped(to: safeHorizontalWanderRange())
-        let y = (position.y + .random(in: -700...700)).clamped(to: range)
-        return CGPoint(x: x, y: y)
+        let xRange = safeHorizontalWanderRange()
+        return CGPoint(x: (position.x + .random(in: -1100...1100)).clamped(to: xRange),
+                       y: (position.y + .random(in: -700...700)).clamped(to: range))
     }
 
     private func safeHorizontalWanderRange() -> ClosedRange<CGFloat> {
@@ -529,9 +566,14 @@ final class AutonomySystem {
                 decisionCooldown = min(decisionCooldown, 1)
             }
         case .wandering, .goingDeeper, .goingUp:
+            if intent == .wandering, let directionalTarget = directionalTouchTarget() {
+                target = directionalTarget
+                break
+            }
             if let t = target, position.distance(to: t) < 90 {
                 if intent == .wandering {
                     touchPointTarget = nil
+                    clearTouchDirection()
                 }
                 setIntent(.idle)
                 decisionCooldown = min(decisionCooldown, .random(in: 1...2.5))
@@ -591,8 +633,9 @@ final class AutonomySystem {
         let dy = position.y - point.y
         let length = max(1, sqrt(dx * dx + dy * dy))
         let range = ctx.depth.allowedYRange()
-        target = CGPoint(x: (position.x + dx / length * 500).clamped(to: horizontalRange),
-                         y: (position.y + dy / length * 500).clamped(to: range))
+        target = boundedTarget(CGPoint(x: position.x + dx / length * 500,
+                                       y: position.y + dy / length * 500),
+                               yRange: range)
         intent = .avoidingDanger
         intentTime = 0
         decisionCooldown = 5
@@ -701,7 +744,9 @@ final class AutonomySystem {
         clearExpiredCommandCooldowns()
         notePlayerPressure()
         let guaranteedByBabyStart = stats.canUseBabyGuaranteedRequest
+        let guaranteedByCheat = stats.cheatAlwaysAcceptCommandsEnabled
         if !guaranteedByBabyStart,
+           !guaranteedByCheat,
            let until = commandCooldownUntil[command],
            until > Date() {
             return
@@ -720,7 +765,10 @@ final class AutonomySystem {
         guard intent != .enteringRefuge else { return }
 
         let guaranteedByBondRecovery = isBondRecoveryRequestReady
-        let requestIsGuaranteed = guaranteedByBabyStart || guaranteedByBondRecovery || stats.hasActiveBuff(.eagerCompanion)
+        let requestIsGuaranteed = guaranteedByBabyStart
+            || guaranteedByBondRecovery
+            || guaranteedByCheat
+            || stats.hasActiveBuff(.eagerCompanion)
         var guidedExplorePoint: CGPoint?
         let desired: MermaidIntent
         switch command {
@@ -874,21 +922,27 @@ final class AutonomySystem {
         let range = ctx.depth.allowedYRange()
         let clampedPoint = CGPoint(x: point.x.clamped(to: horizontalRange),
                                    y: point.y.clamped(to: range))
-        let reachablePoint = pointLimitedByEnergy(clampedPoint)
-        let wasLimited = reachablePoint.distance(to: clampedPoint) > 24
+        let dx = clampedPoint.x - position.x
+        let dy = clampedPoint.y - position.y
+        let distance = sqrt(dx * dx + dy * dy)
+        guard distance >= TouchDirectionBalance.minimumGestureDistance else {
+            ctx.say("Ela precisa de uma direção mais clara.")
+            return false
+        }
+
         guard acceptTouchRequest(for: .wandering,
-                                 acceptedMessage: wasLimited
-                                    ? "Ela aceitou se aproximar, mas a energia atual não leva até o ponto inteiro."
-                                    : "Ela entendeu seu gesto e nadou para lá...",
+                                 acceptedMessage: "Ela entendeu a direção e começou a nadar...",
                                  refusalMessages: [
                                     "Ela olhou para onde você apontou, mas preferiu ficar por aqui.",
                                     "Ela fez que não com a cabeça. Agora não.",
                                     "Ela viu seu gesto, mas seguiu a própria vontade."
                                  ]) else { return false }
-        touchPointTarget = reachablePoint
+        touchPointTarget = nil
+        touchDirection = CGVector(dx: dx / distance, dy: dy / distance)
+        touchDirectionUntil = Date().addingTimeInterval(TouchDirectionBalance.duration)
         commandBias = nil
         setIntent(.wandering)
-        decisionCooldown = .random(in: 7...12)
+        decisionCooldown = CGFloat(TouchDirectionBalance.duration)
         return true
     }
 
@@ -1069,9 +1123,9 @@ final class AutonomySystem {
             endFishGuidance(removeBuff: true)
             if reached {
                 ctx.stats.revealExpeditionMap(in: ctx.activeRegion, near: poi.position)
-                ctx.say("O peixinho levou Ester para perto de \(poi.name).")
+                ctx.say("O peixinho levou \(stats.mermaidName) para perto de \(poi.name).")
             } else {
-                ctx.say("O peixinho guiou Ester um pouco mais perto de algo curioso.")
+                ctx.say("O peixinho guiou \(stats.mermaidName) um pouco mais perto de algo curioso.")
             }
             setIntent(.observing)
             decisionCooldown = 3
@@ -1152,7 +1206,7 @@ final class AutonomySystem {
         stats.addTimedBuff(.fishPlay,
                            title: "Brincando com peixe",
                            duration: FishPlayBalance.playDuration)
-        ctx.say("Ester e o peixinho chegaram pertinho e começaram a brincar.")
+        ctx.say("\(stats.mermaidName) e o peixinho chegaram pertinho e começaram a brincar.")
     }
 
     private func finishFishPlay(with fish: FishNode) {
@@ -1188,13 +1242,17 @@ final class AutonomySystem {
         guard stats.phase != .egg, intent != .inChallenge, intent != .enteringRefuge, !paused else { return false }
 
         let guaranteedByBabyStart = stats.canUseBabyGuaranteedRequest
-        if !guaranteedByBabyStart && touchRequestCooldownRemaining > 0 {
+        let guaranteedByCheat = stats.cheatAlwaysAcceptCommandsEnabled
+        if !guaranteedByBabyStart && !guaranteedByCheat && touchRequestCooldownRemaining > 0 {
             showTouchCooldownFeedback()
             return false
         }
 
         let guaranteedByBondRecovery = isBondRecoveryRequestReady
-        let requestIsGuaranteed = guaranteedByBabyStart || guaranteedByBondRecovery || stats.hasActiveBuff(.eagerCompanion)
+        let requestIsGuaranteed = guaranteedByBabyStart
+            || guaranteedByBondRecovery
+            || guaranteedByCheat
+            || stats.hasActiveBuff(.eagerCompanion)
         let chance = touchAcceptanceChance(for: desired)
         if requestIsGuaranteed || CGFloat.random(in: 0...1) <= chance {
             rewardAcceptedRequest(baseGain: 0.15,
@@ -1282,6 +1340,7 @@ final class AutonomySystem {
     private func clearTouchTargets(except intent: MermaidIntent) {
         if intent != .wandering {
             touchPointTarget = nil
+            clearTouchDirection()
         }
         if intent != .seekingFood {
             touchFoodTarget = nil
@@ -1448,6 +1507,7 @@ final class AutonomySystem {
 
         commandBias = nil
         touchPointTarget = nil
+        clearTouchDirection()
         setIntent(.wandering)
         target = CGPoint(x: x, y: y)
         decisionCooldown = max(decisionCooldown, 3)

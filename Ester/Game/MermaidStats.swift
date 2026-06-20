@@ -9,7 +9,10 @@ import Foundation
 import CoreGraphics
 
 final class MermaidStats: Codable {
-    var mermaidName: String = "Eistrelinha"
+    static let defaultMermaidName = "Eistrelinha"
+    private static var activeSessionStats: MermaidStats?
+
+    var mermaidName: String = MermaidStats.defaultMermaidName
     // 0 = satisfeita, 100 = faminta
     var hunger: CGFloat = 25
     var energy: CGFloat = 85
@@ -64,12 +67,17 @@ final class MermaidStats: Codable {
     var feedingUpgradeLevel: Int = 0
     var energyUpgradeLevel: Int = 0
     var dispositionUpgradeLevel: Int = 0
+    // Cheats sao apenas da sessao em memoria. Eles nao entram no save.
+    var cheatSuperSpeedEnabled: Bool = false
+    var cheatAlwaysAcceptCommandsEnabled: Bool = false
     var babyGuaranteedRequestsUsed: Int = 0
     var balanceVersion: Int = GameBalance.currentVersion
 
     // Estado transitório, não persiste
     var moodBoost: CGFloat = 0
     var scaredTimer: CGFloat = 0
+    private var cheatSessionBaselineData: Data?
+    private var cheatSessionPersistenceBlocked = false
 
     enum CodingKeys: String, CodingKey {
         case mermaidName, hunger, energy, mood, xp, courage, trust, curiosity, pearls
@@ -93,7 +101,7 @@ final class MermaidStats: Codable {
     /// Decoder tolerante: campos novos ganham default em vez de invalidar o save.
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        mermaidName = try c.decodeIfPresent(String.self, forKey: .mermaidName) ?? "Eistrelinha"
+        mermaidName = try c.decodeIfPresent(String.self, forKey: .mermaidName) ?? MermaidStats.defaultMermaidName
         hunger = try c.decodeIfPresent(CGFloat.self, forKey: .hunger) ?? 25
         energy = try c.decodeIfPresent(CGFloat.self, forKey: .energy) ?? 85
         mood = try c.decodeIfPresent(CGFloat.self, forKey: .mood) ?? 70
@@ -517,15 +525,15 @@ final class MermaidStats: Codable {
         var description: String {
             switch self {
             case .speed:
-                return "A Eistrelinha nada mais rápido e leva menos tempo para explorar e viajar."
+                return "A sereia nada mais rápido e leva menos tempo para explorar e viajar."
             case .shellGain:
                 return "Aumenta a quantidade de conchas recebidas nas ações."
             case .feeding:
-                return "A Eistrelinha demora mais para sentir fome."
+                return "A sereia demora mais para sentir fome."
             case .energy:
                 return "A energia diminui mais devagar durante atividades."
             case .disposition:
-                return "A Eistrelinha fica mais disposta e nega menos os seus pedidos."
+                return "A sereia fica mais disposta e nega menos os seus pedidos."
             }
         }
     }
@@ -564,12 +572,14 @@ final class MermaidStats: Codable {
     }
 
     var speedMultiplier: CGFloat {
+        if cheatSuperSpeedEnabled { return 6 }
         let buff: CGFloat = hasActiveBuff(.swiftCurrent) ? 0.28 : 0
         return (1 + buff + CGFloat(speedUpgradeLevel) * 0.007).clamped(to: 1...1.9)
     }
 
     var explorationProgressMultiplier: CGFloat {
-        (1 + CGFloat(speedUpgradeLevel) * 0.007).clamped(to: 1...1.7)
+        if cheatSuperSpeedEnabled { return 4 }
+        return (1 + CGFloat(speedUpgradeLevel) * 0.007).clamped(to: 1...1.7)
     }
 
     var shellRewardMultiplier: CGFloat {
@@ -649,6 +659,10 @@ final class MermaidStats: Codable {
     private static let saveKey = "EsterSave.v1"
 
     static func load() -> MermaidStats {
+        if let activeSessionStats {
+            return activeSessionStats
+        }
+
         if let data = UserDefaults.standard.data(forKey: saveKey),
            let stats = try? JSONDecoder().decode(MermaidStats.self, from: data) {
             // garantias de base após migrações de mundo
@@ -668,14 +682,41 @@ final class MermaidStats: Codable {
             stats.applyBalanceMigrationIfNeeded()
             stats.ensureBaselineRegionAccess()
             stats.removeLegacyAutomaticRegionAccessIfUnused()
+            activeSessionStats = stats
             return stats
         }
         let stats = MermaidStats()
         stats.ensureBaselineRegionAccess()
+        activeSessionStats = stats
         return stats
     }
 
+    func beginCheatSessionIfNeeded() {
+        guard !cheatSessionPersistenceBlocked else { return }
+        let previousSuperSpeed = cheatSuperSpeedEnabled
+        let previousAlwaysAccept = cheatAlwaysAcceptCommandsEnabled
+
+        cheatSuperSpeedEnabled = false
+        cheatAlwaysAcceptCommandsEnabled = false
+        lastSaved = Date()
+        cheatSessionBaselineData = try? JSONEncoder().encode(self)
+        cheatSessionPersistenceBlocked = true
+
+        cheatSuperSpeedEnabled = previousSuperSpeed
+        cheatAlwaysAcceptCommandsEnabled = previousAlwaysAccept
+
+        if let cheatSessionBaselineData {
+            UserDefaults.standard.set(cheatSessionBaselineData, forKey: MermaidStats.saveKey)
+        }
+    }
+
     func save() {
+        if cheatSessionPersistenceBlocked {
+            guard let cheatSessionBaselineData else { return }
+            UserDefaults.standard.set(cheatSessionBaselineData, forKey: MermaidStats.saveKey)
+            return
+        }
+
         lastSaved = Date()
         if let data = try? JSONEncoder().encode(self) {
             UserDefaults.standard.set(data, forKey: MermaidStats.saveKey)

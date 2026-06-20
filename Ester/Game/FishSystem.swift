@@ -665,13 +665,15 @@ final class FishSystem {
             RegionDiscoverySystem.fishPalette(for: $0.id)
         }
         let fish = FishNode(zone: zone, rare: rare, palette: regionPalette)
+        let range = zone.yRange
+        let yRange = (range.lowerBound + 80)...(range.upperBound - 80)
         let angle = CGFloat.random(in: 0...(2 * .pi))
         let distance = CGFloat.random(in: 780...1500)
-        let range = zone.yRange
-        fish.position = CGPoint(
+        let spawnPosition = CGPoint(
             x: (point.x + cos(angle) * distance).clamped(to: World.minX...World.maxX),
-            y: (point.y + sin(angle) * distance).clamped(to: (range.lowerBound + 80)...(range.upperBound - 80))
+            y: (point.y + sin(angle) * distance).clamped(to: yRange)
         )
+        fish.position = spawnPosition
         fish.alpha = 0
         fish.run(.fadeIn(withDuration: 0.8))
         world.addChild(fish)
@@ -685,8 +687,12 @@ final class FishSystem {
         let count = Int.random(in: 3...6)
         for _ in 0..<count {
             guard let member = spawnFish(zone: zone, near: point) else { continue }
-            member.position = leader.position + CGPoint(x: .random(in: -120...120),
-                                                        y: .random(in: -80...80))
+            let range = (zone.yRange.lowerBound + 80)...(zone.yRange.upperBound - 80)
+            let candidate = leader.position + CGPoint(x: .random(in: -120...120),
+                                                      y: .random(in: -80...80))
+            let xRange = ctx.activeRegion?.playableXRange ?? (World.minX...World.maxX)
+            member.position = CGPoint(x: candidate.x.clamped(to: xRange),
+                                      y: candidate.y.clamped(to: range))
             member.heading = leader.heading
             member.baseSpeed = leader.baseSpeed * CGFloat.random(in: 0.9...1.1)
             member.skittish = leader.skittish
@@ -695,7 +701,10 @@ final class FishSystem {
 
     func nearestFish(to point: CGPoint, maxDistance: CGFloat, includeBusy: Bool = false) -> FishNode? {
         fishes
-            .filter { (includeBusy || $0.isAvailableForCompanionAction) && $0.position.distance(to: point) <= maxDistance }
+            .filter {
+                (includeBusy || $0.isAvailableForCompanionAction)
+                    && $0.position.distance(to: point) <= maxDistance
+            }
             .min { $0.position.distance(to: point) < $1.position.distance(to: point) }
     }
 

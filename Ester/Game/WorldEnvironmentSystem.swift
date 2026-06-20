@@ -8,6 +8,7 @@
 
 import Foundation
 import SpriteKit
+import UIKit
 
 enum AquaticBiome: UInt64, CaseIterable {
     case openWater = 1
@@ -96,6 +97,7 @@ enum WorldSeed {
         return value
     }
 }
+
 
 struct SeededGenerator: RandomNumberGenerator {
     private var state: UInt64
