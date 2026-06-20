@@ -95,7 +95,6 @@ final class EventSystem {
         guard let objective = currentObjective else { return }
         currentObjective = nil
         ctx.stats.boostMood(6)
-        ctx.stats.gainXP(10)
         ctx.stats.curiosity = min(100, ctx.stats.curiosity + 1)
         ctx.stats.addMemory("Investigou \(objective.label)")
         objective.onReach?()
@@ -345,7 +344,6 @@ final class EventSystem {
             .run { [weak self] in
                 guard let self else { return }
                 if fish.position.distance(to: self.ctx.mermaidPosition) < 600 {
-                    self.ctx.stats.gainXP(15)
                     self.ctx.stats.addMemory("Viu um peixe raro em \(zone.displayName)")
                     let rewardText = self.ctx.rewards.grant(.pearls(2), source: "peixe raro")
                     self.ctx.say("Ela observou o peixe raro de pertinho! ✨ \(rewardText)")
@@ -369,7 +367,6 @@ final class EventSystem {
         GameAudio.shared.play(.bigShadow)
 
         ctx.autonomy.scare(from: shadow.position)
-        ctx.stats.gainXP(4)
         ctx.say("Uma sombra enorme passou perto... ela se assustou e observou de longe. 😨")
     }
 
@@ -430,8 +427,11 @@ final class EventSystem {
             .run { GameAudio.shared.play(.fallingSplash) },
             .run { [weak self] in
                 guard let self, let world = self.worldNode else { return }
-                let kind = FoodKind(name: "um objeto humano", weight: 1, nutrition: 5,
-                                    xp: 12, pearls: 4, courage: 0.8,
+                let kind = FoodKind(name: "um objeto humano",
+                                    weight: 1,
+                                    nutrition: 5,
+                                    pearls: 4,
+                                    courage: 0.8,
                                     style: .crystal,
                                     color: UIColor(red: 0.7, green: 0.75, blue: 0.8, alpha: 1))
                 self.ctx.food.spawn(kind: kind, at: object.position, in: world)

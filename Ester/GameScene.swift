@@ -1124,14 +1124,13 @@ class GameScene: SKScene {
 
         // Durante o ovo, o desafio reúne energia de nascimento
         if result.isHatching || stats.phase == .egg {
-            ctx.growth.addHatchProgress(CGFloat(result.score) / 900)
+            ctx.growth.addHatchProgress(CGFloat(result.points) / 900)
             stats.save()
             GameAudio.shared.play(.eggTap, volumeMultiplier: 0.7)
             ctx.say("O desafio reuniu energia de nascimento! 🥚✨")
             return
         }
 
-        stats.gainXP(result.xp)
         ctx.autonomy.paused = false
         ctx.autonomy.finishChallenge()
         stats.boostMood(8)
@@ -1281,7 +1280,9 @@ private final class OceanParallaxBackdrop: SKNode {
     private let causticLayer = SKNode()
     private let lifeLayer = SKNode()
     private let planktonLayer = SKNode()
-    private let kelpCurtainLayer = SKNode()
+    private let distantCanopyLayer = SKNode()
+    private let distantHabitatLayer = SKNode()
+    private let distantHabitatTileSpan: CGFloat
     private var ambientLife: [AmbientLifeNode] = []
     private var elapsed: CGFloat = 0
     private static let softMistTexture: SKTexture = {
@@ -1318,11 +1319,12 @@ private final class OceanParallaxBackdrop: SKNode {
 
     init(size: CGSize) {
         sceneSize = size
+        distantHabitatTileSpan = max(size.width * 2.8, 1400)
         let washTexture = GameUI.gradientTexture(size: CGSize(width: 8, height: 512),
                                                  colors: [
                                                     UIColor(white: 1, alpha: 0.18),
                                                     UIColor(white: 1, alpha: 0.02),
-                                                    UIColor(white: 0, alpha: 0.22)
+                                                    UIColor(red: 0.02, green: 0.12, blue: 0.18, alpha: 0.12)
                                                  ])
         gradientWash = SKSpriteNode(texture: washTexture)
         gradientWash.size = CGSize(width: max(1, size.width * 2.8),
@@ -1336,18 +1338,20 @@ private final class OceanParallaxBackdrop: SKNode {
         addChild(causticLayer)
         addChild(lifeLayer)
         addChild(planktonLayer)
-        addChild(kelpCurtainLayer)
+        addChild(distantCanopyLayer)
+        addChild(distantHabitatLayer)
 
         farLayer.zPosition = -80
         causticLayer.zPosition = -62
+        distantCanopyLayer.zPosition = -54
         planktonLayer.zPosition = -46
         lifeLayer.zPosition = -36
-        kelpCurtainLayer.zPosition = -24
+        distantHabitatLayer.zPosition = -30
 
         buildDistantParticleMist()
         buildCaustics()
         buildPlankton()
-        buildKelpCurtains()
+        buildDistantHabitats()
         buildAmbientLife()
     }
 
@@ -1374,12 +1378,19 @@ private final class OceanParallaxBackdrop: SKNode {
                                      y: wrapped(-cameraPosition.y * 0.035, span: sceneSize.height))
         planktonLayer.position = CGPoint(x: wrapped(-cameraPosition.x * 0.11, span: sceneSize.width),
                                          y: wrapped(-cameraPosition.y * 0.08 + elapsed * 7, span: sceneSize.height))
-        kelpCurtainLayer.position = CGPoint(x: wrapped(-cameraPosition.x * 0.16, span: sceneSize.width),
-                                            y: wrapped(-cameraPosition.y * 0.07, span: sceneSize.height))
+        distantCanopyLayer.position = CGPoint(x: wrapped(-cameraPosition.x * 0.055,
+                                                         span: distantHabitatTileSpan),
+                                              y: (-cameraPosition.y * 0.018 + sin(elapsed * 0.11) * 6)
+                                               .clamped(to: -sceneSize.height * 0.12...sceneSize.height * 0.12))
+        distantHabitatLayer.position = CGPoint(x: wrapped(-cameraPosition.x * 0.10,
+                                                          span: distantHabitatTileSpan),
+                                               y: (-cameraPosition.y * 0.035 + sin(elapsed * 0.18) * 8)
+                                                .clamped(to: -sceneSize.height * 0.18...sceneSize.height * 0.18))
 
         causticLayer.alpha = environment.causticAlpha * biomeCausticMultiplier(for: biome)
         planktonLayer.alpha = planktonAlpha(for: zone) * environment.planktonDensity
-        kelpCurtainLayer.alpha = curtainAlpha(for: zone) * biomeCurtainMultiplier(for: biome)
+        distantCanopyLayer.alpha = canopyAlpha(for: zone) * biomeHabitatMultiplier(for: biome)
+        distantHabitatLayer.alpha = habitatAlpha(for: zone) * biomeHabitatMultiplier(for: biome)
         lifeLayer.alpha = lifeAlpha(for: zone) * environment.lifeDensity * biomeLifeMultiplier(for: biome)
 
         for node in ambientLife {
@@ -1392,28 +1403,16 @@ private final class OceanParallaxBackdrop: SKNode {
                               height: max(sceneSize.height * 2.8, 1400))
         let density = ((sceneSize.width * sceneSize.height) / (390 * 844)).clamped(to: 0.55...1.25)
 
-        addDistantEmitter(color: UIColor(red: 0.04, green: 0.12, blue: 0.18, alpha: 1),
-                          birthRate: min(4.4, 3.2 * density),
-                          lifetime: 42,
-                          scale: 2.1,
-                          scaleRange: 1.4,
-                          alpha: 0.16,
-                          alphaRange: 0.08,
-                          speed: 3,
-                          coverage: coverage,
-                          blendMode: .alpha,
-                          zPosition: -2)
-
-        addDistantEmitter(color: UIColor(red: 0.14, green: 0.28, blue: 0.32, alpha: 1),
-                          birthRate: min(8.0, 5.8 * density),
+        addDistantEmitter(color: UIColor(red: 0.42, green: 0.78, blue: 0.76, alpha: 1),
+                          birthRate: min(5.8, 4.2 * density),
                           lifetime: 28,
-                          scale: 0.44,
-                          scaleRange: 0.28,
-                          alpha: 0.18,
-                          alphaRange: 0.10,
+                          scale: 0.30,
+                          scaleRange: 0.18,
+                          alpha: 0.10,
+                          alphaRange: 0.05,
                           speed: 9,
                           coverage: coverage,
-                          blendMode: .alpha,
+                          blendMode: .add,
                           zPosition: -1)
 
         addDistantEmitter(color: UIColor(red: 0.70, green: 0.94, blue: 0.92, alpha: 1),
@@ -1518,18 +1517,15 @@ private final class OceanParallaxBackdrop: SKNode {
         }
     }
 
-    private func buildKelpCurtains() {
-        let height = sceneSize.height * 0.9
-        let width = sceneSize.width * 1.35
-        for side in [-1, 1] {
-            for i in 0..<8 {
-                let frond = makeCurtainFrond(height: height * CGFloat.random(in: 0.34...0.74),
-                                             color: UIColor(red: 0.12, green: 0.54, blue: 0.46, alpha: 0.46))
-                frond.position = CGPoint(x: CGFloat(side) * (width / 2 + CGFloat.random(in: -80...120)),
-                                         y: -sceneSize.height * 0.48 + CGFloat(i) * 38)
-                frond.zRotation = CGFloat(side) * CGFloat.random(in: 0.10...0.22)
-                kelpCurtainLayer.addChild(frond)
-            }
+    private func buildDistantHabitats() {
+        for tile in -1...1 {
+            let canopyTile = makeDistantCanopyTile()
+            canopyTile.position = CGPoint(x: CGFloat(tile) * distantHabitatTileSpan, y: 0)
+            distantCanopyLayer.addChild(canopyTile)
+
+            let tileNode = makeDistantHabitatTile()
+            tileNode.position = CGPoint(x: CGFloat(tile) * distantHabitatTileSpan, y: 0)
+            distantHabitatLayer.addChild(tileNode)
         }
     }
 
@@ -1543,9 +1539,170 @@ private final class OceanParallaxBackdrop: SKNode {
         }
     }
 
-    private func makeCurtainFrond(height: CGFloat, color: UIColor) -> SKNode {
+    private func makeDistantHabitatTile() -> SKNode {
+        let tile = SKNode()
+        let clusterCount = max(5, Int(sceneSize.width / 135))
+        var rng = SeededGenerator(seed: 0xC0A57A7C5EED5678)
+        for index in 0..<clusterCount {
+            let stride = distantHabitatTileSpan / CGFloat(clusterCount)
+            let width = rng.nextCGFloat(in: 220...430)
+            let x = -distantHabitatTileSpan / 2
+                + stride * (CGFloat(index) + 0.5)
+                + rng.nextCGFloat(in: -stride * 0.18...stride * 0.18)
+            let rowOffset = CGFloat(index % 2) * sceneSize.height * 0.075
+            let y = -sceneSize.height * 0.50
+                + rowOffset
+                + rng.nextCGFloat(in: -sceneSize.height * 0.025...sceneSize.height * 0.035)
+            let cluster = makeDistantHabitatCluster(width: width, rng: &rng)
+            cluster.position = CGPoint(x: x, y: y)
+            cluster.zPosition = CGFloat(index % 2)
+            tile.addChild(cluster)
+        }
+        return tile
+    }
+
+    private func makeDistantCanopyTile() -> SKNode {
+        let tile = SKNode()
+        let columnCount = max(9, Int(sceneSize.width / 78))
+        var rng = SeededGenerator(seed: 0x51EA5EEDC0A57A7C)
+        for index in 0..<columnCount {
+            let stride = distantHabitatTileSpan / CGFloat(columnCount)
+            let x = -distantHabitatTileSpan / 2
+                + stride * (CGFloat(index) + 0.5)
+                + rng.nextCGFloat(in: -stride * 0.20...stride * 0.20)
+            let height = rng.nextCGFloat(in: sceneSize.height * 0.42...sceneSize.height * 0.92)
+            let column = makeDistantCanopyColumn(height: height, rng: &rng)
+            column.position = CGPoint(x: x,
+                                      y: -sceneSize.height * rng.nextCGFloat(in: 0.58...0.72))
+            column.zPosition = CGFloat(index % 4)
+            column.alpha = rng.nextCGFloat(in: 0.42...0.74)
+            tile.addChild(column)
+        }
+        return tile
+    }
+
+    private func makeDistantHabitatCluster(width: CGFloat,
+                                           rng: inout SeededGenerator) -> SKNode {
         let node = SKNode()
-        let lean = CGFloat.random(in: -34...34)
+
+        let baseHeight = rng.nextCGFloat(in: 24...56)
+        let base = UIBezierPath()
+        base.move(to: CGPoint(x: -width * 0.54, y: 0))
+        for step in 0...12 {
+            let t = CGFloat(step) / 12
+            let x = -width * 0.54 + width * 1.08 * t
+            let mound = sin(t * .pi) * baseHeight * rng.nextCGFloat(in: 0.72...1.08)
+            base.addLine(to: CGPoint(x: x,
+                                     y: mound + rng.nextCGFloat(in: -baseHeight * 0.16...baseHeight * 0.14)))
+        }
+        base.addLine(to: CGPoint(x: width * 0.56, y: -baseHeight * 0.30))
+        base.addLine(to: CGPoint(x: -width * 0.56, y: -baseHeight * 0.34))
+        base.close()
+
+        let shelf = SKShapeNode(path: base.cgPath)
+        shelf.fillColor = UIColor(red: 0.03, green: 0.16, blue: 0.18, alpha: 0.26)
+        shelf.strokeColor = UIColor(red: 0.34, green: 0.72, blue: 0.62, alpha: 0.12)
+        shelf.lineWidth = 1.2
+        shelf.zPosition = 0
+        node.addChild(shelf)
+
+        let skirtCount = rng.nextInt(in: 14...26)
+        for _ in 0..<skirtCount {
+            node.addChild(makeDistantUnderstoryStrand(width: width,
+                                                      baseHeight: baseHeight,
+                                                      rng: &rng))
+        }
+
+        let plantCount = rng.nextInt(in: 11...22)
+        for _ in 0..<plantCount {
+            let plantHeight = rng.nextCGFloat(in: sceneSize.height * 0.14...sceneSize.height * 0.38)
+            let clearance = max(20, plantHeight * 0.12)
+            let rootX = rng.nextCGFloat(in: (-width * 0.46 + clearance)...(width * 0.46 - clearance))
+            let rootY = baseHeight * rng.nextCGFloat(in: 0.30...0.78)
+            let frond = makeDistantHabitatFrond(height: plantHeight,
+                                                color: distantVegetationColor(alpha: rng.nextCGFloat(in: 0.15...0.30)),
+                                                rng: &rng)
+            frond.position = CGPoint(x: rootX, y: rootY)
+            frond.zPosition = rng.nextCGFloat(in: 1...3)
+            node.addChild(frond)
+        }
+
+        node.alpha = rng.nextCGFloat(in: 0.62...0.90)
+        node.setScale(rng.nextCGFloat(in: 0.76...1.16))
+        return node
+    }
+
+    private func makeDistantCanopyColumn(height: CGFloat,
+                                         rng: inout SeededGenerator) -> SKNode {
+        let node = SKNode()
+        let stemCount = rng.nextInt(in: 2...5)
+        for stemIndex in 0..<stemCount {
+            let offset = (CGFloat(stemIndex) - CGFloat(stemCount - 1) * 0.5) * rng.nextCGFloat(in: 10...22)
+            let stemHeight = height * rng.nextCGFloat(in: 0.72...1.10)
+            let stem = makeDistantHabitatFrond(height: stemHeight,
+                                               color: distantVegetationColor(alpha: rng.nextCGFloat(in: 0.10...0.22)),
+                                               rng: &rng)
+            stem.position = CGPoint(x: offset, y: 0)
+            stem.zRotation = rng.nextCGFloat(in: -0.10...0.10)
+            node.addChild(stem)
+        }
+
+        if rng.chance(0.70) {
+            let canopy = SKShapeNode(ellipseOf: CGSize(width: rng.nextCGFloat(in: 74...150),
+                                                       height: rng.nextCGFloat(in: 42...94)))
+            canopy.fillColor = distantVegetationColor(alpha: rng.nextCGFloat(in: 0.08...0.16))
+            canopy.strokeColor = .clear
+            canopy.position = CGPoint(x: rng.nextCGFloat(in: -24...24),
+                                      y: height * rng.nextCGFloat(in: 0.52...0.92))
+            canopy.zRotation = rng.nextCGFloat(in: -0.28...0.28)
+            node.addChild(canopy)
+        }
+
+        return node
+    }
+
+    private func makeDistantUnderstoryStrand(width: CGFloat,
+                                             baseHeight: CGFloat,
+                                             rng: inout SeededGenerator) -> SKNode {
+        let node = SKNode()
+        let rootX = rng.nextCGFloat(in: -width * 0.48...width * 0.48)
+        let rootY = baseHeight * rng.nextCGFloat(in: -0.02...0.42)
+        let length = rng.nextCGFloat(in: sceneSize.height * 0.07...sceneSize.height * 0.22)
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: rootX, y: rootY))
+        path.addCurve(to: CGPoint(x: rootX + rng.nextCGFloat(in: -24...24),
+                                  y: rootY - length),
+                      controlPoint1: CGPoint(x: rootX + rng.nextCGFloat(in: -12...12),
+                                             y: rootY - length * 0.30),
+                      controlPoint2: CGPoint(x: rootX + rng.nextCGFloat(in: -18...18),
+                                             y: rootY - length * 0.72))
+        let strand = SKShapeNode(path: path.cgPath)
+        strand.strokeColor = distantVegetationColor(alpha: rng.nextCGFloat(in: 0.10...0.24))
+        strand.fillColor = .clear
+        strand.lineWidth = rng.nextCGFloat(in: 1.1...3.4)
+        strand.lineCap = .round
+        strand.zPosition = -1
+        node.addChild(strand)
+
+        if rng.chance(0.36) {
+            let leaf = SKShapeNode(ellipseOf: CGSize(width: rng.nextCGFloat(in: 12...24),
+                                                     height: rng.nextCGFloat(in: 28...52)))
+            leaf.fillColor = distantVegetationColor(alpha: rng.nextCGFloat(in: 0.08...0.16))
+            leaf.strokeColor = .clear
+            leaf.position = CGPoint(x: rootX + rng.nextCGFloat(in: -16...16),
+                                    y: rootY - length * rng.nextCGFloat(in: 0.30...0.86))
+            leaf.zRotation = rng.nextCGFloat(in: -0.92...0.92)
+            node.addChild(leaf)
+        }
+
+        return node
+    }
+
+    private func makeDistantHabitatFrond(height: CGFloat,
+                                         color: UIColor,
+                                         rng: inout SeededGenerator) -> SKNode {
+        let node = SKNode()
+        let lean = rng.nextCGFloat(in: -22...22)
         let path = UIBezierPath()
         path.move(to: .zero)
         path.addCurve(to: CGPoint(x: lean, y: height),
@@ -1554,16 +1711,39 @@ private final class OceanParallaxBackdrop: SKNode {
         let shape = SKShapeNode(path: path.cgPath)
         shape.strokeColor = color
         shape.fillColor = .clear
-        shape.lineWidth = CGFloat.random(in: 7...12)
-        shape.glowWidth = 4
+        shape.lineWidth = rng.nextCGFloat(in: 3.2...6.5)
+        shape.glowWidth = 1.5
+        shape.lineCap = .round
         node.addChild(shape)
 
-        let left = SKAction.rotate(byAngle: -CGFloat.random(in: 0.04...0.08), duration: Double.random(in: 3.0...5.0))
-        let right = SKAction.rotate(byAngle: CGFloat.random(in: 0.04...0.08), duration: Double.random(in: 3.0...5.0))
+        if rng.chance(0.52) {
+            let leafCount = rng.nextInt(in: 1...3)
+            for leafIndex in 1...leafCount {
+                let t = CGFloat(leafIndex) / CGFloat(leafCount + 1)
+                let side: CGFloat = leafIndex.isMultiple(of: 2) ? -1 : 1
+                let leaf = SKShapeNode(ellipseOf: CGSize(width: rng.nextCGFloat(in: 14...28),
+                                                         height: rng.nextCGFloat(in: 30...58)))
+                leaf.fillColor = color.withAlphaComponent(color.cgColor.alpha * 0.55)
+                leaf.strokeColor = .clear
+                leaf.position = CGPoint(x: lean * t + side * rng.nextCGFloat(in: 6...14),
+                                        y: height * t)
+                leaf.zRotation = side * rng.nextCGFloat(in: 0.42...0.92)
+                node.addChild(leaf)
+            }
+        }
+
+        let left = SKAction.rotate(byAngle: -rng.nextCGFloat(in: 0.010...0.026),
+                                   duration: TimeInterval(rng.nextCGFloat(in: 5.5...8.5)))
+        let right = SKAction.rotate(byAngle: rng.nextCGFloat(in: 0.010...0.026),
+                                    duration: TimeInterval(rng.nextCGFloat(in: 5.5...8.5)))
         left.eaeInEaseOut()
         right.eaeInEaseOut()
         node.run(.repeatForever(.sequence([left, right])))
         return node
+    }
+
+    private func distantVegetationColor(alpha: CGFloat) -> UIColor {
+        UIColor(red: 0.08, green: 0.42, blue: 0.38, alpha: alpha)
     }
 
     private func gradientAlpha(for zone: DepthZone) -> CGFloat {
@@ -1599,15 +1779,27 @@ private final class OceanParallaxBackdrop: SKNode {
         }
     }
 
-    private func curtainAlpha(for zone: DepthZone) -> CGFloat {
+    private func habitatAlpha(for zone: DepthZone) -> CGFloat {
         switch zone {
         case .surface: return 0.0
-        case .clear: return 0.28
-        case .shallow: return 0.48
-        case .mid: return 0.36
-        case .blue: return 0.22
-        case .deep: return 0.16
-        case .abyss: return 0.12
+        case .clear: return 0.18
+        case .shallow: return 0.34
+        case .mid: return 0.28
+        case .blue: return 0.18
+        case .deep: return 0.12
+        case .abyss: return 0.08
+        }
+    }
+
+    private func canopyAlpha(for zone: DepthZone) -> CGFloat {
+        switch zone {
+        case .surface: return 0.0
+        case .clear: return 0.10
+        case .shallow: return 0.26
+        case .mid: return 0.24
+        case .blue: return 0.17
+        case .deep: return 0.11
+        case .abyss: return 0.07
         }
     }
 
@@ -1634,16 +1826,16 @@ private final class OceanParallaxBackdrop: SKNode {
         }
     }
 
-    private func biomeCurtainMultiplier(for biome: AquaticBiome) -> CGFloat {
+    private func biomeHabitatMultiplier(for biome: AquaticBiome) -> CGFloat {
         switch biome {
         case .kelpForest:
-            return 1.55
+            return 1.28
         case .coralGarden, .reefWall:
-            return 1.12
+            return 1.06
         case .openWater, .abyssPlain:
-            return 0.35
+            return 0.42
         default:
-            return 0.72
+            return 0.68
         }
     }
 

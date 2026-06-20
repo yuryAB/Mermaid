@@ -325,53 +325,53 @@ final class RegionDiscoverySystem {
         switch regionId {
         case "nascente":
             return [
-                FoodKind(name: "plâncton de berço", weight: 4, nutrition: 12, xp: 3, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.72, green: 0.9, blue: 1.0, alpha: 1)),
-                FoodKind(name: "conchinha morna", weight: 2, nutrition: 0, xp: 4, pearls: 1, courage: 0, style: .pearl, color: UIColor(red: 0.95, green: 0.82, blue: 0.92, alpha: 1))
+                FoodKind(name: "plâncton de berço", weight: 4, nutrition: 12, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.72, green: 0.9, blue: 1.0, alpha: 1)),
+                FoodKind(name: "conchinha morna", weight: 2, nutrition: 0, pearls: 1, courage: 0, style: .pearl, color: UIColor(red: 0.95, green: 0.82, blue: 0.92, alpha: 1))
             ]
         case "jardim_calmo":
             return [
-                FoodKind(name: "folha doce", weight: 4, nutrition: 14, xp: 3, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.46, green: 0.76, blue: 0.48, alpha: 1)),
-                FoodKind(name: "frutinha d'água", weight: 3, nutrition: 18, xp: 4, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.82, green: 0.58, blue: 0.72, alpha: 1))
+                FoodKind(name: "folha doce", weight: 4, nutrition: 14, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.46, green: 0.76, blue: 0.48, alpha: 1)),
+                FoodKind(name: "frutinha d'água", weight: 3, nutrition: 18, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.82, green: 0.58, blue: 0.72, alpha: 1))
             ]
         case "recife":
             return [
-                FoodKind(name: "baga de coral", weight: 3, nutrition: 20, xp: 5, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.95, green: 0.35, blue: 0.55, alpha: 1)),
-                FoodKind(name: "alga do recife", weight: 3, nutrition: 15, xp: 3, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.95, green: 0.55, blue: 0.65, alpha: 1))
+                FoodKind(name: "baga de coral", weight: 3, nutrition: 20, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.95, green: 0.35, blue: 0.55, alpha: 1)),
+                FoodKind(name: "alga do recife", weight: 3, nutrition: 15, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.95, green: 0.55, blue: 0.65, alpha: 1))
             ]
         case "delta":
             return [
-                FoodKind(name: "semente de rio", weight: 4, nutrition: 16, xp: 4, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.75, green: 0.65, blue: 0.35, alpha: 1)),
-                FoodKind(name: "folha do delta", weight: 3, nutrition: 13, xp: 3, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.5, green: 0.6, blue: 0.3, alpha: 1))
+                FoodKind(name: "semente de rio", weight: 4, nutrition: 16, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.75, green: 0.65, blue: 0.35, alpha: 1)),
+                FoodKind(name: "folha do delta", weight: 3, nutrition: 13, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.5, green: 0.6, blue: 0.3, alpha: 1))
             ]
         case "mar_azul_aberto":
             return [
-                FoodKind(name: "sal azul", weight: 2, nutrition: 9, xp: 5, pearls: 1, courage: 0, style: .crystal, color: UIColor(red: 0.34, green: 0.62, blue: 1.0, alpha: 1)),
-                FoodKind(name: "alga de corrente", weight: 3, nutrition: 17, xp: 4, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.22, green: 0.58, blue: 0.72, alpha: 1))
+                FoodKind(name: "sal azul", weight: 2, nutrition: 9, pearls: 1, courage: 0, style: .crystal, color: UIColor(red: 0.34, green: 0.62, blue: 1.0, alpha: 1)),
+                FoodKind(name: "alga de corrente", weight: 3, nutrition: 17, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.22, green: 0.58, blue: 0.72, alpha: 1))
             ]
         case "cavernas":
             return [
-                FoodKind(name: "musgo de pedra", weight: 4, nutrition: 15, xp: 4, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.26, green: 0.52, blue: 0.46, alpha: 1)),
-                FoodKind(name: "gota luminosa", weight: 2, nutrition: 10, xp: 6, pearls: 1, courage: 0, style: .glow, color: UIColor(red: 0.58, green: 0.86, blue: 0.92, alpha: 1))
+                FoodKind(name: "musgo de pedra", weight: 4, nutrition: 15, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.26, green: 0.52, blue: 0.46, alpha: 1)),
+                FoodKind(name: "gota luminosa", weight: 2, nutrition: 10, pearls: 1, courage: 0, style: .glow, color: UIColor(red: 0.58, green: 0.86, blue: 0.92, alpha: 1))
             ]
         case "campos_cristal":
             return [
-                FoodKind(name: "fruto de cristal", weight: 2, nutrition: 18, xp: 7, pearls: 1, courage: 0, style: .crystal, color: UIColor(red: 0.74, green: 0.9, blue: 1.0, alpha: 1)),
-                FoodKind(name: "plâncton prismático", weight: 3, nutrition: 12, xp: 5, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.86, green: 0.78, blue: 1.0, alpha: 1))
+                FoodKind(name: "fruto de cristal", weight: 2, nutrition: 18, pearls: 1, courage: 0, style: .crystal, color: UIColor(red: 0.74, green: 0.9, blue: 1.0, alpha: 1)),
+                FoodKind(name: "plâncton prismático", weight: 3, nutrition: 12, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.86, green: 0.78, blue: 1.0, alpha: 1))
             ]
         case "ruinas":
             return [
-                FoodKind(name: "semente antiga", weight: 3, nutrition: 16, xp: 6, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.62, green: 0.54, blue: 0.36, alpha: 1)),
-                FoodKind(name: "concha gravada", weight: 2, nutrition: 0, xp: 6, pearls: 2, courage: 0, style: .pearl, color: UIColor(red: 0.76, green: 0.70, blue: 0.58, alpha: 1))
+                FoodKind(name: "semente antiga", weight: 3, nutrition: 16, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.62, green: 0.54, blue: 0.36, alpha: 1)),
+                FoodKind(name: "concha gravada", weight: 2, nutrition: 0, pearls: 2, courage: 0, style: .pearl, color: UIColor(red: 0.76, green: 0.70, blue: 0.58, alpha: 1))
             ]
         case "abismo_vivo":
             return [
-                FoodKind(name: "luz abissal", weight: 2, nutrition: 20, xp: 8, pearls: 1, courage: 0, style: .glow, color: UIColor(red: 0.48, green: 0.92, blue: 1.0, alpha: 1)),
-                FoodKind(name: "cristal vivo", weight: 1, nutrition: 22, xp: 9, pearls: 2, courage: 0, style: .crystal, color: UIColor(red: 0.76, green: 0.32, blue: 0.92, alpha: 1))
+                FoodKind(name: "luz abissal", weight: 2, nutrition: 20, pearls: 1, courage: 0, style: .glow, color: UIColor(red: 0.48, green: 0.92, blue: 1.0, alpha: 1)),
+                FoodKind(name: "cristal vivo", weight: 1, nutrition: 22, pearls: 2, courage: 0, style: .crystal, color: UIColor(red: 0.76, green: 0.32, blue: 0.92, alpha: 1))
             ]
         case "superficie_distante":
             return [
-                FoodKind(name: "gota de sol", weight: 2, nutrition: 18, xp: 7, pearls: 1, courage: 0, style: .glow, color: UIColor(red: 1.0, green: 0.86, blue: 0.46, alpha: 1)),
-                FoodKind(name: "fruta flutuante", weight: 3, nutrition: 20, xp: 5, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.92, green: 0.62, blue: 0.48, alpha: 1))
+                FoodKind(name: "gota de sol", weight: 2, nutrition: 18, pearls: 1, courage: 0, style: .glow, color: UIColor(red: 1.0, green: 0.86, blue: 0.46, alpha: 1)),
+                FoodKind(name: "fruta flutuante", weight: 3, nutrition: 20, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.92, green: 0.62, blue: 0.48, alpha: 1))
             ]
         default:
             return []
@@ -428,7 +428,6 @@ final class RegionDiscoverySystem {
         ctx.stats.discoveryRouteRegionId = nil
         ctx.stats.discoveredRegionIds.insert(region.id)
         ctx.stats.discoveryPointByRegion[region.id] = nil
-        ctx.stats.gainXP(40)
         let gained = ctx.stats.awardPearls(4)
         ctx.stats.addMemory("Confirmou rota para \(region.name)")
         GameAudio.shared.play(.regionDiscover)

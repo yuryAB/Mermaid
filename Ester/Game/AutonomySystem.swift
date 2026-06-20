@@ -982,7 +982,7 @@ final class AutonomySystem {
                 || isBondRecoveryRequestReady
                 || stats.hunger >= 28
                 || food.kind.pearls > 0
-                || food.kind.xp >= 10 else {
+                || food.kind.nutrition >= 18 else {
             return rejectTouchRequest("Ela viu \(food.kind.name), mas não está com fome agora.")
         }
         let acceptedMessage = "Ela aceitou provar \(food.kind.name)..."
@@ -1358,7 +1358,6 @@ final class AutonomySystem {
         ctx.fish.interact(fish)
         GameAudio.shared.play(.mermaidFishPlay)
         stats.boostMood(6)
-        stats.gainXP(3)
         if Int.random(in: 0..<12) == 0 {
             let gained = stats.awardPearls(1)
             ctx.say("O peixinho deixou conchas! 🐚+\(gained)")

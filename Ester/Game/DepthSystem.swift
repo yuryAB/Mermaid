@@ -225,7 +225,6 @@ final class DepthSystem {
         let zone = DepthZone.zone(atY: y)
         if zone != currentZone {
             currentZone = zone
-            ctx.stats.gainXP(2)
         }
 
         // Adaptação cresce na camada onde ela está
@@ -238,7 +237,6 @@ final class DepthSystem {
         if meters > ctx.stats.maxDepthMeters + 200 {
             ctx.stats.maxDepthMeters = meters
             let gained = ctx.stats.awardPearls(1)
-            ctx.stats.gainXP(10)
             GameAudio.shared.play(.depthRecord)
             ctx.say("Ela nadou mais fundo do que nunca! 🐚+\(gained)")
         }
@@ -280,7 +278,6 @@ final class DepthSystem {
             guard meetsRequirements(zone) else { continue }
             ctx.stats.unlock(zone)
             let gained = ctx.stats.awardPearls(8)
-            ctx.stats.gainXP(30)
             ctx.stats.addMemory("Alcançou a \(zone.displayName)")
             GameAudio.shared.play(.zoneUnlock)
             ctx.say("🌊 Nova camada alcançável: \(zone.displayName)! 🐚+\(gained)")

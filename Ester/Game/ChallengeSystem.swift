@@ -57,10 +57,9 @@ protocol ChallengeGiver: AnyObject {
 
 struct ChallengeResult {
     let kind: ChallengeKind
-    let score: Int
+    let points: Int
     let reachedTarget: Bool
     let pearls: Int
-    let xp: CGFloat
     let special: Bool
     /// Só usado pelo match-3 durante a fase de ovo.
     let isHatching: Bool
@@ -236,7 +235,34 @@ enum ChallengeChrome {
                 node.addChild(dot)
             }
         }
+
         return node
+    }
+
+    static func animatePointConversion(label: SKLabelNode, points: Int, pearls: Int) {
+        let duration: TimeInterval = 1.1
+        let durationCGFloat = CGFloat(duration)
+        label.removeAllActions()
+        label.text = "Convertendo pontos..."
+
+        let count = SKAction.customAction(withDuration: duration) { node, elapsed in
+            guard let label = node as? SKLabelNode else { return }
+            let t = max(0, min(1, elapsed / durationCGFloat))
+            let eased = t * t * (3 - 2 * t)
+            let shownPoints = Int((CGFloat(points) * eased).rounded())
+            let shownPearls = Int((CGFloat(pearls) * eased).rounded())
+            label.text = "\(shownPoints) pontos = \(shownPearls) conchas"
+        }
+        let settle = SKAction.run {
+            label.text = "\(points) pontos = \(pearls) conchas"
+        }
+        let pulseStep = SKAction.sequence([
+            .scale(to: 1.08, duration: 0.12),
+            .scale(to: 1.0, duration: 0.18)
+        ])
+        let pulse = SKAction.repeat(pulseStep, count: 4)
+
+        label.run(.group([.sequence([count, settle]), pulse]))
     }
 
     /// Altura total ocupada pelo cabeçalho (NPC + título + subtítulo).

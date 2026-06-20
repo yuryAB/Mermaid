@@ -30,7 +30,6 @@ enum GameBalance {
     static let babyStartingHunger: CGFloat = 42
     static let babyStartingEnergy: CGFloat = 75
     static let babyStartingDisposition: CGFloat = 58
-    static let babyStartingXP: CGFloat = 4
     static let babyGuaranteedRequestCount = 10
     static let gameplayEffectDuration: TimeInterval = 5 * 60
     static let visualEffectDuration: TimeInterval = 20 * 60
@@ -88,11 +87,11 @@ enum GameBalance {
         10
     }
 
-    static func challengeBaseReward(score: Int,
-                                    reachedTarget: Bool,
-                                    phase: MermaidPhase,
-                                    special: Bool,
-                                    isHatching: Bool) -> Int {
+    static func challengeShellReward(points: Int,
+                                     reachedTarget: Bool,
+                                     phase: MermaidPhase,
+                                     special: Bool,
+                                     isHatching: Bool) -> Int {
         guard !isHatching else { return 0 }
         let completionBonus: Int
         switch phase {
@@ -109,7 +108,7 @@ enum GameBalance {
         case .adult:
             completionBonus = 45
         }
-        let base = max(0, score) + (reachedTarget ? completionBonus : 0)
+        let base = max(0, points) + (reachedTarget ? completionBonus : 0)
         return special ? base * 3 : base
     }
 

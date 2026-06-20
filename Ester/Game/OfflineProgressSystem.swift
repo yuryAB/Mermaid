@@ -94,7 +94,6 @@ enum OfflineProgressSystem {
         stats.energy = (stats.energy + min(35, hours * 8)).clamped(to: 0...100)
         lines.append("descansou, mas voltou precisando de cuidado")
 
-        stats.gainXP(stats.phase == .baby ? min(8, hours * 1.5) : min(35, hours * 4))
         let pearlGain = stats.phase == .baby ? (hours >= 6 ? 1 : 0) : Int(min(4, hours / 2))
         if pearlGain > 0 {
             let gained = stats.awardPearls(pearlGain)

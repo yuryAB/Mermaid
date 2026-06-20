@@ -18,7 +18,6 @@ final class MermaidStats: Codable {
     var energy: CGFloat = 85
     // Mantém a chave antiga do save; no jogo este atributo aparece como Disposição.
     var mood: CGFloat = 70
-    var xp: CGFloat = 0
     // Campo legado de saves antigos. Coragem não participa das regras atuais.
     var courage: CGFloat = 12
     var trust: CGFloat = 50
@@ -80,7 +79,7 @@ final class MermaidStats: Codable {
     private var cheatSessionPersistenceBlocked = false
 
     enum CodingKeys: String, CodingKey {
-        case mermaidName, hunger, energy, mood, xp, courage, trust, curiosity, pearls
+        case mermaidName, hunger, energy, mood, courage, trust, curiosity, pearls
         case phase, birthDate, phaseStartedAt, adaptationByZone, unlockedZoneKeys
         case maxDepthMeters
         case puzzlesSolved, mealsEaten, memories, lastSaved, hatchProgress
@@ -105,7 +104,6 @@ final class MermaidStats: Codable {
         hunger = try c.decodeIfPresent(CGFloat.self, forKey: .hunger) ?? 25
         energy = try c.decodeIfPresent(CGFloat.self, forKey: .energy) ?? 85
         mood = try c.decodeIfPresent(CGFloat.self, forKey: .mood) ?? 70
-        xp = try c.decodeIfPresent(CGFloat.self, forKey: .xp) ?? 0
         courage = try c.decodeIfPresent(CGFloat.self, forKey: .courage) ?? 12
         trust = try c.decodeIfPresent(CGFloat.self, forKey: .trust) ?? 50
         curiosity = try c.decodeIfPresent(CGFloat.self, forKey: .curiosity) ?? 60
@@ -604,10 +602,6 @@ final class MermaidStats: Codable {
 
     // MARK: - Ganhos
 
-    func gainXP(_ amount: CGFloat) {
-        xp += amount
-    }
-
     func boostMood(_ amount: CGFloat) {
         moodBoost = min(40, moodBoost + amount)
     }
@@ -727,7 +721,6 @@ final class MermaidStats: Codable {
         guard balanceVersion < GameBalance.currentVersion else { return }
         if phase == .baby {
             pearls = GameBalance.babyStartingPearls
-            xp = min(xp, 30)
             hunger = max(hunger, 45)
             energy = energy.clamped(to: 55...80)
             mood = min(mood, 65)

@@ -25,7 +25,6 @@ struct FoodKind {
     let name: String
     let weight: CGFloat
     let nutrition: CGFloat
-    let xp: CGFloat
     let pearls: Int
     let courage: CGFloat
     let style: FoodStyle
@@ -247,7 +246,9 @@ final class FoodSystem {
     func spawnRare(near point: CGPoint) -> FoodNode? {
         guard let world = worldNode else { return nil }
         let zone = DepthZone.zone(atY: point.y)
-        let rare = FoodSystem.kinds(for: zone).max { $0.xp < $1.xp } ?? FoodSystem.kinds(for: zone)[0]
+        let rare = FoodSystem.kinds(for: zone).max {
+            ($0.pearls * 10 + Int($0.nutrition)) < ($1.pearls * 10 + Int($1.nutrition))
+        } ?? FoodSystem.kinds(for: zone)[0]
         let yRange = ctx.depth.allowedYRange()
         let candidate = CGPoint(
             x: (point.x + .random(in: -350...350)).clamped(to: World.minX...World.maxX),
@@ -267,7 +268,6 @@ final class FoodSystem {
             stats.mealsEaten += 1
         }
         stats.boostMood(food.kind.isShellCurrency ? 2 : 4)
-        stats.gainXP(food.kind.xp)
         if food.kind.pearls > 0 {
             let gained = stats.awardPearls(food.kind.pearls)
             GameAudio.shared.play(.pearlReward)
@@ -294,7 +294,6 @@ final class FoodSystem {
 
         let amount = Int.random(in: 10...100)
         ctx.stats.pearls += amount
-        ctx.stats.gainXP(food.kind.xp)
         GameAudio.shared.play(.pearlReward)
         ctx.say("Você coletou \(food.kind.name). Conchas +\(amount)")
         return amount
@@ -314,47 +313,47 @@ final class FoodSystem {
         switch zone {
         case .clear:
             return [
-                FoodKind(name: "alga doce", weight: 5, nutrition: 8, xp: 2, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.4, green: 0.8, blue: 0.5, alpha: 1)),
-                FoodKind(name: "plâncton brilhante", weight: 3, nutrition: 6, xp: 4, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.65, green: 0.95, blue: 0.85, alpha: 1)),
-                FoodKind(name: "fruta caída na água", weight: 2, nutrition: 10, xp: 3, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.95, green: 0.45, blue: 0.4, alpha: 1))
+                FoodKind(name: "alga doce", weight: 5, nutrition: 8, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.4, green: 0.8, blue: 0.5, alpha: 1)),
+                FoodKind(name: "plâncton brilhante", weight: 3, nutrition: 6, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.65, green: 0.95, blue: 0.85, alpha: 1)),
+                FoodKind(name: "fruta caída na água", weight: 2, nutrition: 10, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.95, green: 0.45, blue: 0.4, alpha: 1))
             ]
         case .shallow:
             return [
-                FoodKind(name: "alga macia", weight: 5, nutrition: 8, xp: 2, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.3, green: 0.75, blue: 0.45, alpha: 1)),
-                FoodKind(name: "plâncton brilhante", weight: 3, nutrition: 6, xp: 4, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.65, green: 0.95, blue: 0.85, alpha: 1)),
-                FoodKind(name: "semente aquática", weight: 2, nutrition: 7, xp: 2, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.85, green: 0.75, blue: 0.4, alpha: 1)),
-                FoodKind(name: "uma concha pequena", weight: 1, nutrition: 0, xp: 5, pearls: 1, courage: 0.3, style: .pearl, color: UIColor(white: 0.95, alpha: 1))
+                FoodKind(name: "alga macia", weight: 5, nutrition: 8, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.3, green: 0.75, blue: 0.45, alpha: 1)),
+                FoodKind(name: "plâncton brilhante", weight: 3, nutrition: 6, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.65, green: 0.95, blue: 0.85, alpha: 1)),
+                FoodKind(name: "semente aquática", weight: 2, nutrition: 7, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.85, green: 0.75, blue: 0.4, alpha: 1)),
+                FoodKind(name: "uma concha pequena", weight: 1, nutrition: 0, pearls: 1, courage: 0.3, style: .pearl, color: UIColor(white: 0.95, alpha: 1))
             ]
         case .mid:
             return [
-                FoodKind(name: "plâncton azul", weight: 4, nutrition: 8, xp: 4, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.45, green: 0.65, blue: 0.95, alpha: 1)),
-                FoodKind(name: "crustáceo das águas", weight: 3, nutrition: 10, xp: 5, pearls: 0, courage: 0.3, style: .critter, color: UIColor(red: 0.55, green: 0.55, blue: 0.75, alpha: 1)),
-                FoodKind(name: "alga da meia-água", weight: 3, nutrition: 9, xp: 3, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.25, green: 0.55, blue: 0.5, alpha: 1)),
-                FoodKind(name: "uma concha reluzente", weight: 1, nutrition: 0, xp: 8, pearls: 1, courage: 0.4, style: .pearl, color: UIColor(white: 0.95, alpha: 1))
+                FoodKind(name: "plâncton azul", weight: 4, nutrition: 8, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.45, green: 0.65, blue: 0.95, alpha: 1)),
+                FoodKind(name: "crustáceo das águas", weight: 3, nutrition: 10, pearls: 0, courage: 0.3, style: .critter, color: UIColor(red: 0.55, green: 0.55, blue: 0.75, alpha: 1)),
+                FoodKind(name: "alga da meia-água", weight: 3, nutrition: 9, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.25, green: 0.55, blue: 0.5, alpha: 1)),
+                FoodKind(name: "uma concha reluzente", weight: 1, nutrition: 0, pearls: 1, courage: 0.4, style: .pearl, color: UIColor(white: 0.95, alpha: 1))
             ]
         case .blue:
             return [
-                FoodKind(name: "organismo luminoso", weight: 4, nutrition: 15, xp: 5, pearls: 0, courage: 0.3, style: .glow, color: UIColor(red: 0.5, green: 0.85, blue: 0.95, alpha: 1)),
-                FoodKind(name: "crustáceo azulado", weight: 3, nutrition: 20, xp: 5, pearls: 0, courage: 0.3, style: .critter, color: UIColor(red: 0.45, green: 0.5, blue: 0.8, alpha: 1)),
-                FoodKind(name: "um cristal marinho", weight: 1, nutrition: 12, xp: 10, pearls: 3, courage: 0.8, style: .crystal, color: UIColor(red: 0.6, green: 0.8, blue: 1, alpha: 1))
+                FoodKind(name: "organismo luminoso", weight: 4, nutrition: 15, pearls: 0, courage: 0.3, style: .glow, color: UIColor(red: 0.5, green: 0.85, blue: 0.95, alpha: 1)),
+                FoodKind(name: "crustáceo azulado", weight: 3, nutrition: 20, pearls: 0, courage: 0.3, style: .critter, color: UIColor(red: 0.45, green: 0.5, blue: 0.8, alpha: 1)),
+                FoodKind(name: "um cristal marinho", weight: 1, nutrition: 12, pearls: 3, courage: 0.8, style: .crystal, color: UIColor(red: 0.6, green: 0.8, blue: 1, alpha: 1))
             ]
         case .deep:
             return [
-                FoodKind(name: "plâncton luminoso", weight: 4, nutrition: 16, xp: 6, pearls: 0, courage: 0.3, style: .glow, color: UIColor(red: 0.55, green: 0.95, blue: 0.9, alpha: 1)),
-                FoodKind(name: "crustáceo das fendas", weight: 3, nutrition: 22, xp: 6, pearls: 0, courage: 0.4, style: .critter, color: UIColor(red: 0.4, green: 0.35, blue: 0.6, alpha: 1)),
-                FoodKind(name: "uma concha mágica", weight: 1, nutrition: 0, xp: 14, pearls: 6, courage: 1, style: .pearl, color: UIColor(red: 0.8, green: 0.85, blue: 1, alpha: 1))
+                FoodKind(name: "plâncton luminoso", weight: 4, nutrition: 16, pearls: 0, courage: 0.3, style: .glow, color: UIColor(red: 0.55, green: 0.95, blue: 0.9, alpha: 1)),
+                FoodKind(name: "crustáceo das fendas", weight: 3, nutrition: 22, pearls: 0, courage: 0.4, style: .critter, color: UIColor(red: 0.4, green: 0.35, blue: 0.6, alpha: 1)),
+                FoodKind(name: "uma concha mágica", weight: 1, nutrition: 0, pearls: 6, courage: 1, style: .pearl, color: UIColor(red: 0.8, green: 0.85, blue: 1, alpha: 1))
             ]
         case .abyss:
             return [
-                FoodKind(name: "plâncton abissal", weight: 4, nutrition: 18, xp: 8, pearls: 0, courage: 0.5, style: .glow, color: UIColor(red: 0.75, green: 0.55, blue: 0.95, alpha: 1)),
-                FoodKind(name: "fruto-cristal", weight: 2, nutrition: 26, xp: 12, pearls: 2, courage: 1, style: .crystal, color: UIColor(red: 0.6, green: 0.8, blue: 1, alpha: 1)),
-                FoodKind(name: "uma concha do abismo", weight: 1, nutrition: 0, xp: 18, pearls: 8, courage: 1.5, style: .pearl, color: UIColor(red: 0.9, green: 0.8, blue: 1, alpha: 1))
+                FoodKind(name: "plâncton abissal", weight: 4, nutrition: 18, pearls: 0, courage: 0.5, style: .glow, color: UIColor(red: 0.75, green: 0.55, blue: 0.95, alpha: 1)),
+                FoodKind(name: "fruto-cristal", weight: 2, nutrition: 26, pearls: 2, courage: 1, style: .crystal, color: UIColor(red: 0.6, green: 0.8, blue: 1, alpha: 1)),
+                FoodKind(name: "uma concha do abismo", weight: 1, nutrition: 0, pearls: 8, courage: 1.5, style: .pearl, color: UIColor(red: 0.9, green: 0.8, blue: 1, alpha: 1))
             ]
         case .surface:
             return [
-                FoodKind(name: "fruta flutuante", weight: 4, nutrition: 24, xp: 6, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.95, green: 0.65, blue: 0.3, alpha: 1)),
-                FoodKind(name: "migalhas de barco", weight: 3, nutrition: 12, xp: 5, pearls: 1, courage: 0.3, style: .critter, color: UIColor(red: 0.8, green: 0.7, blue: 0.5, alpha: 1)),
-                FoodKind(name: "um objeto humano curioso", weight: 1, nutrition: 5, xp: 12, pearls: 4, courage: 0.8, style: .crystal, color: UIColor(red: 0.7, green: 0.75, blue: 0.8, alpha: 1))
+                FoodKind(name: "fruta flutuante", weight: 4, nutrition: 24, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.95, green: 0.65, blue: 0.3, alpha: 1)),
+                FoodKind(name: "migalhas de barco", weight: 3, nutrition: 12, pearls: 1, courage: 0.3, style: .critter, color: UIColor(red: 0.8, green: 0.7, blue: 0.5, alpha: 1)),
+                FoodKind(name: "um objeto humano curioso", weight: 1, nutrition: 5, pearls: 4, courage: 0.8, style: .crystal, color: UIColor(red: 0.7, green: 0.75, blue: 0.8, alpha: 1))
             ]
         }
     }

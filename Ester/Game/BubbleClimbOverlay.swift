@@ -177,7 +177,7 @@ final class BubbleClimbOverlay: SKNode {
 
     private var timerRunning = false
     private var bubblesClimbed = 0
-    private var shellScore = 0
+    private var pointScore = 0
     private var challengeCompleted = false
 
     private let contentNode = SKNode()
@@ -269,7 +269,7 @@ final class BubbleClimbOverlay: SKNode {
 
         let subtitle = special
             ? "Bolhas frágeis em corrente forte"
-            : "Suba bolhas e acumule conchas"
+            : "Suba bolhas e faça pontos"
         let header = makeClimbHeader(subtitle: subtitle,
                                      giverDisplay: giverDisplay,
                                      width: areaWidth)
@@ -278,10 +278,11 @@ final class BubbleClimbOverlay: SKNode {
         addChild(header)
 
         let chipWidth = (areaWidth - 14) / 2
-        let shellsChip = makeInfoChip(iconNode: GameUI.assetIconNode(named: "conch",
-                                                                     color: GameUI.gold,
-                                                                     size: 22),
-                                      title: "Conchas",
+        let shellsChip = makeInfoChip(iconNode: GameUI.symbolIconNode(named: "star.fill",
+                                                                      fallback: "★",
+                                                                      color: GameUI.gold,
+                                                                      size: 22),
+                                      title: "Pontos",
                                       value: progressText(),
                                       width: chipWidth,
                                       accent: GameUI.gold)
@@ -842,7 +843,7 @@ final class BubbleClimbOverlay: SKNode {
     }
 
     private func progressText() -> String {
-        "+\(projectedPearls())"
+        "\(pointScore)"
     }
 
     private func objectiveText() -> String {
@@ -853,11 +854,11 @@ final class BubbleClimbOverlay: SKNode {
     }
 
     private func projectedPearls(reached: Bool? = nil) -> Int {
-        let basePearls = GameBalance.challengeBaseReward(score: shellScore,
-                                                         reachedTarget: reached ?? challengeCompleted,
-                                                         phase: phase,
-                                                         special: special,
-                                                         isHatching: false)
+        let basePearls = GameBalance.challengeShellReward(points: pointScore,
+                                                          reachedTarget: reached ?? challengeCompleted,
+                                                          phase: phase,
+                                                          special: special,
+                                                          isHatching: false)
         return GameBalance.scaledPearlReward(baseAmount: basePearls,
                                              multiplier: shellRewardMultiplier)
     }
@@ -1013,7 +1014,7 @@ final class BubbleClimbOverlay: SKNode {
         let completedNow = !challengeCompleted && bubblesClimbed + 1 >= challengeGoalBubbles
         bubble.scored = true
         bubblesClimbed += 1
-        shellScore += 1
+        pointScore += 1
         if !challengeCompleted && bubblesClimbed >= challengeGoalBubbles {
             challengeCompleted = true
         }
@@ -1065,7 +1066,7 @@ final class BubbleClimbOverlay: SKNode {
     }
 
     private func showLandingBurst(at point: CGPoint, permanent: Bool) {
-        let label = SKLabelNode(text: permanent ? "+1 bolha segura" : "+1 concha")
+        let label = SKLabelNode(text: permanent ? "+1 ponto seguro" : "+1 ponto")
         label.fontName = "AvenirNext-Heavy"
         label.fontSize = permanent ? 20 : 18
         label.fontColor = permanent ? GameUI.gold : GameUI.palePaper
@@ -1250,13 +1251,12 @@ final class BubbleClimbOverlay: SKNode {
         GameAudio.shared.play(challengeCompleted ? .challengeSuccess : .challengeFail)
 
         let reached = challengeCompleted
-        let basePearls = GameBalance.challengeBaseReward(score: shellScore,
-                                                         reachedTarget: reached,
-                                                         phase: phase,
-                                                         special: special,
-                                                         isHatching: false)
+        let basePearls = GameBalance.challengeShellReward(points: pointScore,
+                                                          reachedTarget: reached,
+                                                          phase: phase,
+                                                          special: special,
+                                                          isHatching: false)
         let pearls = projectedPearls(reached: reached)
-        let xp = CGFloat(bubblesClimbed) * 2.0 * (special ? 1.5 : 1)
 
         let panel = makeResultPanel(reached: reached)
         panel.zPosition = 100
@@ -1273,7 +1273,7 @@ final class BubbleClimbOverlay: SKNode {
         titleLabel.position = CGPoint(x: 0, y: 60)
         panelContent.addChild(titleLabel)
 
-        let scoreText = "Bolhas subidas: \(bubblesClimbed)"
+        let scoreText = "Pontos feitos: \(pointScore)"
         let scoreLine = SKLabelNode(text: scoreText)
         scoreLine.fontName = "AvenirNext-Regular"
         scoreLine.fontSize = 16
@@ -1281,12 +1281,13 @@ final class BubbleClimbOverlay: SKNode {
         scoreLine.position = CGPoint(x: 0, y: 24)
         panelContent.addChild(scoreLine)
 
-        let rewardLine = SKLabelNode(text: "Conchas +\(pearls)   XP +\(Int(xp))")
+        let rewardLine = SKLabelNode(text: "Convertendo pontos...")
         rewardLine.fontName = "AvenirNext-DemiBold"
         rewardLine.fontSize = 17
         rewardLine.fontColor = GameUI.gold
         rewardLine.position = CGPoint(x: 0, y: -10)
         panelContent.addChild(rewardLine)
+        ChallengeChrome.animatePointConversion(label: rewardLine, points: pointScore, pearls: pearls)
 
         let continueButton = GameUI.pill(text: "Continuar",
                                          fontSize: 16,
@@ -1301,10 +1302,9 @@ final class BubbleClimbOverlay: SKNode {
         panelContent.addChild(continueButton)
 
         pendingResult = ChallengeResult(kind: .ascent,
-                                        score: shellScore,
+                                        points: pointScore,
                                         reachedTarget: reached,
                                         pearls: basePearls,
-                                        xp: xp,
                                         special: special,
                                         isHatching: false)
     }

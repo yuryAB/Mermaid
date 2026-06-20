@@ -39,7 +39,6 @@ final class GrowthSystem {
 
     private struct Requirement {
         let waitDays: Double
-        let xp: CGFloat
         let zone: DepthZone?
 
         var waitSeconds: Double { waitDays * 86_400 }
@@ -50,11 +49,11 @@ final class GrowthSystem {
         let waitDays = months * daysPerGrowthMonth
         switch phase {
         case .egg: return nil
-        case .baby: return Requirement(waitDays: 0, xp: 0, zone: nil)
-        case .child: return Requirement(waitDays: waitDays, xp: 150, zone: nil)
-        case .teen: return Requirement(waitDays: waitDays, xp: 1000, zone: .blue)
-        case .young: return Requirement(waitDays: waitDays, xp: 4000, zone: .deep)
-        case .adult: return Requirement(waitDays: waitDays, xp: 16000, zone: .abyss)
+        case .baby: return Requirement(waitDays: 0, zone: nil)
+        case .child: return Requirement(waitDays: waitDays, zone: nil)
+        case .teen: return Requirement(waitDays: waitDays, zone: .blue)
+        case .young: return Requirement(waitDays: waitDays, zone: .deep)
+        case .adult: return Requirement(waitDays: waitDays, zone: .abyss)
         }
     }
 
@@ -67,7 +66,6 @@ final class GrowthSystem {
         if req.waitSeconds > 0 {
             fractions.append(CGFloat(min(1, effectivePhaseSeconds() / req.waitSeconds)))
         }
-        if req.xp > 0 { fractions.append(min(1, ctx.stats.xp / req.xp)) }
         if let zone = req.zone { fractions.append(ctx.stats.isUnlocked(zone) ? 1 : 0.5 * ctx.stats.adaptation(for: zone.adaptationGate?.zone ?? .shallow) / 100) }
         return fractions.min() ?? 0
     }
@@ -87,9 +85,6 @@ final class GrowthSystem {
             return "Cresce em \(waitText)"
         }
 
-        if ctx.stats.xp < req.xp {
-            return "Cresce depois de \(Int(ceil(req.xp - ctx.stats.xp))) XP de maré"
-        }
         if let zone = req.zone, !ctx.stats.isUnlocked(zone) {
             return "Cresce quando \(zone.displayName.lowercased()) for catalogada"
         }
@@ -103,7 +98,6 @@ final class GrowthSystem {
         guard let next = ctx.stats.phase.next,
               let req = requirement(toReach: next) else { return false }
         if effectivePhaseSeconds() < req.waitSeconds { return false }
-        if ctx.stats.xp < req.xp { return false }
         if let zone = req.zone, !ctx.stats.isUnlocked(zone) { return false }
         if next == .adult && !ctx.stats.isUnlocked(.surface) { return false }
         return true
@@ -485,7 +479,6 @@ final class GrowthSystem {
         ctx.stats.hunger = GameBalance.babyStartingHunger
         ctx.stats.energy = GameBalance.babyStartingEnergy
         ctx.stats.disposition = GameBalance.babyStartingDisposition
-        ctx.stats.xp = GameBalance.babyStartingXP
         let mermaid = ctx.mermaidEntity.mermaid
         mermaid.setForm(for: .baby)
         eggNode = nil

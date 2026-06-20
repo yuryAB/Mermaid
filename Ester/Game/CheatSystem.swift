@@ -26,7 +26,6 @@ enum CheatSystem {
         Suggestion(code: "normalaccept", description: "Volta ao aceite normal"),
         Suggestion(code: "fullstatus", description: "Status cheio"),
         Suggestion(code: "addpearls500", description: "Adiciona conchas"),
-        Suggestion(code: "addxp100", description: "Adiciona XP"),
         Suggestion(code: "sethunger0", description: "Define fome"),
         Suggestion(code: "setenergy100", description: "Define energia"),
         Suggestion(code: "setmood100", description: "Define disposicao"),
@@ -104,7 +103,7 @@ enum CheatSystem {
 
         switch code {
         case "help":
-            return "Cheats de sessao: superspeed, alwaysaccept, fullstatus, addpearls500, addxp100, sethunger0, setenergy100, setmood100, settrust100, phaseadult, unlockdepths, unlockmaps, revealmap, revealallmaps, unlockall."
+            return "Cheats de sessao: superspeed, alwaysaccept, fullstatus, addpearls500, sethunger0, setenergy100, setmood100, settrust100, phaseadult, unlockdepths, unlockmaps, revealmap, revealallmaps, unlockall."
         case "superspeed":
             stats.beginCheatSessionIfNeeded()
             stats.cheatSuperSpeedEnabled = true
@@ -165,13 +164,6 @@ enum CheatSystem {
             stats.addMemory("Cheat usado: conchas +\(clamped)")
             return "Cheat de sessao aplicado: conchas +\(clamped)."
         }
-        if let amount = numberSuffix(in: code, prefix: "addxp", fallback: 500) {
-            let clamped = amount.clamped(to: 1...999_999)
-            stats.beginCheatSessionIfNeeded()
-            stats.gainXP(clamped)
-            stats.addMemory("Cheat usado: XP +\(Int(clamped))")
-            return "Cheat de sessao aplicado: XP +\(Int(clamped))."
-        }
         if let value = numberSuffix(in: code, prefix: "sethunger", fallback: 0) {
             stats.beginCheatSessionIfNeeded()
             stats.hunger = value.clamped(to: 0...100)
@@ -221,7 +213,6 @@ enum CheatSystem {
         discoverAllRegions(stats)
         revealAllMaps(stats)
         stats.pearls += 5_000
-        stats.gainXP(5_000)
         stats.speedUpgradeLevel = 100
         stats.shellGainUpgradeLevel = 100
         stats.feedingUpgradeLevel = 100

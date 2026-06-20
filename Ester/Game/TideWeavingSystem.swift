@@ -64,7 +64,7 @@ struct TideTheme {
         case .clear:
             return TideTheme(icons: ["🐚", "🫧", "🐠", "⭐️", "🦀"], subtitle: "Luzes da Camada Clara")
         case .shallow:
-            return TideTheme(icons: ["🐚", "🐠", "🦀", "🐡", "⭐️"], subtitle: "Conchas da Camada Rasa")
+            return TideTheme(icons: ["🐚", "🐠", "🦀", "🐡", "⭐️"], subtitle: "Marés da Camada Rasa")
         case .mid:
             return TideTheme(icons: ["🫧", "🐠", "🐙", "🐡", "🐚"], subtitle: "Correntes da Camada Média")
         case .blue:
@@ -153,11 +153,11 @@ final class TideWeavingOverlay: SKNode {
         self.phase = phase
         self.shellRewardMultiplier = shellRewardMultiplier
         var goal = 18 + zone.rawValue * 4
-        var bonus = GameBalance.challengeBaseReward(score: 0,
-                                                    reachedTarget: true,
-                                                    phase: phase,
-                                                    special: session == .event,
-                                                    isHatching: session == .hatching)
+        var bonus = GameBalance.challengeShellReward(points: 0,
+                                                     reachedTarget: true,
+                                                     phase: phase,
+                                                     special: session == .event,
+                                                     isHatching: session == .hatching)
         if session == .event {
             goal += 10
         }
@@ -206,10 +206,11 @@ final class TideWeavingOverlay: SKNode {
         addChild(header)
 
         let chipWidth = (boardWidth - 14) / 2
-        let shellsChip = makeInfoChip(iconNode: GameUI.assetIconNode(named: "conch",
-                                                                     color: TideVisual.gold,
-                                                                     size: 22),
-                                      title: "Conchas",
+        let shellsChip = makeInfoChip(iconNode: GameUI.symbolIconNode(named: "star.fill",
+                                                                      fallback: "★",
+                                                                      color: TideVisual.gold,
+                                                                      size: 22),
+                                      title: "Pontos",
                                       value: scoreText(),
                                       width: chipWidth,
                                       accent: TideVisual.gold)
@@ -1030,7 +1031,7 @@ final class TideWeavingOverlay: SKNode {
     }
 
     private func showScoreBurst(at point: CGPoint, gained: Int, multiplier: Int) {
-        let label = SKLabelNode(text: session == .hatching ? "+\(gained) energia" : "+\(gained) conchas")
+        let label = SKLabelNode(text: session == .hatching ? "+\(gained) energia" : "+\(gained) pontos")
         label.fontName = "AvenirNext-Heavy"
         label.fontSize = multiplier > 1 ? 25 : 21
         label.fontColor = multiplier > 1 ? TideVisual.rose : TideVisual.gold
@@ -1151,7 +1152,7 @@ final class TideWeavingOverlay: SKNode {
         if session == .hatching {
             return "Energia \(score)"
         }
-        return "Conchas +\(projectedPearls())"
+        return "Pontos \(score)"
     }
 
     private func objectiveText() -> String {
@@ -1167,11 +1168,11 @@ final class TideWeavingOverlay: SKNode {
     }
 
     private func projectedPearls(reached: Bool? = nil) -> Int {
-        let basePearls = GameBalance.challengeBaseReward(score: score,
-                                                         reachedTarget: reached ?? challengeCompleted,
-                                                         phase: phase,
-                                                         special: session == .event,
-                                                         isHatching: session == .hatching)
+        let basePearls = GameBalance.challengeShellReward(points: score,
+                                                          reachedTarget: reached ?? challengeCompleted,
+                                                          phase: phase,
+                                                          special: session == .event,
+                                                          isHatching: session == .hatching)
         return GameBalance.scaledPearlReward(baseAmount: basePearls,
                                              multiplier: shellRewardMultiplier)
     }
@@ -1246,13 +1247,12 @@ final class TideWeavingOverlay: SKNode {
         GameAudio.shared.play(challengeCompleted ? .challengeSuccess : .challengeFail)
 
         let reached = challengeCompleted
-        let basePearls = GameBalance.challengeBaseReward(score: score,
-                                                         reachedTarget: reached,
-                                                         phase: phase,
-                                                         special: session == .event,
-                                                         isHatching: session == .hatching)
+        let basePearls = GameBalance.challengeShellReward(points: score,
+                                                          reachedTarget: reached,
+                                                          phase: phase,
+                                                          special: session == .event,
+                                                          isHatching: session == .hatching)
         let pearls = projectedPearls(reached: reached)
-        let xp = CGFloat(score) / 5 * (session == .event ? 1.5 : 1)
 
         let panel = makeResultPanel(reached: reached)
         panel.zPosition = 100
@@ -1275,7 +1275,9 @@ final class TideWeavingOverlay: SKNode {
         titleLabel.position = CGPoint(x: 0, y: 60)
         panelContent.addChild(titleLabel)
 
-        let scoreLine = SKLabelNode(text: "Peças removidas: \(score)")
+        let scoreLine = SKLabelNode(text: session == .hatching
+                                    ? "Energia reunida: \(score)"
+                                    : "Pontos feitos: \(score)")
         scoreLine.fontName = "AvenirNext-Regular"
         scoreLine.fontSize = 16
         scoreLine.fontColor = GameUI.mutedInk
@@ -1284,13 +1286,16 @@ final class TideWeavingOverlay: SKNode {
 
         let rewardText = session == .hatching
             ? "Energia de nascimento +\(score)"
-            : "Conchas +\(pearls)   XP +\(Int(xp))"
+            : "Convertendo pontos..."
         let rewardLine = SKLabelNode(text: rewardText)
         rewardLine.fontName = "AvenirNext-DemiBold"
         rewardLine.fontSize = 17
         rewardLine.fontColor = GameUI.gold
         rewardLine.position = CGPoint(x: 0, y: -10)
         panelContent.addChild(rewardLine)
+        if session != .hatching {
+            ChallengeChrome.animatePointConversion(label: rewardLine, points: score, pearls: pearls)
+        }
 
         let continueButton = GameUI.pill(text: "Continuar",
                                          fontSize: 16,
@@ -1305,10 +1310,9 @@ final class TideWeavingOverlay: SKNode {
         panelContent.addChild(continueButton)
 
         pendingResult = ChallengeResult(kind: .plot,
-                                        score: score,
+                                        points: score,
                                         reachedTarget: reached,
                                         pearls: basePearls,
-                                        xp: xp,
                                         special: session == .event,
                                         isHatching: session == .hatching)
     }
