@@ -350,10 +350,17 @@ private struct TileImageView: View {
 private final class TileImageCache {
     static let shared = TileImageCache()
 
-    private var images: [URL: NSImage] = [:]
+    private let images: NSCache<NSURL, NSImage> = {
+        let cache = NSCache<NSURL, NSImage>()
+        cache.name = "TileImageCache.images"
+        cache.countLimit = 128
+        cache.totalCostLimit = 48 * 1024 * 1024
+        return cache
+    }()
 
     func image(for url: URL) -> NSImage? {
-        if let image = images[url] {
+        let cacheKey = url as NSURL
+        if let image = images.object(forKey: cacheKey) {
             return image
         }
 
@@ -361,8 +368,20 @@ private final class TileImageCache {
             return nil
         }
 
-        images[url] = image
+        images.setObject(image, forKey: cacheKey, cost: approximateCost(for: image))
         return image
+    }
+
+    private func approximateCost(for image: NSImage) -> Int {
+        if let representation = image.representations.first {
+            let pixels = max(1, representation.pixelsWide * representation.pixelsHigh)
+            return pixels * 4
+        }
+
+        let scale = NSScreen.main?.backingScaleFactor ?? 2
+        let width = max(1, Int(ceil(image.size.width * scale)))
+        let height = max(1, Int(ceil(image.size.height * scale)))
+        return width * height * 4
     }
 }
 

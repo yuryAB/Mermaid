@@ -13,7 +13,6 @@ final class WorldChunkManager {
     private let rootNode = SKNode()
     private let activeRadius = 1
     private var chunks: [WorldChunkCoord: SKNode] = [:]
-    private var updateAccumulator: CGFloat = 0
     private var lastCenter: WorldChunkCoord?
 
     init(parent: SKNode) {
@@ -21,11 +20,9 @@ final class WorldChunkManager {
         parent.addChild(rootNode)
     }
 
-    func update(dt: CGFloat, cameraPosition: CGPoint) {
-        updateAccumulator += dt
+    func update(dt _: CGFloat, cameraPosition: CGPoint) {
         let center = WorldChunkCoord.chunkCoord(for: cameraPosition)
-        guard center != lastCenter || updateAccumulator >= 0.35 else { return }
-        updateAccumulator = 0
+        guard center != lastCenter else { return }
         lastCenter = center
 
         var needed = Set<WorldChunkCoord>()

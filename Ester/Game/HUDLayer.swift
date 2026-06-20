@@ -128,13 +128,20 @@ final class HUDLayer: SKNode {
     }
 
     private enum HUDTexture {
-        private static var cache: [String: SKTexture] = [:]
+        private static let cache: NSCache<NSString, SKTexture> = {
+            let cache = NSCache<NSString, SKTexture>()
+            cache.name = "HUDTexture.paperCache"
+            cache.countLimit = 32
+            cache.totalCostLimit = 18 * 1024 * 1024
+            return cache
+        }()
 
         static func paper(size: CGSize, base: UIColor) -> SKTexture {
             let w = max(1, Int(ceil(size.width)))
             let h = max(1, Int(ceil(size.height)))
-            let key = "\(w)x\(h)|\(base.hashValue)"
-            if let cached = cache[key] { return cached }
+            let key = "\(w)x\(h)|\(colorKey(base))"
+            let cacheKey = NSString(string: key)
+            if let cached = cache.object(forKey: cacheKey) { return cached }
 
             let image = UIGraphicsImageRenderer(size: CGSize(width: w, height: h)).image { context in
                 let cg = context.cgContext
@@ -172,8 +179,26 @@ final class HUDLayer: SKNode {
             }
 
             let texture = SKTexture(image: image)
-            cache[key] = texture
+            cache.setObject(texture,
+                            forKey: cacheKey,
+                            cost: textureCost(width: w, height: h))
             return texture
+        }
+
+        private static func colorKey(_ color: UIColor) -> String {
+            var red: CGFloat = 0
+            var green: CGFloat = 0
+            var blue: CGFloat = 0
+            var alpha: CGFloat = 0
+            color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+            return String(format: "%.3f,%.3f,%.3f,%.3f", red, green, blue, alpha)
+        }
+
+        private static func textureCost(width: Int,
+                                        height: Int,
+                                        scale: CGFloat = UIScreen.main.scale) -> Int {
+            let pixelScale = max(1, Int(ceil(scale)))
+            return max(1, width) * max(1, height) * pixelScale * pixelScale * 4
         }
     }
 
@@ -1148,58 +1173,68 @@ final class HUDLayer: SKNode {
                  touchCooldownRemaining: TimeInterval,
                  bondRecoveryState: BondRecoveryHUDState) {
         let eggMode = stats.phase == .egg
-        titleLabel.text = "Registro da \(stats.mermaidName)"
-        fitLabelToWidth(titleLabel,
-                        maxWidth: topPanelTitleMaxWidth,
-                        baseSize: 16,
-                        minSize: 12)
-        updateNameEditPosition()
+        if setLabelText(titleLabel, "Registro da \(stats.mermaidName)") {
+            fitLabelToWidth(titleLabel,
+                            maxWidth: topPanelTitleMaxWidth,
+                            baseSize: 16,
+                            minSize: 12)
+            updateNameEditPosition()
+        }
 
+        let phaseText: String
+        let growthText = evolutionNote
+        let intentText: String
+        let bondText: String
         if eggMode {
-            phaseLabel.text = "Ovo misterioso · \(Int(evolutionProgress * 100))% chocado"
-            growthLabel.text = evolutionNote
-            intentLabel.text = "Registro: incubação em andamento"
-            barLabels["bond"]?.text = "Nascimento"
+            phaseText = "Ovo misterioso · \(Int(evolutionProgress * 100))% chocado"
+            intentText = "Registro: incubação em andamento"
+            bondText = "Nascimento"
             phaseLabel.fontColor = HUDPalette.blueInk
             growthLabel.fontColor = HUDPalette.gold
         } else {
-            phaseLabel.text = "Observada há \(stats.ageText)"
-            growthLabel.text = evolutionNote
-            intentLabel.text = "Comportamento: \(intent.displayName)"
-            barLabels["bond"]?.text = "Vínculo"
+            phaseText = "Observada há \(stats.ageText)"
+            intentText = "Comportamento: \(intent.displayName)"
+            bondText = "Vínculo"
             phaseLabel.fontColor = HUDPalette.blueInk
             growthLabel.fontColor = HUDPalette.teal
         }
 
-        fitLabelToWidth(phaseLabel,
-                        maxWidth: topPanelStatusMaxWidth,
-                        baseSize: 12.5,
-                        minSize: 10.5)
+        if setLabelText(phaseLabel, phaseText) {
+            fitLabelToWidth(phaseLabel,
+                            maxWidth: topPanelStatusMaxWidth,
+                            baseSize: 12.5,
+                            minSize: 10.5)
+        }
+        setLabelText(growthLabel, growthText)
+        setLabelText(intentLabel, intentText)
+        setLabelText(barLabels["bond"], bondText)
 
         let zoneText = zone.displayName.lowercased()
         if let regionName {
-            depthLabel.text = "\(regionName) · \(zoneText)"
+            setLabelText(depthLabel, "\(regionName) · \(zoneText)")
         } else {
-            depthLabel.text = "Camada atual: \(zoneText)"
+            setLabelText(depthLabel, "Camada atual: \(zoneText)")
         }
-        pearlsLabel.text = "Conchas \(GameUI.shellAmountText(stats.pearls))"
-        fitLabelToWidth(pearlsLabel,
-                        maxWidth: topPanelPearlsMaxWidth,
-                        baseSize: 10,
-                        minSize: 8)
-        moodLabel.text = "Humor: \(moodDescription(for: stats.disposition))"
+        if setLabelText(pearlsLabel, "Conchas \(GameUI.shellAmountText(stats.pearls))") {
+            fitLabelToWidth(pearlsLabel,
+                            maxWidth: topPanelPearlsMaxWidth,
+                            baseSize: 10,
+                            minSize: 8)
+        }
+        if setLabelText(moodLabel, "Humor: \(moodDescription(for: stats.disposition))") {
+            fitLabelToWidth(moodLabel,
+                            maxWidth: topPanelMoodMaxWidth,
+                            baseSize: 10,
+                            minSize: 8)
+        }
         moodLabel.fontColor = moodTint(for: stats.disposition)
-        fitLabelToWidth(moodLabel,
-                        maxWidth: topPanelMoodMaxWidth,
-                        baseSize: 10,
-                        minSize: 8)
 
         let nourishment = 1 - stats.hunger / 100
         setBar("hunger", value: nourishment)
         setBar("energy", value: stats.energy / 100)
         setBar("mood", value: stats.disposition / 100)
         setBar("bond", value: eggMode ? evolutionProgress : stats.trust / 100)
-        barLabels["hunger"]?.text = stats.hasActiveBuff(.fullBelly) ? "Fome pausada" : "Alimentação"
+        setLabelText(barLabels["hunger"], stats.hasActiveBuff(.fullBelly) ? "Fome pausada" : "Alimentação")
         updateEggModeChrome(enabled: eggMode)
         updateActiveEffects(stats.activeBuffs)
         updateTouchCooldown(remaining: touchCooldownRemaining)
@@ -1269,6 +1304,13 @@ final class HUDLayer: SKNode {
                 highlight.glowWidth = 1.5
             }
         }
+    }
+
+    @discardableResult
+    private func setLabelText(_ label: SKLabelNode?, _ text: String) -> Bool {
+        guard let label, label.text != text else { return false }
+        label.text = text
+        return true
     }
 
     private func updateEggModeChrome(enabled: Bool) {

@@ -11,12 +11,19 @@ import SpriteKit
 import UIKit
 
 enum MermaidTemplateTexture {
-    private static var cache: [String: SKTexture] = [:]
+    private static let cache: NSCache<NSString, SKTexture> = {
+        let cache = NSCache<NSString, SKTexture>()
+        cache.name = "MermaidTemplateTexture.cache"
+        cache.countLimit = 96
+        cache.totalCostLimit = 28 * 1024 * 1024
+        return cache
+    }()
 
     static func texture(named name: String, color: UIColor) -> SKTexture? {
         guard let source = UIImage(named: name) else { return nil }
         let key = "\(name)|\(source.size.width)x\(source.size.height)|\(color.mermaidTemplateCacheKey)"
-        if let cached = cache[key] { return cached }
+        let cacheKey = NSString(string: key)
+        if let cached = cache.object(forKey: cacheKey) { return cached }
 
         let format = UIGraphicsImageRendererFormat()
         format.scale = source.scale
@@ -29,8 +36,16 @@ enum MermaidTemplateTexture {
         }
 
         let texture = SKTexture(image: image)
-        cache[key] = texture
+        cache.setObject(texture,
+                        forKey: cacheKey,
+                        cost: Self.approximateCost(for: source.size, scale: source.scale))
         return texture
+    }
+
+    private static func approximateCost(for size: CGSize, scale: CGFloat) -> Int {
+        let width = max(1, Int(ceil(size.width * scale)))
+        let height = max(1, Int(ceil(size.height * scale)))
+        return width * height * 4
     }
 }
 

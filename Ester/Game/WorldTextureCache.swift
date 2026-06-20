@@ -12,7 +12,13 @@ final class WorldTextureCache {
     static let shared = WorldTextureCache()
 
     let softDot: SKTexture
-    private var stampTextures: [WorldTextureKey: SKTexture] = [:]
+    private let stampTextures: NSCache<NSString, SKTexture> = {
+        let cache = NSCache<NSString, SKTexture>()
+        cache.name = "WorldTextureCache.stampTextures"
+        cache.countLimit = 192
+        cache.totalCostLimit = 72 * 1024 * 1024
+        return cache
+    }()
 
     private init() {
         let size = CGSize(width: 32, height: 32)
@@ -52,7 +58,8 @@ final class WorldTextureCache {
                                   zoneRaw: zone.rawValue,
                                   biomeRaw: biome.rawValue,
                                   variant: variant)
-        if let texture = stampTextures[key] {
+        let cacheKey = NSString(string: key.cacheKey)
+        if let texture = stampTextures.object(forKey: cacheKey) {
             return texture
         }
 
@@ -60,7 +67,21 @@ final class WorldTextureCache {
                                                      zone: zone,
                                                      biome: biome,
                                                      variant: variant)
-        stampTextures[key] = texture
+        stampTextures.setObject(texture, forKey: cacheKey, cost: texture.approximateMemoryCost)
         return texture
+    }
+}
+
+private extension WorldTextureKey {
+    var cacheKey: String {
+        "\(kindRaw)|\(zoneRaw)|\(biomeRaw)|\(variant)"
+    }
+}
+
+private extension SKTexture {
+    var approximateMemoryCost: Int {
+        let size = self.size()
+        let pixels = max(1, Int(ceil(size.width)) * Int(ceil(size.height)))
+        return pixels * 4
     }
 }

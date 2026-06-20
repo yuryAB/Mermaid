@@ -746,9 +746,27 @@ enum GameUI {
     static let cardBottom = palePaper
     static let cardStroke = line.withAlphaComponent(0.45)
 
-    private static var gradientCache: [String: SKTexture] = [:]
-    private static var paperCache: [String: SKTexture] = [:]
-    private static var iconCache: [String: SKTexture] = [:]
+    private static let gradientCache: NSCache<NSString, SKTexture> = {
+        let cache = NSCache<NSString, SKTexture>()
+        cache.name = "GameUI.gradientCache"
+        cache.countLimit = 48
+        cache.totalCostLimit = 18 * 1024 * 1024
+        return cache
+    }()
+    private static let paperCache: NSCache<NSString, SKTexture> = {
+        let cache = NSCache<NSString, SKTexture>()
+        cache.name = "GameUI.paperCache"
+        cache.countLimit = 40
+        cache.totalCostLimit = 18 * 1024 * 1024
+        return cache
+    }()
+    private static let iconCache: NSCache<NSString, SKTexture> = {
+        let cache = NSCache<NSString, SKTexture>()
+        cache.name = "GameUI.iconCache"
+        cache.countLimit = 96
+        cache.totalCostLimit = 8 * 1024 * 1024
+        return cache
+    }()
 
     static func shellAmountText(_ amount: Int) -> String {
         let suffixes = ["", "k", "M", "B", "T"]
@@ -785,7 +803,8 @@ enum GameUI {
             c.getRed(&r, green: &g, blue: &b, alpha: &a)
             return String(format: "%.2f,%.2f,%.2f,%.2f", r, g, b, a)
         }.joined(separator: ";")
-        if let cached = gradientCache[key] { return cached }
+        let cacheKey = NSString(string: key)
+        if let cached = gradientCache.object(forKey: cacheKey) { return cached }
 
         let pixelSize = CGSize(width: w, height: h)
         let renderer = UIGraphicsImageRenderer(size: pixelSize)
@@ -805,15 +824,18 @@ enum GameUI {
                                   options: [])
         }
         let texture = SKTexture(image: image)
-        gradientCache[key] = texture
+        gradientCache.setObject(texture,
+                                forKey: cacheKey,
+                                cost: textureCost(width: w, height: h))
         return texture
     }
 
     static func paperTexture(size: CGSize, base: UIColor = paper) -> SKTexture {
         let w = max(1, Int(size.width.rounded()))
         let h = max(1, Int(size.height.rounded()))
-        let key = "\(w)x\(h)|\(base.hashValue)"
-        if let cached = paperCache[key] { return cached }
+        let key = "\(w)x\(h)|\(base.cacheKey)"
+        let cacheKey = NSString(string: key)
+        if let cached = paperCache.object(forKey: cacheKey) { return cached }
 
         let image = UIGraphicsImageRenderer(size: CGSize(width: w, height: h)).image { context in
             let cg = context.cgContext
@@ -841,7 +863,9 @@ enum GameUI {
         }
 
         let texture = SKTexture(image: image)
-        paperCache[key] = texture
+        paperCache.setObject(texture,
+                             forKey: cacheKey,
+                             cost: textureCost(width: w, height: h))
         return texture
     }
 
@@ -895,7 +919,8 @@ enum GameUI {
         let w = max(1, Int(pointSize.rounded()))
         let h = max(1, Int(pointSize.rounded()))
         let key = "\(sourceKey)|\(w)x\(h)|\(color.cacheKey)"
-        if let cached = iconCache[key] { return cached }
+        let cacheKey = NSString(string: key)
+        if let cached = iconCache.object(forKey: cacheKey) { return cached }
 
         let format = UIGraphicsImageRendererFormat()
         format.scale = UIScreen.main.scale
@@ -908,8 +933,17 @@ enum GameUI {
             source.draw(in: rect, blendMode: .destinationIn, alpha: 1)
         }
         let texture = SKTexture(image: tintedImage)
-        iconCache[key] = texture
+        iconCache.setObject(texture,
+                            forKey: cacheKey,
+                            cost: textureCost(width: w, height: h, scale: format.scale))
         return texture
+    }
+
+    private static func textureCost(width: Int,
+                                    height: Int,
+                                    scale: CGFloat = UIScreen.main.scale) -> Int {
+        let pixelScale = max(1, Int(ceil(scale)))
+        return max(1, width) * max(1, height) * pixelScale * pixelScale * 4
     }
 
     static func card(size: CGSize,

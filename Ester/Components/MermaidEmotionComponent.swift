@@ -405,9 +405,38 @@ final class MermaidEmotionComponent: GKComponent {
 
 extension SKSpriteNode {
     func setFaceTexture(_ name: String) {
-        let nextTexture = SKTexture(imageNamed: name)
+        let nextTexture = FaceTextureCache.texture(named: name)
         texture = nextTexture
         size = nextTexture.size()
+    }
+}
+
+private enum FaceTextureCache {
+    private static let cache: NSCache<NSString, SKTexture> = {
+        let cache = NSCache<NSString, SKTexture>()
+        cache.name = "FaceTextureCache.textures"
+        cache.countLimit = 24
+        cache.totalCostLimit = 6 * 1024 * 1024
+        return cache
+    }()
+
+    static func texture(named name: String) -> SKTexture {
+        let key = NSString(string: name)
+        if let texture = cache.object(forKey: key) {
+            return texture
+        }
+
+        let texture = SKTexture(imageNamed: name)
+        cache.setObject(texture, forKey: key, cost: texture.approximateFaceMemoryCost)
+        return texture
+    }
+}
+
+private extension SKTexture {
+    var approximateFaceMemoryCost: Int {
+        let size = self.size()
+        let pixels = max(1, Int(ceil(size.width)) * Int(ceil(size.height)))
+        return pixels * 4
     }
 }
 
