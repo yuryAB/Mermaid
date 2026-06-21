@@ -732,7 +732,8 @@ class GameScene: SKScene {
         if temporaryCompanionNode == nil || temporaryCompanionTitle != buff.title {
             temporaryCompanionNode?.removeFromParent()
             let companion = makeTemporaryCompanionNode(title: buff.title)
-            companion.position = ctx.mermaidPosition + CGPoint(x: -120, y: 78)
+            let isFishSchool = isTemporaryFishSchool(title: buff.title)
+            companion.position = ctx.mermaidPosition + temporaryCompanionOffset(isFishSchool: isFishSchool)
             worldNode.addChild(companion)
             temporaryCompanionNode = companion
             temporaryCompanionTitle = buff.title
@@ -740,8 +741,10 @@ class GameScene: SKScene {
 
         guard let companion = temporaryCompanionNode else { return }
         temporaryCompanionPhase += dt
-        let offset = CGPoint(x: -115 + sin(temporaryCompanionPhase * 1.7) * 16,
-                             y: 78 + cos(temporaryCompanionPhase * 1.35) * 12)
+        let isFishSchool = isTemporaryFishSchool(title: buff.title)
+        let drift = CGPoint(x: sin(temporaryCompanionPhase * 1.7) * (isFishSchool ? 20 : 16),
+                            y: cos(temporaryCompanionPhase * 1.35) * (isFishSchool ? 14 : 12))
+        let offset = temporaryCompanionOffset(isFishSchool: isFishSchool) + drift
         let target = ctx.mermaidPosition + offset
         let blend = min(1, dt * 3.8)
         companion.position = CGPoint(x: companion.position.x + (target.x - companion.position.x) * blend,
@@ -776,46 +779,49 @@ class GameScene: SKScene {
         let node = SKNode()
         node.zPosition = 12
 
-        let halo = SKShapeNode(circleOfRadius: 34)
-        halo.fillColor = GameUI.accent.withAlphaComponent(0.12)
-        halo.strokeColor = UIColor.white.withAlphaComponent(0.32)
-        halo.lineWidth = 1
-        halo.glowWidth = 8
-        node.addChild(halo)
+        let isFishSchool = isTemporaryFishSchool(title: title)
+        if !isFishSchool {
+            let halo = SKShapeNode(circleOfRadius: 34)
+            halo.fillColor = GameUI.accent.withAlphaComponent(0.12)
+            halo.strokeColor = UIColor.white.withAlphaComponent(0.32)
+            halo.lineWidth = 1
+            halo.glowWidth = 8
+            node.addChild(halo)
+        }
 
-        let glyph = SKLabelNode(text: companionGlyph(for: title))
-        glyph.fontName = "AvenirNext-DemiBold"
-        glyph.fontSize = 28
-        glyph.fontColor = UIColor(red: 0.76, green: 1.0, blue: 0.94, alpha: 1)
-        glyph.verticalAlignmentMode = .center
-        glyph.horizontalAlignmentMode = .center
-        glyph.zPosition = 2
-        node.addChild(glyph)
+        let artwork = WorldPOIArtworkFactory.makeTemporaryCompanionArtwork(title: title)
+        artwork.zPosition = 2
+        node.addChild(artwork)
 
-        let label = SKLabelNode(text: title.count > 18 ? "companhia" : title)
-        label.fontName = "AvenirNext-DemiBold"
-        label.fontSize = 10
-        label.fontColor = UIColor.white.withAlphaComponent(0.78)
-        label.verticalAlignmentMode = .center
-        label.horizontalAlignmentMode = .center
-        label.position = CGPoint(x: 0, y: -36)
-        node.addChild(label)
+        if !isFishSchool {
+            let label = SKLabelNode(text: title.count > 18 ? "companhia" : title)
+            label.fontName = "AvenirNext-DemiBold"
+            label.fontSize = 10
+            label.fontColor = UIColor.white.withAlphaComponent(0.78)
+            label.verticalAlignmentMode = .center
+            label.horizontalAlignmentMode = .center
+            label.position = CGPoint(x: 0, y: -36)
+            node.addChild(label)
+        }
 
-        let pulse = SKAction.repeatForever(.sequence([
-            .scale(to: 1.08, duration: 0.9),
-            .scale(to: 1.0, duration: 1.0)
-        ]))
-        pulse.eaeInEaseOut()
-        node.run(pulse, withKey: "temporary_companion_pulse")
+        if !isFishSchool {
+            let pulse = SKAction.repeatForever(.sequence([
+                .scale(to: 1.08, duration: 0.9),
+                .scale(to: 1.0, duration: 1.0)
+            ]))
+            pulse.eaeInEaseOut()
+            node.run(pulse, withKey: "temporary_companion_pulse")
+        }
 
         return node
     }
 
-    private func companionGlyph(for title: String) -> String {
-        let lower = title.lowercased()
-        if lower.contains("polvo") { return "🐙" }
-        if lower.contains("cardume") { return "🐠" }
-        return "🐟"
+    private func isTemporaryFishSchool(title: String) -> Bool {
+        title.lowercased().contains("cardume")
+    }
+
+    private func temporaryCompanionOffset(isFishSchool: Bool) -> CGPoint {
+        isFishSchool ? .zero : CGPoint(x: -115, y: 78)
     }
 
     private var cameraTarget: CGPoint {
@@ -857,6 +863,10 @@ class GameScene: SKScene {
     func openRegionMenu() {
         guard regionMenu == nil, challengeChoiceMenu == nil, !isChallengeOpen, refugeOverlay == nil else { return }
         GameAudio.shared.play(.uiOpenPanel)
+        if let activeRegion {
+            stats.revealExpeditionMap(in: activeRegion, near: ctx.mermaidPosition)
+            stats.rememberMapPosition(ctx.mermaidPosition, in: activeRegion)
+        }
         let menu = RegionMenuOverlay(size: size,
                                      stats: stats,
                                      currentRegionId: activeRegion?.id,
@@ -1121,14 +1131,9 @@ class GameScene: SKScene {
         ring.glowWidth = 5
         node.addChild(ring)
 
-        let glyph = SKLabelNode(text: poi.visual.glyph)
-        glyph.fontName = "AvenirNext-DemiBold"
-        glyph.fontSize = 28
-        glyph.fontColor = UIColor.lerp(poi.visual.color, .white, 0.28)
-        glyph.verticalAlignmentMode = .center
-        glyph.horizontalAlignmentMode = .center
-        glyph.zPosition = 2
-        node.addChild(glyph)
+        let artwork = WorldPOIArtworkFactory.makeArtwork(for: poi, size: .challenge)
+        artwork.zPosition = 2
+        node.addChild(artwork)
         return node
     }
 

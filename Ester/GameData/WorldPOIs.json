@@ -55,13 +55,13 @@
     "mapId": "nascente",
     "zone": "mid",
     "kind": "shipwreck",
-    "name": "Barco naufragado pequeno",
+    "name": "Barquinho de brinquedo naufragado",
     "visual": { "glyph": "▧", "tint": "sand", "scale": 1.0 },
     "reward": {
       "kind": "item",
-      "title": "brilho de naufrágio",
+      "title": "peça brilhante do barquinho",
       "pearlAmount": 0,
-      "itemId": "brilho_de_naufragio",
+      "itemId": "peca_brilhante_do_barquinho",
       "buffKind": null,
       "duration": 0,
       "storyText": null

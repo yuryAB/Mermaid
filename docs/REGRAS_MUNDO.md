@@ -303,7 +303,7 @@ Na primeira versão do jogo:
 #### Águas de Nascimento × Média
 | POI | Tipo | Descrição |
 |---|---|---|
-| Barco naufragado pequeno | Exploração/Coleta | Objetos brilhantes dentro para coletar |
+| Barquinho de brinquedo naufragado | Exploração/Coleta | Brinquedo humano perdido, pequeno o bastante para a bebê explorar por dentro |
 | Tartaruga velha | NPC | Dá dica sobre o mundo; recompensa por conversar |
 | Corrente quente | Evento | Leva a sereia brevemente a uma área secreta |
 

@@ -1099,15 +1099,36 @@ final class ExpeditionMapNode: SKNode {
         let cellHeight = max(2.5, plotHeight / CGFloat(MermaidStats.expeditionMapRows) * 0.82)
 
         for (key, amount) in reveal {
-            guard amount > 0.04,
+            guard amount > 0.02,
                   let cell = MermaidStats.expeditionCellCoordinates(from: key) else { continue }
             let x = plotLeftX + (CGFloat(cell.column) + 0.5) * cellWidth
             let y = visualY(forWorldY: worldY(forRow: cell.row))
             let node = SKShapeNode(rectOf: CGSize(width: cellWidth + 0.5, height: cellHeight), cornerRadius: 1.2)
             node.position = CGPoint(x: x, y: y)
-            node.fillColor = UIColor(red: 0.78, green: 0.98, blue: 0.94, alpha: 0.12 + amount * 0.44)
+            node.fillColor = UIColor(red: 0.78, green: 0.98, blue: 0.94, alpha: 0.20 + amount * 0.62)
             node.strokeColor = .clear
-            node.zPosition = 5
+            node.zPosition = 6
+            addChild(node)
+        }
+
+        for poi in WorldPOICatalog.pois(in: region, stats: stats) {
+            guard stats.canAccess(poi.zone) else { continue }
+            let discovered = stats.isPOIDiscovered(poi.key)
+            let interacted = stats.isPOIVisited(poi.key) || stats.isPOIRewardCollected(poi.key)
+            guard discovered || interacted else { continue }
+
+            let column = MermaidStats.expeditionColumn(forX: poi.position.x, in: region)
+            let row = MermaidStats.expeditionRow(forY: poi.position.y)
+            let cellKey = MermaidStats.expeditionCellKey(column: column, row: row)
+            guard (reveal[cellKey] ?? 0) <= 0.02 else { continue }
+
+            let x = plotLeftX + (CGFloat(column) + 0.5) * cellWidth
+            let y = visualY(forWorldY: worldY(forRow: row))
+            let node = SKShapeNode(rectOf: CGSize(width: cellWidth + 0.5, height: cellHeight), cornerRadius: 1.2)
+            node.position = CGPoint(x: x, y: y)
+            node.fillColor = poi.visual.color.withAlphaComponent(interacted ? 0.38 : 0.25)
+            node.strokeColor = .clear
+            node.zPosition = 6
             addChild(node)
         }
     }
@@ -1200,17 +1221,18 @@ final class ExpeditionMapNode: SKNode {
             let column = MermaidStats.expeditionColumn(forX: poi.position.x, in: region)
             let row = MermaidStats.expeditionRow(forY: poi.position.y)
             let cellKey = MermaidStats.expeditionCellKey(column: column, row: row)
-            guard (reveal[cellKey] ?? 0) > 0.14 else { continue }
-
             let discovered = stats.isPOIDiscovered(poi.key)
             let interacted = stats.isPOIVisited(poi.key) || stats.isPOIRewardCollected(poi.key)
+            let known = discovered || interacted
+            guard (reveal[cellKey] ?? 0) > 0.14 || known else { continue }
+
             let node = SKNode()
             node.position = poiPoint(for: poi, in: region)
-            node.name = discovered ? "poi_\(poi.key)" : nil
+            node.name = known ? "poi_\(poi.key)" : nil
             node.zPosition = interacted ? 17 : (discovered ? 16 : 12)
             addChild(node)
 
-            if discovered {
+            if known {
                 let hit = SKShapeNode(circleOfRadius: 16)
                 hit.fillColor = UIColor.white.withAlphaComponent(0.001)
                 hit.strokeColor = .clear
@@ -1234,20 +1256,11 @@ final class ExpeditionMapNode: SKNode {
             marker.name = node.name
             node.addChild(marker)
 
-            let glyph = SKLabelNode(text: poi.visual.glyph)
-            glyph.fontName = "AvenirNext-DemiBold"
-            glyph.fontSize = interacted ? 9 : 8
-            glyph.fontColor = interacted
-                ? UIColor.white.withAlphaComponent(0.95)
-                : discovered
-                    ? UIColor.white.withAlphaComponent(0.48)
-                    : GameUI.mutedInk.withAlphaComponent(0.46)
-            glyph.alpha = interacted ? 1 : (discovered ? 0.50 : 0.28)
-            glyph.horizontalAlignmentMode = .center
-            glyph.verticalAlignmentMode = .center
-            glyph.name = node.name
-            glyph.zPosition = 2
-            node.addChild(glyph)
+            let artwork = WorldPOIArtworkFactory.makeArtwork(for: poi, size: .mapSmall)
+            artwork.alpha = interacted ? 1 : (discovered ? 0.50 : 0.26)
+            artwork.zPosition = 2
+            WorldPOIArtworkFactory.applyInteractionName(node.name, to: artwork)
+            node.addChild(artwork)
         }
     }
 
@@ -1443,10 +1456,11 @@ final class RegionMenuOverlay: SKNode {
             for (index, poi) in pois.enumerated() {
                 let discovered = stats.isPOIDiscovered(poi.key)
                 let interacted = stats.isPOIVisited(poi.key) || stats.isPOIRewardCollected(poi.key)
+                let known = discovered || interacted
                 let indicator = SKNode()
                 indicator.position = CGPoint(x: startX + CGFloat(index) * step, y: 0)
                 indicator.zPosition = CGFloat(index + 1)
-                if discovered {
+                if known {
                     indicator.name = "poi_\(poi.key)"
                 }
 
@@ -1466,20 +1480,11 @@ final class RegionMenuOverlay: SKNode {
                 ring.name = indicator.name
                 indicator.addChild(ring)
 
-                let glyph = SKLabelNode(text: poi.visual.glyph)
-                glyph.fontName = "AvenirNext-DemiBold"
-                glyph.fontSize = iconDiameter * 0.62
-                glyph.fontColor = interacted
-                    ? GameUI.ink.withAlphaComponent(0.96)
-                    : discovered
-                        ? GameUI.ink.withAlphaComponent(0.48)
-                        : GameUI.mutedInk.withAlphaComponent(0.52)
-                glyph.alpha = interacted ? 1 : (discovered ? 0.44 : 0.24)
-                glyph.horizontalAlignmentMode = .center
-                glyph.verticalAlignmentMode = .center
-                glyph.name = indicator.name
-                glyph.zPosition = 2
-                indicator.addChild(glyph)
+                let artwork = WorldPOIArtworkFactory.makeArtwork(for: poi, size: .listSmall)
+                artwork.alpha = interacted ? 1 : (discovered ? 0.44 : 0.24)
+                artwork.zPosition = 2
+                WorldPOIArtworkFactory.applyInteractionName(indicator.name, to: artwork)
+                indicator.addChild(artwork)
 
                 node.addChild(indicator)
             }
@@ -1596,8 +1601,13 @@ final class RegionMenuOverlay: SKNode {
             map.zPosition = 4
             panelContent.addChild(map)
 
-            for poi in WorldPOICatalog.pois(in: previewRegion, stats: stats) where stats.isPOIDiscovered(poi.key) {
-                rowPOIs[poi.key] = poi
+            for poi in WorldPOICatalog.pois(in: previewRegion, stats: stats) {
+                let known = stats.isPOIDiscovered(poi.key)
+                    || stats.isPOIVisited(poi.key)
+                    || stats.isPOIRewardCollected(poi.key)
+                if known {
+                    rowPOIs[poi.key] = poi
+                }
             }
         }
 
