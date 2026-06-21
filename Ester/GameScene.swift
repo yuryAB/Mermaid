@@ -254,6 +254,7 @@ class GameScene: SKScene {
     private var hud: HUDLayer!
     private var plotOverlay: TideWeavingOverlay?
     private var climbOverlay: BubbleClimbOverlay?
+    private var snapOverlay: ShellSnapOverlay?
     private var pendingPOIChallengeCompletion: ((ChallengeResult) -> Void)?
     private var challengeBackdrop: SKNode?
     private var challengeChoiceMenu: ChallengeChoiceOverlay?
@@ -661,6 +662,7 @@ class GameScene: SKScene {
         // desafios modais com tempo/física próprios
         plotOverlay?.update(dt: dt)
         climbOverlay?.update(dt: dt)
+        snapOverlay?.update(dt: dt)
 
         // no Refúgio o tempo é gentil: descanso acelerado
         if let refuge = refugeOverlay {
@@ -685,6 +687,7 @@ class GameScene: SKScene {
                     evolutionProgress: ctx.growth.progressToNext(),
                     evolutionNote: ctx.growth.evolutionNote(),
                     objectiveAvailable: ctx.events.currentObjective != nil,
+                    activeDirectionsCommand: ctx.autonomy.activeDirectionsCommand,
                     commandCooldowns: ctx.autonomy.commandCooldownsRemaining,
                     touchCooldownRemaining: ctx.autonomy.touchRequestCooldownRemaining,
                     bondRecoveryState: ctx.autonomy.bondRecoveryHUDState)
@@ -1090,7 +1093,7 @@ class GameScene: SKScene {
 
     // MARK: - Desafios
 
-    var isChallengeOpen: Bool { plotOverlay != nil || climbOverlay != nil }
+    var isChallengeOpen: Bool { plotOverlay != nil || climbOverlay != nil || snapOverlay != nil }
 
     /// Abre o desafio oferecido por um NPC (hoje, um peixe).
     func openChallenge(giver: FishNode) {
@@ -1187,6 +1190,20 @@ class GameScene: SKScene {
             overlay.position = CGPoint(x: 0, y: -modalDropOffset)
             cameraNode.addChild(overlay)
             climbOverlay = overlay
+
+        case .snap:
+            let overlay = ShellSnapOverlay(size: size,
+                                           zone: zone,
+                                           phase: stats.phase,
+                                           special: special,
+                                           shellRewardMultiplier: stats.shellRewardMultiplier,
+                                           giverDisplay: giverDisplay) { [weak self] result in
+                self?.closeChallenge(result: result, zone: zone)
+            }
+            overlay.zPosition = 200
+            overlay.position = CGPoint(x: 0, y: -modalDropOffset)
+            cameraNode.addChild(overlay)
+            snapOverlay = overlay
         }
     }
 
@@ -1237,6 +1254,8 @@ class GameScene: SKScene {
         plotOverlay = nil
         climbOverlay?.removeFromParent()
         climbOverlay = nil
+        snapOverlay?.removeFromParent()
+        snapOverlay = nil
         challengeBackdrop?.removeFromParent()
         challengeBackdrop = nil
         let poiCompletion = pendingPOIChallengeCompletion

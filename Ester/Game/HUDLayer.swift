@@ -44,6 +44,10 @@ final class HUDLayer: SKNode {
     private var disabledCommands: Set<PlayerCommand> = []
     private var directionsButton: SKNode?
     private var directionsButtonHighlight: SKShapeNode?
+    private var directionsButtonIconHolder: SKNode?
+    private var directionsButtonLabel: SKLabelNode?
+    private var displayedDirectionsCommand: PlayerCommand?
+    private var currentActiveDirectionsCommand: PlayerCommand?
     private var directionsMenu: SKNode!
     private var isDirectionsMenuOpen = false
     private var directionsMenuEnabled = true
@@ -961,7 +965,7 @@ final class HUDLayer: SKNode {
     }
 
     private func buildButtons() {
-        let bottomCommands: [PlayerCommand?] = [nil, .seekFood, .challenge, .objective, .refuge]
+        let bottomCommands: [PlayerCommand?] = [.refuge, .seekFood, nil, .challenge, .objective]
         let bottomWidth = min(CGFloat(68), (sceneSize.width - 36) / CGFloat(bottomCommands.count))
         let bottomSpacing = max(CGFloat(4), (sceneSize.width - bottomWidth * CGFloat(bottomCommands.count) - 24) / CGFloat(bottomCommands.count - 1))
         let bottomStartX = -sceneSize.width / 2 + 12 + bottomWidth / 2
@@ -1028,10 +1032,11 @@ final class HUDLayer: SKNode {
         highlight.isHidden = true
         button.addChild(highlight)
 
-        let icon = HUDLayer.directionPadIconNode(color: HUDPalette.teal)
-        icon.position = CGPoint(x: 0, y: 4)
-        icon.zPosition = 5
-        button.addChild(icon)
+        let iconHolder = SKNode()
+        iconHolder.position = CGPoint(x: 0, y: 4)
+        iconHolder.zPosition = 5
+        iconHolder.addChild(HUDLayer.directionPadIconNode(color: HUDPalette.teal))
+        button.addChild(iconHolder)
 
         let text = makeLabel(text: "Direções",
                              fontSize: 9.2,
@@ -1047,6 +1052,8 @@ final class HUDLayer: SKNode {
         addChild(button)
         directionsButton = button
         directionsButtonHighlight = highlight
+        directionsButtonIconHolder = iconHolder
+        directionsButtonLabel = text
     }
 
     private func buildDirectionsMenu(anchor: CGPoint) {
@@ -1262,6 +1269,7 @@ final class HUDLayer: SKNode {
                  evolutionProgress: CGFloat,
                  evolutionNote: String,
                  objectiveAvailable: Bool,
+                 activeDirectionsCommand: PlayerCommand?,
                  commandCooldowns: [PlayerCommand: TimeInterval],
                  touchCooldownRemaining: TimeInterval,
                  bondRecoveryState: BondRecoveryHUDState) {
@@ -1363,6 +1371,7 @@ final class HUDLayer: SKNode {
         if !directionsMenuEnabled {
             setDirectionsMenu(open: false, animated: false)
         }
+        updateDirectionsButton(activeCommand: directionsMenuEnabled ? activeDirectionsCommand : nil)
         let stateChanged = eggMode != lastEggMode || objectiveAvailable != lastObjectiveAvailable
         lastEggMode = eggMode
         lastObjectiveAvailable = objectiveAvailable
@@ -1407,7 +1416,7 @@ final class HUDLayer: SKNode {
     private func setDirectionsMenu(open: Bool, animated: Bool = true) {
         guard directionsMenu != nil else { return }
         isDirectionsMenuOpen = open
-        directionsButtonHighlight?.isHidden = !open
+        updateDirectionsButtonHighlight()
         directionsMenu.removeAllActions()
         if open {
             directionsMenu.isHidden = false
@@ -1431,6 +1440,39 @@ final class HUDLayer: SKNode {
                 }
             ]))
         }
+    }
+
+    private func updateDirectionsButton(activeCommand: PlayerCommand?) {
+        currentActiveDirectionsCommand = activeCommand
+        if displayedDirectionsCommand != activeCommand {
+            displayedDirectionsCommand = activeCommand
+            let tint = activeCommand?.tint ?? HUDPalette.teal
+            directionsButtonIconHolder?.removeAllChildren()
+            if let activeCommand {
+                directionsButtonIconHolder?.addChild(HUDLayer.iconNode(for: activeCommand, color: tint))
+                setLabelText(directionsButtonLabel, activeCommand.label)
+            } else {
+                directionsButtonIconHolder?.addChild(HUDLayer.directionPadIconNode(color: tint))
+                setLabelText(directionsButtonLabel, "Direções")
+            }
+            if let label = directionsButtonLabel {
+                let maxWidth = label.preferredMaxLayoutWidth > 0 ? label.preferredMaxLayoutWidth : 60
+                fitLabelToWidth(label,
+                                maxWidth: maxWidth,
+                                baseSize: 9.2,
+                                minSize: 6.8)
+            }
+        }
+        updateDirectionsButtonHighlight()
+    }
+
+    private func updateDirectionsButtonHighlight() {
+        guard let highlight = directionsButtonHighlight else { return }
+        let tint = currentActiveDirectionsCommand?.tint ?? HUDPalette.teal
+        highlight.isHidden = !isDirectionsMenuOpen && currentActiveDirectionsCommand == nil
+        highlight.fillColor = tint.withAlphaComponent(currentActiveDirectionsCommand == nil ? 0.12 : 0.16)
+        highlight.strokeColor = tint.withAlphaComponent(currentActiveDirectionsCommand == nil ? 0.78 : 0.90)
+        highlight.glowWidth = currentActiveDirectionsCommand == nil ? 1.5 : 3
     }
 
     @discardableResult

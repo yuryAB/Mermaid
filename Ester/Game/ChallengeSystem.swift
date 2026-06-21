@@ -19,11 +19,14 @@ enum ChallengeKind: String, CaseIterable, Codable {
     case plot
     /// Subir o mais alto possível pegando bolhas antes do tempo acabar.
     case ascent
+    /// Tocar grupos de 3+ peças iguais antes do tempo acabar.
+    case snap
 
     var shortName: String {
         switch self {
         case .plot: return "Trama"
         case .ascent: return "Subida"
+        case .snap: return "Estalo"
         }
     }
 
@@ -33,6 +36,7 @@ enum ChallengeKind: String, CaseIterable, Codable {
         switch self {
         case .plot: return "Combine correntes, faça sequências e junte conchas."
         case .ascent: return "Suba pelas bolhas antes que o fôlego acabe."
+        case .snap: return "Toque grupos iguais, mantenha combo e solte ondas."
         }
     }
 
@@ -40,6 +44,7 @@ enum ChallengeKind: String, CaseIterable, Codable {
         switch self {
         case .plot: return "≈"
         case .ascent: return "○"
+        case .snap: return "✦"
         }
     }
 
@@ -47,6 +52,7 @@ enum ChallengeKind: String, CaseIterable, Codable {
         switch self {
         case .plot: return GameUI.accent
         case .ascent: return UIColor(red: 0.38, green: 0.58, blue: 0.90, alpha: 1)
+        case .snap: return GameUI.coral
         }
     }
 }
@@ -425,6 +431,24 @@ enum ChallengeChrome {
                 dot.position = point
                 node.addChild(dot)
             }
+        case .snap:
+            let burst = UIBezierPath()
+            for angle in stride(from: CGFloat(0), to: CGFloat.pi * 2, by: CGFloat.pi / 4) {
+                burst.move(to: CGPoint(x: cos(angle) * 4, y: sin(angle) * 4))
+                burst.addLine(to: CGPoint(x: cos(angle) * 16, y: sin(angle) * 16))
+            }
+            let burstNode = SKShapeNode(path: burst.cgPath)
+            burstNode.fillColor = .clear
+            burstNode.strokeColor = GameUI.coral
+            burstNode.lineWidth = 2
+            burstNode.lineCap = .round
+            node.addChild(burstNode)
+
+            let core = SKShapeNode(circleOfRadius: 6)
+            core.fillColor = GameUI.gold.withAlphaComponent(0.82)
+            core.strokeColor = UIColor.white.withAlphaComponent(0.50)
+            core.lineWidth = 1
+            node.addChild(core)
         }
 
         return node

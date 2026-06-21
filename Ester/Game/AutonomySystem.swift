@@ -147,6 +147,26 @@ final class AutonomySystem {
         guard let until = touchRequestCooldownUntil else { return 0 }
         return max(0, until.timeIntervalSince(Date()))
     }
+    var activeDirectionsCommand: PlayerCommand? {
+        guard stats.phase != .egg else { return nil }
+        switch intent {
+        case .goingUp:
+            return .goUp
+        case .goingDeeper:
+            return .goDown
+        case .resting:
+            return .rest
+        case .wandering:
+            guard let direction = touchDirection,
+                  let until = touchDirectionUntil,
+                  Date() < until,
+                  abs(direction.dx) >= abs(direction.dy),
+                  abs(direction.dx) > 0.1 else { return nil }
+            return direction.dx < 0 ? .goLeft : .goRight
+        default:
+            return nil
+        }
+    }
     var bondRecoveryHUDState: BondRecoveryHUDState {
         guard stats.phase != .egg else { return .hidden }
         switch bondRecoveryState {
