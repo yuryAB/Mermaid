@@ -255,6 +255,7 @@ class GameScene: SKScene {
     private var plotOverlay: TideWeavingOverlay?
     private var climbOverlay: BubbleClimbOverlay?
     private var snapOverlay: ShellSnapOverlay?
+    private var banquetOverlay: BanquetOfTidesOverlay?
     private var pendingPOIChallengeCompletion: ((ChallengeResult) -> Void)?
     private var challengeBackdrop: SKNode?
     private var challengeChoiceMenu: ChallengeChoiceOverlay?
@@ -663,6 +664,7 @@ class GameScene: SKScene {
         plotOverlay?.update(dt: dt)
         climbOverlay?.update(dt: dt)
         snapOverlay?.update(dt: dt)
+        banquetOverlay?.update(dt: dt)
 
         // no Refúgio o tempo é gentil: descanso acelerado
         if let refuge = refugeOverlay {
@@ -1093,7 +1095,9 @@ class GameScene: SKScene {
 
     // MARK: - Desafios
 
-    var isChallengeOpen: Bool { plotOverlay != nil || climbOverlay != nil || snapOverlay != nil }
+    var isChallengeOpen: Bool {
+        plotOverlay != nil || climbOverlay != nil || snapOverlay != nil || banquetOverlay != nil
+    }
 
     /// Abre o desafio oferecido por um NPC (hoje, um peixe).
     func openChallenge(giver: FishNode) {
@@ -1204,6 +1208,20 @@ class GameScene: SKScene {
             overlay.position = CGPoint(x: 0, y: -modalDropOffset)
             cameraNode.addChild(overlay)
             snapOverlay = overlay
+
+        case .banquet:
+            let overlay = BanquetOfTidesOverlay(size: size,
+                                                zone: zone,
+                                                phase: stats.phase,
+                                                special: special,
+                                                shellRewardMultiplier: stats.shellRewardMultiplier,
+                                                giverDisplay: giverDisplay) { [weak self] result in
+                self?.closeChallenge(result: result, zone: zone)
+            }
+            overlay.zPosition = 200
+            overlay.position = CGPoint(x: 0, y: -modalDropOffset)
+            cameraNode.addChild(overlay)
+            banquetOverlay = overlay
         }
     }
 
@@ -1256,6 +1274,8 @@ class GameScene: SKScene {
         climbOverlay = nil
         snapOverlay?.removeFromParent()
         snapOverlay = nil
+        banquetOverlay?.removeFromParent()
+        banquetOverlay = nil
         challengeBackdrop?.removeFromParent()
         challengeBackdrop = nil
         let poiCompletion = pendingPOIChallengeCompletion

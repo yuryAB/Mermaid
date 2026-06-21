@@ -21,22 +21,31 @@ enum ChallengeKind: String, CaseIterable, Codable {
     case ascent
     /// Tocar grupos de 3+ peças iguais antes do tempo acabar.
     case snap
+    /// Comer alimentos bons, crescer e desviar de perigos numa arena.
+    case banquet
 
     var shortName: String {
         switch self {
         case .plot: return "Trama"
         case .ascent: return "Subida"
         case .snap: return "Estalo"
+        case .banquet: return "Banquete"
         }
     }
 
-    var title: String { "Desafio: \(shortName)" }
+    var title: String {
+        switch self {
+        case .banquet: return "Desafio: Banquete das Marés"
+        default: return "Desafio: \(shortName)"
+        }
+    }
 
     var blurb: String {
         switch self {
         case .plot: return "Combine correntes, faça sequências e junte conchas."
         case .ascent: return "Suba pelas bolhas antes que o fôlego acabe."
         case .snap: return "Toque grupos iguais, mantenha combo e solte ondas."
+        case .banquet: return "Coma as delícias, cresça e fuja dos perigos."
         }
     }
 
@@ -45,6 +54,7 @@ enum ChallengeKind: String, CaseIterable, Codable {
         case .plot: return "≈"
         case .ascent: return "○"
         case .snap: return "✦"
+        case .banquet: return "●"
         }
     }
 
@@ -53,6 +63,7 @@ enum ChallengeKind: String, CaseIterable, Codable {
         case .plot: return GameUI.accent
         case .ascent: return UIColor(red: 0.38, green: 0.58, blue: 0.90, alpha: 1)
         case .snap: return GameUI.coral
+        case .banquet: return GameUI.gold
         }
     }
 }
@@ -234,10 +245,11 @@ final class ChallengeChoiceOverlay: SKNode {
             rowContent.addChild(icon)
 
             let name = makeLabel(kind.title,
-                                 fontSize: 15,
+                                 fontSize: kind == .banquet ? 13.2 : 15,
                                  color: GameUI.ink,
                                  bold: true,
-                                 maxWidth: rowWidth - 152)
+                                 maxWidth: rowWidth - 152,
+                                 lines: kind == .banquet ? 2 : 1)
             name.position = CGPoint(x: -rowWidth / 2 + 74, y: 20)
             rowContent.addChild(name)
 
@@ -449,6 +461,33 @@ enum ChallengeChrome {
             core.strokeColor = UIColor.white.withAlphaComponent(0.50)
             core.lineWidth = 1
             node.addChild(core)
+        case .banquet:
+            let bowl = SKShapeNode(ellipseOf: CGSize(width: 31, height: 22))
+            bowl.fillColor = GameUI.gold.withAlphaComponent(0.78)
+            bowl.strokeColor = GameUI.coral.withAlphaComponent(0.76)
+            bowl.lineWidth = 1.6
+            bowl.position = CGPoint(x: 0, y: -2)
+            node.addChild(bowl)
+
+            for point in [CGPoint(x: -8, y: 4), CGPoint(x: 0, y: 8), CGPoint(x: 9, y: 3)] {
+                let bite = SKShapeNode(circleOfRadius: 3.2)
+                bite.fillColor = GameUI.algae.withAlphaComponent(0.86)
+                bite.strokeColor = UIColor.white.withAlphaComponent(0.38)
+                bite.lineWidth = 0.8
+                bite.position = point
+                bite.zPosition = 2
+                node.addChild(bite)
+            }
+
+            let sparkle = SKLabelNode(text: "✦")
+            sparkle.fontName = "AvenirNext-Heavy"
+            sparkle.fontSize = 12
+            sparkle.fontColor = GameUI.palePaper
+            sparkle.verticalAlignmentMode = .center
+            sparkle.horizontalAlignmentMode = .center
+            sparkle.position = CGPoint(x: 12, y: 12)
+            sparkle.zPosition = 3
+            node.addChild(sparkle)
         }
 
         return node
