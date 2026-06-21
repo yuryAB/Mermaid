@@ -847,6 +847,7 @@ final class AutonomySystem {
             || guaranteedByCheat
             || stats.hasActiveBuff(.eagerCompanion)
         var guidedExplorePoint: CGPoint?
+        var guidedDirection: CGVector?
         let desired: MermaidIntent
         switch command {
         case .explore:
@@ -927,6 +928,20 @@ final class AutonomySystem {
                 ctx.say(ctx.depth.ascentHint(for: next))
             }
             desired = .goingUp
+        case .goLeft:
+            guard requestIsGuaranteed || stats.energy > 10 else {
+                refuseTired(command)
+                return
+            }
+            guidedDirection = CGVector(dx: -1, dy: 0)
+            desired = .wandering
+        case .goRight:
+            guard requestIsGuaranteed || stats.energy > 10 else {
+                refuseTired(command)
+                return
+            }
+            guidedDirection = CGVector(dx: 1, dy: 0)
+            desired = .wandering
         }
 
         let chance = commandAcceptanceChance(for: desired)
@@ -936,7 +951,11 @@ final class AutonomySystem {
                                   guaranteedByBondRecovery: guaranteedByBondRecovery,
                                   guaranteedByBabyStart: guaranteedByBabyStart)
             if desired == .wandering {
-                if let guidedExplorePoint {
+                if let guidedDirection {
+                    touchPointTarget = nil
+                    touchDirection = guidedDirection
+                    touchDirectionUntil = Date().addingTimeInterval(TouchDirectionBalance.duration)
+                } else if let guidedExplorePoint {
                     let limitedPoint = pointLimitedByEnergy(guidedExplorePoint)
                     touchPointTarget = limitedPoint
                     if limitedPoint.distance(to: guidedExplorePoint) > 24 {

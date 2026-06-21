@@ -304,6 +304,8 @@ enum PlayerCommand: String, CaseIterable {
     case objective
     case goUp
     case goDown
+    case goLeft
+    case goRight
     case travel
     case refuge
     case rest
@@ -314,8 +316,10 @@ enum PlayerCommand: String, CaseIterable {
         case .seekFood: return "Alimentar"
         case .challenge: return "Desafio"
         case .objective: return "Objetivo"
-        case .goUp: return "Subir camada"
-        case .goDown: return "Descer camada"
+        case .goUp: return "Cima"
+        case .goDown: return "Baixo"
+        case .goLeft: return "Esquerda"
+        case .goRight: return "Direita"
         case .travel: return "Viajar"
         case .refuge: return "Refúgio"
         case .rest: return "Descansar"
@@ -331,6 +335,8 @@ enum PlayerCommand: String, CaseIterable {
         case .objective: return "🎯"
         case .goUp: return "⬆️"
         case .goDown: return "⬇️"
+        case .goLeft: return "⬅️"
+        case .goRight: return "➡️"
         case .travel: return "🗺"
         case .refuge: return "🐚"
         case .rest: return "😴"
@@ -345,6 +351,8 @@ enum PlayerCommand: String, CaseIterable {
         case .objective: return "scope"
         case .goUp: return "arrow.up.circle.fill"
         case .goDown: return "arrow.down.circle.fill"
+        case .goLeft: return "arrow.left.circle.fill"
+        case .goRight: return "arrow.right.circle.fill"
         case .travel: return "map.fill"
         case .refuge: return "house.fill"
         case .rest: return "moon.zzz.fill"
@@ -359,6 +367,8 @@ enum PlayerCommand: String, CaseIterable {
         case .objective: return UIColor(red: 0.78, green: 0.34, blue: 0.30, alpha: 1)
         case .goUp: return UIColor(red: 0.30, green: 0.64, blue: 0.72, alpha: 1)
         case .goDown: return UIColor(red: 0.04, green: 0.24, blue: 0.43, alpha: 1)
+        case .goLeft: return UIColor(red: 0.19, green: 0.48, blue: 0.64, alpha: 1)
+        case .goRight: return UIColor(red: 0.24, green: 0.56, blue: 0.50, alpha: 1)
         case .travel: return UIColor(red: 0.22, green: 0.45, blue: 0.50, alpha: 1)
         case .refuge: return UIColor(red: 0.72, green: 0.46, blue: 0.30, alpha: 1)
         case .rest: return UIColor(red: 0.28, green: 0.40, blue: 0.49, alpha: 1)

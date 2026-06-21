@@ -42,6 +42,12 @@ final class HUDLayer: SKNode {
     private var buttonCooldownLines: [PlayerCommand: SKShapeNode] = [:]
     private var buttonCooldownLabels: [PlayerCommand: SKLabelNode] = [:]
     private var disabledCommands: Set<PlayerCommand> = []
+    private var directionsButton: SKNode?
+    private var directionsButtonHighlight: SKShapeNode?
+    private var directionsMenu: SKNode!
+    private var isDirectionsMenuOpen = false
+    private var directionsMenuEnabled = true
+    private let directionsMenuCommands: Set<PlayerCommand> = [.goUp, .goDown, .goLeft, .goRight, .rest]
     private var messageContainer: SKNode!
     private var messageTitleLabel: SKLabelNode!
     private var messageLabel: SKLabelNode!
@@ -955,37 +961,31 @@ final class HUDLayer: SKNode {
     }
 
     private func buildButtons() {
-        let bottomCommands: [PlayerCommand] = [.seekFood, .rest, .challenge, .objective, .refuge]
+        let bottomCommands: [PlayerCommand?] = [nil, .seekFood, .challenge, .objective, .refuge]
         let bottomWidth = min(CGFloat(68), (sceneSize.width - 36) / CGFloat(bottomCommands.count))
         let bottomSpacing = max(CGFloat(4), (sceneSize.width - bottomWidth * CGFloat(bottomCommands.count) - 24) / CGFloat(bottomCommands.count - 1))
         let bottomStartX = -sceneSize.width / 2 + 12 + bottomWidth / 2
         for (index, command) in bottomCommands.enumerated() {
             let x = bottomStartX + CGFloat(index) * (bottomWidth + bottomSpacing)
-            addCommandButton(command,
-                             size: CGSize(width: bottomWidth, height: 54),
-                             position: CGPoint(x: x, y: buttonRowY(0)),
-                             tilt: buttonTilt(seed: index),
-                             primary: true,
-                             showsLabel: true)
+            let position = CGPoint(x: x, y: buttonRowY(0))
+            if let command {
+                addCommandButton(command,
+                                 size: CGSize(width: bottomWidth, height: 54),
+                                 position: position,
+                                 tilt: buttonTilt(seed: index),
+                                 primary: true,
+                                 showsLabel: true)
+            } else {
+                addDirectionsButton(size: CGSize(width: bottomWidth, height: 54),
+                                    position: position,
+                                    tilt: buttonTilt(seed: index))
+                buildDirectionsMenu(anchor: position)
+            }
         }
 
         let sideSize = CGSize(width: 56, height: 56)
         let sideOffset: CGFloat = 33
         let sideY: CGFloat = -6
-        let leftX = -sceneSize.width / 2 + insets.left + 38
-        addCommandButton(.goUp,
-                         size: sideSize,
-                         position: CGPoint(x: leftX, y: sideY + sideOffset),
-                         tilt: -0.008,
-                         primary: false,
-                         showsLabel: false)
-        addCommandButton(.goDown,
-                         size: sideSize,
-                         position: CGPoint(x: leftX, y: sideY - sideOffset),
-                         tilt: 0.010,
-                         primary: false,
-                         showsLabel: false)
-
         let rightX = sceneSize.width / 2 - insets.right - 38
         addCommandButton(.explore,
                          size: sideSize,
@@ -1005,12 +1005,105 @@ final class HUDLayer: SKNode {
         [-0.012, 0.006, -0.004, 0.008, -0.010][seed % 5]
     }
 
+    private func addDirectionsButton(size: CGSize,
+                                     position: CGPoint,
+                                     tilt: CGFloat) {
+        let button = SKNode()
+        button.name = "cmd_directions_menu"
+        button.position = position
+        button.zRotation = tilt
+
+        let card = makeActionCard(size: size,
+                                  accent: HUDPalette.teal,
+                                  primary: true)
+        button.addChild(card)
+
+        let highlight = SKShapeNode(rectOf: CGSize(width: size.width - 4, height: size.height - 4),
+                                    cornerRadius: 7)
+        highlight.fillColor = HUDPalette.teal.withAlphaComponent(0.12)
+        highlight.strokeColor = HUDPalette.teal.withAlphaComponent(0.78)
+        highlight.lineWidth = 1.5
+        highlight.glowWidth = 1.5
+        highlight.zPosition = 4
+        highlight.isHidden = true
+        button.addChild(highlight)
+
+        let icon = HUDLayer.directionPadIconNode(color: HUDPalette.teal)
+        icon.position = CGPoint(x: 0, y: 4)
+        icon.zPosition = 5
+        button.addChild(icon)
+
+        let text = makeLabel(text: "Direções",
+                             fontSize: 9.2,
+                             style: .bodyBold,
+                             color: HUDPalette.ink)
+        text.horizontalAlignmentMode = .center
+        text.position = CGPoint(x: 0, y: -18)
+        text.preferredMaxLayoutWidth = size.width - 8
+        text.numberOfLines = 1
+        text.zPosition = 5
+        button.addChild(text)
+
+        addChild(button)
+        directionsButton = button
+        directionsButtonHighlight = highlight
+    }
+
+    private func buildDirectionsMenu(anchor: CGPoint) {
+        let menu = SKNode()
+        menu.position = CGPoint(x: anchor.x, y: anchor.y + 118)
+        menu.zPosition = 24
+        menu.alpha = 0
+        menu.setScale(0.86)
+        menu.isHidden = true
+        addChild(menu)
+        directionsMenu = menu
+
+        let size = CGSize(width: 54, height: 46)
+        addCommandButton(.goUp,
+                         size: size,
+                         position: CGPoint(x: 0, y: 52),
+                         tilt: -0.006,
+                         primary: false,
+                         showsLabel: true,
+                         parent: menu)
+        addCommandButton(.goLeft,
+                         size: size,
+                         position: CGPoint(x: -58, y: 0),
+                         tilt: 0.008,
+                         primary: false,
+                         showsLabel: true,
+                         parent: menu)
+        addCommandButton(.rest,
+                         size: size,
+                         position: .zero,
+                         tilt: -0.004,
+                         primary: false,
+                         showsLabel: true,
+                         parent: menu)
+        addCommandButton(.goRight,
+                         size: size,
+                         position: CGPoint(x: 58, y: 0),
+                         tilt: -0.008,
+                         primary: false,
+                         showsLabel: true,
+                         parent: menu)
+        addCommandButton(.goDown,
+                         size: size,
+                         position: CGPoint(x: 0, y: -52),
+                         tilt: 0.006,
+                         primary: false,
+                         showsLabel: true,
+                         parent: menu)
+    }
+
     private func addCommandButton(_ command: PlayerCommand,
                                   size: CGSize,
                                   position: CGPoint,
                                   tilt: CGFloat,
                                   primary: Bool,
-                                  showsLabel: Bool) {
+                                  showsLabel: Bool,
+                                  parent: SKNode? = nil) {
         let button = SKNode()
         button.name = "cmd_\(command.rawValue)"
         button.position = position
@@ -1039,7 +1132,7 @@ final class HUDLayer: SKNode {
 
         if showsLabel {
             let text = makeLabel(text: command.label,
-                                 fontSize: 9.2,
+                                 fontSize: size.width < 60 ? 8.2 : 9.2,
                                  style: .bodyBold,
                                  color: HUDPalette.ink)
             text.horizontalAlignmentMode = .center
@@ -1061,7 +1154,7 @@ final class HUDLayer: SKNode {
 
         addCooldownOverlay(for: command, size: size, to: button)
 
-        addChild(button)
+        (parent ?? self).addChild(button)
         buttons[command] = button
         buttonSizes[command] = size
     }
@@ -1265,6 +1358,11 @@ final class HUDLayer: SKNode {
         }
 
         disabledCommands = Set(commandCooldowns.keys.filter { (commandCooldowns[$0] ?? 0) > 0 })
+        directionsMenuEnabled = !eggMode
+        directionsButton?.alpha = directionsMenuEnabled ? 1 : 0.42
+        if !directionsMenuEnabled {
+            setDirectionsMenu(open: false, animated: false)
+        }
         let stateChanged = eggMode != lastEggMode || objectiveAvailable != lastObjectiveAvailable
         lastEggMode = eggMode
         lastObjectiveAvailable = objectiveAvailable
@@ -1303,6 +1401,35 @@ final class HUDLayer: SKNode {
                 highlight.strokeColor = command.tint.withAlphaComponent(0.72)
                 highlight.glowWidth = 1.5
             }
+        }
+    }
+
+    private func setDirectionsMenu(open: Bool, animated: Bool = true) {
+        guard directionsMenu != nil else { return }
+        isDirectionsMenuOpen = open
+        directionsButtonHighlight?.isHidden = !open
+        directionsMenu.removeAllActions()
+        if open {
+            directionsMenu.isHidden = false
+            let reveal = SKAction.group([
+                .fadeAlpha(to: 1, duration: animated ? 0.14 : 0),
+                .scale(to: 1, duration: animated ? 0.16 : 0)
+            ])
+            reveal.timingMode = .easeOut
+            directionsMenu.run(reveal)
+        } else {
+            let hide = SKAction.group([
+                .fadeAlpha(to: 0, duration: animated ? 0.10 : 0),
+                .scale(to: 0.86, duration: animated ? 0.12 : 0)
+            ])
+            hide.timingMode = .easeIn
+            directionsMenu.run(.sequence([
+                hide,
+                .run { [weak self] in
+                    guard let self, !self.isDirectionsMenuOpen else { return }
+                    self.directionsMenu.isHidden = true
+                }
+            ]))
         }
     }
 
@@ -1550,6 +1677,13 @@ final class HUDLayer: SKNode {
                     onNameEditTap?()
                     return
                 }
+                if name == "cmd_directions_menu" {
+                    guard directionsMenuEnabled else { return }
+                    GameAudio.shared.play(.uiTap)
+                    flashNode(directionsButton)
+                    setDirectionsMenu(open: !isDirectionsMenuOpen)
+                    return
+                }
                 if name == "cmd_give_space" {
                     guard bondRecoveryTapEnabled else { return }
                     GameAudio.shared.play(.uiConfirm)
@@ -1559,10 +1693,18 @@ final class HUDLayer: SKNode {
                 }
                 if name.hasPrefix("cmd_"),
                    let command = PlayerCommand(rawValue: String(name.dropFirst(4))) {
+                    if directionsMenuCommands.contains(command) {
+                        guard isDirectionsMenuOpen else { return }
+                    } else {
+                        setDirectionsMenu(open: false)
+                    }
                     guard !disabledCommands.contains(command) else { return }
                     GameAudio.shared.play(.uiTap)
                     flashButton(command)
                     onCommand?(command)
+                    if directionsMenuCommands.contains(command) {
+                        setDirectionsMenu(open: false)
+                    }
                     return
                 }
                 if name == "cmd_debug_rig_tool" {
@@ -1695,9 +1837,50 @@ final class HUDLayer: SKNode {
                                   width: 1.9))
             addDot(to: node, at: CGPoint(x: -8, y: 4), radius: 1.2, color: color)
             addDot(to: node, at: CGPoint(x: 8, y: -1), radius: 1.0, color: color)
+        case .goLeft:
+            node.addChild(pathNode(points: [CGPoint(x: 9, y: 0), CGPoint(x: -9, y: 0)],
+                                  color: color,
+                                  width: 1.9))
+            node.addChild(pathNode(points: [CGPoint(x: -3, y: -6), CGPoint(x: -9, y: 0), CGPoint(x: -3, y: 6)],
+                                  color: color,
+                                  width: 1.9))
+            addDot(to: node, at: CGPoint(x: 4, y: -8), radius: 1.2, color: color)
+            addDot(to: node, at: CGPoint(x: -1, y: 8), radius: 1.0, color: color)
+        case .goRight:
+            node.addChild(pathNode(points: [CGPoint(x: -9, y: 0), CGPoint(x: 9, y: 0)],
+                                  color: color,
+                                  width: 1.9))
+            node.addChild(pathNode(points: [CGPoint(x: 3, y: -6), CGPoint(x: 9, y: 0), CGPoint(x: 3, y: 6)],
+                                  color: color,
+                                  width: 1.9))
+            addDot(to: node, at: CGPoint(x: -4, y: -8), radius: 1.2, color: color)
+            addDot(to: node, at: CGPoint(x: 1, y: 8), radius: 1.0, color: color)
         case .travel:
             node.addChild(assetIconNode(named: "roadmap", color: color, size: 24))
         }
+        return node
+    }
+
+    private static func directionPadIconNode(color: UIColor) -> SKNode {
+        let node = SKNode()
+        node.addChild(pathNode(points: [CGPoint(x: 0, y: -10), CGPoint(x: 0, y: 10)],
+                              color: color,
+                              width: 1.7))
+        node.addChild(pathNode(points: [CGPoint(x: -10, y: 0), CGPoint(x: 10, y: 0)],
+                              color: color,
+                              width: 1.7))
+        node.addChild(pathNode(points: [CGPoint(x: -4, y: 5), CGPoint(x: 0, y: 10), CGPoint(x: 4, y: 5)],
+                              color: color,
+                              width: 1.7))
+        node.addChild(pathNode(points: [CGPoint(x: -4, y: -5), CGPoint(x: 0, y: -10), CGPoint(x: 4, y: -5)],
+                              color: color,
+                              width: 1.7))
+        node.addChild(pathNode(points: [CGPoint(x: -5, y: -4), CGPoint(x: -10, y: 0), CGPoint(x: -5, y: 4)],
+                              color: color,
+                              width: 1.7))
+        node.addChild(pathNode(points: [CGPoint(x: 5, y: -4), CGPoint(x: 10, y: 0), CGPoint(x: 5, y: 4)],
+                              color: color,
+                              width: 1.7))
         return node
     }
 
