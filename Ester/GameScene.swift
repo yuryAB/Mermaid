@@ -256,6 +256,8 @@ class GameScene: SKScene {
     private var climbOverlay: BubbleClimbOverlay?
     private var snapOverlay: ShellSnapOverlay?
     private var banquetOverlay: BanquetOfTidesOverlay?
+    private var memoryOverlay: TideMemoryOverlay?
+    private var reefAsteroidsOverlay: ReefAsteroidsOverlay?
     private var pendingPOIChallengeCompletion: ((ChallengeResult) -> Void)?
     private var challengeBackdrop: SKNode?
     private var challengeChoiceMenu: ChallengeChoiceOverlay?
@@ -665,6 +667,8 @@ class GameScene: SKScene {
         climbOverlay?.update(dt: dt)
         snapOverlay?.update(dt: dt)
         banquetOverlay?.update(dt: dt)
+        memoryOverlay?.update(dt: dt)
+        reefAsteroidsOverlay?.update(dt: dt)
 
         // no Refúgio o tempo é gentil: descanso acelerado
         if let refuge = refugeOverlay {
@@ -1096,13 +1100,22 @@ class GameScene: SKScene {
     // MARK: - Desafios
 
     var isChallengeOpen: Bool {
-        plotOverlay != nil || climbOverlay != nil || snapOverlay != nil || banquetOverlay != nil
+        plotOverlay != nil
+            || climbOverlay != nil
+            || snapOverlay != nil
+            || banquetOverlay != nil
+            || memoryOverlay != nil
+            || reefAsteroidsOverlay != nil
     }
 
     /// Abre o desafio oferecido por um NPC (hoje, um peixe).
     func openChallenge(giver: FishNode) {
         guard !isChallengeOpen, challengeChoiceMenu == nil, refugeOverlay == nil else { return }
         guard let kind = giver.offeredChallenge else { return }
+        guard kind.isAvailable else {
+            ctx.challenges.consumeChallenge(of: giver)
+            return
+        }
         GameAudio.shared.play(.challengeOpen)
         let special = giver.isSpecialChallenge
         let giverDisplay = giver.makeGiverDisplayNode()
@@ -1148,6 +1161,7 @@ class GameScene: SKScene {
                                   special: Bool,
                                   giverDisplay: SKNode?,
                                   hatching: Bool = false) {
+        guard hatching || kind.isAvailable else { return }
         closeRegionMenu()
         closeChallengeChoiceMenu(playSound: false)
         let zone = ctx.depth.currentZone
@@ -1222,6 +1236,36 @@ class GameScene: SKScene {
             overlay.position = CGPoint(x: 0, y: -modalDropOffset)
             cameraNode.addChild(overlay)
             banquetOverlay = overlay
+
+        case .memory:
+            let overlay = TideMemoryOverlay(size: size,
+                                            zone: zone,
+                                            phase: stats.phase,
+                                            special: special,
+                                            shellRewardMultiplier: stats.shellRewardMultiplier,
+                                            giverDisplay: giverDisplay,
+                                            bestScore: stats.highScore(for: .memory)) { [weak self] result in
+                self?.closeChallenge(result: result, zone: zone)
+            }
+            overlay.zPosition = 200
+            overlay.position = CGPoint(x: 0, y: -modalDropOffset)
+            cameraNode.addChild(overlay)
+            memoryOverlay = overlay
+
+        case .reefAsteroids:
+            let overlay = ReefAsteroidsOverlay(size: size,
+                                               zone: zone,
+                                               phase: stats.phase,
+                                               special: special,
+                                               shellRewardMultiplier: stats.shellRewardMultiplier,
+                                               giverDisplay: giverDisplay,
+                                               bestScore: stats.highScore(for: .reefAsteroids)) { [weak self] result in
+                self?.closeChallenge(result: result, zone: zone)
+            }
+            overlay.zPosition = 200
+            overlay.position = CGPoint(x: 0, y: -modalDropOffset)
+            cameraNode.addChild(overlay)
+            reefAsteroidsOverlay = overlay
         }
     }
 
@@ -1276,6 +1320,10 @@ class GameScene: SKScene {
         snapOverlay = nil
         banquetOverlay?.removeFromParent()
         banquetOverlay = nil
+        memoryOverlay?.removeFromParent()
+        memoryOverlay = nil
+        reefAsteroidsOverlay?.removeFromParent()
+        reefAsteroidsOverlay = nil
         challengeBackdrop?.removeFromParent()
         challengeBackdrop = nil
         let poiCompletion = pendingPOIChallengeCompletion
@@ -1297,6 +1345,9 @@ class GameScene: SKScene {
         stats.boostMood(8)
         let adaptation = stats.adaptation(for: zone)
         stats.setAdaptation(adaptation + 3, for: zone)
+        let madeHighScore = result.kind == .reefAsteroids || result.kind == .memory
+            ? stats.recordHighScore(result.points, for: result.kind)
+            : false
         if result.reachedTarget {
             stats.puzzlesSolved += 1
             stats.addMemory("Venceu o \(result.kind.title) em \(zone.displayName)")
@@ -1305,9 +1356,10 @@ class GameScene: SKScene {
         if let poiCompletion {
             poiCompletion(result)
         } else {
+            let recordText = madeHighScore ? " Novo recorde!" : ""
             ctx.say(result.reachedTarget
-                    ? "Ela adorou o \(result.kind.title)! 🐚+\(GameUI.shellAmountText(gainedPearls))"
-                    : "Quase! Ainda assim ganhou 🐚+\(GameUI.shellAmountText(gainedPearls))")
+                    ? "Ela adorou o \(result.kind.title)!\(recordText) 🐚+\(GameUI.shellAmountText(gainedPearls))"
+                    : "Quase!\(recordText) Ainda assim ganhou 🐚+\(GameUI.shellAmountText(gainedPearls))")
         }
     }
 

@@ -33,6 +33,7 @@ final class MermaidStats: Codable {
                                          DepthZone.mid.storageKey]
     var maxDepthMeters: CGFloat = 0
     var puzzlesSolved: Int = 0
+    var challengeHighScores: [String: Int] = [:]
     var mealsEaten: Int = 0
     var memories: [String] = []
     var lastSaved: Date = Date()
@@ -83,7 +84,7 @@ final class MermaidStats: Codable {
         case mermaidName, hunger, energy, mood, courage, trust, curiosity, pearls
         case phase, birthDate, phaseStartedAt, adaptationByZone, unlockedZoneKeys
         case maxDepthMeters
-        case puzzlesSolved, mealsEaten, memories, lastSaved, hatchProgress
+        case puzzlesSolved, challengeHighScores, mealsEaten, memories, lastSaved, hatchProgress
         case posX, posY, discoveredRegionIds, regionProgress, expeditionRevealByRegion
         case discoveredPOIKeys, visitedPOIKeys, collectedPOIRewardKeys
         case inventoryItems, activeBuffs, currentRegionId
@@ -124,6 +125,7 @@ final class MermaidStats: Codable {
         }
         maxDepthMeters = try c.decodeIfPresent(CGFloat.self, forKey: .maxDepthMeters) ?? 0
         puzzlesSolved = try c.decodeIfPresent(Int.self, forKey: .puzzlesSolved) ?? 0
+        challengeHighScores = try c.decodeIfPresent([String: Int].self, forKey: .challengeHighScores) ?? [:]
         mealsEaten = try c.decodeIfPresent(Int.self, forKey: .mealsEaten) ?? 0
         memories = try c.decodeIfPresent([String].self, forKey: .memories) ?? []
         lastSaved = try c.decodeIfPresent(Date.self, forKey: .lastSaved) ?? Date()
@@ -170,6 +172,17 @@ final class MermaidStats: Codable {
     var disposition: CGFloat {
         get { mood }
         set { mood = newValue }
+    }
+
+    func highScore(for kind: ChallengeKind) -> Int {
+        challengeHighScores[kind.rawValue] ?? 0
+    }
+
+    @discardableResult
+    func recordHighScore(_ score: Int, for kind: ChallengeKind) -> Bool {
+        guard score > highScore(for: kind) else { return false }
+        challengeHighScores[kind.rawValue] = score
+        return true
     }
 
     var ageDays: Double { Date().timeIntervalSince(birthDate) / 86400 }

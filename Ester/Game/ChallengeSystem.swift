@@ -14,7 +14,7 @@ import SpriteKit
 
 // MARK: - Tipos de desafio
 
-enum ChallengeKind: String, CaseIterable, Codable {
+enum ChallengeKind: String, CaseIterable, Codable, Hashable {
     /// Match-3 (antiga "Trama das Marés").
     case plot
     /// Subir o mais alto possível pegando bolhas antes do tempo acabar.
@@ -23,6 +23,21 @@ enum ChallengeKind: String, CaseIterable, Codable {
     case snap
     /// Comer alimentos bons, crescer e desviar de perigos numa arena.
     case banquet
+    /// Virar cartas, lembrar posições e encontrar todos os pares.
+    case memory
+    /// Pedras e corais quebram em partes menores numa arena infinita de high score.
+    case reefAsteroids
+
+    // Pausados: mantidos no projeto, mas fora de sorteios, menus e abertura direta.
+    static let disabledCases: Set<ChallengeKind> = [.ascent, .reefAsteroids]
+
+    static var availableCases: [ChallengeKind] {
+        allCases.filter(\.isAvailable)
+    }
+
+    var isAvailable: Bool {
+        !Self.disabledCases.contains(self)
+    }
 
     var shortName: String {
         switch self {
@@ -30,12 +45,16 @@ enum ChallengeKind: String, CaseIterable, Codable {
         case .ascent: return "Subida"
         case .snap: return "Estalo"
         case .banquet: return "Banquete"
+        case .memory: return "Lembrança"
+        case .reefAsteroids: return "Ruptura"
         }
     }
 
     var title: String {
         switch self {
         case .banquet: return "Desafio: Banquete das Marés"
+        case .memory: return "Desafio: Lembranças da Maré"
+        case .reefAsteroids: return "Desafio: Ruptura do Recife"
         default: return "Desafio: \(shortName)"
         }
     }
@@ -46,6 +65,8 @@ enum ChallengeKind: String, CaseIterable, Codable {
         case .ascent: return "Suba pelas bolhas antes que o fôlego acabe."
         case .snap: return "Toque grupos iguais, mantenha combo e solte ondas."
         case .banquet: return "Coma as delícias, cresça e fuja dos perigos."
+        case .memory: return "Vire pares, guarde posições e complete a lembrança."
+        case .reefAsteroids: return "Quebre pedras e corais, faça combo e sobreviva à maré."
         }
     }
 
@@ -55,6 +76,8 @@ enum ChallengeKind: String, CaseIterable, Codable {
         case .ascent: return "○"
         case .snap: return "✦"
         case .banquet: return "●"
+        case .memory: return "?"
+        case .reefAsteroids: return "◆"
         }
     }
 
@@ -64,6 +87,8 @@ enum ChallengeKind: String, CaseIterable, Codable {
         case .ascent: return UIColor(red: 0.38, green: 0.58, blue: 0.90, alpha: 1)
         case .snap: return GameUI.coral
         case .banquet: return GameUI.gold
+        case .memory: return UIColor(red: 0.38, green: 0.86, blue: 0.92, alpha: 1)
+        case .reefAsteroids: return UIColor(red: 0.26, green: 0.75, blue: 0.92, alpha: 1)
         }
     }
 }
@@ -112,12 +137,13 @@ final class ChallengeSystem {
         let spawnChallengeChance = GameBalance.challengeSpawnChanceTenths(for: ctx.stats.phase)
         guard nearbyGivers(to: fish.position, maxDistance: 2600).count < maxNearbyGivers else { return }
         guard Int.random(in: 0..<10) < spawnChallengeChance else { return }
-        fish.offeredChallenge = ChallengeKind.allCases.randomElement()
+        guard let kind = ChallengeKind.availableCases.randomElement() else { return }
+        fish.offeredChallenge = kind
     }
 
     func nearbyGivers(to point: CGPoint, maxDistance: CGFloat) -> [FishNode] {
         ctx.fish.fishes.filter {
-            $0.offeredChallenge != nil
+            $0.offeredChallenge?.isAvailable == true
                 && $0.position.distance(to: point) <= maxDistance
         }
     }
@@ -130,6 +156,7 @@ final class ChallengeSystem {
     /// Garante que existe um peixe com desafio por perto (botão "Desafio").
     @discardableResult
     func ensureGiver(near point: CGPoint, kind preferredKind: ChallengeKind? = nil) -> FishNode? {
+        if preferredKind?.isAvailable == false { return nil }
         if let preferredKind,
            let existing = nearbyGivers(to: point, maxDistance: 2200)
             .filter({ $0.offeredChallenge == preferredKind })
@@ -139,16 +166,25 @@ final class ChallengeSystem {
         if preferredKind == nil, let existing = nearestGiver(to: point, maxDistance: 2200) {
             return existing
         }
+        let resolvedKind: ChallengeKind
+        if let preferredKind {
+            resolvedKind = preferredKind
+        } else if let randomKind = ChallengeKind.availableCases.randomElement() {
+            resolvedKind = randomKind
+        } else {
+            return nil
+        }
         let zone = DepthZone.zone(atY: point.y)
         guard let fish = ctx.fish.spawnFish(zone: zone, near: point) else { return nil }
-        fish.offeredChallenge = preferredKind ?? ChallengeKind.allCases.randomElement()
+        fish.offeredChallenge = resolvedKind
         return fish
     }
 
     /// Peixe dourado especial criado por eventos (recompensas maiores).
     func spawnSpecialGiver(near point: CGPoint, zone: DepthZone) {
+        guard let kind = ChallengeKind.availableCases.randomElement() else { return }
         guard let fish = ctx.fish.spawnFish(zone: zone, near: point, rare: true) else { return }
-        fish.offeredChallenge = ChallengeKind.allCases.randomElement()
+        fish.offeredChallenge = kind
         fish.isSpecialChallenge = true
     }
 
@@ -167,7 +203,7 @@ final class ChallengeChoiceOverlay: SKNode {
     private var choiceKinds: [String: ChallengeKind] = [:]
 
     init(size: CGSize,
-         kinds: [ChallengeKind] = ChallengeKind.allCases,
+         kinds: [ChallengeKind] = ChallengeKind.availableCases,
          onSelect: @escaping (ChallengeKind) -> Void,
          onClose: @escaping () -> Void) {
         self.onSelect = onSelect
@@ -182,10 +218,12 @@ final class ChallengeChoiceOverlay: SKNode {
         addChild(backdrop)
 
         let panelWidth = min(size.width - 32, size.width >= 700 ? 444 : 368)
-        let rowHeight: CGFloat = 82
         let rowSpacing: CGFloat = 10
+        let maxPanelHeight = size.height - 52
+        let spacingTotal = CGFloat(max(0, kinds.count - 1)) * rowSpacing
+        let rowHeight = min(82, max(62, (maxPanelHeight - 148 - spacingTotal) / CGFloat(max(1, kinds.count))))
         let panelHeight = min(size.height - 52,
-                              148 + CGFloat(kinds.count) * rowHeight + CGFloat(max(0, kinds.count - 1)) * rowSpacing)
+                              148 + CGFloat(kinds.count) * rowHeight + spacingTotal)
 
         let panel = GameUI.card(size: CGSize(width: panelWidth, height: panelHeight),
                                 cornerRadius: 22,
@@ -244,12 +282,13 @@ final class ChallengeChoiceOverlay: SKNode {
             icon.zPosition = 3
             rowContent.addChild(icon)
 
+            let isLongTitle = kind == .banquet || kind == .memory || kind == .reefAsteroids
             let name = makeLabel(kind.title,
-                                 fontSize: kind == .banquet ? 13.2 : 15,
+                                 fontSize: isLongTitle ? 13.2 : 15,
                                  color: GameUI.ink,
                                  bold: true,
                                  maxWidth: rowWidth - 152,
-                                 lines: kind == .banquet ? 2 : 1)
+                                 lines: isLongTitle ? 2 : 1)
             name.position = CGPoint(x: -rowWidth / 2 + 74, y: 20)
             rowContent.addChild(name)
 
@@ -488,6 +527,90 @@ enum ChallengeChrome {
             sparkle.position = CGPoint(x: 12, y: 12)
             sparkle.zPosition = 3
             node.addChild(sparkle)
+        case .memory:
+            let cardSize = CGSize(width: 23, height: 30)
+            for index in 0..<2 {
+                let card = SKShapeNode(rectOf: cardSize, cornerRadius: 5)
+                card.fillColor = index == 0
+                    ? GameUI.palePaper.withAlphaComponent(0.82)
+                    : UIColor.lerp(GameUI.accent, GameUI.gold, 0.24).withAlphaComponent(0.76)
+                card.strokeColor = UIColor.white.withAlphaComponent(0.62)
+                card.lineWidth = 1.2
+                card.position = CGPoint(x: CGFloat(index) * 10 - 5, y: CGFloat(index) * 4 - 2)
+                card.zRotation = CGFloat(index == 0 ? -0.18 : 0.16)
+                node.addChild(card)
+            }
+
+            let mark = SKLabelNode(text: "?")
+            mark.fontName = "AvenirNext-Heavy"
+            mark.fontSize = 18
+            mark.fontColor = GameUI.gold
+            mark.verticalAlignmentMode = .center
+            mark.horizontalAlignmentMode = .center
+            mark.position = CGPoint(x: 5, y: 1)
+            mark.zPosition = 4
+            node.addChild(mark)
+
+            let threadPath = UIBezierPath()
+            threadPath.move(to: CGPoint(x: -16, y: -12))
+            threadPath.addCurve(to: CGPoint(x: 17, y: 13),
+                                controlPoint1: CGPoint(x: -7, y: 2),
+                                controlPoint2: CGPoint(x: 7, y: -1))
+            let thread = SKShapeNode(path: threadPath.cgPath)
+            thread.fillColor = .clear
+            thread.strokeColor = UIColor.lerp(GameUI.accent, .white, 0.28).withAlphaComponent(0.62)
+            thread.lineWidth = 1.8
+            thread.lineCap = .round
+            thread.glowWidth = 3
+            thread.zPosition = 5
+            node.addChild(thread)
+        case .reefAsteroids:
+            let rockPath = UIBezierPath()
+            let points = [
+                CGPoint(x: -14, y: -5),
+                CGPoint(x: -8, y: 13),
+                CGPoint(x: 6, y: 15),
+                CGPoint(x: 15, y: 2),
+                CGPoint(x: 9, y: -13),
+                CGPoint(x: -7, y: -15)
+            ]
+            for (index, point) in points.enumerated() {
+                if index == 0 {
+                    rockPath.move(to: point)
+                } else {
+                    rockPath.addLine(to: point)
+                }
+            }
+            rockPath.close()
+            let rock = SKShapeNode(path: rockPath.cgPath)
+            rock.fillColor = GameUI.line.withAlphaComponent(0.58)
+            rock.strokeColor = UIColor.white.withAlphaComponent(0.58)
+            rock.lineWidth = 1.3
+            node.addChild(rock)
+
+            let crack = UIBezierPath()
+            crack.move(to: CGPoint(x: -5, y: 9))
+            crack.addLine(to: CGPoint(x: 0, y: 1))
+            crack.addLine(to: CGPoint(x: -3, y: -8))
+            let crackNode = SKShapeNode(path: crack.cgPath)
+            crackNode.fillColor = .clear
+            crackNode.strokeColor = GameUI.palePaper.withAlphaComponent(0.70)
+            crackNode.lineWidth = 1.2
+            crackNode.lineCap = .round
+            node.addChild(crackNode)
+
+            for angle in [CGFloat(-0.25), CGFloat(0.55), CGFloat(1.30)] {
+                let branch = UIBezierPath()
+                branch.move(to: CGPoint(x: 2, y: -2))
+                branch.addLine(to: CGPoint(x: cos(angle) * 17, y: sin(angle) * 17))
+                let branchNode = SKShapeNode(path: branch.cgPath)
+                branchNode.fillColor = .clear
+                branchNode.strokeColor = UIColor.lerp(GameUI.coral, GameUI.gold, 0.34)
+                branchNode.lineWidth = 2
+                branchNode.lineCap = .round
+                branchNode.zPosition = 2
+                node.addChild(branchNode)
+            }
         }
 
         return node

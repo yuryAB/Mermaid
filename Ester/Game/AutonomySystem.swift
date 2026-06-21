@@ -665,6 +665,10 @@ final class AutonomySystem {
 
     @discardableResult
     func requestChallenge(kind: ChallengeKind) -> Bool {
+        guard kind.isAvailable else {
+            refuse(.challenge, saying: "\(kind.title) está pausado por enquanto.")
+            return false
+        }
         clearExpiredCommandCooldowns()
 
         let guaranteedByBabyStart = stats.canUseBabyGuaranteedRequest
