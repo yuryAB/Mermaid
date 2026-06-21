@@ -11,11 +11,16 @@ import SpriteKit
 
 // MARK: - Regras puras
 
+private struct TideMemoryTimeRecovery {
+    let timeLeft: CGFloat
+    let addedTime: CGFloat
+}
+
 private enum TideMemoryRules {
     static let rows = 4
     static let columns = 4
     static let startTime: CGFloat = 52
-    static let maxTime: CGFloat = 58
+    static let maxTime: CGFloat = 68
     static let mismatchPenalty: CGFloat = 1.6
     static let comboWindow: CGFloat = 3.8
     static let flipFadeOutDuration: TimeInterval = 0.045
@@ -46,10 +51,30 @@ private enum TideMemoryRules {
         return base + streakBonus + quickBonus + closeoutBonus
     }
 
-    static func timeBonus(streak: Int, revealGap: CGFloat) -> CGFloat {
-        let streakBonus = streak >= 3 ? min(1.6, CGFloat(streak) * 0.18) : 0
-        let quickBonus: CGFloat = revealGap <= 2.4 ? 0.55 : 0
-        return streakBonus + quickBonus
+    static func timeBonus(streak: Int, revealGap: CGFloat, timeLeft: CGFloat) -> CGFloat {
+        let base: CGFloat = 0.65
+        let quickBonus: CGFloat
+        if revealGap <= 1.4 {
+            quickBonus = 1.15
+        } else if revealGap <= 2.5 {
+            quickBonus = 0.80
+        } else if revealGap <= 4.0 {
+            quickBonus = 0.45
+        } else {
+            quickBonus = 0.20
+        }
+
+        let streakBonus = streak >= 2 ? min(1.40, CGFloat(streak - 1) * 0.28) : 0
+        let pressureBonus: CGFloat
+        if timeLeft <= 14 {
+            pressureBonus = 0.85
+        } else if timeLeft <= 24 {
+            pressureBonus = 0.45
+        } else {
+            pressureBonus = 0
+        }
+
+        return min(3.10, base + quickBonus + streakBonus + pressureBonus)
     }
 
     static func finalBonus(timeLeft: CGFloat, mistakes: Int, allMatched: Bool) -> Int {
@@ -66,8 +91,42 @@ private enum TideMemoryRules {
     }
 
     static func waveTimeBonus(wave: Int, mistakesThisWave: Int) -> CGFloat {
-        let cleanBonus = mistakesThisWave == 0 ? 2.2 : 0
-        return min(6.0, 3.0 + CGFloat(wave) * 0.25 + cleanBonus)
+        let cleanBonus: CGFloat
+        if mistakesThisWave == 0 {
+            cleanBonus = 6.0
+        } else if mistakesThisWave <= 2 {
+            cleanBonus = 3.0
+        } else {
+            cleanBonus = 0
+        }
+
+        let waveRamp = min(2.0, CGFloat(wave) * 0.18)
+        let mistakeTax = min(4.0, CGFloat(mistakesThisWave) * 0.60)
+        return max(6.0, min(14.0, 8.0 + waveRamp + cleanBonus - mistakeTax))
+    }
+
+    static func waveTimeFloor(mistakesThisWave: Int) -> CGFloat {
+        switch mistakesThisWave {
+        case 0:
+            return 46
+        case 1...2:
+            return 40
+        case 3...5:
+            return 34
+        default:
+            return 28
+        }
+    }
+
+    static func recoverTimeAfterWave(currentTime: CGFloat,
+                                     wave: Int,
+                                     mistakesThisWave: Int) -> TideMemoryTimeRecovery {
+        let additiveTime = currentTime + waveTimeBonus(wave: wave,
+                                                       mistakesThisWave: mistakesThisWave)
+        let floorTime = waveTimeFloor(mistakesThisWave: mistakesThisWave)
+        let recoveredTime = min(maxTime, max(additiveTime, floorTime))
+        return TideMemoryTimeRecovery(timeLeft: recoveredTime,
+                                      addedTime: recoveredTime - currentTime)
     }
 }
 
@@ -933,7 +992,9 @@ final class TideMemoryOverlay: SKNode {
         let gained = TideMemoryRules.matchPoints(streak: streak,
                                                  revealGap: revealGap,
                                                  remainingPairs: board.remainingPairs)
-        let addedTime = TideMemoryRules.timeBonus(streak: streak, revealGap: revealGap)
+        let addedTime = TideMemoryRules.timeBonus(streak: streak,
+                                                  revealGap: revealGap,
+                                                  timeLeft: timeLeft)
         score += gained
         timeLeft = min(TideMemoryRules.maxTime, timeLeft + addedTime)
 
@@ -1169,10 +1230,12 @@ final class TideMemoryOverlay: SKNode {
         let bonus = TideMemoryRules.waveBonus(wave: completedWave,
                                               timeLeft: timeLeft,
                                               mistakesThisWave: mistakesThisWave)
-        let addedTime = TideMemoryRules.waveTimeBonus(wave: completedWave,
-                                                      mistakesThisWave: mistakesThisWave)
+        let recovery = TideMemoryRules.recoverTimeAfterWave(currentTime: timeLeft,
+                                                            wave: completedWave,
+                                                            mistakesThisWave: mistakesThisWave)
+        let addedTime = recovery.addedTime
         score += bonus
-        timeLeft = min(TideMemoryRules.maxTime, timeLeft + addedTime)
+        timeLeft = recovery.timeLeft
         challengeCompleted = challengeCompleted || score >= currentGoal
         updateStatusUI()
 
