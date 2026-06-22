@@ -134,11 +134,11 @@ final class GrowthSystem {
         }
 
         let skipped = min(shellGrowthSkipSeconds, remaining)
-        ctx.stats.pearls -= shellGrowthCost
+        guard ctx.stats.spendPearls(shellGrowthCost, autosave: false) else { return false }
         ctx.stats.phaseStartedAt = ctx.stats.phaseStartedAt.addingTimeInterval(-skipped)
         ctx.stats.addMemory("Conchas aceleraram \(GrowthSystem.formatDuration(skipped)) do crescimento")
         ctx.say("Crescimento acelerado em \(GrowthSystem.formatDuration(skipped)).")
-        if canEvolve() { evolve() } else { ctx.stats.save() }
+        if canEvolve() { evolve() } else { ctx.stats.save(immediately: true) }
         return true
     }
 
@@ -715,6 +715,6 @@ final class GrowthSystem {
         }
 
         ctx.say("✨ Ela evoluiu: agora é \(next.displayName)! 🐚+\(GameUI.shellAmountText(gained))")
-        ctx.stats.save()
+        ctx.stats.save(immediately: true)
     }
 }

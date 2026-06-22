@@ -15,6 +15,7 @@ conchasFinais = min(round(conchasBase * multiplicadorDeGanhoDeConchas), pontosBr
 
 `pontosBrutos` seguem visiveis na tela e continuam valendo para recordes. `pontosEconomicos` existem so para converter recompensa.
 Regra dura: conchas finais nunca podem ser maiores que pontos brutos.
+O multiplicador global de ganho de conchas comeca em 0.45x, sobe +0.02 por nivel do aprimoramento "Ganho de conchas" e trava em 1.8x.
 
 ## Criterio de Dificuldade
 
@@ -41,12 +42,12 @@ Para escolher a nota, avaliar:
 
 | Minigame | Volume de pontos | Dificuldade | Taxa ponto -> concha | Multiplicador de meta | Racional |
 |---|---:|---:|---:|---:|---|
-| Subida | Muito baixo | 4 | 0.75 | 0.50 | Cada bolha vale so 1 ponto; maior taxa, mas sempre abaixo do score. |
-| Trama | Baixo | 2 | 0.62 | 0.50 | Score cresce devagar, mas jogo e simples e perdoa bastante. |
-| Lembrancas | Medio-alto | 4 | 0.50 | 0.65 | Exige memoria e pune erro; bonus de meta paga execucao boa. |
-| Banquete | Medio-alto | 3 | 0.46 | 0.55 | Movimento e risco elevam dificuldade, mas pontuacao sobe em blocos grandes. |
-| Estalo | Alto | 2 | 0.36 | 0.35 | Pontua muito rapido em grupos e combos; concha por ponto deve ser menor. |
-| Ruptura | Muito alto | 5 | 0.16 | 0.75 | Score bruto e enorme; taxa baixa compensa volume, bonus paga risco. |
+| Subida | Muito baixo | 4 | 0.58 | 0.35 | Cada bolha vale so 1 ponto; taxa ainda maior, mas sem acelerar demais o inicio. |
+| Trama | Baixo | 2 | 0.38 | 0.35 | Score cresce devagar, mas jogo e simples e perdoa bastante. |
+| Lembrancas | Medio-alto | 4 | 0.32 | 0.45 | Exige memoria e pune erro; bonus de meta paga execucao boa sem inflar tentativas ruins. |
+| Banquete | Medio-alto | 3 | 0.28 | 0.35 | Movimento e risco elevam dificuldade, mas pontuacao sobe em blocos grandes. |
+| Estalo | Alto | 2 | 0.20 | 0.20 | Pontua muito rapido em grupos e combos; concha por ponto deve ser bem menor. |
+| Ruptura | Muito alto | 5 | 0.09 | 0.50 | Score bruto e enorme; taxa baixa compensa volume, bonus paga risco. |
 
 ## Regra de Ajuste
 

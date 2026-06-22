@@ -99,33 +99,33 @@ enum GameBalance {
         case .plot:
             return ChallengeRewardProfile(difficultyTier: 2,
                                           scoreVolume: "baixo",
-                                          scoreToShellRate: 0.62,
-                                          completionBonusMultiplier: 0.50)
+                                          scoreToShellRate: 0.38,
+                                          completionBonusMultiplier: 0.35)
         case .ascent:
             return ChallengeRewardProfile(difficultyTier: 4,
                                           scoreVolume: "muito baixo",
-                                          scoreToShellRate: 0.75,
-                                          completionBonusMultiplier: 0.50)
+                                          scoreToShellRate: 0.58,
+                                          completionBonusMultiplier: 0.35)
         case .snap:
             return ChallengeRewardProfile(difficultyTier: 2,
                                           scoreVolume: "alto",
-                                          scoreToShellRate: 0.36,
-                                          completionBonusMultiplier: 0.35)
+                                          scoreToShellRate: 0.20,
+                                          completionBonusMultiplier: 0.20)
         case .banquet:
             return ChallengeRewardProfile(difficultyTier: 3,
                                           scoreVolume: "medio-alto",
-                                          scoreToShellRate: 0.46,
-                                          completionBonusMultiplier: 0.55)
+                                          scoreToShellRate: 0.28,
+                                          completionBonusMultiplier: 0.35)
         case .memory:
             return ChallengeRewardProfile(difficultyTier: 4,
                                           scoreVolume: "medio-alto",
-                                          scoreToShellRate: 0.50,
-                                          completionBonusMultiplier: 0.65)
+                                          scoreToShellRate: 0.32,
+                                          completionBonusMultiplier: 0.45)
         case .reefAsteroids:
             return ChallengeRewardProfile(difficultyTier: 5,
                                           scoreVolume: "muito alto",
-                                          scoreToShellRate: 0.16,
-                                          completionBonusMultiplier: 0.75)
+                                          scoreToShellRate: 0.09,
+                                          completionBonusMultiplier: 0.50)
         }
     }
 

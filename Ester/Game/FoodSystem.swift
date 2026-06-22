@@ -292,11 +292,10 @@ final class FoodSystem {
               food.kind.isShellCurrency else { return nil }
         removeNode(food)
 
-        let amount = Int.random(in: 10...100)
-        ctx.stats.pearls += amount
+        let gained = ctx.stats.awardPearls(max(1, food.kind.pearls))
         GameAudio.shared.play(.pearlReward)
-        ctx.say("Você coletou \(food.kind.name). Conchas +\(GameUI.shellAmountText(amount))")
-        return amount
+        ctx.say("Você coletou \(food.kind.name). Conchas +\(GameUI.shellAmountText(gained))")
+        return gained
     }
 
     private func removeNode(_ food: FoodNode) {

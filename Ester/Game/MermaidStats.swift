@@ -573,8 +573,7 @@ final class MermaidStats: Codable {
     @discardableResult
     func buyUpgrade(_ kind: UpgradeKind) -> Bool {
         guard let cost = upgradeCost(for: kind) else { return false }
-        guard pearls >= cost else { return false }
-        pearls -= cost
+        guard spendPearls(cost, autosave: false) else { return false }
         switch kind {
         case .speed: speedUpgradeLevel += 1
         case .shellGain: shellGainUpgradeLevel += 1
@@ -583,7 +582,7 @@ final class MermaidStats: Codable {
         case .disposition: dispositionUpgradeLevel += 1
         }
         addMemory("Cuidou de \(kind.title.lowercased()) no Refúgio")
-        save()
+        save(immediately: true)
         return true
     }
 
@@ -599,7 +598,7 @@ final class MermaidStats: Codable {
     }
 
     var shellRewardMultiplier: CGFloat {
-        (0.65 + CGFloat(shellGainUpgradeLevel) * 0.035).clamped(to: 0.65...2.4)
+        (0.45 + CGFloat(shellGainUpgradeLevel) * 0.02).clamped(to: 0.45...1.8)
     }
 
     var feedingDrainMultiplier: CGFloat {
@@ -633,6 +632,16 @@ final class MermaidStats: Codable {
     func addMemory(_ text: String) {
         memories.append(text)
         if memories.count > 60 { memories.removeFirst() }
+    }
+
+    @discardableResult
+    func spendPearls(_ amount: Int, autosave: Bool = true) -> Bool {
+        guard amount > 0, pearls >= amount else { return false }
+        pearls -= amount
+        if autosave {
+            save(immediately: true)
+        }
+        return true
     }
 
     @discardableResult
@@ -735,16 +744,22 @@ final class MermaidStats: Codable {
         }
     }
 
-    func save() {
+    func save(immediately: Bool = false) {
         if cheatSessionPersistenceBlocked {
             guard let cheatSessionBaselineData else { return }
             UserDefaults.standard.set(cheatSessionBaselineData, forKey: MermaidStats.saveKey)
+            if immediately {
+                _ = UserDefaults.standard.synchronize()
+            }
             return
         }
 
         lastSaved = Date()
         if let data = try? JSONEncoder().encode(self) {
             UserDefaults.standard.set(data, forKey: MermaidStats.saveKey)
+            if immediately {
+                _ = UserDefaults.standard.synchronize()
+            }
         }
     }
 
