@@ -257,6 +257,7 @@ class GameScene: SKScene {
     private var snapOverlay: ShellSnapOverlay?
     private var banquetOverlay: BanquetOfTidesOverlay?
     private var memoryOverlay: TideMemoryOverlay?
+    private var echoMelodyOverlay: EchoMelodyOverlay?
     private var reefAsteroidsOverlay: ReefAsteroidsOverlay?
     private var pendingPOIChallengeCompletion: ((ChallengeResult) -> Void)?
     private var challengeBackdrop: SKNode?
@@ -762,6 +763,7 @@ class GameScene: SKScene {
         snapOverlay?.update(dt: dt)
         banquetOverlay?.update(dt: dt)
         memoryOverlay?.update(dt: dt)
+        echoMelodyOverlay?.update(dt: dt)
         reefAsteroidsOverlay?.update(dt: dt)
 
         // no Refúgio o tempo é gentil: descanso acelerado
@@ -1332,6 +1334,7 @@ class GameScene: SKScene {
             || snapOverlay != nil
             || banquetOverlay != nil
             || memoryOverlay != nil
+            || echoMelodyOverlay != nil
             || reefAsteroidsOverlay != nil
     }
 
@@ -1558,6 +1561,23 @@ class GameScene: SKScene {
             cameraNode.addChild(overlay)
             memoryOverlay = overlay
 
+        case .echoMelody:
+            let overlay = EchoMelodyOverlay(size: size,
+                                            zone: zone,
+                                            phase: stats.phase,
+                                            special: special,
+                                            shellRewardMultiplier: stats.shellRewardMultiplier,
+                                            victoryReward: victoryReward,
+                                            challengeGoal: challengeGoal,
+                                            giverDisplay: giverDisplay,
+                                            record: record) { [weak self] result in
+                self?.closeChallenge(result: result, zone: zone)
+            }
+            overlay.zPosition = 200
+            overlay.position = CGPoint(x: 0, y: -modalDropOffset)
+            cameraNode.addChild(overlay)
+            echoMelodyOverlay = overlay
+
         case .reefAsteroids:
             let overlay = ReefAsteroidsOverlay(size: size,
                                                zone: zone,
@@ -1630,6 +1650,8 @@ class GameScene: SKScene {
         banquetOverlay = nil
         memoryOverlay?.removeFromParent()
         memoryOverlay = nil
+        echoMelodyOverlay?.removeFromParent()
+        echoMelodyOverlay = nil
         reefAsteroidsOverlay?.removeFromParent()
         reefAsteroidsOverlay = nil
         challengeBackdrop?.removeFromParent()

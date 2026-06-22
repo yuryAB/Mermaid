@@ -175,6 +175,9 @@ final class GameAudio {
     private var ambiencePlayers: [GameAmbience: AVAudioPlayer] = [:]
     private var activeAmbience: GameAmbience?
     private var configured = false
+    private let toneEngine = AVAudioEngine()
+    private let tonePlayer = AVAudioPlayerNode()
+    private var toneEnginePrepared = false
 
     private init() {}
 
@@ -212,6 +215,26 @@ final class GameAudio {
         player.currentTime = 0
         player.volume = max(0, min(1, spec.volume * volumeMultiplier))
         player.play()
+    }
+
+    func playMelodyTone(frequency: Double,
+                        duration: TimeInterval,
+                        volume: Float = 0.18) {
+        configure()
+        guard prepareToneEngine(),
+              let buffer = makeToneBuffer(frequency: frequency,
+                                          duration: duration,
+                                          volume: volume) else { return }
+        do {
+            if !toneEngine.isRunning {
+                try toneEngine.start()
+            }
+            tonePlayer.stop()
+            tonePlayer.scheduleBuffer(buffer, at: nil, options: .interrupts, completionHandler: nil)
+            tonePlayer.play()
+        } catch {
+            // Musical cues are best-effort; visual feedback still carries gameplay.
+        }
     }
 
     func updateOceanAmbience(for zone: DepthZone) {
@@ -260,6 +283,40 @@ final class GameAudio {
         }
         playerPools[sound] = players
         return players
+    }
+
+    private func prepareToneEngine() -> Bool {
+        guard !toneEnginePrepared else { return true }
+        guard let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1) else { return false }
+        toneEngine.attach(tonePlayer)
+        toneEngine.connect(tonePlayer, to: toneEngine.mainMixerNode, format: format)
+        toneEnginePrepared = true
+        return true
+    }
+
+    private func makeToneBuffer(frequency: Double,
+                                duration: TimeInterval,
+                                volume: Float) -> AVAudioPCMBuffer? {
+        let sampleRate: Double = 44_100
+        let clampedDuration = max(0.08, min(1.2, duration))
+        guard let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1) else { return nil }
+        let frameCount = AVAudioFrameCount(sampleRate * clampedDuration)
+        guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount),
+              let channel = buffer.floatChannelData?[0] else { return nil }
+        buffer.frameLength = frameCount
+
+        let safeVolume = max(0, min(0.35, volume))
+        let totalFrames = max(1, Int(frameCount))
+        let twoPi = Double.pi * 2
+        for frame in 0..<totalFrames {
+            let progress = Float(frame) / Float(totalFrames)
+            let attack = min(1, progress / 0.10)
+            let release = min(1, (1 - progress) / 0.18)
+            let envelope = max(0, min(attack, release))
+            let t = Double(frame) / sampleRate
+            channel[frame] = Float(sin(twoPi * frequency * t)) * safeVolume * envelope
+        }
+        return buffer
     }
 
     private func ambiencePlayer(for ambience: GameAmbience) -> AVAudioPlayer? {

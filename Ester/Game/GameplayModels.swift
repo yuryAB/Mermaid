@@ -157,6 +157,10 @@ enum GameBalance {
             return ChallengeRewardProfile(difficultyTier: 4,
                                           scoreVolume: "medio-alto",
                                           scoreToShellRate: 0.32)
+        case .echoMelody:
+            return ChallengeRewardProfile(difficultyTier: 4,
+                                          scoreVolume: "medio",
+                                          scoreToShellRate: 0.30)
         case .reefAsteroids:
             return ChallengeRewardProfile(difficultyTier: 5,
                                           scoreVolume: "muito alto",
@@ -179,6 +183,8 @@ enum GameBalance {
             base = 132 + zone.rawValue * 18 + (special ? 54 : 0)
         case .memory:
             base = 150 + zone.rawValue * 10 + (special ? 44 : 0)
+        case .echoMelody:
+            base = 186 + zone.rawValue * 14 + (special ? 58 : 0)
         case .reefAsteroids:
             base = 720 + zone.rawValue * 130 + (special ? 420 : 0)
         }

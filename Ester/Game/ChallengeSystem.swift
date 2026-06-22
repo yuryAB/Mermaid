@@ -25,6 +25,8 @@ enum ChallengeKind: String, CaseIterable, Codable, Hashable {
     case banquet
     /// Virar cartas, lembrar posições e encontrar todos os pares.
     case memory
+    /// Escutar uma sequencia musical e reproduzir o canto crescente.
+    case echoMelody
     /// Pedras e corais quebram em partes menores numa arena infinita de high score.
     case reefAsteroids
 
@@ -46,6 +48,7 @@ enum ChallengeKind: String, CaseIterable, Codable, Hashable {
         case .snap: return "Estalo"
         case .banquet: return "Banquete"
         case .memory: return "Lembrança"
+        case .echoMelody: return "Eco"
         case .reefAsteroids: return "Ruptura"
         }
     }
@@ -54,6 +57,7 @@ enum ChallengeKind: String, CaseIterable, Codable, Hashable {
         switch self {
         case .banquet: return "Desafio: Banquete das Marés"
         case .memory: return "Desafio: Lembranças da Maré"
+        case .echoMelody: return "Desafio: Canto dos Ecos"
         case .reefAsteroids: return "Desafio: Ruptura do Recife"
         default: return "Desafio: \(shortName)"
         }
@@ -66,6 +70,7 @@ enum ChallengeKind: String, CaseIterable, Codable, Hashable {
         case .snap: return "Toque grupos iguais, mantenha combo e solte ondas."
         case .banquet: return "Coma as delícias, cresça e fuja dos perigos."
         case .memory: return "Vire pares, guarde posições e complete a lembrança."
+        case .echoMelody: return "Escute a maré, repita as notas e segure o eco."
         case .reefAsteroids: return "Quebre pedras e corais, faça combo e sobreviva à maré."
         }
     }
@@ -77,6 +82,7 @@ enum ChallengeKind: String, CaseIterable, Codable, Hashable {
         case .snap: return "✦"
         case .banquet: return "●"
         case .memory: return "?"
+        case .echoMelody: return "♪"
         case .reefAsteroids: return "◆"
         }
     }
@@ -88,6 +94,7 @@ enum ChallengeKind: String, CaseIterable, Codable, Hashable {
         case .snap: return GameUI.coral
         case .banquet: return GameUI.gold
         case .memory: return UIColor(red: 0.38, green: 0.86, blue: 0.92, alpha: 1)
+        case .echoMelody: return UIColor(red: 0.45, green: 0.82, blue: 0.92, alpha: 1)
         case .reefAsteroids: return UIColor(red: 0.26, green: 0.75, blue: 0.92, alpha: 1)
         }
     }
@@ -340,7 +347,7 @@ final class ChallengeChoiceOverlay: SKNode {
             icon.zPosition = 3
             rowContent.addChild(icon)
 
-            let isLongTitle = kind == .banquet || kind == .memory || kind == .reefAsteroids
+            let isLongTitle = kind == .banquet || kind == .memory || kind == .echoMelody || kind == .reefAsteroids
             let name = makeLabel(kind.title,
                                  fontSize: isLongTitle ? 13.2 : 15,
                                  color: GameUI.ink,
@@ -857,6 +864,39 @@ enum ChallengeChrome {
             thread.glowWidth = 3
             thread.zPosition = 5
             node.addChild(thread)
+        case .echoMelody:
+            let noteStem = UIBezierPath()
+            noteStem.move(to: CGPoint(x: 2, y: -10))
+            noteStem.addLine(to: CGPoint(x: 2, y: 14))
+            noteStem.addCurve(to: CGPoint(x: 13, y: 10),
+                              controlPoint1: CGPoint(x: 6, y: 16),
+                              controlPoint2: CGPoint(x: 11, y: 15))
+            let noteLine = SKShapeNode(path: noteStem.cgPath)
+            noteLine.fillColor = .clear
+            noteLine.strokeColor = UIColor.lerp(GameUI.gold, .white, 0.16)
+            noteLine.lineWidth = 2.3
+            noteLine.lineCap = .round
+            noteLine.lineJoin = .round
+            noteLine.glowWidth = 3
+            node.addChild(noteLine)
+
+            let head = SKShapeNode(ellipseOf: CGSize(width: 18, height: 13))
+            head.fillColor = UIColor(red: 0.45, green: 0.82, blue: 0.92, alpha: 0.86)
+            head.strokeColor = UIColor.white.withAlphaComponent(0.62)
+            head.lineWidth = 1.1
+            head.zRotation = -0.32
+            head.position = CGPoint(x: -4, y: -11)
+            node.addChild(head)
+
+            for radius in [CGFloat(10), CGFloat(17)] {
+                let echo = SKShapeNode(circleOfRadius: radius)
+                echo.fillColor = .clear
+                echo.strokeColor = UIColor.lerp(GameUI.accent, .white, 0.34).withAlphaComponent(0.38)
+                echo.lineWidth = 1.1
+                echo.glowWidth = 2
+                echo.position = CGPoint(x: -1, y: 0)
+                node.addChild(echo)
+            }
         case .reefAsteroids:
             let rockPath = UIBezierPath()
             let points = [
