@@ -111,14 +111,40 @@ protocol ChallengeGiver: AnyObject {
 
 // MARK: - Resultado genérico
 
+struct ChallengeRecordSnapshot {
+    let kind: ChallengeKind
+    let bestScore: Int
+
+    var displayText: String {
+        bestScore > 0 ? "Recorde \(bestScore)" : "Sem recorde"
+    }
+
+    func isNewRecord(score: Int, isHatching: Bool = false) -> Bool {
+        !isHatching && score > bestScore
+    }
+
+    static func empty(for kind: ChallengeKind) -> ChallengeRecordSnapshot {
+        ChallengeRecordSnapshot(kind: kind, bestScore: 0)
+    }
+}
+
 struct ChallengeResult {
     let kind: ChallengeKind
     let points: Int
     let reachedTarget: Bool
     let pearls: Int
     let special: Bool
+    let previousBestScore: Int
     /// Só usado pelo match-3 durante a fase de ovo.
     let isHatching: Bool
+
+    var madeHighScore: Bool {
+        !isHatching && points > previousBestScore
+    }
+
+    var bestScoreAfterRun: Int {
+        max(previousBestScore, points)
+    }
 }
 
 // MARK: - Sistema
@@ -204,6 +230,7 @@ final class ChallengeChoiceOverlay: SKNode {
 
     init(size: CGSize,
          kinds: [ChallengeKind] = ChallengeKind.availableCases,
+         records: [ChallengeKind: ChallengeRecordSnapshot] = [:],
          onSelect: @escaping (ChallengeKind) -> Void,
          onClose: @escaping () -> Void) {
         self.onSelect = onSelect
@@ -218,12 +245,14 @@ final class ChallengeChoiceOverlay: SKNode {
         addChild(backdrop)
 
         let panelWidth = min(size.width - 32, size.width >= 700 ? 444 : 368)
+        let recordSectionHeight: CGFloat = 96
         let rowSpacing: CGFloat = 10
         let maxPanelHeight = size.height - 52
         let spacingTotal = CGFloat(max(0, kinds.count - 1)) * rowSpacing
-        let rowHeight = min(82, max(62, (maxPanelHeight - 148 - spacingTotal) / CGFloat(max(1, kinds.count))))
+        let reservedHeight: CGFloat = 166 + recordSectionHeight
+        let rowHeight = min(78, max(58, (maxPanelHeight - reservedHeight - spacingTotal) / CGFloat(max(1, kinds.count))))
         let panelHeight = min(size.height - 52,
-                              148 + CGFloat(kinds.count) * rowHeight + spacingTotal)
+                              reservedHeight + CGFloat(kinds.count) * rowHeight + spacingTotal)
 
         let panel = GameUI.card(size: CGSize(width: panelWidth, height: panelHeight),
                                 cornerRadius: 22,
@@ -300,6 +329,16 @@ final class ChallengeChoiceOverlay: SKNode {
             blurb.position = CGPoint(x: -rowWidth / 2 + 74, y: -7)
             rowContent.addChild(blurb)
 
+            let record = records[kind] ?? .empty(for: kind)
+            let recordLabel = SKLabelNode(text: record.displayText)
+            recordLabel.fontName = "AvenirNext-DemiBold"
+            recordLabel.fontSize = 10.5
+            recordLabel.fontColor = GameUI.gold.withAlphaComponent(record.bestScore > 0 ? 0.95 : 0.68)
+            recordLabel.horizontalAlignmentMode = .right
+            recordLabel.verticalAlignmentMode = .center
+            recordLabel.position = CGPoint(x: rowWidth / 2 - 16, y: 20)
+            rowContent.addChild(recordLabel)
+
             let action = GameUI.pill(text: "Pedir",
                                      fontSize: 12,
                                      fill: [kind.tint.withAlphaComponent(0.92)],
@@ -310,6 +349,44 @@ final class ChallengeChoiceOverlay: SKNode {
             action.position = CGPoint(x: rowWidth / 2 - 48, y: -20)
             action.zPosition = 7
             rowContent.addChild(action)
+        }
+
+        let recordsTopY = firstRowY
+            - CGFloat(max(0, kinds.count - 1)) * (rowHeight + rowSpacing)
+            - rowHeight / 2
+            - 22
+        let recordsTitle = makeLabel("Recordes",
+                                     fontSize: 12.5,
+                                     color: GameUI.ink,
+                                     bold: true)
+        recordsTitle.position = CGPoint(x: -rowWidth / 2 + 8, y: recordsTopY)
+        content.addChild(recordsTitle)
+
+        let recordKinds = kinds
+        let columnWidth = rowWidth / 2
+        for (index, kind) in recordKinds.enumerated() {
+            let column = index / 3
+            let row = index % 3
+            let x = -rowWidth / 2 + 12 + CGFloat(column) * columnWidth
+            let y = recordsTopY - 24 - CGFloat(row) * 20
+            let record = records[kind] ?? .empty(for: kind)
+
+            let name = makeLabel(kind.shortName,
+                                 fontSize: 10.5,
+                                 color: GameUI.mutedInk,
+                                 bold: false,
+                                 maxWidth: columnWidth - 70)
+            name.position = CGPoint(x: x, y: y)
+            content.addChild(name)
+
+            let value = SKLabelNode(text: record.bestScore > 0 ? "\(record.bestScore)" : "-")
+            value.fontName = "AvenirNext-DemiBold"
+            value.fontSize = 10.5
+            value.fontColor = record.bestScore > 0 ? GameUI.gold : GameUI.mutedInk.withAlphaComponent(0.62)
+            value.horizontalAlignmentMode = .right
+            value.verticalAlignmentMode = .center
+            value.position = CGPoint(x: x + columnWidth - 22, y: y)
+            content.addChild(value)
         }
 
         let close = GameUI.pill(text: "Voltar",
@@ -616,11 +693,17 @@ enum ChallengeChrome {
         return node
     }
 
-    static func animatePointConversion(label: SKLabelNode, points: Int, pearls: Int) {
+    static func animatePointConversion(label: SKLabelNode,
+                                       points: Int,
+                                       pearls: Int,
+                                       newRecord: Bool = false) {
         let duration: TimeInterval = 1.1
         let durationCGFloat = CGFloat(duration)
         label.removeAllActions()
-        label.text = "Convertendo pontos..."
+        if newRecord {
+            label.fontSize = min(label.fontSize, 15.5)
+        }
+        label.text = newRecord ? "Novo recorde!" : "Convertendo pontos..."
 
         let count = SKAction.customAction(withDuration: duration) { node, elapsed in
             guard let label = node as? SKLabelNode else { return }
@@ -628,10 +711,12 @@ enum ChallengeChrome {
             let eased = t * t * (3 - 2 * t)
             let shownPoints = Int((CGFloat(points) * eased).rounded())
             let shownPearls = Int((CGFloat(pearls) * eased).rounded())
-            label.text = "\(shownPoints) pontos = \(GameUI.shellAmountText(shownPearls)) conchas"
+            let prefix = newRecord ? "Recorde! " : ""
+            label.text = "\(prefix)\(shownPoints) pts = \(GameUI.shellAmountText(shownPearls)) conchas"
         }
         let settle = SKAction.run {
-            label.text = "\(points) pontos = \(GameUI.shellAmountText(pearls)) conchas"
+            let prefix = newRecord ? "Recorde! " : ""
+            label.text = "\(prefix)\(points) pts = \(GameUI.shellAmountText(pearls)) conchas"
         }
         let pulseStep = SKAction.sequence([
             .scale(to: 1.08, duration: 0.12),

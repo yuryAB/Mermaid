@@ -915,7 +915,10 @@ class GameScene: SKScene {
               refugeOverlay == nil,
               rigDebugTool == nil else { return }
         GameAudio.shared.play(.uiOpenPanel)
+        let availableKinds = ChallengeKind.availableCases
         let menu = ChallengeChoiceOverlay(size: size,
+                                          kinds: availableKinds,
+                                          records: challengeRecordSnapshots(for: availableKinds),
                                           onSelect: { [weak self] kind in
                                               guard let self else { return }
                                               self.closeChallengeChoiceMenu(playSound: false)
@@ -935,6 +938,16 @@ class GameScene: SKScene {
         }
         challengeChoiceMenu?.removeFromParent()
         challengeChoiceMenu = nil
+    }
+
+    private func challengeRecordSnapshots(for kinds: [ChallengeKind]) -> [ChallengeKind: ChallengeRecordSnapshot] {
+        Dictionary(uniqueKeysWithValues: kinds.map { kind in
+            (kind, challengeRecordSnapshot(for: kind))
+        })
+    }
+
+    private func challengeRecordSnapshot(for kind: ChallengeKind) -> ChallengeRecordSnapshot {
+        ChallengeRecordSnapshot(kind: kind, bestScore: stats.highScore(for: kind))
     }
 
     @discardableResult
@@ -1165,6 +1178,7 @@ class GameScene: SKScene {
         closeRegionMenu()
         closeChallengeChoiceMenu(playSound: false)
         let zone = ctx.depth.currentZone
+        let record = challengeRecordSnapshot(for: kind)
         stats.energy = max(0, stats.energy - 8)
         ctx.autonomy.paused = true
         showChallengeBackdrop()
@@ -1187,7 +1201,8 @@ class GameScene: SKScene {
                                              session: session,
                                              phase: stats.phase,
                                              shellRewardMultiplier: stats.shellRewardMultiplier,
-                                             giverDisplay: giverDisplay) { [weak self] result in
+                                             giverDisplay: giverDisplay,
+                                             record: record) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
             }
             overlay.zPosition = 200
@@ -1201,7 +1216,8 @@ class GameScene: SKScene {
                                              palette: ctx.depth.mermaidPalette(atY: ctx.mermaidPosition.y),
                                              special: special,
                                              shellRewardMultiplier: stats.shellRewardMultiplier,
-                                             giverDisplay: giverDisplay) { [weak self] result in
+                                             giverDisplay: giverDisplay,
+                                             record: record) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
             }
             overlay.zPosition = 200
@@ -1215,7 +1231,8 @@ class GameScene: SKScene {
                                            phase: stats.phase,
                                            special: special,
                                            shellRewardMultiplier: stats.shellRewardMultiplier,
-                                           giverDisplay: giverDisplay) { [weak self] result in
+                                           giverDisplay: giverDisplay,
+                                           record: record) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
             }
             overlay.zPosition = 200
@@ -1229,7 +1246,8 @@ class GameScene: SKScene {
                                                 phase: stats.phase,
                                                 special: special,
                                                 shellRewardMultiplier: stats.shellRewardMultiplier,
-                                                giverDisplay: giverDisplay) { [weak self] result in
+                                                giverDisplay: giverDisplay,
+                                                record: record) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
             }
             overlay.zPosition = 200
@@ -1244,7 +1262,7 @@ class GameScene: SKScene {
                                             special: special,
                                             shellRewardMultiplier: stats.shellRewardMultiplier,
                                             giverDisplay: giverDisplay,
-                                            bestScore: stats.highScore(for: .memory)) { [weak self] result in
+                                            record: record) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
             }
             overlay.zPosition = 200
@@ -1259,7 +1277,7 @@ class GameScene: SKScene {
                                                special: special,
                                                shellRewardMultiplier: stats.shellRewardMultiplier,
                                                giverDisplay: giverDisplay,
-                                               bestScore: stats.highScore(for: .reefAsteroids)) { [weak self] result in
+                                               record: record) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
             }
             overlay.zPosition = 200
@@ -1347,9 +1365,7 @@ class GameScene: SKScene {
         stats.boostMood(8)
         let adaptation = stats.adaptation(for: zone)
         stats.setAdaptation(adaptation + 3, for: zone)
-        let madeHighScore = result.kind == .reefAsteroids || result.kind == .memory
-            ? stats.recordHighScore(result.points, for: result.kind)
-            : false
+        let madeHighScore = stats.recordHighScore(result.points, for: result.kind)
         if result.reachedTarget {
             stats.puzzlesSolved += 1
             stats.addMemory("Venceu o \(result.kind.title) em \(zone.displayName)")

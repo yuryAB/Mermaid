@@ -95,6 +95,7 @@ final class TideWeavingOverlay: SKNode {
     private let session: TideSessionType
     private let phase: MermaidPhase
     private let shellRewardMultiplier: CGFloat
+    private let record: ChallengeRecordSnapshot
     private let onFinish: (ChallengeResult) -> Void
 
     private var board: [[Int]] = []
@@ -146,12 +147,14 @@ final class TideWeavingOverlay: SKNode {
          phase: MermaidPhase,
          shellRewardMultiplier: CGFloat,
          giverDisplay: SKNode?,
+         record: ChallengeRecordSnapshot,
          onFinish: @escaping (ChallengeResult) -> Void) {
         self.theme = TideTheme.theme(for: zone, region: region, session: session)
         self.kindCount = theme.icons.count
         self.session = session
         self.phase = phase
         self.shellRewardMultiplier = shellRewardMultiplier
+        self.record = record
         var goal = 18 + zone.rawValue * 4
         var bonus = GameBalance.challengeShellReward(points: 0,
                                                      kind: .plot,
@@ -1298,7 +1301,11 @@ final class TideWeavingOverlay: SKNode {
         rewardLine.position = CGPoint(x: 0, y: -10)
         panelContent.addChild(rewardLine)
         if session != .hatching {
-            ChallengeChrome.animatePointConversion(label: rewardLine, points: score, pearls: pearls)
+            ChallengeChrome.animatePointConversion(label: rewardLine,
+                                                   points: score,
+                                                   pearls: pearls,
+                                                   newRecord: record.isNewRecord(score: score,
+                                                                                 isHatching: session == .hatching))
         }
 
         let continueButton = GameUI.pill(text: "Continuar",
@@ -1318,6 +1325,7 @@ final class TideWeavingOverlay: SKNode {
                                         reachedTarget: reached,
                                         pearls: basePearls,
                                         special: session == .event,
+                                        previousBestScore: record.bestScore,
                                         isHatching: session == .hatching)
     }
 

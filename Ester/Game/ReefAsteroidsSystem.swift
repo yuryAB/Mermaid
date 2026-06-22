@@ -532,6 +532,7 @@ final class ReefAsteroidsOverlay: SKNode {
     private let special: Bool
     private let shellRewardMultiplier: CGFloat
     private let bestScore: Int
+    private let record: ChallengeRecordSnapshot
     private let onFinish: (ChallengeResult) -> Void
     private let goal: Int
 
@@ -589,12 +590,13 @@ final class ReefAsteroidsOverlay: SKNode {
          special: Bool,
          shellRewardMultiplier: CGFloat,
          giverDisplay: SKNode?,
-         bestScore: Int,
+         record: ChallengeRecordSnapshot,
          onFinish: @escaping (ChallengeResult) -> Void) {
         self.phase = phase
         self.special = special
         self.shellRewardMultiplier = shellRewardMultiplier
-        self.bestScore = bestScore
+        self.bestScore = record.bestScore
+        self.record = record
         self.onFinish = onFinish
         self.goal = ReefAsteroidsRules.milestoneScore(for: zone, special: special)
 
@@ -1630,7 +1632,7 @@ final class ReefAsteroidsOverlay: SKNode {
         content.zPosition = 8
         panel.addChild(content)
 
-        let isNewRecord = engine.score > bestScore
+        let isNewRecord = record.isNewRecord(score: engine.score)
         let titleLabel = SKLabelNode(text: isNewRecord ? "Novo recorde!" : (reached ? "Recife rompido!" : "Maré encerrada!"))
         titleLabel.fontName = "AvenirNext-DemiBold"
         titleLabel.fontSize = 18
@@ -1658,7 +1660,10 @@ final class ReefAsteroidsOverlay: SKNode {
         rewardLine.fontColor = GameUI.gold
         rewardLine.position = CGPoint(x: 0, y: -28)
         content.addChild(rewardLine)
-        ChallengeChrome.animatePointConversion(label: rewardLine, points: engine.score, pearls: pearls)
+        ChallengeChrome.animatePointConversion(label: rewardLine,
+                                               points: engine.score,
+                                               pearls: pearls,
+                                               newRecord: isNewRecord)
 
         let continueButton = GameUI.pill(text: "Continuar",
                                          fontSize: 16,
@@ -1677,6 +1682,7 @@ final class ReefAsteroidsOverlay: SKNode {
                                         reachedTarget: reached,
                                         pearls: basePearls,
                                         special: special,
+                                        previousBestScore: record.bestScore,
                                         isHatching: false)
     }
 

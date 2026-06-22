@@ -329,6 +329,7 @@ final class ShellSnapOverlay: SKNode {
     private let special: Bool
     private let shellRewardMultiplier: CGFloat
     private let challengeGoal: Int
+    private let record: ChallengeRecordSnapshot
     private let onFinish: (ChallengeResult) -> Void
 
     private let cellSize: CGFloat
@@ -370,6 +371,7 @@ final class ShellSnapOverlay: SKNode {
          special: Bool,
          shellRewardMultiplier: CGFloat,
          giverDisplay: SKNode?,
+         record: ChallengeRecordSnapshot,
          onFinish: @escaping (ChallengeResult) -> Void) {
         self.theme = ShellSnapTheme.theme(for: zone)
         self.zone = zone
@@ -377,6 +379,7 @@ final class ShellSnapOverlay: SKNode {
         self.special = special
         self.shellRewardMultiplier = shellRewardMultiplier
         self.challengeGoal = ShellSnapRules.goal(for: zone, special: special)
+        self.record = record
         self.onFinish = onFinish
         self.board = ShellSnapBoard(rows: ShellSnapRules.rows,
                                     columns: ShellSnapRules.columns,
@@ -1255,7 +1258,10 @@ final class ShellSnapOverlay: SKNode {
         rewardLine.fontColor = GameUI.gold
         rewardLine.position = CGPoint(x: 0, y: -10)
         content.addChild(rewardLine)
-        ChallengeChrome.animatePointConversion(label: rewardLine, points: score, pearls: pearls)
+        ChallengeChrome.animatePointConversion(label: rewardLine,
+                                               points: score,
+                                               pearls: pearls,
+                                               newRecord: record.isNewRecord(score: score))
 
         let continueButton = GameUI.pill(text: "Continuar",
                                          fontSize: 16,
@@ -1274,6 +1280,7 @@ final class ShellSnapOverlay: SKNode {
                                         reachedTarget: reached,
                                         pearls: basePearls,
                                         special: special,
+                                        previousBestScore: record.bestScore,
                                         isHatching: false)
     }
 

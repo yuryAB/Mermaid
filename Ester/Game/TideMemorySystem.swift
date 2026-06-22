@@ -293,6 +293,7 @@ final class TideMemoryOverlay: SKNode {
     private let special: Bool
     private let shellRewardMultiplier: CGFloat
     private let bestScore: Int
+    private let record: ChallengeRecordSnapshot
     private let onFinish: (ChallengeResult) -> Void
 
     private let boardWidth: CGFloat
@@ -340,14 +341,15 @@ final class TideMemoryOverlay: SKNode {
          special: Bool,
          shellRewardMultiplier: CGFloat,
          giverDisplay: SKNode?,
-         bestScore: Int,
+         record: ChallengeRecordSnapshot,
          onFinish: @escaping (ChallengeResult) -> Void) {
         self.theme = TideMemoryTheme.theme(for: zone)
         self.zone = zone
         self.phase = phase
         self.special = special
         self.shellRewardMultiplier = shellRewardMultiplier
-        self.bestScore = bestScore
+        self.bestScore = record.bestScore
+        self.record = record
         self.onFinish = onFinish
         self.board = TideMemoryBoard(rows: TideMemoryRules.rows,
                                      columns: TideMemoryRules.columns,
@@ -1445,7 +1447,10 @@ final class TideMemoryOverlay: SKNode {
         rewardLine.fontColor = GameUI.gold
         rewardLine.position = CGPoint(x: 0, y: -27)
         content.addChild(rewardLine)
-        ChallengeChrome.animatePointConversion(label: rewardLine, points: score, pearls: pearls)
+        ChallengeChrome.animatePointConversion(label: rewardLine,
+                                               points: score,
+                                               pearls: pearls,
+                                               newRecord: record.isNewRecord(score: score))
 
         let continueButton = GameUI.pill(text: "Continuar",
                                          fontSize: 16,
@@ -1464,6 +1469,7 @@ final class TideMemoryOverlay: SKNode {
                                         reachedTarget: reached,
                                         pearls: basePearls,
                                         special: special,
+                                        previousBestScore: record.bestScore,
                                         isHatching: false)
     }
 

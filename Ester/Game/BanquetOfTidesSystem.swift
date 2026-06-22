@@ -523,6 +523,7 @@ final class BanquetOfTidesOverlay: SKNode {
     private let phase: MermaidPhase
     private let special: Bool
     private let shellRewardMultiplier: CGFloat
+    private let record: ChallengeRecordSnapshot
     private let onFinish: (ChallengeResult) -> Void
     private let goal: Int
 
@@ -569,10 +570,12 @@ final class BanquetOfTidesOverlay: SKNode {
          special: Bool,
          shellRewardMultiplier: CGFloat,
          giverDisplay: SKNode?,
+         record: ChallengeRecordSnapshot,
          onFinish: @escaping (ChallengeResult) -> Void) {
         self.phase = phase
         self.special = special
         self.shellRewardMultiplier = shellRewardMultiplier
+        self.record = record
         self.onFinish = onFinish
         self.goal = BanquetRules.goal(for: zone, special: special)
 
@@ -1362,7 +1365,10 @@ final class BanquetOfTidesOverlay: SKNode {
         rewardLine.fontColor = GameUI.gold
         rewardLine.position = CGPoint(x: 0, y: -10)
         content.addChild(rewardLine)
-        ChallengeChrome.animatePointConversion(label: rewardLine, points: engine.score, pearls: pearls)
+        ChallengeChrome.animatePointConversion(label: rewardLine,
+                                               points: engine.score,
+                                               pearls: pearls,
+                                               newRecord: record.isNewRecord(score: engine.score))
 
         let continueButton = GameUI.pill(text: "Continuar",
                                          fontSize: 16,
@@ -1381,6 +1387,7 @@ final class BanquetOfTidesOverlay: SKNode {
                                         reachedTarget: reached,
                                         pearls: basePearls,
                                         special: special,
+                                        previousBestScore: record.bestScore,
                                         isHatching: false)
     }
 
