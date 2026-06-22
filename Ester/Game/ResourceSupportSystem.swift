@@ -15,8 +15,9 @@ enum SupportResourceKind: String, CaseIterable, Codable, Equatable {
     case currentAmpoule
     case coralToy
     case growthPotion
+    case powerfulGrowthPotion
 
-    private static let challengeRewardExcludedRawValues: Set<String> = ["growthPotion"]
+    private static let challengeRewardExcludedRawValues: Set<String> = ["growthPotion", "powerfulGrowthPotion"]
 
     var itemId: String { "support_\(rawValue)" }
 
@@ -35,6 +36,7 @@ enum SupportResourceKind: String, CaseIterable, Codable, Equatable {
         case .currentAmpoule: return "Ampola corrente"
         case .coralToy: return "Brinquedo coral"
         case .growthPotion: return "Porção acelerar"
+        case .powerfulGrowthPotion: return "Poção de crescimento poderosa"
         }
     }
 
@@ -45,6 +47,7 @@ enum SupportResourceKind: String, CaseIterable, Codable, Equatable {
         case .currentAmpoule: return "Corrente"
         case .coralToy: return "Brinquedo"
         case .growthPotion: return "Acelerar"
+        case .powerfulGrowthPotion: return "Poção +1d"
         }
     }
 
@@ -60,6 +63,8 @@ enum SupportResourceKind: String, CaseIterable, Codable, Equatable {
             return "Objeto de enriquecimento para humor e vínculo."
         case .growthPotion:
             return "Porção enviada para adiantar 1h da espera de crescimento."
+        case .powerfulGrowthPotion:
+            return "Poção rara que adianta 1 dia da espera de crescimento."
         }
     }
 
@@ -75,6 +80,8 @@ enum SupportResourceKind: String, CaseIterable, Codable, Equatable {
             return "Recurso enviado: ela ficou curiosa com o brinquedo de coral."
         case .growthPotion:
             return "Recurso enviado: ela recebeu a porção de acelerar."
+        case .powerfulGrowthPotion:
+            return "Recurso enviado: ela recebeu a poção de crescimento poderosa."
         }
     }
 
@@ -94,6 +101,8 @@ enum SupportResourceKind: String, CaseIterable, Codable, Equatable {
             return UIColor(red: 0.82, green: 0.38, blue: 0.42, alpha: 1)
         case .growthPotion:
             return GameUI.coral
+        case .powerfulGrowthPotion:
+            return UIColor(red: 0.72, green: 0.36, blue: 0.92, alpha: 1)
         }
     }
 
@@ -104,6 +113,7 @@ enum SupportResourceKind: String, CaseIterable, Codable, Equatable {
         case .currentAmpoule: return "N"
         case .coralToy: return "B"
         case .growthPotion: return "H"
+        case .powerfulGrowthPotion: return "D"
         }
     }
 
@@ -114,6 +124,7 @@ enum SupportResourceKind: String, CaseIterable, Codable, Equatable {
         case .currentAmpoule: return "drop.fill"
         case .coralToy: return "sparkles"
         case .growthPotion: return "hourglass"
+        case .powerfulGrowthPotion: return "hourglass.badge.plus"
         }
     }
 }
@@ -131,9 +142,17 @@ struct RefugeShopItem {
     let symbolName: String
     let fallbackGlyph: String
     let purchase: RefugeShopPurchase
+    var availableWeekdays: Set<Int>? = nil
+
+    func isAvailable(on date: Date = Date(), calendar: Calendar = .current) -> Bool {
+        guard let availableWeekdays else { return true }
+        return availableWeekdays.contains(calendar.component(.weekday, from: date))
+    }
 }
 
 enum RefugeShopCatalog {
+    private static let mondayWeekday = 2
+
     static let items: [RefugeShopItem] = [
         RefugeShopItem(id: "food_bag",
                        title: "Saco de comida",
@@ -174,8 +193,21 @@ enum RefugeShopCatalog {
                        tint: SupportResourceKind.growthPotion.tint,
                        symbolName: SupportResourceKind.growthPotion.symbolName,
                        fallbackGlyph: SupportResourceKind.growthPotion.glyph,
-                       purchase: .resource(.growthPotion, quantity: 1))
+                       purchase: .resource(.growthPotion, quantity: 1)),
+        RefugeShopItem(id: "powerful_growth_potion",
+                       title: "Poção de crescimento poderosa",
+                       blurb: "Só às segundas: adianta 1 dia de crescimento.",
+                       cost: 20_000,
+                       tint: SupportResourceKind.powerfulGrowthPotion.tint,
+                       symbolName: SupportResourceKind.powerfulGrowthPotion.symbolName,
+                       fallbackGlyph: SupportResourceKind.powerfulGrowthPotion.glyph,
+                       purchase: .resource(.powerfulGrowthPotion, quantity: 1),
+                       availableWeekdays: [mondayWeekday])
     ]
+
+    static func availableItems(on date: Date = Date()) -> [RefugeShopItem] {
+        items.filter { $0.isAvailable(on: date) }
+    }
 
     static func item(withId id: String) -> RefugeShopItem? {
         items.first { $0.id == id }
@@ -198,6 +230,10 @@ final class ResourceSupportSystem {
         guard count(for: kind) > 0 else { return false }
         if kind == .growthPotion,
            !ctx.growth.canReceiveGrowthAccelerationResource() {
+            return false
+        }
+        if kind == .powerfulGrowthPotion,
+           !ctx.growth.canReceivePowerfulGrowthAccelerationResource() {
             return false
         }
         return ctx.stats.spendInventoryItem(id: kind.itemId, amount: 1)
@@ -242,6 +278,16 @@ final class ResourceSupportSystem {
                                        autosave: true)
             }
             return
+        case .powerfulGrowthPotion:
+            if ctx.growth.applyPowerfulGrowthAccelerationResource() {
+                return
+            } else {
+                stats.addInventoryItem(id: kind.itemId,
+                                       amount: 1,
+                                       memoryText: "Poção de crescimento poderosa devolvida ao estoque",
+                                       autosave: true)
+            }
+            return
         }
         stats.addMemory("Recurso enviado: \(kind.title)")
         stats.save(immediately: true)
@@ -257,6 +303,11 @@ final class ResourceSupportSystem {
 
     @discardableResult
     func purchase(_ item: RefugeShopItem) -> Bool {
+        guard item.isAvailable() else {
+            ctx.say("\(item.title) só fica disponível às segundas-feiras.")
+            return false
+        }
+
         switch item.purchase {
         case .resource(let kind, let quantity):
             guard ctx.stats.spendPearls(item.cost, autosave: false) else {
@@ -375,11 +426,13 @@ final class ResourceChoiceOverlay: SKNode {
             icon.zPosition = 3
             rowContent.addChild(icon)
 
+            let longTitle = kind.title.count > 24
             let name = makeLabel(kind.title,
-                                 fontSize: 14.5,
+                                 fontSize: longTitle ? 12.8 : 14.5,
                                  color: GameUI.ink,
                                  bold: true,
-                                 maxWidth: rowWidth - 154)
+                                 maxWidth: rowWidth - 154,
+                                 lines: longTitle ? 2 : 1)
             name.position = CGPoint(x: -rowWidth / 2 + 74, y: 20)
             rowContent.addChild(name)
 
@@ -492,7 +545,7 @@ enum SupportResourceVisualFactory {
             buildCurrentAmpoule(in: node, tint: kind.tint)
         case .coralToy:
             buildCoralToy(in: node, tint: kind.tint)
-        case .growthPotion:
+        case .growthPotion, .powerfulGrowthPotion:
             buildGrowthPotion(in: node, tint: kind.tint)
         }
 
@@ -566,7 +619,7 @@ enum SupportResourceVisualFactory {
                     .removeFromParent()
                 ]))
             }
-        case .growthPotion:
+        case .growthPotion, .powerfulGrowthPotion:
             let ring = SKShapeNode(circleOfRadius: 16)
             ring.fillColor = .clear
             ring.strokeColor = kind.tint.withAlphaComponent(0.86)
@@ -761,7 +814,7 @@ final class RefugeStoreOverlay: SKNode {
         addChild(pearlLine)
 
         let rowWidth = min(size.width - 28, 420)
-        let items = RefugeShopCatalog.items
+        let items = RefugeShopCatalog.availableItems()
         let availableHeight = max(390, size.height - insets.top - insets.bottom - 214)
         let rowHeight = min(88, max(68, availableHeight / CGFloat(items.count)))
         let firstY = top - 146

@@ -848,7 +848,7 @@ enum WorldPOICatalog {
     }
 
     private static func visualConcept(for kind: WorldPOIKind, key: String) -> WorldPOIVisualConcept {
-        if key == "nascente_mid_warm_current" { return .environment }
+        if key == "jardim_calmo_shallow_warm_current" { return .environment }
         switch kind {
         case .npc, .pet:
             return .npc
@@ -916,7 +916,7 @@ enum WorldPOICatalog {
 
 final class POISystem {
     private enum RepeatablePOIReward {
-        static let warmCurrentKey = "nascente_mid_warm_current"
+        static let warmCurrentKey = "jardim_calmo_shallow_warm_current"
     }
     private enum WarmCurrentEnvironment {
         static let horizontalRadius: CGFloat = 980

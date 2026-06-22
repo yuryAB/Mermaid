@@ -1,56 +1,18 @@
 [
   {
-    "poiId": "nascente_shallow_abandoned_egg_nest",
-    "mapId": "nascente",
-    "zone": "shallow",
-    "kind": "story",
-    "visualConcept": "object",
-    "actionKind": "temporaryEffect",
-    "name": "Ninho de ovos abandonados",
-    "visual": { "glyph": "🥚", "tint": "aqua", "scale": 1.0 },
-    "reward": {
-      "kind": "temporaryEffect",
-      "title": "Memória de origem",
-      "pearlAmount": 0,
-      "itemId": null,
-      "buffKind": "eagerCompanion",
-      "duration": 1200,
-      "storyText": null
-    }
-  },
-  {
-    "poiId": "nascente_shallow_baby_fish_school",
-    "mapId": "nascente",
-    "zone": "shallow",
-    "kind": "pet",
-    "visualConcept": "npc",
-    "actionKind": "temporaryEffect",
-    "name": "Cardume de peixinhos bebês",
-    "visual": { "glyph": "🐠", "tint": "aqua", "scale": 1.05 },
-    "reward": {
-      "kind": "temporaryEffect",
-      "title": "cardume pequeno",
-      "pearlAmount": 0,
-      "itemId": null,
-      "buffKind": "temporaryPet",
-      "duration": 2400,
-      "storyText": null
-    }
-  },
-  {
     "poiId": "nascente_shallow_music_shell",
     "mapId": "nascente",
     "zone": "shallow",
     "kind": "minigame",
     "visualConcept": "object",
     "actionKind": "challenge",
-    "name": "Concha gigante com música",
+    "name": "Concha de origem com música",
     "visual": { "glyph": "♪", "tint": "gold", "scale": 1.0 },
     "challenge": {
       "kind": "plot",
       "goalMultiplier": 4.0,
       "special": true,
-      "introText": "A concha vibra baixo, como se pedisse uma sequência perfeita antes de revelar o prêmio."
+      "introText": "A concha vibra baixo junto ao ninho antigo, como se pedisse uma sequência perfeita antes de revelar o prêmio."
     },
     "reward": {
       "kind": "supportResource",
@@ -94,37 +56,9 @@
     }
   },
   {
-    "poiId": "nascente_mid_old_turtle",
-    "mapId": "nascente",
-    "zone": "mid",
-    "kind": "npc",
-    "visualConcept": "npc",
-    "actionKind": "challenge",
-    "name": "Tartaruga velha",
-    "visual": { "glyph": "?", "tint": "algae", "scale": 1.0 },
-    "challenge": {
-      "kind": "snap",
-      "goalMultiplier": 7.0,
-      "special": true,
-      "introText": "A tartaruga velha pisca devagar: paciência, pequena. Meu teste de estalo não perdoa pressa."
-    },
-    "reward": {
-      "kind": "supportResource",
-      "title": "Porções de acelerar",
-      "pearlAmount": 0,
-      "itemId": null,
-      "buffKind": null,
-      "duration": 0,
-      "storyText": null,
-      "supportResourceKind": "growthPotion",
-      "quantity": 24,
-      "regionId": null
-    }
-  },
-  {
-    "poiId": "nascente_mid_warm_current",
-    "mapId": "nascente",
-    "zone": "mid",
+    "poiId": "jardim_calmo_shallow_warm_current",
+    "mapId": "jardim_calmo",
+    "zone": "shallow",
     "kind": "story",
     "visualConcept": "environment",
     "actionKind": "temporaryEffect",
@@ -141,144 +75,31 @@
     }
   },
   {
-    "poiId": "jardim_calmo_shallow_touch_plant",
+    "poiId": "jardim_calmo_mid_old_turtle",
     "mapId": "jardim_calmo",
-    "zone": "shallow",
-    "kind": "minigame",
-    "visualConcept": "object",
-    "actionKind": "challenge",
-    "name": "Planta que reage ao toque",
-    "visual": { "glyph": "✿", "tint": "algae", "scale": 1.0 },
-    "challenge": {
-      "kind": "banquet",
-      "goalMultiplier": 4.0,
-      "special": true,
-      "introText": "A planta se curva e abre folhas famintas. Ela só entrega comida para quem domina o banquete."
-    },
-    "reward": {
-      "kind": "supportResource",
-      "title": "Sacos de comida",
-      "pearlAmount": 0,
-      "itemId": null,
-      "buffKind": null,
-      "duration": 0,
-      "storyText": null,
-      "supportResourceKind": "foodBag",
-      "quantity": 8,
-      "regionId": null
-    }
-  },
-  {
-    "poiId": "jardim_calmo_shallow_color_fish",
-    "mapId": "jardim_calmo",
-    "zone": "shallow",
+    "zone": "mid",
     "kind": "npc",
     "visualConcept": "npc",
     "actionKind": "challenge",
-    "name": "Peixe colorido",
-    "visual": { "glyph": "🐠", "tint": "coral", "scale": 1.08 },
+    "name": "Tartaruga velha",
+    "visual": { "glyph": "?", "tint": "algae", "scale": 1.0 },
     "challenge": {
       "kind": "snap",
-      "goalMultiplier": 4.5,
+      "goalMultiplier": 7.0,
       "special": true,
-      "introText": "O peixe colorido faz um giro rápido: me acompanhe no estalo, se conseguir."
+      "introText": "A tartaruga velha pisca devagar: paciência, pequena. Meu teste de estalo não perdoa pressa."
     },
     "reward": {
       "kind": "supportResource",
-      "title": "Brinquedos de coral",
+      "title": "Poção de crescimento poderosa",
       "pearlAmount": 0,
       "itemId": null,
       "buffKind": null,
       "duration": 0,
       "storyText": null,
-      "supportResourceKind": "coralToy",
-      "quantity": 6,
-      "regionId": null
-    }
-  },
-  {
-    "poiId": "jardim_calmo_shallow_bubble_cloud",
-    "mapId": "jardim_calmo",
-    "zone": "shallow",
-    "kind": "story",
-    "visualConcept": "environment",
-    "actionKind": "temporaryEffect",
-    "name": "Nuvem de bolhas subindo",
-    "visual": { "glyph": "○", "tint": "aqua", "scale": 1.0 },
-    "reward": {
-      "kind": "temporaryEffect",
-      "title": "Fôlego leve",
-      "pearlAmount": 0,
-      "itemId": null,
-      "buffKind": "swiftCurrent",
-      "duration": 900,
-      "storyText": null
-    }
-  },
-  {
-    "poiId": "jardim_calmo_mid_algae_ruin",
-    "mapId": "jardim_calmo",
-    "zone": "mid",
-    "kind": "story",
-    "visualConcept": "object",
-    "actionKind": "challenge",
-    "name": "Ruína coberta de algas",
-    "visual": { "glyph": "▧", "tint": "violet", "scale": 1.0 },
-    "challenge": {
-      "kind": "memory",
-      "goalMultiplier": 4.8,
-      "special": true,
-      "introText": "As algas afastam símbolos antigos. A ruína só abre tesouro para uma memória firme."
-    },
-    "reward": {
-      "kind": "pearls",
-      "title": "Tesouro das algas",
-      "pearlAmount": 600,
-      "itemId": null,
-      "buffKind": null,
-      "duration": 0,
-      "storyText": null,
-      "supportResourceKind": null,
+      "supportResourceKind": "powerfulGrowthPotion",
       "quantity": 1,
       "regionId": null
-    }
-  },
-  {
-    "poiId": "jardim_calmo_mid_hidden_baby_octopus",
-    "mapId": "jardim_calmo",
-    "zone": "mid",
-    "kind": "pet",
-    "visualConcept": "npc",
-    "actionKind": "temporaryEffect",
-    "name": "Polvo bebê escondido",
-    "visual": { "glyph": "🐙", "tint": "violet", "scale": 1.0 },
-    "reward": {
-      "kind": "temporaryEffect",
-      "title": "polvo bebê",
-      "pearlAmount": 0,
-      "itemId": null,
-      "buffKind": "temporaryPet",
-      "duration": 3600,
-      "storyText": null
-    }
-  },
-  {
-    "poiId": "jardim_calmo_mid_sleeping_elder",
-    "mapId": "jardim_calmo",
-    "zone": "mid",
-    "kind": "npc",
-    "visualConcept": "npc",
-    "actionKind": "temporaryEffect",
-    "name": "Sereia anciã dormindo",
-    "visual": { "glyph": "☾", "tint": "gold", "scale": 1.0 },
-    "reward": {
-      "kind": "temporaryEffect",
-      "title": "Sonho da anciã",
-      "pearlAmount": 0,
-      "itemId": null,
-      "buffKind": "eagerCompanion",
-      "duration": 1200,
-      "storyText": null
     }
   }
 ]

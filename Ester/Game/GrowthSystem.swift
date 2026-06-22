@@ -29,6 +29,7 @@ final class GrowthSystem {
     private let crackThresholds: [CGFloat] = [0.35, 0.6, 0.82]
     private let daysPerGrowthMonth: Double = 30
     private let shellGrowthSkipSeconds: TimeInterval = 3_600
+    private let powerfulGrowthSkipSeconds: TimeInterval = 86_400
 
     init(ctx: GameContext, worldNode: SKNode) {
         self.ctx = ctx
@@ -121,6 +122,7 @@ final class GrowthSystem {
         }
         guard ctx.stats.spendPearls(shellGrowthCost, autosave: false) else { return false }
         return applyGrowthAcceleration(remaining: remaining,
+                                       skipSeconds: shellGrowthSkipSeconds,
                                        memoryText: "Conchas aceleraram",
                                        messageText: "Crescimento acelerado")
     }
@@ -133,8 +135,22 @@ final class GrowthSystem {
     func applyGrowthAccelerationResource() -> Bool {
         guard let remaining = growthAccelerationRemainingWait(showMessages: true) else { return false }
         return applyGrowthAcceleration(remaining: remaining,
+                                       skipSeconds: shellGrowthSkipSeconds,
                                        memoryText: "Porção acelerou",
                                        messageText: "Porção acelerou o crescimento")
+    }
+
+    func canReceivePowerfulGrowthAccelerationResource() -> Bool {
+        growthAccelerationRemainingWait(showMessages: true) != nil
+    }
+
+    @discardableResult
+    func applyPowerfulGrowthAccelerationResource() -> Bool {
+        guard let remaining = growthAccelerationRemainingWait(showMessages: true) else { return false }
+        return applyGrowthAcceleration(remaining: remaining,
+                                       skipSeconds: powerfulGrowthSkipSeconds,
+                                       memoryText: "Poção poderosa acelerou",
+                                       messageText: "Poção poderosa acelerou o crescimento")
     }
 
     private func growthAccelerationRemainingWait(showMessages: Bool) -> Double? {
@@ -162,9 +178,10 @@ final class GrowthSystem {
     }
 
     private func applyGrowthAcceleration(remaining: Double,
+                                         skipSeconds: TimeInterval,
                                          memoryText: String,
                                          messageText: String) -> Bool {
-        let skipped = min(shellGrowthSkipSeconds, remaining)
+        let skipped = min(skipSeconds, remaining)
         ctx.stats.phaseStartedAt = ctx.stats.phaseStartedAt.addingTimeInterval(-skipped)
         ctx.stats.addMemory("\(memoryText) \(GrowthSystem.formatDuration(skipped)) do crescimento")
         ctx.say("\(messageText) em \(GrowthSystem.formatDuration(skipped)).")

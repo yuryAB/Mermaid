@@ -114,7 +114,7 @@ final class WorldPOINode: SKNode {
     }
 
     private static func visualStyle(for poi: WorldPOI) -> VisualStyle {
-        if poi.key == "nascente_mid_warm_current",
+        if poi.key == "jardim_calmo_shallow_warm_current",
            poi.visualConcept == .environment {
             return .warmCurrentEnvironment
         }
@@ -177,9 +177,9 @@ enum WorldPOIArtworkFactory {
             node = makeMusicShell(tint: poi.visual.color)
         case "nascente_mid_small_shipwreck":
             node = makeSmallShipwreck(tint: poi.visual.color)
-        case "nascente_mid_old_turtle":
+        case "jardim_calmo_mid_old_turtle":
             node = makeOldTurtle(tint: poi.visual.color)
-        case "nascente_mid_warm_current":
+        case "jardim_calmo_shallow_warm_current":
             node = makeWarmCurrent(tint: poi.visual.color)
         case "jardim_calmo_shallow_touch_plant":
             node = makeTouchPlant(tint: poi.visual.color)
@@ -263,7 +263,7 @@ enum WorldPOIArtworkFactory {
             context.cgContext.setLineJoin(.round)
 
             let tint = poi.visual.color
-            if poi.key != "nascente_mid_warm_current" {
+            if poi.key != "jardim_calmo_shallow_warm_current" {
                 drawMiniBackdrop(tint: tint)
             }
 
@@ -276,9 +276,9 @@ enum WorldPOIArtworkFactory {
                 drawMiniIconShell(tint: tint)
             case "nascente_mid_small_shipwreck":
                 drawMiniIconToyBoat(tint: tint)
-            case "nascente_mid_old_turtle":
+            case "jardim_calmo_mid_old_turtle":
                 drawMiniIconTurtle(tint: tint)
-            case "nascente_mid_warm_current":
+            case "jardim_calmo_shallow_warm_current":
                 drawMiniIconCurrent(tint: tint)
             case "jardim_calmo_shallow_touch_plant":
                 drawMiniIconPlant(tint: tint)
