@@ -608,19 +608,22 @@ struct POIChallenge: Codable {
     let goal: Int?
     let goalMultiplier: CGFloat
     let special: Bool
+    let introText: String
 
     init(kind: ChallengeKind,
          goal: Int? = nil,
          goalMultiplier: CGFloat = 1,
-         special: Bool = true) {
+         special: Bool = true,
+         introText: String = "") {
         self.kind = kind
         self.goal = goal
         self.goalMultiplier = max(0.1, goalMultiplier)
         self.special = special
+        self.introText = introText
     }
 
     private enum CodingKeys: String, CodingKey {
-        case kind, goal, goalMultiplier, special
+        case kind, goal, goalMultiplier, special, introText
     }
 
     init(from decoder: Decoder) throws {
@@ -629,6 +632,7 @@ struct POIChallenge: Codable {
         goal = try c.decodeIfPresent(Int.self, forKey: .goal)
         goalMultiplier = max(0.1, try c.decodeIfPresent(CGFloat.self, forKey: .goalMultiplier) ?? 1)
         special = try c.decodeIfPresent(Bool.self, forKey: .special) ?? true
+        introText = try c.decodeIfPresent(String.self, forKey: .introText) ?? ""
     }
 }
 
@@ -867,15 +871,15 @@ enum WorldPOICatalog {
         guard actionKind == .challenge else { return nil }
         switch kind {
         case .shipwreck:
-            return POIChallenge(kind: .memory, goalMultiplier: 1.35)
+            return POIChallenge(kind: .memory, goalMultiplier: 4)
         case .minigame:
-            return POIChallenge(kind: .plot, goalMultiplier: 1.25)
+            return POIChallenge(kind: .plot, goalMultiplier: 4)
         case .npc:
-            return POIChallenge(kind: .snap, goalMultiplier: 1.55)
+            return POIChallenge(kind: .snap, goalMultiplier: 5)
         case .story:
-            return POIChallenge(kind: .memory, goalMultiplier: 1.35)
+            return POIChallenge(kind: .memory, goalMultiplier: 4)
         case .pet:
-            return POIChallenge(kind: .snap, goalMultiplier: 1.25)
+            return POIChallenge(kind: .snap, goalMultiplier: 4)
         }
     }
 
@@ -926,6 +930,8 @@ final class POISystem {
     }
     private enum InteractionBalance {
         static let arrivalRadius: CGFloat = 150
+        static let automaticRadius: CGFloat = 185
+        static let automaticCooldown: TimeInterval = 35
     }
 
     unowned let ctx: GameContext
@@ -938,6 +944,7 @@ final class POISystem {
     private var visiblePOIs: [String: WorldPOI] = [:]
     private var isInsideWarmCurrent = false
     private var warmCurrentAudioCooldown: CGFloat = 0
+    private var automaticInteractionCooldownByKey: [String: Date] = [:]
 
     init(ctx: GameContext, worldNode: SKNode) {
         self.ctx = ctx
@@ -958,6 +965,7 @@ final class POISystem {
         syncWorldNodes()
         discoverNearbyPOIs()
         completePendingInteractionIfReached()
+        activateNearbyPOIIfNeeded()
     }
 
     func explorationTargetAfterCommand() -> CGPoint? {
@@ -1170,6 +1178,60 @@ final class POISystem {
         interact(with: poi)
     }
 
+    private func activateNearbyPOIIfNeeded() {
+        guard let region = ctx.regions.currentRegion else { return }
+        pruneAutomaticInteractionCooldowns()
+        let pois = WorldPOICatalog.pois(in: region, stats: ctx.stats)
+            .filter { canAutomaticallyActivate($0) }
+        guard let poi = pois.min(by: {
+            automaticActivationDistance(for: $0) < automaticActivationDistance(for: $1)
+        }) else { return }
+
+        automaticInteractionCooldownByKey[poi.key] = Date()
+            .addingTimeInterval(InteractionBalance.automaticCooldown)
+        pendingInteraction = nil
+        interact(with: poi)
+    }
+
+    private func canAutomaticallyActivate(_ poi: WorldPOI) -> Bool {
+        guard ctx.regions.currentRegion?.id == poi.regionId,
+              ctx.stats.isPOIDiscovered(poi.key),
+              isReachable(poi),
+              automaticActivationDistance(for: poi) <= automaticActivationRadius(for: poi),
+              automaticInteractionCooldownByKey[poi.key, default: .distantPast] <= Date() else {
+            return false
+        }
+        if ctx.stats.isPOIRewardCollected(poi.key) {
+            return canGrantRepeatableReward(for: poi)
+        }
+        if poi.actionKind == .challenge,
+           ctx.scene?.canPresentPOIChallengeOffer() != true {
+            return false
+        }
+        if isRepeatableRewardPOI(poi),
+           !canGrantRepeatableReward(for: poi) {
+            return false
+        }
+        return true
+    }
+
+    private func automaticActivationRadius(for poi: WorldPOI) -> CGFloat {
+        isWarmCurrentPOI(poi) ? 1 : InteractionBalance.automaticRadius
+    }
+
+    private func automaticActivationDistance(for poi: WorldPOI) -> CGFloat {
+        if isWarmCurrentPOI(poi),
+           warmCurrentIntensity(at: ctx.mermaidPosition, for: poi) != nil {
+            return 0
+        }
+        return ctx.mermaidPosition.distance(to: poi.position)
+    }
+
+    private func pruneAutomaticInteractionCooldowns() {
+        let now = Date()
+        automaticInteractionCooldownByKey = automaticInteractionCooldownByKey.filter { $0.value > now }
+    }
+
     private func interact(with poi: WorldPOI) {
         ctx.stats.visitPOI(poi.key)
         ctx.stats.revealExpeditionMap(in: ctx.activeRegion, near: poi.position)
@@ -1195,10 +1257,8 @@ final class POISystem {
                   scene.openPOIChallenge(for: poi, onCompletion: { [weak self] result in
                       self?.finishPOIChallenge(poi, result: result)
                   }) else {
-                ctx.say("O desafio local de \(poi.name) não abriu agora. Tente de novo em instantes.")
                 return
             }
-            ctx.say("Ela começou o desafio local de \(poi.name).")
             return
         }
 

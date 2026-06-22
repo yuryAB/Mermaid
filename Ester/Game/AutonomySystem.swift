@@ -85,6 +85,7 @@ final class AutonomySystem {
         static let gatherDuration: TimeInterval = 12
         static let meetDistance: CGFloat = 120
         static let guideChanceOnTouch: CGFloat = 0.58
+        static let guidanceFollowDistance: CGFloat = 190
     }
 
     private enum FishCompanionAction {
@@ -1230,7 +1231,7 @@ final class AutonomySystem {
         guidingPOI = poi
         fishGuidanceUntil = Date().addingTimeInterval(FishPlayBalance.guidanceDuration)
         touchFishTarget = fish
-        target = fish.position
+        target = fishGuidanceFollowPoint(for: fish, poi: poi)
         fish.startGuiding(toward: poi.position, duration: FishPlayBalance.guidanceDuration)
         stats.addTimedBuff(.fishGuide,
                            title: "Seguindo peixe",
@@ -1250,7 +1251,7 @@ final class AutonomySystem {
             return
         }
 
-        target = fish.position
+        target = fishGuidanceFollowPoint(for: fish, poi: poi)
         if position.distance(to: poi.position) < 420 {
             ctx.stats.revealExpeditionMap(in: ctx.activeRegion, near: poi.position)
         }
@@ -1267,6 +1268,25 @@ final class AutonomySystem {
             decisionCooldown = 3
             return
         }
+    }
+
+    private func fishGuidanceFollowPoint(for fish: FishNode, poi: WorldPOI) -> CGPoint {
+        let direction = fishGuidanceDirection(for: fish, poi: poi)
+        let point = CGPoint(x: fish.position.x - direction.dx * FishPlayBalance.guidanceFollowDistance,
+                            y: fish.position.y - direction.dy * FishPlayBalance.guidanceFollowDistance)
+        let range = ctx.depth.allowedYRange()
+        return CGPoint(x: point.x.clamped(to: horizontalRange),
+                       y: point.y.clamped(to: range))
+    }
+
+    private func fishGuidanceDirection(for fish: FishNode, poi: WorldPOI) -> CGVector {
+        let dx = poi.position.x - position.x
+        let dy = poi.position.y - position.y
+        let distance = sqrt(dx * dx + dy * dy)
+        guard distance > 1 else {
+            return CGVector(dx: cos(fish.heading), dy: sin(fish.heading))
+        }
+        return CGVector(dx: dx / distance, dy: dy / distance)
     }
 
     private func endFishGuidance(removeBuff: Bool) {

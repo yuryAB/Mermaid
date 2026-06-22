@@ -476,6 +476,167 @@ final class ChallengeChoiceOverlay: SKNode {
     }
 }
 
+// MARK: - Convite de desafio de POI
+
+final class POIChallengeOfferOverlay: SKNode {
+    private let onAccept: () -> Void
+    private let onDecline: () -> Void
+
+    init(size: CGSize,
+         poi: WorldPOI,
+         challengeGoal: Int,
+         onAccept: @escaping () -> Void,
+         onDecline: @escaping () -> Void) {
+        self.onAccept = onAccept
+        self.onDecline = onDecline
+        super.init()
+        isUserInteractionEnabled = true
+
+        let backdrop = SKShapeNode(rectOf: CGSize(width: size.width * 2.2, height: size.height * 2.2))
+        backdrop.fillColor = UIColor(white: 0, alpha: 0.48)
+        backdrop.strokeColor = .clear
+        backdrop.name = "poi_challenge_decline"
+        addChild(backdrop)
+
+        let panelWidth = min(size.width - 32, size.width >= 700 ? 460 : 372)
+        let panelHeight: CGFloat = 282
+        let panel = GameUI.card(size: CGSize(width: panelWidth, height: panelHeight),
+                                cornerRadius: 18,
+                                tint: poi.visual.color.withAlphaComponent(0.72),
+                                baseColors: GameUI.tintedColors(poi.visual.color))
+        addChild(panel)
+
+        let content = SKNode()
+        content.zPosition = 8
+        panel.addChild(content)
+
+        let artwork = WorldPOIArtworkFactory.makeArtwork(for: poi, size: .listSmall)
+        artwork.position = CGPoint(x: -panelWidth / 2 + 42, y: panelHeight / 2 - 45)
+        artwork.setScale(1.45)
+        content.addChild(artwork)
+
+        let title = makeLabel(poi.name,
+                              fontSize: 19,
+                              color: GameUI.ink,
+                              bold: true,
+                              maxWidth: panelWidth - 116,
+                              lines: 2)
+        title.position = CGPoint(x: -panelWidth / 2 + 86, y: panelHeight / 2 - 34)
+        content.addChild(title)
+
+        let subtitle = makeLabel("\(poi.challenge?.kind.title ?? "Desafio") · meta \(challengeGoal)",
+                                 fontSize: 12.5,
+                                 color: GameUI.mutedInk,
+                                 maxWidth: panelWidth - 116,
+                                 lines: 1)
+        subtitle.position = CGPoint(x: -panelWidth / 2 + 86, y: panelHeight / 2 - 62)
+        content.addChild(subtitle)
+
+        let intro = poi.challenge?.introText.isEmpty == false
+            ? poi.challenge?.introText
+            : Self.defaultIntro(for: poi)
+        let body = makeLabel("\"\(intro ?? "")\"",
+                             fontSize: 14,
+                             color: GameUI.ink,
+                             maxWidth: panelWidth - 52,
+                             lines: 4)
+        body.position = CGPoint(x: -panelWidth / 2 + 26, y: 26)
+        content.addChild(body)
+
+        let reward = makeLabel("Vitória: \(rewardText(for: poi.reward))",
+                               fontSize: 12.5,
+                               color: GameUI.mutedInk,
+                               maxWidth: panelWidth - 52,
+                               lines: 2)
+        reward.position = CGPoint(x: -panelWidth / 2 + 26, y: -54)
+        content.addChild(reward)
+
+        let decline = GameUI.pill(text: "Agora não",
+                                  fontSize: 13,
+                                  fill: [GameUI.mutedInk.withAlphaComponent(0.20)],
+                                  strokeColor: GameUI.mutedInk.withAlphaComponent(0.30),
+                                  minWidth: 112,
+                                  height: 38)
+        decline.name = "poi_challenge_decline"
+        decline.position = CGPoint(x: -68, y: -panelHeight / 2 + 42)
+        decline.zPosition = 10
+        content.addChild(decline)
+
+        let accept = GameUI.pill(text: "Aceitar",
+                                 fontSize: 13,
+                                 fill: [poi.visual.color.withAlphaComponent(0.95)],
+                                 strokeColor: UIColor.white.withAlphaComponent(0.32),
+                                 minWidth: 112,
+                                 height: 38)
+        accept.name = "poi_challenge_accept"
+        accept.position = CGPoint(x: 68, y: -panelHeight / 2 + 42)
+        accept.zPosition = 10
+        content.addChild(accept)
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        let location = touch.location(in: self)
+        var node: SKNode? = atPoint(location)
+        while let current = node {
+            if current.name == "poi_challenge_accept" {
+                onAccept()
+                return
+            }
+            if current.name == "poi_challenge_decline" {
+                onDecline()
+                return
+            }
+            node = current.parent
+        }
+    }
+
+    private static func defaultIntro(for poi: WorldPOI) -> String {
+        switch poi.visualConcept {
+        case .npc:
+            return "Eu posso te testar, pequena corrente. Quer tentar agora?"
+        case .object:
+            return "Há uma lembrança presa aqui. Só a maré certa consegue abrir."
+        case .environment:
+            return "A água mudou de tom. Respire antes de seguir."
+        }
+    }
+
+    private func rewardText(for reward: Reward) -> String {
+        switch reward.kind {
+        case .supportResource:
+            return "\(reward.supportResourceKind?.title ?? reward.title) x\(reward.quantity)"
+        case .regionMap:
+            return reward.title
+        case .pearls:
+            return "\(GameUI.shellAmountText(reward.pearlAmount)) conchas"
+        default:
+            return reward.title
+        }
+    }
+
+    private func makeLabel(_ text: String,
+                           fontSize: CGFloat,
+                           color: UIColor,
+                           bold: Bool = false,
+                           maxWidth: CGFloat = 0,
+                           lines: Int = 1) -> SKLabelNode {
+        let label = SKLabelNode(text: text)
+        label.fontName = bold ? "AvenirNext-DemiBold" : "AvenirNext-Regular"
+        label.fontSize = fontSize
+        label.fontColor = color
+        label.horizontalAlignmentMode = .left
+        label.verticalAlignmentMode = .center
+        if maxWidth > 0 {
+            label.preferredMaxLayoutWidth = maxWidth
+            label.numberOfLines = lines
+        }
+        return label
+    }
+}
+
 // MARK: - Cabeçalho compartilhado dos overlays
 
 enum ChallengeChrome {

@@ -260,6 +260,7 @@ class GameScene: SKScene {
     private var reefAsteroidsOverlay: ReefAsteroidsOverlay?
     private var pendingPOIChallengeCompletion: ((ChallengeResult) -> Void)?
     private var challengeBackdrop: SKNode?
+    private var poiChallengeOffer: POIChallengeOfferOverlay?
     private var challengeChoiceMenu: ChallengeChoiceOverlay?
     private var resourceChoiceMenu: ResourceChoiceOverlay?
     private var regionMenu: RegionMenuOverlay?
@@ -970,7 +971,12 @@ class GameScene: SKScene {
     // MARK: - Menu de regiões
 
     func openRegionMenu() {
-        guard regionMenu == nil, challengeChoiceMenu == nil, resourceChoiceMenu == nil, !isChallengeOpen, refugeOverlay == nil else { return }
+        guard regionMenu == nil,
+              challengeChoiceMenu == nil,
+              resourceChoiceMenu == nil,
+              poiChallengeOffer == nil,
+              !isChallengeOpen,
+              refugeOverlay == nil else { return }
         GameAudio.shared.play(.uiOpenPanel)
         if let activeRegion {
             stats.revealExpeditionMap(in: activeRegion, near: ctx.mermaidPosition)
@@ -1013,6 +1019,7 @@ class GameScene: SKScene {
               resourceChoiceMenu == nil,
               regionMenu == nil,
               !isChallengeOpen,
+              poiChallengeOffer == nil,
               refugeOverlay == nil,
               rigDebugTool == nil else { return }
         GameAudio.shared.play(.uiOpenPanel)
@@ -1041,6 +1048,14 @@ class GameScene: SKScene {
         challengeChoiceMenu = nil
     }
 
+    private func closePOIChallengeOffer(playSound: Bool = true) {
+        if playSound && poiChallengeOffer != nil {
+            GameAudio.shared.play(.uiClosePanel)
+        }
+        poiChallengeOffer?.removeFromParent()
+        poiChallengeOffer = nil
+    }
+
     // MARK: - Menu de recursos
 
     func openResourceChoiceMenu() {
@@ -1048,6 +1063,7 @@ class GameScene: SKScene {
               challengeChoiceMenu == nil,
               regionMenu == nil,
               !isChallengeOpen,
+              poiChallengeOffer == nil,
               refugeOverlay == nil,
               rigDebugTool == nil else { return }
         guard stats.phase != .egg else {
@@ -1228,7 +1244,7 @@ class GameScene: SKScene {
 
     /// Passo 1: um portal se abre perto da sereia e ela nada até ele.
     func beginRefugeEntry() {
-        guard refugeOverlay == nil, resourceChoiceMenu == nil, !isChallengeOpen, refugePortal == nil else { return }
+        guard refugeOverlay == nil, resourceChoiceMenu == nil, poiChallengeOffer == nil, !isChallengeOpen, refugePortal == nil else { return }
         closeRegionMenu()
         GameAudio.shared.play(.refugePortalOpen)
 
@@ -1321,7 +1337,7 @@ class GameScene: SKScene {
 
     /// Abre o desafio oferecido por um NPC (hoje, um peixe).
     func openChallenge(giver: FishNode) {
-        guard !isChallengeOpen, challengeChoiceMenu == nil, resourceChoiceMenu == nil, refugeOverlay == nil else { return }
+        guard !isChallengeOpen, challengeChoiceMenu == nil, resourceChoiceMenu == nil, poiChallengeOffer == nil, refugeOverlay == nil else { return }
         guard let kind = giver.offeredChallenge else { return }
         guard kind.isAvailable else {
             ctx.challenges.consumeChallenge(of: giver)
@@ -1338,29 +1354,74 @@ class GameScene: SKScene {
 
     /// Durante o ovo: o Desafio: Trama abre direto (energia de nascimento).
     func openHatchingChallenge() {
-        guard !isChallengeOpen, challengeChoiceMenu == nil, resourceChoiceMenu == nil, refugeOverlay == nil else { return }
+        guard !isChallengeOpen, challengeChoiceMenu == nil, resourceChoiceMenu == nil, poiChallengeOffer == nil, refugeOverlay == nil else { return }
         GameAudio.shared.play(.challengeOpen)
         presentChallenge(kind: .plot, special: false, challengeGoal: 35, giverDisplay: nil, hatching: true)
+    }
+
+    func canPresentPOIChallengeOffer() -> Bool {
+        !isChallengeOpen
+            && challengeChoiceMenu == nil
+            && resourceChoiceMenu == nil
+            && regionMenu == nil
+            && poiChallengeOffer == nil
+            && refugeOverlay == nil
+            && rigDebugTool == nil
     }
 
     @discardableResult
     func openPOIChallenge(for poi: WorldPOI,
                           onCompletion: @escaping (ChallengeResult) -> Void) -> Bool {
-        guard !isChallengeOpen, challengeChoiceMenu == nil, resourceChoiceMenu == nil, refugeOverlay == nil else { return false }
+        guard canPresentPOIChallengeOffer() else { return false }
         guard let poiChallenge = poi.challenge,
               poiChallenge.kind.isAvailable else { return false }
-        pendingPOIChallengeCompletion = onCompletion
-        GameAudio.shared.play(.challengeOpen)
         let challengeGoal = poiChallenge.goal
             ?? GameBalance.poiChallengeGoal(kind: poiChallenge.kind,
                                             at: poi.position,
                                             special: poiChallenge.special,
                                             multiplier: poiChallenge.goalMultiplier)
+        ctx.say(poiChallenge.introText.isEmpty
+                ? "Ela encontrou \(poi.name). Há um desafio esperando."
+                : poiChallenge.introText)
+        GameAudio.shared.play(.uiOpenPanel)
+        let offer = POIChallengeOfferOverlay(size: size,
+                                             poi: poi,
+                                             challengeGoal: challengeGoal,
+                                             onAccept: { [weak self] in
+                                                 guard let self else { return }
+                                                 self.closePOIChallengeOffer(playSound: false)
+                                                 self.startPOIChallenge(poi: poi,
+                                                                        poiChallenge: poiChallenge,
+                                                                        challengeGoal: challengeGoal,
+                                                                        onCompletion: onCompletion)
+                                             },
+                                             onDecline: { [weak self] in
+                                                 guard let self else { return }
+                                                 self.closePOIChallengeOffer()
+                                                 self.ctx.say("Ela deixou \(poi.name) para tentar depois.")
+                                             })
+        offer.zPosition = 190
+        offer.position = CGPoint(x: 0, y: -modalDropOffset)
+        cameraNode.addChild(offer)
+        poiChallengeOffer = offer
+        return true
+    }
+
+    private func startPOIChallenge(poi: WorldPOI,
+                                   poiChallenge: POIChallenge,
+                                   challengeGoal: Int,
+                                   onCompletion: @escaping (ChallengeResult) -> Void) {
+        guard !isChallengeOpen,
+              challengeChoiceMenu == nil,
+              resourceChoiceMenu == nil,
+              regionMenu == nil,
+              refugeOverlay == nil else { return }
+        pendingPOIChallengeCompletion = onCompletion
+        GameAudio.shared.play(.challengeOpen)
         presentChallenge(kind: poiChallenge.kind,
                          special: poiChallenge.special,
                          challengeGoal: challengeGoal,
                          giverDisplay: makePOIChallengeDisplay(for: poi))
-        return true
     }
 
     private func makePOIChallengeDisplay(for poi: WorldPOI) -> SKNode {
@@ -1387,6 +1448,7 @@ class GameScene: SKScene {
         closeRegionMenu()
         closeChallengeChoiceMenu(playSound: false)
         closeResourceChoiceMenu(playSound: false)
+        closePOIChallengeOffer(playSound: false)
         let zone = ctx.depth.currentZone
         let record = challengeRecordSnapshot(for: kind)
         let isHatchingSession = hatching || stats.phase == .egg
@@ -1575,7 +1637,8 @@ class GameScene: SKScene {
         let poiCompletion = pendingPOIChallengeCompletion
         pendingPOIChallengeCompletion = nil
 
-        let gainedPearls = result.isHatching
+        let isPOIChallenge = poiCompletion != nil
+        let gainedPearls = result.isHatching || isPOIChallenge
             ? 0
             : stats.awardChallengePearls(result.pearls, points: result.points)
 
@@ -1629,7 +1692,13 @@ class GameScene: SKScene {
     // MARK: - Toques no mundo
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard !isChallengeOpen, challengeChoiceMenu == nil, resourceChoiceMenu == nil, regionMenu == nil, refugeOverlay == nil, rigDebugTool == nil,
+        guard !isChallengeOpen,
+              challengeChoiceMenu == nil,
+              resourceChoiceMenu == nil,
+              regionMenu == nil,
+              poiChallengeOffer == nil,
+              refugeOverlay == nil,
+              rigDebugTool == nil,
               let touch = touches.first else { return }
         let location = touch.location(in: self)
 

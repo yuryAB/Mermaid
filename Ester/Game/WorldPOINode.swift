@@ -8,27 +8,26 @@ import UIKit
 
 final class WorldPOINode: SKNode {
     private enum VisualStyle: Equatable {
-        case marker
+        case object
+        case npc
+        case environment
         case warmCurrentEnvironment
 
-        var usesMarkerAura: Bool {
+        var shouldBobInWorld: Bool {
             switch self {
-            case .marker: return true
-            case .warmCurrentEnvironment: return false
+            case .npc: return true
+            case .object, .environment, .warmCurrentEnvironment: return false
             }
         }
     }
 
     let poiKey: String
 
-    private let halo: SKShapeNode
-    private let core: SKShapeNode
     private let artwork: SKNode
     private let title: SKLabelNode
     private let collectedMark: SKLabelNode
     private let baseColor: UIColor
     private let normalScale: CGFloat
-    private let showsAura: Bool
     private let visualStyle: VisualStyle
 
     init(poi: WorldPOI, discovered: Bool, rewardCollected: Bool, focused: Bool) {
@@ -37,9 +36,6 @@ final class WorldPOINode: SKNode {
         baseColor = poi.visual.color
         visualStyle = style
         normalScale = Self.normalScale(for: poi, style: style)
-        showsAura = style.usesMarkerAura && poi.key != "nascente_shallow_baby_fish_school"
-        halo = SKShapeNode(circleOfRadius: 42)
-        core = SKShapeNode(circleOfRadius: 26)
         artwork = WorldPOIArtworkFactory.makeArtwork(for: poi, size: .world)
         title = SKLabelNode(text: Self.shortTitle(poi.name))
         collectedMark = SKLabelNode(text: "✓")
@@ -50,22 +46,6 @@ final class WorldPOINode: SKNode {
         isUserInteractionEnabled = false
         zPosition = visualStyle == .warmCurrentEnvironment ? -6 : 8
         setScale(normalScale)
-
-        halo.fillColor = baseColor.withAlphaComponent(0.12)
-        halo.strokeColor = UIColor.lerp(baseColor, .white, 0.35).withAlphaComponent(0.55)
-        halo.lineWidth = 1.3
-        halo.glowWidth = 8
-        if showsAura {
-            addChild(halo)
-        }
-
-        core.fillColor = baseColor.withAlphaComponent(0.24)
-        core.strokeColor = UIColor.white.withAlphaComponent(0.62)
-        core.lineWidth = 1
-        core.glowWidth = 4
-        if showsAura {
-            addChild(core)
-        }
 
         artwork.zPosition = 2
         addChild(artwork)
@@ -88,10 +68,10 @@ final class WorldPOINode: SKNode {
         collectedMark.zPosition = visualStyle == .warmCurrentEnvironment ? 9 : 4
         addChild(collectedMark)
 
-        if visualStyle != .warmCurrentEnvironment {
+        if visualStyle.shouldBobInWorld {
             let bob = SKAction.repeatForever(.sequence([
-                .moveBy(x: 0, y: 7, duration: 1.35),
-                .moveBy(x: 0, y: -7, duration: 1.45)
+                .moveBy(x: 0, y: 5, duration: 1.35),
+                .moveBy(x: 0, y: -5, duration: 1.45)
             ]))
             bob.eaeInEaseOut()
             run(bob, withKey: "poi_bob")
@@ -112,10 +92,6 @@ final class WorldPOINode: SKNode {
         collectedMark.isHidden = visualStyle == .warmCurrentEnvironment || !rewardCollected
 
         if focused {
-            if showsAura {
-                halo.strokeColor = UIColor.white.withAlphaComponent(0.90)
-                halo.glowWidth = 16
-            }
             if action(forKey: "poi_focus") == nil {
                 let focusedScale = visualStyle == .warmCurrentEnvironment ? normalScale * 1.035 : normalScale * 1.11
                 let pulse = SKAction.repeatForever(.sequence([
@@ -126,10 +102,6 @@ final class WorldPOINode: SKNode {
                 run(pulse, withKey: "poi_focus")
             }
         } else {
-            if showsAura {
-                halo.strokeColor = UIColor.lerp(baseColor, .white, 0.35).withAlphaComponent(0.55)
-                halo.glowWidth = 8
-            }
             removeAction(forKey: "poi_focus")
             setScale(normalScale)
         }
@@ -146,13 +118,21 @@ final class WorldPOINode: SKNode {
            poi.visualConcept == .environment {
             return .warmCurrentEnvironment
         }
-        return .marker
+        switch poi.visualConcept {
+        case .object: return .object
+        case .npc: return .npc
+        case .environment: return .environment
+        }
     }
 
     private static func normalScale(for poi: WorldPOI, style: VisualStyle) -> CGFloat {
         switch style {
-        case .marker:
-            return (poi.visual.scale * 1.80).clamped(to: 1.35...2.35)
+        case .object:
+            return (poi.visual.scale * 1.62).clamped(to: 1.20...2.10)
+        case .npc:
+            return (poi.visual.scale * 1.70).clamped(to: 1.25...2.18)
+        case .environment:
+            return (poi.visual.scale * 1.55).clamped(to: 1.20...2.05)
         case .warmCurrentEnvironment:
             return (poi.visual.scale * 1.0).clamped(to: 0.90...1.20)
         }
@@ -1092,13 +1072,23 @@ enum WorldPOIArtworkFactory {
         let sand = UIColor(red: 0.68, green: 0.54, blue: 0.35, alpha: 1)
         let darkSand = UIColor.lerp(sand, .black, 0.36)
 
-        let glow = circle(radius: 31,
-                          fill: tint.withAlphaComponent(0.11),
-                          stroke: tint.withAlphaComponent(0.20),
-                          lineWidth: 1,
-                          glow: 8)
-        glow.position = CGPoint(x: 0, y: -2)
-        node.addChild(glow)
+        let sandPatch = makeSeafloorPatch(width: 86,
+                                           height: 34,
+                                           color: sand.withAlphaComponent(0.46),
+                                           stroke: darkSand.withAlphaComponent(0.24))
+        sandPatch.position = CGPoint(x: -2, y: -23)
+        sandPatch.zPosition = -3
+        node.addChild(sandPatch)
+
+        for i in 0..<5 {
+            let grass = makeLeaf(width: 5,
+                                 height: 18 + CGFloat(i % 3) * 5,
+                                 color: UIColor.lerp(GameUI.algae, tint, 0.15).withAlphaComponent(0.58))
+            grass.position = CGPoint(x: -38 + CGFloat(i) * 19, y: -20 + CGFloat(i % 2) * 3)
+            grass.zRotation = -0.42 + CGFloat(i) * 0.18
+            grass.zPosition = -1
+            node.addChild(grass)
+        }
 
         let bowl = ellipse(width: 55, height: 21,
                            fill: darkSand.withAlphaComponent(0.72),
@@ -1250,6 +1240,14 @@ enum WorldPOIArtworkFactory {
     private static func makeMusicShell(tint: UIColor) -> SKNode {
         let node = SKNode()
         let shellColor = UIColor.lerp(GameUI.gold, tint, 0.28)
+        let sand = makeSeafloorPatch(width: 86,
+                                     height: 28,
+                                     color: UIColor(red: 0.63, green: 0.52, blue: 0.34, alpha: 0.36),
+                                     stroke: shellColor.withAlphaComponent(0.20))
+        sand.position = CGPoint(x: -4, y: -30)
+        sand.zPosition = -3
+        node.addChild(sand)
+
         let shell = makeShell(width: 58, height: 42, color: shellColor)
         shell.position = CGPoint(x: -2, y: -8)
         node.addChild(shell)
@@ -1288,6 +1286,13 @@ enum WorldPOIArtworkFactory {
         let node = SKNode()
         let wood = UIColor(red: 0.45, green: 0.31, blue: 0.18, alpha: 1)
         let wetWood = UIColor.lerp(wood, tint, 0.22)
+        let sand = makeSeafloorPatch(width: 104,
+                                     height: 30,
+                                     color: UIColor(red: 0.59, green: 0.48, blue: 0.33, alpha: 0.38),
+                                     stroke: wetWood.withAlphaComponent(0.22))
+        sand.position = CGPoint(x: -2, y: -31)
+        sand.zPosition = -4
+        node.addChild(sand)
 
         let hullPath = UIBezierPath()
         hullPath.move(to: CGPoint(x: -34, y: -12))
@@ -1343,6 +1348,14 @@ enum WorldPOIArtworkFactory {
             node.addChild(sparkle)
         }
 
+        let mapThread = line(from: CGPoint(x: 31, y: -24),
+                             to: CGPoint(x: 49, y: -16),
+                             color: GameUI.gold.withAlphaComponent(0.56),
+                             width: 1.2,
+                             glow: 3)
+        mapThread.zPosition = 6
+        node.addChild(mapThread)
+
         node.zRotation = -0.08
         return node
     }
@@ -1351,6 +1364,14 @@ enum WorldPOIArtworkFactory {
         let node = SKNode()
         let shellColor = UIColor.lerp(GameUI.algae, tint, 0.22)
         let skinColor = UIColor(red: 0.50, green: 0.68, blue: 0.45, alpha: 1)
+
+        let shadow = makeSeafloorPatch(width: 78,
+                                       height: 24,
+                                       color: UIColor.black.withAlphaComponent(0.16),
+                                       stroke: GameUI.algae.withAlphaComponent(0.18))
+        shadow.position = CGPoint(x: 1, y: -21)
+        shadow.zPosition = -3
+        node.addChild(shadow)
 
         let backLeft = ellipse(width: 23, height: 12,
                                fill: skinColor.withAlphaComponent(0.78),
@@ -1426,6 +1447,14 @@ enum WorldPOIArtworkFactory {
         let node = SKNode()
         let stemColor = UIColor.lerp(GameUI.algae, tint, 0.16)
 
+        let rootPatch = makeSeafloorPatch(width: 64,
+                                          height: 24,
+                                          color: GameUI.algae.withAlphaComponent(0.22),
+                                          stroke: stemColor.withAlphaComponent(0.22))
+        rootPatch.position = CGPoint(x: 0, y: -32)
+        rootPatch.zPosition = -3
+        node.addChild(rootPatch)
+
         let stemPath = UIBezierPath()
         stemPath.move(to: CGPoint(x: 0, y: -29))
         stemPath.addCurve(to: CGPoint(x: 3, y: 22),
@@ -1482,6 +1511,17 @@ enum WorldPOIArtworkFactory {
 
     private static func makeColorFish(tint: UIColor) -> SKNode {
         let node = SKNode()
+        for i in 0..<4 {
+            let trail = ellipse(width: 12 + CGFloat(i) * 6,
+                                height: 4 + CGFloat(i),
+                                fill: UIColor.lerp(GameUI.coral, tint, CGFloat(i) * 0.12).withAlphaComponent(0.18),
+                                stroke: .clear,
+                                glow: 2)
+            trail.position = CGPoint(x: -44 - CGFloat(i) * 13, y: -8 + CGFloat(i % 2) * 10)
+            trail.zRotation = -0.18 + CGFloat(i) * 0.08
+            trail.zPosition = -2
+            node.addChild(trail)
+        }
         let body = makeFish(length: 62,
                             height: 30,
                             color: UIColor.lerp(GameUI.coral, tint, 0.18),
@@ -1518,14 +1558,24 @@ enum WorldPOIArtworkFactory {
 
     private static func makeBubbleCloud(tint: UIColor) -> SKNode {
         let node = SKNode()
+        let vent = makeSeafloorPatch(width: 58,
+                                     height: 18,
+                                     color: UIColor.black.withAlphaComponent(0.20),
+                                     stroke: tint.withAlphaComponent(0.24))
+        vent.position = CGPoint(x: 0, y: -35)
+        vent.zPosition = -3
+        node.addChild(vent)
+
         let bubbles: [(CGPoint, CGFloat, CGFloat)] = [
-            (CGPoint(x: -22, y: -13), 8, 0.48),
-            (CGPoint(x: -7, y: -3), 12, 0.56),
-            (CGPoint(x: 13, y: -14), 7, 0.44),
-            (CGPoint(x: 23, y: 4), 10, 0.52),
-            (CGPoint(x: -17, y: 18), 6, 0.40),
-            (CGPoint(x: 4, y: 23), 8, 0.48),
-            (CGPoint(x: 24, y: 29), 5, 0.36)
+            (CGPoint(x: -22, y: -24), 8, 0.48),
+            (CGPoint(x: -7, y: -12), 12, 0.56),
+            (CGPoint(x: 13, y: -22), 7, 0.44),
+            (CGPoint(x: 23, y: -2), 10, 0.52),
+            (CGPoint(x: -17, y: 17), 6, 0.40),
+            (CGPoint(x: 4, y: 37), 8, 0.48),
+            (CGPoint(x: 24, y: 58), 5, 0.36),
+            (CGPoint(x: -8, y: 78), 9, 0.44),
+            (CGPoint(x: 14, y: 99), 6, 0.38)
         ]
         for (index, bubble) in bubbles.enumerated() {
             let ring = circle(radius: bubble.1,
@@ -1558,15 +1608,13 @@ enum WorldPOIArtworkFactory {
         let stone = UIColor(red: 0.34, green: 0.34, blue: 0.42, alpha: 1)
         let moss = UIColor.lerp(GameUI.algae, tint, 0.15)
 
-        let backGlow = roundedRect(width: 60,
-                                   height: 45,
-                                   radius: 8,
-                                   fill: tint.withAlphaComponent(0.10),
-                                   stroke: tint.withAlphaComponent(0.20),
-                                   lineWidth: 0.8,
-                                   glow: 8)
-        backGlow.position = CGPoint(x: 0, y: -3)
-        node.addChild(backGlow)
+        let rubble = makeSeafloorPatch(width: 92,
+                                       height: 28,
+                                       color: UIColor.black.withAlphaComponent(0.18),
+                                       stroke: moss.withAlphaComponent(0.22))
+        rubble.position = CGPoint(x: 2, y: -28)
+        rubble.zPosition = -3
+        node.addChild(rubble)
 
         let leftColumn = roundedRect(width: 13,
                                      height: 48,
@@ -1630,6 +1678,14 @@ enum WorldPOIArtworkFactory {
 
     private static func makeHiddenBabyOctopus(tint: UIColor) -> SKNode {
         let node = SKNode()
+        let rockPatch = makeSeafloorPatch(width: 84,
+                                          height: 28,
+                                          color: UIColor(red: 0.18, green: 0.16, blue: 0.22, alpha: 0.42),
+                                          stroke: tint.withAlphaComponent(0.22))
+        rockPatch.position = CGPoint(x: 0, y: -31)
+        rockPatch.zPosition = -4
+        node.addChild(rockPatch)
+
         let cave = ellipse(width: 67, height: 35,
                            fill: UIColor.black.withAlphaComponent(0.32),
                            stroke: UIColor.lerp(tint, .black, 0.20).withAlphaComponent(0.46),
@@ -1740,13 +1796,13 @@ enum WorldPOIArtworkFactory {
     private static func makeSleepingElder(tint: UIColor) -> SKNode {
         let node = SKNode()
 
-        let sleepAura = ellipse(width: 67, height: 41,
-                                fill: tint.withAlphaComponent(0.10),
-                                stroke: UIColor.lerp(tint, .white, 0.28).withAlphaComponent(0.28),
-                                lineWidth: 0.9,
-                                glow: 8)
-        sleepAura.position = CGPoint(x: 0, y: -2)
-        node.addChild(sleepAura)
+        let restingWeed = makeSeafloorPatch(width: 82,
+                                            height: 24,
+                                            color: GameUI.algae.withAlphaComponent(0.20),
+                                            stroke: tint.withAlphaComponent(0.20))
+        restingWeed.position = CGPoint(x: 6, y: -27)
+        restingWeed.zPosition = -3
+        node.addChild(restingWeed)
 
         let hair = ellipse(width: 22, height: 33,
                            fill: UIColor.lerp(GameUI.gold, tint, 0.44).withAlphaComponent(0.88),
@@ -1842,6 +1898,34 @@ enum WorldPOIArtworkFactory {
         case .story:
             return makeAlgaeRuin(tint: tint)
         }
+    }
+
+    private static func makeSeafloorPatch(width: CGFloat,
+                                          height: CGFloat,
+                                          color: UIColor,
+                                          stroke: UIColor) -> SKShapeNode {
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: -width * 0.48, y: -height * 0.08))
+        path.addCurve(to: CGPoint(x: -width * 0.18, y: height * 0.42),
+                      controlPoint1: CGPoint(x: -width * 0.44, y: height * 0.26),
+                      controlPoint2: CGPoint(x: -width * 0.30, y: height * 0.44))
+        path.addCurve(to: CGPoint(x: width * 0.34, y: height * 0.30),
+                      controlPoint1: CGPoint(x: width * 0.02, y: height * 0.54),
+                      controlPoint2: CGPoint(x: width * 0.24, y: height * 0.42))
+        path.addCurve(to: CGPoint(x: width * 0.49, y: -height * 0.10),
+                      controlPoint1: CGPoint(x: width * 0.52, y: height * 0.14),
+                      controlPoint2: CGPoint(x: width * 0.55, y: -height * 0.02))
+        path.addCurve(to: CGPoint(x: width * 0.12, y: -height * 0.45),
+                      controlPoint1: CGPoint(x: width * 0.40, y: -height * 0.34),
+                      controlPoint2: CGPoint(x: width * 0.26, y: -height * 0.50))
+        path.addCurve(to: CGPoint(x: -width * 0.48, y: -height * 0.08),
+                      controlPoint1: CGPoint(x: -width * 0.14, y: -height * 0.56),
+                      controlPoint2: CGPoint(x: -width * 0.42, y: -height * 0.36))
+        path.close()
+        return shape(path,
+                     fill: color,
+                     stroke: stroke,
+                     lineWidth: 0.9)
     }
 
     private static func makeFish(length: CGFloat,

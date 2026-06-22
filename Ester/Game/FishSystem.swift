@@ -567,6 +567,28 @@ final class FishNode: SKNode, ChallengeGiver {
 
         let guideSpeed = max(CGFloat(150), baseSpeed * CGFloat(1.35))
         swimToward(desired, speed: guideSpeed, dt: dt, bob: CGFloat(4))
+        keepGuidingLead(from: mermaidPosition, toward: target)
+    }
+
+    private func keepGuidingLead(from mermaidPosition: CGPoint, toward target: CGPoint) {
+        let dx = target.x - mermaidPosition.x
+        let dy = target.y - mermaidPosition.y
+        let distance = sqrt(dx * dx + dy * dy)
+        guard distance > CGFloat(1) else { return }
+
+        let unitX = dx / distance
+        let unitY = dy / distance
+        let offsetX = position.x - mermaidPosition.x
+        let offsetY = position.y - mermaidPosition.y
+        let forwardLead = offsetX * unitX + offsetY * unitY
+        let minimumLead = CGFloat(220)
+        guard forwardLead < minimumLead else { return }
+
+        let sideOffset = (offsetX * -unitY + offsetY * unitX).clamped(to: -CGFloat(90)...CGFloat(90))
+        position.x = mermaidPosition.x + unitX * minimumLead - unitY * sideOffset
+        position.y = mermaidPosition.y + unitY * minimumLead + unitX * sideOffset
+        heading = atan2(unitY, unitX)
+        clampToWorldAndZone()
     }
 
     private func updateGatheringMotion(dt: CGFloat, mermaidPosition: CGPoint, point: CGPoint) {

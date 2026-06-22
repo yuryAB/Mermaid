@@ -48,8 +48,9 @@
     "visual": { "glyph": "♪", "tint": "gold", "scale": 1.0 },
     "challenge": {
       "kind": "plot",
-      "goalMultiplier": 1.35,
-      "special": true
+      "goalMultiplier": 4.0,
+      "special": true,
+      "introText": "A concha vibra baixo, como se pedisse uma sequência perfeita antes de revelar o prêmio."
     },
     "reward": {
       "kind": "supportResource",
@@ -75,8 +76,9 @@
     "visual": { "glyph": "▧", "tint": "sand", "scale": 1.0 },
     "challenge": {
       "kind": "memory",
-      "goalMultiplier": 1.4,
-      "special": true
+      "goalMultiplier": 4.5,
+      "special": true,
+      "introText": "O barquinho range na água: se você lembrar o caminho da maré, eu mostro o mapa escondido."
     },
     "reward": {
       "kind": "regionMap",
@@ -102,8 +104,9 @@
     "visual": { "glyph": "?", "tint": "algae", "scale": 1.0 },
     "challenge": {
       "kind": "snap",
-      "goalMultiplier": 2.5,
-      "special": true
+      "goalMultiplier": 7.0,
+      "special": true,
+      "introText": "A tartaruga velha pisca devagar: paciência, pequena. Meu teste de estalo não perdoa pressa."
     },
     "reward": {
       "kind": "supportResource",
@@ -148,8 +151,9 @@
     "visual": { "glyph": "✿", "tint": "algae", "scale": 1.0 },
     "challenge": {
       "kind": "banquet",
-      "goalMultiplier": 1.45,
-      "special": true
+      "goalMultiplier": 4.0,
+      "special": true,
+      "introText": "A planta se curva e abre folhas famintas. Ela só entrega comida para quem domina o banquete."
     },
     "reward": {
       "kind": "supportResource",
@@ -175,8 +179,9 @@
     "visual": { "glyph": "🐠", "tint": "coral", "scale": 1.08 },
     "challenge": {
       "kind": "snap",
-      "goalMultiplier": 1.65,
-      "special": true
+      "goalMultiplier": 4.5,
+      "special": true,
+      "introText": "O peixe colorido faz um giro rápido: me acompanhe no estalo, se conseguir."
     },
     "reward": {
       "kind": "supportResource",
@@ -221,8 +226,9 @@
     "visual": { "glyph": "▧", "tint": "violet", "scale": 1.0 },
     "challenge": {
       "kind": "memory",
-      "goalMultiplier": 1.6,
-      "special": true
+      "goalMultiplier": 4.8,
+      "special": true,
+      "introText": "As algas afastam símbolos antigos. A ruína só abre tesouro para uma memória firme."
     },
     "reward": {
       "kind": "pearls",
