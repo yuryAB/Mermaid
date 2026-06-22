@@ -26,7 +26,7 @@ private enum ReefAsteroidsRules {
     static let fragmentGhostTime: CGFloat = 0.78
 
     static func milestoneScore(for zone: DepthZone, special: Bool) -> Int {
-        720 + zone.rawValue * 130 + (special ? 420 : 0)
+        GameBalance.challengeGoalFallback(for: .reefAsteroids, zone: zone, special: special)
     }
 
     static func spawnCount(for wave: Int, special: Bool) -> Int {
@@ -531,6 +531,7 @@ final class ReefAsteroidsOverlay: SKNode {
     private let phase: MermaidPhase
     private let special: Bool
     private let shellRewardMultiplier: CGFloat
+    private let victoryReward: ChallengeVictoryReward
     private let bestScore: Int
     private let record: ChallengeRecordSnapshot
     private let onFinish: (ChallengeResult) -> Void
@@ -589,16 +590,19 @@ final class ReefAsteroidsOverlay: SKNode {
          phase: MermaidPhase,
          special: Bool,
          shellRewardMultiplier: CGFloat,
+         victoryReward: ChallengeVictoryReward,
+         challengeGoal: Int,
          giverDisplay: SKNode?,
          record: ChallengeRecordSnapshot,
          onFinish: @escaping (ChallengeResult) -> Void) {
         self.phase = phase
         self.special = special
         self.shellRewardMultiplier = shellRewardMultiplier
+        self.victoryReward = victoryReward
         self.bestScore = record.bestScore
         self.record = record
         self.onFinish = onFinish
-        self.goal = ReefAsteroidsRules.milestoneScore(for: zone, special: special)
+        self.goal = challengeGoal
 
         let availableWidth = max(320, size.width - 8)
         let availableHeight = max(360, size.height - 318)
@@ -609,7 +613,7 @@ final class ReefAsteroidsOverlay: SKNode {
                                y: arenaOrigin.y + 8,
                                width: resolvedArenaWidth - 16,
                                height: resolvedArenaWidth - 16)
-        self.engine = ReefAsteroidsEngine(playRect: playRect, goal: goal, special: special)
+        self.engine = ReefAsteroidsEngine(playRect: playRect, goal: challengeGoal, special: special)
 
         super.init()
         isUserInteractionEnabled = true
@@ -909,8 +913,10 @@ final class ReefAsteroidsOverlay: SKNode {
         valueLabel.fontColor = GameUI.ink
         valueLabel.horizontalAlignmentMode = .left
         valueLabel.verticalAlignmentMode = .center
-        valueLabel.preferredMaxLayoutWidth = width - 48
-        valueLabel.numberOfLines = 1
+        ChallengeChrome.fitSingleLineLabel(valueLabel,
+                                           maxWidth: width - 60,
+                                           maxFontSize: 12.6,
+                                           minFontSize: 9.8)
         valueLabel.position = CGPoint(x: titleLabel.position.x, y: -8)
         node.addChild(valueLabel)
 
@@ -1562,6 +1568,18 @@ final class ReefAsteroidsOverlay: SKNode {
         scoreLabel.text = "\(engine.score)"
         waveLabel.text = "\(engine.wave)"
         livesLabel.text = livesText()
+        ChallengeChrome.fitSingleLineLabel(scoreLabel,
+                                           maxWidth: scoreLabel.preferredMaxLayoutWidth,
+                                           maxFontSize: 12.6,
+                                           minFontSize: 9.8)
+        ChallengeChrome.fitSingleLineLabel(waveLabel,
+                                           maxWidth: waveLabel.preferredMaxLayoutWidth,
+                                           maxFontSize: 12.6,
+                                           minFontSize: 9.8)
+        ChallengeChrome.fitSingleLineLabel(livesLabel,
+                                           maxWidth: livesLabel.preferredMaxLayoutWidth,
+                                           maxFontSize: 12.6,
+                                           minFontSize: 9.8)
         recordLabel.text = recordText()
         updateTideUI()
     }
@@ -1599,7 +1617,8 @@ final class ReefAsteroidsOverlay: SKNode {
                                                           reachedTarget: reached ?? engine.challengeCompleted,
                                                           phase: phase,
                                                           special: special,
-                                                          isHatching: false)
+                                                          isHatching: false,
+                                                          victoryReward: victoryReward)
         return GameBalance.scaledChallengePearlReward(baseAmount: basePearls,
                                                       points: engine.score,
                                                       multiplier: shellRewardMultiplier)
@@ -1621,7 +1640,8 @@ final class ReefAsteroidsOverlay: SKNode {
                                                           reachedTarget: reached,
                                                           phase: phase,
                                                           special: special,
-                                                          isHatching: false)
+                                                          isHatching: false,
+                                                          victoryReward: victoryReward)
         let pearls = projectedPearls(reached: reached)
 
         let panel = makeResultPanel(reached: reached)
@@ -1637,32 +1657,50 @@ final class ReefAsteroidsOverlay: SKNode {
         titleLabel.fontName = "AvenirNext-DemiBold"
         titleLabel.fontSize = 18
         titleLabel.fontColor = GameUI.ink
-        titleLabel.position = CGPoint(x: 0, y: 62)
+        titleLabel.verticalAlignmentMode = .center
+        titleLabel.position = CGPoint(x: 0, y: 82)
+        ChallengeChrome.fitSingleLineLabel(titleLabel,
+                                           maxWidth: 288,
+                                           maxFontSize: 18,
+                                           minFontSize: 13.5)
         content.addChild(titleLabel)
 
         let scoreLine = SKLabelNode(text: "Pontos feitos: \(engine.score)")
         scoreLine.fontName = "AvenirNext-Regular"
         scoreLine.fontSize = 16
         scoreLine.fontColor = GameUI.mutedInk
-        scoreLine.position = CGPoint(x: 0, y: 26)
+        scoreLine.verticalAlignmentMode = .center
+        scoreLine.position = CGPoint(x: 0, y: 48)
+        ChallengeChrome.fitSingleLineLabel(scoreLine,
+                                           maxWidth: 280,
+                                           maxFontSize: 16,
+                                           minFontSize: 12.5)
         content.addChild(scoreLine)
 
         let waveLine = SKLabelNode(text: "Onda \(engine.wave)  |  Recorde \(max(bestScore, engine.score))")
         waveLine.fontName = "AvenirNext-Regular"
         waveLine.fontSize = 13
         waveLine.fontColor = GameUI.mutedInk
-        waveLine.position = CGPoint(x: 0, y: 2)
+        waveLine.verticalAlignmentMode = .center
+        waveLine.position = CGPoint(x: 0, y: 24)
+        ChallengeChrome.fitSingleLineLabel(waveLine,
+                                           maxWidth: 284,
+                                           maxFontSize: 13,
+                                           minFontSize: 10.5)
         content.addChild(waveLine)
 
         let rewardLine = SKLabelNode(text: "Convertendo pontos...")
         rewardLine.fontName = "AvenirNext-DemiBold"
         rewardLine.fontSize = 17
         rewardLine.fontColor = GameUI.gold
-        rewardLine.position = CGPoint(x: 0, y: -28)
+        rewardLine.verticalAlignmentMode = .center
+        rewardLine.position = CGPoint(x: 0, y: -34)
         content.addChild(rewardLine)
         ChallengeChrome.animatePointConversion(label: rewardLine,
                                                points: engine.score,
                                                pearls: pearls,
+                                               reachedTarget: reached,
+                                               victoryReward: victoryReward,
                                                newRecord: isNewRecord)
 
         let continueButton = GameUI.pill(text: "Continuar",
@@ -1674,7 +1712,7 @@ final class ReefAsteroidsOverlay: SKNode {
                                          minWidth: 170,
                                          height: 44)
         continueButton.name = "reef_asteroids_continue"
-        continueButton.position = CGPoint(x: 0, y: -82)
+        continueButton.position = CGPoint(x: 0, y: -104)
         content.addChild(continueButton)
 
         pendingResult = ChallengeResult(kind: .reefAsteroids,
@@ -1682,6 +1720,7 @@ final class ReefAsteroidsOverlay: SKNode {
                                         reachedTarget: reached,
                                         pearls: basePearls,
                                         special: special,
+                                        victoryReward: victoryReward,
                                         previousBestScore: record.bestScore,
                                         isHatching: false)
     }
@@ -1690,11 +1729,11 @@ final class ReefAsteroidsOverlay: SKNode {
         let resultTint = reached
             ? GameUI.algae.withAlphaComponent(0.82)
             : GameUI.coral.withAlphaComponent(0.82)
-        let panel = GameUI.card(size: CGSize(width: 304, height: 244),
+        let panel = GameUI.card(size: CGSize(width: 316, height: 286),
                                 cornerRadius: 24,
                                 tint: resultTint,
                                 baseColors: [UIColor.lerp(GameUI.palePaper, resultTint, 0.28)])
-        let wash = SKShapeNode(rectOf: CGSize(width: 292, height: 232), cornerRadius: 20)
+        let wash = SKShapeNode(rectOf: CGSize(width: 304, height: 274), cornerRadius: 20)
         wash.fillColor = resultTint.withAlphaComponent(0.08)
         wash.strokeColor = .clear
         wash.zPosition = 0.5

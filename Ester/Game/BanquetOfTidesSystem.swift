@@ -23,7 +23,7 @@ private enum BanquetRules {
     static let bumpCooldown: CGFloat = 0.85
 
     static func goal(for zone: DepthZone, special: Bool) -> Int {
-        132 + zone.rawValue * 18 + (special ? 54 : 0)
+        GameBalance.challengeGoalFallback(for: .banquet, zone: zone, special: special)
     }
 
     static func playerRadius(stage: Int) -> CGFloat {
@@ -523,6 +523,7 @@ final class BanquetOfTidesOverlay: SKNode {
     private let phase: MermaidPhase
     private let special: Bool
     private let shellRewardMultiplier: CGFloat
+    private let victoryReward: ChallengeVictoryReward
     private let record: ChallengeRecordSnapshot
     private let onFinish: (ChallengeResult) -> Void
     private let goal: Int
@@ -569,15 +570,18 @@ final class BanquetOfTidesOverlay: SKNode {
          phase: MermaidPhase,
          special: Bool,
          shellRewardMultiplier: CGFloat,
+         victoryReward: ChallengeVictoryReward,
+         challengeGoal: Int,
          giverDisplay: SKNode?,
          record: ChallengeRecordSnapshot,
          onFinish: @escaping (ChallengeResult) -> Void) {
         self.phase = phase
         self.special = special
         self.shellRewardMultiplier = shellRewardMultiplier
+        self.victoryReward = victoryReward
         self.record = record
         self.onFinish = onFinish
-        self.goal = BanquetRules.goal(for: zone, special: special)
+        self.goal = challengeGoal
 
         let availableWidth = max(320, size.width - 8)
         let availableHeight = max(360, size.height - 318)
@@ -588,7 +592,7 @@ final class BanquetOfTidesOverlay: SKNode {
                                y: arenaOrigin.y + 4,
                                width: resolvedArenaWidth - 8,
                                height: resolvedArenaWidth - 8)
-        self.engine = BanquetEngine(playRect: playRect, goal: goal, special: special)
+        self.engine = BanquetEngine(playRect: playRect, goal: challengeGoal, special: special)
 
         super.init()
         isUserInteractionEnabled = true
@@ -869,8 +873,10 @@ final class BanquetOfTidesOverlay: SKNode {
         valueLabel.fontColor = GameUI.ink
         valueLabel.horizontalAlignmentMode = .left
         valueLabel.verticalAlignmentMode = .center
-        valueLabel.preferredMaxLayoutWidth = width - 48
-        valueLabel.numberOfLines = 1
+        ChallengeChrome.fitSingleLineLabel(valueLabel,
+                                           maxWidth: width - 60,
+                                           maxFontSize: 12.6,
+                                           minFontSize: 9.8)
         valueLabel.position = CGPoint(x: titleLabel.position.x, y: -8)
         node.addChild(valueLabel)
 
@@ -1267,6 +1273,18 @@ final class BanquetOfTidesOverlay: SKNode {
         scoreLabel.text = "\(engine.score)"
         objectiveLabel.text = objectiveText()
         livesLabel.text = livesText()
+        ChallengeChrome.fitSingleLineLabel(scoreLabel,
+                                           maxWidth: scoreLabel.preferredMaxLayoutWidth,
+                                           maxFontSize: 12.6,
+                                           minFontSize: 9.8)
+        ChallengeChrome.fitSingleLineLabel(objectiveLabel,
+                                           maxWidth: objectiveLabel.preferredMaxLayoutWidth,
+                                           maxFontSize: 12.6,
+                                           minFontSize: 9.8)
+        ChallengeChrome.fitSingleLineLabel(livesLabel,
+                                           maxWidth: livesLabel.preferredMaxLayoutWidth,
+                                           maxFontSize: 12.6,
+                                           minFontSize: 9.8)
         updateTimerUI()
         updateGaugeUI()
     }
@@ -1314,7 +1332,8 @@ final class BanquetOfTidesOverlay: SKNode {
                                                           reachedTarget: reached ?? engine.challengeCompleted,
                                                           phase: phase,
                                                           special: special,
-                                                          isHatching: false)
+                                                          isHatching: false,
+                                                          victoryReward: victoryReward)
         return GameBalance.scaledChallengePearlReward(baseAmount: basePearls,
                                                       points: engine.score,
                                                       multiplier: shellRewardMultiplier)
@@ -1334,7 +1353,8 @@ final class BanquetOfTidesOverlay: SKNode {
                                                           reachedTarget: reached,
                                                           phase: phase,
                                                           special: special,
-                                                          isHatching: false)
+                                                          isHatching: false,
+                                                          victoryReward: victoryReward)
         let pearls = projectedPearls(reached: reached)
 
         let panel = makeResultPanel(reached: reached)
@@ -1349,25 +1369,38 @@ final class BanquetOfTidesOverlay: SKNode {
         titleLabel.fontName = "AvenirNext-DemiBold"
         titleLabel.fontSize = 18
         titleLabel.fontColor = GameUI.ink
-        titleLabel.position = CGPoint(x: 0, y: 60)
+        titleLabel.verticalAlignmentMode = .center
+        titleLabel.position = CGPoint(x: 0, y: 72)
+        ChallengeChrome.fitSingleLineLabel(titleLabel,
+                                           maxWidth: 276,
+                                           maxFontSize: 18,
+                                           minFontSize: 13.5)
         content.addChild(titleLabel)
 
         let scoreLine = SKLabelNode(text: "Pontos feitos: \(engine.score)")
         scoreLine.fontName = "AvenirNext-Regular"
         scoreLine.fontSize = 16
         scoreLine.fontColor = GameUI.mutedInk
-        scoreLine.position = CGPoint(x: 0, y: 24)
+        scoreLine.verticalAlignmentMode = .center
+        scoreLine.position = CGPoint(x: 0, y: 38)
+        ChallengeChrome.fitSingleLineLabel(scoreLine,
+                                           maxWidth: 266,
+                                           maxFontSize: 16,
+                                           minFontSize: 12.5)
         content.addChild(scoreLine)
 
         let rewardLine = SKLabelNode(text: "Convertendo pontos...")
         rewardLine.fontName = "AvenirNext-DemiBold"
         rewardLine.fontSize = 17
         rewardLine.fontColor = GameUI.gold
-        rewardLine.position = CGPoint(x: 0, y: -10)
+        rewardLine.verticalAlignmentMode = .center
+        rewardLine.position = CGPoint(x: 0, y: -12)
         content.addChild(rewardLine)
         ChallengeChrome.animatePointConversion(label: rewardLine,
                                                points: engine.score,
                                                pearls: pearls,
+                                               reachedTarget: reached,
+                                               victoryReward: victoryReward,
                                                newRecord: record.isNewRecord(score: engine.score))
 
         let continueButton = GameUI.pill(text: "Continuar",
@@ -1379,7 +1412,7 @@ final class BanquetOfTidesOverlay: SKNode {
                                          minWidth: 170,
                                          height: 44)
         continueButton.name = "banquet_continue"
-        continueButton.position = CGPoint(x: 0, y: -68)
+        continueButton.position = CGPoint(x: 0, y: -86)
         content.addChild(continueButton)
 
         pendingResult = ChallengeResult(kind: .banquet,
@@ -1387,6 +1420,7 @@ final class BanquetOfTidesOverlay: SKNode {
                                         reachedTarget: reached,
                                         pearls: basePearls,
                                         special: special,
+                                        victoryReward: victoryReward,
                                         previousBestScore: record.bestScore,
                                         isHatching: false)
     }
@@ -1395,11 +1429,11 @@ final class BanquetOfTidesOverlay: SKNode {
         let resultTint = reached
             ? GameUI.algae.withAlphaComponent(0.82)
             : GameUI.coral.withAlphaComponent(0.82)
-        let panel = GameUI.card(size: CGSize(width: 290, height: 220),
+        let panel = GameUI.card(size: CGSize(width: 304, height: 250),
                                 cornerRadius: 24,
                                 tint: resultTint,
                                 baseColors: [UIColor.lerp(GameUI.palePaper, resultTint, 0.28)])
-        let wash = SKShapeNode(rectOf: CGSize(width: 278, height: 208), cornerRadius: 20)
+        let wash = SKShapeNode(rectOf: CGSize(width: 292, height: 238), cornerRadius: 20)
         wash.fillColor = resultTint.withAlphaComponent(0.08)
         wash.strokeColor = .clear
         wash.zPosition = 0.5

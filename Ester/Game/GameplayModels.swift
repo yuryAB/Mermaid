@@ -23,6 +23,43 @@ enum World {
 
 // MARK: - Balanceamento
 
+enum ChallengeVictoryReward: Equatable {
+    case none
+    case shellBonus
+    case resource(SupportResourceKind)
+
+    var grantsShellBonus: Bool {
+        self == .shellBonus
+    }
+
+    var resourceKind: SupportResourceKind? {
+        if case .resource(let kind) = self {
+            return kind
+        }
+        return nil
+    }
+
+    var displayText: String? {
+        switch self {
+        case .none:
+            return nil
+        case .shellBonus:
+            return "Vitória: +50% conchas"
+        case .resource(let kind):
+            return "Vitória: \(kind.title) +1"
+        }
+    }
+}
+
+struct ChallengeGoalRange {
+    let lowerBound: Int
+    let upperBound: Int
+
+    func randomValue() -> Int {
+        Int.random(in: lowerBound...upperBound)
+    }
+}
+
 enum GameBalance {
     static let currentVersion = 2
 
@@ -33,6 +70,7 @@ enum GameBalance {
     static let babyGuaranteedRequestCount = 10
     static let gameplayEffectDuration: TimeInterval = 5 * 60
     static let visualEffectDuration: TimeInterval = 20 * 60
+    static let growthAccelerateShellCost = 1_000
 
     static func hungerRate(for phase: MermaidPhase) -> CGFloat {
         switch phase {
@@ -87,11 +125,16 @@ enum GameBalance {
         10
     }
 
+    static let commonChallengeGoalMultiplierRange: ClosedRange<CGFloat> = 1.18...1.35
+    static let specialChallengeGoalMultiplierRange: ClosedRange<CGFloat> = 1.38...1.62
+    static let memoryChallengeWaveGoalStep = 110
+    static let challengeCompletionShellBonusMultiplier: CGFloat = 0.50
+    static let challengeVictoryResourceChance: CGFloat = 0.50
+
     struct ChallengeRewardProfile {
         let difficultyTier: Int
         let scoreVolume: String
         let scoreToShellRate: CGFloat
-        let completionBonusMultiplier: CGFloat
     }
 
     static func challengeRewardProfile(for kind: ChallengeKind) -> ChallengeRewardProfile {
@@ -99,34 +142,84 @@ enum GameBalance {
         case .plot:
             return ChallengeRewardProfile(difficultyTier: 2,
                                           scoreVolume: "baixo",
-                                          scoreToShellRate: 0.38,
-                                          completionBonusMultiplier: 0.35)
+                                          scoreToShellRate: 0.38)
         case .ascent:
             return ChallengeRewardProfile(difficultyTier: 4,
                                           scoreVolume: "muito baixo",
-                                          scoreToShellRate: 0.58,
-                                          completionBonusMultiplier: 0.35)
+                                          scoreToShellRate: 0.58)
         case .snap:
             return ChallengeRewardProfile(difficultyTier: 2,
                                           scoreVolume: "alto",
-                                          scoreToShellRate: 0.20,
-                                          completionBonusMultiplier: 0.20)
+                                          scoreToShellRate: 0.20)
         case .banquet:
             return ChallengeRewardProfile(difficultyTier: 3,
                                           scoreVolume: "medio-alto",
-                                          scoreToShellRate: 0.28,
-                                          completionBonusMultiplier: 0.35)
+                                          scoreToShellRate: 0.28)
         case .memory:
             return ChallengeRewardProfile(difficultyTier: 4,
                                           scoreVolume: "medio-alto",
-                                          scoreToShellRate: 0.32,
-                                          completionBonusMultiplier: 0.45)
+                                          scoreToShellRate: 0.32)
         case .reefAsteroids:
             return ChallengeRewardProfile(difficultyTier: 5,
                                           scoreVolume: "muito alto",
-                                          scoreToShellRate: 0.09,
-                                          completionBonusMultiplier: 0.50)
+                                          scoreToShellRate: 0.09)
         }
+    }
+
+    static func baseChallengeGoal(for kind: ChallengeKind,
+                                  zone: DepthZone,
+                                  special: Bool) -> Int {
+        let base: Int
+        switch kind {
+        case .plot:
+            base = 18 + zone.rawValue * 4 + (special ? 10 : 0)
+        case .ascent:
+            base = special ? 24 : 16
+        case .snap:
+            base = 94 + zone.rawValue * 8 + (special ? 36 : 0)
+        case .banquet:
+            base = 132 + zone.rawValue * 18 + (special ? 54 : 0)
+        case .memory:
+            base = 150 + zone.rawValue * 10 + (special ? 44 : 0)
+        case .reefAsteroids:
+            base = 720 + zone.rawValue * 130 + (special ? 420 : 0)
+        }
+        return base
+    }
+
+    static func challengeGoalRange(for kind: ChallengeKind,
+                                   zone: DepthZone,
+                                   special: Bool) -> ChallengeGoalRange {
+        let base = CGFloat(max(1, baseChallengeGoal(for: kind, zone: zone, special: special)))
+        let multiplierRange = special
+            ? specialChallengeGoalMultiplierRange
+            : commonChallengeGoalMultiplierRange
+        let lower = max(1, Int(ceil(base * multiplierRange.lowerBound)))
+        let upper = max(lower, Int(ceil(base * multiplierRange.upperBound)))
+        return ChallengeGoalRange(lowerBound: lower, upperBound: upper)
+    }
+
+    static func randomChallengeGoal(for kind: ChallengeKind,
+                                    zone: DepthZone,
+                                    special: Bool) -> Int {
+        challengeGoalRange(for: kind, zone: zone, special: special).randomValue()
+    }
+
+    static func challengeGoalFallback(for kind: ChallengeKind,
+                                      zone: DepthZone,
+                                      special: Bool) -> Int {
+        let range = challengeGoalRange(for: kind, zone: zone, special: special)
+        return (range.lowerBound + range.upperBound) / 2
+    }
+
+    static func challengeVictoryReward(special: Bool,
+                                       isHatching: Bool,
+                                       resourceCandidates: [SupportResourceKind]) -> ChallengeVictoryReward {
+        guard !special, !isHatching else { return .none }
+        guard let resourceKind = resourceCandidates.randomElement() else { return .shellBonus }
+        return CGFloat.random(in: 0..<1) < challengeVictoryResourceChance
+            ? .resource(resourceKind)
+            : .shellBonus
     }
 
     static func challengeShellReward(points: Int,
@@ -134,31 +227,18 @@ enum GameBalance {
                                      reachedTarget: Bool,
                                      phase: MermaidPhase,
                                      special: Bool,
-                                     isHatching: Bool) -> Int {
+                                     isHatching: Bool,
+                                     victoryReward: ChallengeVictoryReward) -> Int {
         guard !isHatching else { return 0 }
         let pointCap = max(0, points)
         guard pointCap > 0 else { return 0 }
-        let completionBonus: Int
-        switch phase {
-        case .egg:
-            completionBonus = 0
-        case .baby:
-            completionBonus = 6
-        case .child:
-            completionBonus = 12
-        case .teen:
-            completionBonus = 20
-        case .young:
-            completionBonus = 30
-        case .adult:
-            completionBonus = 45
-        }
+        guard phase != .egg else { return 0 }
         let profile = challengeRewardProfile(for: kind)
         let economicPoints = Int((CGFloat(max(0, points)) * profile.scoreToShellRate).rounded())
-        let adjustedCompletionBonus = reachedTarget
-            ? Int((CGFloat(completionBonus) * profile.completionBonusMultiplier).rounded())
+        let victoryBonus = reachedTarget && victoryReward.grantsShellBonus
+            ? Int((CGFloat(economicPoints) * challengeCompletionShellBonusMultiplier).rounded())
             : 0
-        let base = economicPoints + adjustedCompletionBonus
+        let base = economicPoints + victoryBonus
         let specialAdjustedBase = special ? base * 3 : base
         return min(pointCap, specialAdjustedBase)
     }
@@ -181,10 +261,7 @@ enum GameBalance {
     static func growthShellCost(for phase: MermaidPhase) -> Int {
         switch phase {
         case .egg: return 0
-        case .baby: return 300
-        case .child: return 600
-        case .teen: return 1_000
-        case .young: return 1_600
+        case .baby, .child, .teen, .young: return growthAccelerateShellCost
         case .adult: return 0
         }
     }
@@ -360,7 +437,7 @@ enum MermaidPhase: Int, Codable, CaseIterable, Comparable {
 
 enum PlayerCommand: String, CaseIterable {
     case explore
-    case seekFood
+    case resources
     case challenge
     case objective
     case goUp
@@ -374,7 +451,7 @@ enum PlayerCommand: String, CaseIterable {
     var label: String {
         switch self {
         case .explore: return "Explorar"
-        case .seekFood: return "Alimentar"
+        case .resources: return "Recursos"
         case .challenge: return "Desafio"
         case .objective: return "Objetivo"
         case .goUp: return "Cima"
@@ -391,7 +468,7 @@ enum PlayerCommand: String, CaseIterable {
     var icon: String {
         switch self {
         case .explore: return "🧭"
-        case .seekFood: return "🍎"
+        case .resources: return "📦"
         case .challenge: return "🏆"
         case .objective: return "🎯"
         case .goUp: return "⬆️"
@@ -407,7 +484,7 @@ enum PlayerCommand: String, CaseIterable {
     var symbolName: String {
         switch self {
         case .explore: return "safari.fill"
-        case .seekFood: return "leaf.fill"
+        case .resources: return "shippingbox.fill"
         case .challenge: return "trophy.fill"
         case .objective: return "scope"
         case .goUp: return "arrow.up.circle.fill"
@@ -423,7 +500,7 @@ enum PlayerCommand: String, CaseIterable {
     var tint: UIColor {
         switch self {
         case .explore: return UIColor(red: 0.16, green: 0.50, blue: 0.52, alpha: 1)
-        case .seekFood: return UIColor(red: 0.33, green: 0.54, blue: 0.30, alpha: 1)
+        case .resources: return UIColor(red: 0.33, green: 0.54, blue: 0.30, alpha: 1)
         case .challenge: return UIColor(red: 0.83, green: 0.62, blue: 0.25, alpha: 1)
         case .objective: return UIColor(red: 0.78, green: 0.34, blue: 0.30, alpha: 1)
         case .goUp: return UIColor(red: 0.30, green: 0.64, blue: 0.72, alpha: 1)
@@ -664,7 +741,7 @@ final class RewardSystem {
             if let buffKind = reward.buffKind {
                 stats.addTimedBuff(buffKind, title: reward.title, duration: reward.duration)
                 GameAudio.shared.play(.pearlReward)
-                return "Efeito ativo: \(buffKind.title) por \(durationText(reward.duration)). \(buffKind.effectDescription)"
+                return "Efeito ativo: \(reward.title) por \(durationText(reward.duration)). \(buffKind.effectDescription)"
             }
             GameAudio.shared.play(.pearlReward)
             return "Efeito temporário aplicado."
@@ -745,6 +822,7 @@ final class GameContext {
     var regions: RegionDiscoverySystem!
     var travel: TravelSystem!
     var rewards: RewardSystem!
+    var supportResources: ResourceSupportSystem!
     var pois: POISystem!
     var hud: HUDLayer!
 

@@ -7,6 +7,18 @@ import SpriteKit
 import UIKit
 
 final class WorldPOINode: SKNode {
+    private enum VisualStyle: Equatable {
+        case marker
+        case warmCurrentEnvironment
+
+        var usesMarkerAura: Bool {
+            switch self {
+            case .marker: return true
+            case .warmCurrentEnvironment: return false
+            }
+        }
+    }
+
     let poiKey: String
 
     private let halo: SKShapeNode
@@ -17,12 +29,15 @@ final class WorldPOINode: SKNode {
     private let baseColor: UIColor
     private let normalScale: CGFloat
     private let showsAura: Bool
+    private let visualStyle: VisualStyle
 
     init(poi: WorldPOI, discovered: Bool, rewardCollected: Bool, focused: Bool) {
+        let style = Self.visualStyle(for: poi)
         poiKey = poi.key
         baseColor = poi.visual.color
-        normalScale = (poi.visual.scale * 1.80).clamped(to: 1.35...2.35)
-        showsAura = poi.key != "nascente_shallow_baby_fish_school"
+        visualStyle = style
+        normalScale = Self.normalScale(for: poi, style: style)
+        showsAura = style.usesMarkerAura && poi.key != "nascente_shallow_baby_fish_school"
         halo = SKShapeNode(circleOfRadius: 42)
         core = SKShapeNode(circleOfRadius: 26)
         artwork = WorldPOIArtworkFactory.makeArtwork(for: poi, size: .world)
@@ -33,7 +48,7 @@ final class WorldPOINode: SKNode {
 
         name = "world_poi_\(poi.key)"
         isUserInteractionEnabled = false
-        zPosition = 8
+        zPosition = visualStyle == .warmCurrentEnvironment ? 7 : 8
         setScale(normalScale)
 
         halo.fillColor = baseColor.withAlphaComponent(0.12)
@@ -56,29 +71,31 @@ final class WorldPOINode: SKNode {
         addChild(artwork)
 
         title.fontName = "AvenirNext-DemiBold"
-        title.fontSize = 11
+        title.fontSize = visualStyle == .warmCurrentEnvironment ? 13 : 11
         title.fontColor = UIColor.white.withAlphaComponent(0.86)
         title.verticalAlignmentMode = .center
         title.horizontalAlignmentMode = .center
-        title.position = CGPoint(x: 0, y: -47)
-        title.zPosition = 2
+        title.position = visualStyle == .warmCurrentEnvironment ? CGPoint(x: 0, y: -78) : CGPoint(x: 0, y: -47)
+        title.zPosition = visualStyle == .warmCurrentEnvironment ? 8 : 2
         addChild(title)
 
         collectedMark.fontName = "AvenirNext-Bold"
-        collectedMark.fontSize = 16
+        collectedMark.fontSize = visualStyle == .warmCurrentEnvironment ? 18 : 16
         collectedMark.fontColor = GameUI.gold
         collectedMark.verticalAlignmentMode = .center
         collectedMark.horizontalAlignmentMode = .center
-        collectedMark.position = CGPoint(x: 26, y: 24)
-        collectedMark.zPosition = 4
+        collectedMark.position = visualStyle == .warmCurrentEnvironment ? CGPoint(x: 126, y: 49) : CGPoint(x: 26, y: 24)
+        collectedMark.zPosition = visualStyle == .warmCurrentEnvironment ? 9 : 4
         addChild(collectedMark)
 
-        let bob = SKAction.repeatForever(.sequence([
-            .moveBy(x: 0, y: 7, duration: 1.35),
-            .moveBy(x: 0, y: -7, duration: 1.45)
-        ]))
-        bob.eaeInEaseOut()
-        run(bob, withKey: "poi_bob")
+        if visualStyle != .warmCurrentEnvironment {
+            let bob = SKAction.repeatForever(.sequence([
+                .moveBy(x: 0, y: 7, duration: 1.35),
+                .moveBy(x: 0, y: -7, duration: 1.45)
+            ]))
+            bob.eaeInEaseOut()
+            run(bob, withKey: "poi_bob")
+        }
 
         update(discovered: discovered, rewardCollected: rewardCollected, focused: focused)
     }
@@ -96,8 +113,9 @@ final class WorldPOINode: SKNode {
                 halo.glowWidth = 16
             }
             if action(forKey: "poi_focus") == nil {
+                let focusedScale = visualStyle == .warmCurrentEnvironment ? normalScale * 1.035 : normalScale * 1.11
                 let pulse = SKAction.repeatForever(.sequence([
-                    .scale(to: normalScale * 1.11, duration: 0.45),
+                    .scale(to: focusedScale, duration: 0.45),
                     .scale(to: normalScale, duration: 0.55)
                 ]))
                 pulse.eaeInEaseOut()
@@ -117,6 +135,24 @@ final class WorldPOINode: SKNode {
         guard text.count > 26 else { return text }
         let end = text.index(text.startIndex, offsetBy: 23)
         return "\(text[..<end])..."
+    }
+
+    private static func visualStyle(for poi: WorldPOI) -> VisualStyle {
+        switch poi.key {
+        case "nascente_mid_warm_current":
+            return .warmCurrentEnvironment
+        default:
+            return .marker
+        }
+    }
+
+    private static func normalScale(for poi: WorldPOI, style: VisualStyle) -> CGFloat {
+        switch style {
+        case .marker:
+            return (poi.visual.scale * 1.80).clamped(to: 1.35...2.35)
+        case .warmCurrentEnvironment:
+            return (poi.visual.scale * 1.0).clamped(to: 0.90...1.20)
+        }
     }
 }
 
@@ -244,7 +280,9 @@ enum WorldPOIArtworkFactory {
             context.cgContext.setLineJoin(.round)
 
             let tint = poi.visual.color
-            drawMiniBackdrop(tint: tint)
+            if poi.key != "nascente_mid_warm_current" {
+                drawMiniBackdrop(tint: tint)
+            }
 
             switch poi.key {
             case "nascente_shallow_abandoned_egg_nest":
@@ -412,18 +450,45 @@ enum WorldPOIArtworkFactory {
     }
 
     private static func drawMiniIconCurrent(tint: UIColor) {
-        let colors = [GameUI.coral, GameUI.gold, tint]
-        for index in 0..<3 {
-            let y = 39 + CGFloat(index) * 10
+        let warm = UIColor.lerp(GameUI.coral, tint, 0.18)
+        let lane = UIBezierPath()
+        lane.move(to: CGPoint(x: 7, y: 63))
+        lane.addCurve(to: CGPoint(x: 90, y: 55),
+                      controlPoint1: CGPoint(x: 29, y: 48),
+                      controlPoint2: CGPoint(x: 62, y: 68))
+        lane.addCurve(to: CGPoint(x: 87, y: 34),
+                      controlPoint1: CGPoint(x: 93, y: 48),
+                      controlPoint2: CGPoint(x: 93, y: 41))
+        lane.addCurve(to: CGPoint(x: 8, y: 42),
+                      controlPoint1: CGPoint(x: 61, y: 48),
+                      controlPoint2: CGPoint(x: 31, y: 30))
+        lane.addCurve(to: CGPoint(x: 7, y: 63),
+                      controlPoint1: CGPoint(x: 5, y: 49),
+                      controlPoint2: CGPoint(x: 4, y: 56))
+        drawMiniPath(lane,
+                     fill: warm.withAlphaComponent(0.16),
+                     stroke: GameUI.gold.withAlphaComponent(0.28),
+                     lineWidth: 1.4)
+
+        let colors = [GameUI.coral, UIColor.lerp(GameUI.gold, tint, 0.15), tint]
+        for index in 0..<4 {
+            let y = 38 + CGFloat(index) * 6.5
             let path = UIBezierPath()
-            path.move(to: CGPoint(x: 12, y: y + 5))
-            path.addCurve(to: CGPoint(x: 84, y: y - 5),
-                          controlPoint1: CGPoint(x: 30, y: y - 17),
-                          controlPoint2: CGPoint(x: 63, y: y + 18))
+            path.move(to: CGPoint(x: 10, y: y + 7))
+            path.addCurve(to: CGPoint(x: 88, y: y - 4),
+                          controlPoint1: CGPoint(x: 30, y: y - 13),
+                          controlPoint2: CGPoint(x: 64, y: y + 14))
             drawMiniPath(path,
                          fill: .clear,
-                         stroke: colors[index].withAlphaComponent(0.82),
-                         lineWidth: 4)
+                         stroke: colors[index % colors.count].withAlphaComponent(0.82),
+                         lineWidth: 3.2)
+        }
+
+        for point in [CGPoint(x: 25, y: 48), CGPoint(x: 49, y: 38), CGPoint(x: 69, y: 55)] {
+            drawMiniEllipse(center: point,
+                            size: CGSize(width: 5, height: 5),
+                            fill: UIColor.lerp(GameUI.gold, .white, 0.18).withAlphaComponent(0.70),
+                            stroke: .clear)
         }
     }
 
@@ -1352,43 +1417,99 @@ enum WorldPOIArtworkFactory {
 
     private static func makeWarmCurrent(tint: UIColor) -> SKNode {
         let node = SKNode()
+        let warm = UIColor.lerp(GameUI.coral, tint, 0.20)
+        let bright = UIColor.lerp(GameUI.gold, tint, 0.12)
         let colors = [
             GameUI.coral,
-            UIColor.lerp(GameUI.gold, tint, 0.15),
-            UIColor.lerp(tint, .white, 0.20)
+            bright,
+            UIColor.lerp(tint, .white, 0.18)
         ]
 
-        for i in 0..<4 {
+        let currentField = UIBezierPath()
+        currentField.move(to: CGPoint(x: -158, y: -38))
+        currentField.addCurve(to: CGPoint(x: 154, y: -24),
+                              controlPoint1: CGPoint(x: -78, y: -70),
+                              controlPoint2: CGPoint(x: 74, y: 0))
+        currentField.addCurve(to: CGPoint(x: 151, y: 38),
+                              controlPoint1: CGPoint(x: 168, y: -8),
+                              controlPoint2: CGPoint(x: 169, y: 22))
+        currentField.addCurve(to: CGPoint(x: -151, y: 31),
+                              controlPoint1: CGPoint(x: 74, y: 72),
+                              controlPoint2: CGPoint(x: -72, y: 8))
+        currentField.addCurve(to: CGPoint(x: -158, y: -38),
+                              controlPoint1: CGPoint(x: -170, y: 13),
+                              controlPoint2: CGPoint(x: -173, y: -18))
+        let field = shape(currentField,
+                          fill: warm.withAlphaComponent(0.13),
+                          stroke: bright.withAlphaComponent(0.18),
+                          lineWidth: 1.2,
+                          glow: 12,
+                          lineCap: .round)
+        field.zPosition = -4
+        node.addChild(field)
+
+        for i in 0..<3 {
+            let band = UIBezierPath()
+            let baseY = CGFloat(i - 1) * 21
+            band.move(to: CGPoint(x: -146, y: baseY - 15))
+            band.addCurve(to: CGPoint(x: 146, y: baseY - 8),
+                          controlPoint1: CGPoint(x: -66, y: baseY - 41),
+                          controlPoint2: CGPoint(x: 55, y: baseY + 17))
+            band.addCurve(to: CGPoint(x: 143, y: baseY + 9),
+                          controlPoint1: CGPoint(x: 151, y: baseY - 4),
+                          controlPoint2: CGPoint(x: 151, y: baseY + 5))
+            band.addCurve(to: CGPoint(x: -143, y: baseY + 13),
+                          controlPoint1: CGPoint(x: 56, y: baseY + 30),
+                          controlPoint2: CGPoint(x: -58, y: baseY - 24))
+            band.addCurve(to: CGPoint(x: -146, y: baseY - 15),
+                          controlPoint1: CGPoint(x: -152, y: baseY + 7),
+                          controlPoint2: CGPoint(x: -153, y: baseY - 8))
+            let wash = shape(band,
+                             fill: colors[i].withAlphaComponent(0.09),
+                             stroke: .clear)
+            wash.zPosition = CGFloat(i) - 3
+            node.addChild(wash)
+        }
+
+        for i in 0..<6 {
             let path = UIBezierPath()
-            let offset = CGFloat(i) * 9 - 14
-            path.move(to: CGPoint(x: -38, y: -20 + offset * 0.25))
-            path.addCurve(to: CGPoint(x: 39, y: 19 - offset * 0.15),
-                          controlPoint1: CGPoint(x: -20, y: 20 + offset),
-                          controlPoint2: CGPoint(x: 18, y: -22 + offset * 0.55))
+            let offset = CGFloat(i) * 12 - 31
+            path.move(to: CGPoint(x: -150, y: offset - 5))
+            path.addCurve(to: CGPoint(x: 150, y: offset + 3),
+                          controlPoint1: CGPoint(x: -76, y: offset + 31),
+                          controlPoint2: CGPoint(x: 59, y: offset - 32))
             let ribbon = shape(path,
                                fill: .clear,
                                stroke: colors[i % colors.count].withAlphaComponent(0.72),
-                               lineWidth: 3.2 - CGFloat(i) * 0.35,
-                               glow: 5,
+                               lineWidth: 3.8 - CGFloat(i % 3) * 0.45,
+                               glow: 6,
                                lineCap: .round)
             ribbon.zPosition = CGFloat(i)
             node.addChild(ribbon)
             ribbon.run(.repeatForever(.sequence([
-                eased(.moveBy(x: 4, y: 0, duration: 1.0 + TimeInterval(i) * 0.12)),
-                eased(.moveBy(x: -4, y: 0, duration: 1.0 + TimeInterval(i) * 0.12))
+                eased(.moveBy(x: 12, y: 2, duration: 1.05 + TimeInterval(i) * 0.10)),
+                eased(.moveBy(x: -12, y: -2, duration: 1.05 + TimeInterval(i) * 0.10))
             ])))
         }
 
-        for i in 0..<7 {
-            let mote = circle(radius: 2.2 + CGFloat(i % 3),
-                              fill: colors[i % colors.count].withAlphaComponent(0.60),
-                              stroke: .clear,
-                              glow: 4)
-            mote.position = CGPoint(x: -29 + CGFloat(i) * 10,
-                                    y: -19 + CGFloat((i * 13) % 38))
+        for i in 0..<18 {
+            let mote = ellipse(width: 4.5 + CGFloat(i % 3) * 1.4,
+                               height: 2.4 + CGFloat((i + 1) % 3),
+                               fill: colors[i % colors.count].withAlphaComponent(0.60),
+                               stroke: .clear,
+                               glow: 4)
+            mote.position = CGPoint(x: -135 + CGFloat(i) * 16,
+                                    y: -30 + CGFloat((i * 17) % 64))
+            mote.zRotation = CGFloat(i % 5) * 0.18
             mote.zPosition = 5
             node.addChild(mote)
+            mote.run(.repeatForever(.sequence([
+                eased(.moveBy(x: 10, y: 3, duration: 1.2 + TimeInterval(i % 4) * 0.18)),
+                eased(.moveBy(x: -10, y: -3, duration: 1.2 + TimeInterval(i % 4) * 0.18))
+            ])))
         }
+
+        field.run(makeBreathAction(amount: 1.025, duration: 1.8))
         return node
     }
 

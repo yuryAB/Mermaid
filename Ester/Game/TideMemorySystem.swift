@@ -31,7 +31,8 @@ private enum TideMemoryRules {
     }
 
     static func goal(for zone: DepthZone, special: Bool, wave: Int) -> Int {
-        150 + zone.rawValue * 10 + (special ? 44 : 0) + max(0, wave - 1) * 88
+        GameBalance.challengeGoalFallback(for: .memory, zone: zone, special: special)
+            + max(0, wave - 1) * GameBalance.memoryChallengeWaveGoalStep
     }
 
     static func matchPoints(streak: Int, revealGap: CGFloat, remainingPairs: Int) -> Int {
@@ -292,6 +293,8 @@ final class TideMemoryOverlay: SKNode {
     private let zone: DepthZone
     private let special: Bool
     private let shellRewardMultiplier: CGFloat
+    private let victoryReward: ChallengeVictoryReward
+    private let initialGoal: Int
     private let bestScore: Int
     private let record: ChallengeRecordSnapshot
     private let onFinish: (ChallengeResult) -> Void
@@ -340,6 +343,8 @@ final class TideMemoryOverlay: SKNode {
          phase: MermaidPhase,
          special: Bool,
          shellRewardMultiplier: CGFloat,
+         victoryReward: ChallengeVictoryReward,
+         initialGoal: Int,
          giverDisplay: SKNode?,
          record: ChallengeRecordSnapshot,
          onFinish: @escaping (ChallengeResult) -> Void) {
@@ -348,6 +353,8 @@ final class TideMemoryOverlay: SKNode {
         self.phase = phase
         self.special = special
         self.shellRewardMultiplier = shellRewardMultiplier
+        self.victoryReward = victoryReward
+        self.initialGoal = initialGoal
         self.bestScore = record.bestScore
         self.record = record
         self.onFinish = onFinish
@@ -640,8 +647,10 @@ final class TideMemoryOverlay: SKNode {
         valueLabel.fontColor = GameUI.ink
         valueLabel.horizontalAlignmentMode = .left
         valueLabel.verticalAlignmentMode = .center
-        valueLabel.preferredMaxLayoutWidth = width - 54
-        valueLabel.numberOfLines = 1
+        ChallengeChrome.fitSingleLineLabel(valueLabel,
+                                           maxWidth: width - 64,
+                                           maxFontSize: 13.5,
+                                           minFontSize: 10.5)
         valueLabel.position = CGPoint(x: titleLabel.position.x, y: -8)
         node.addChild(valueLabel)
 
@@ -1292,7 +1301,7 @@ final class TideMemoryOverlay: SKNode {
     // MARK: - Estado
 
     private var currentGoal: Int {
-        TideMemoryRules.goal(for: zone, special: special, wave: wave)
+        initialGoal + max(0, wave - 1) * GameBalance.memoryChallengeWaveGoalStep
     }
 
     private func updateChallengeProgress() {
@@ -1311,6 +1320,14 @@ final class TideMemoryOverlay: SKNode {
         guard scoreLabel != nil else { return }
         scoreLabel.text = "\(score)"
         objectiveLabel.text = objectiveText()
+        ChallengeChrome.fitSingleLineLabel(scoreLabel,
+                                           maxWidth: scoreLabel.preferredMaxLayoutWidth,
+                                           maxFontSize: 13.5,
+                                           minFontSize: 10.5)
+        ChallengeChrome.fitSingleLineLabel(objectiveLabel,
+                                           maxWidth: objectiveLabel.preferredMaxLayoutWidth,
+                                           maxFontSize: 13.5,
+                                           minFontSize: 10.5)
         let remaining = board.remainingPairs
         if streak > 0 {
             streakLabel.text = "Memória x\(streak) • \(remaining) pares"
@@ -1376,7 +1393,8 @@ final class TideMemoryOverlay: SKNode {
                                                           reachedTarget: reached ?? challengeCompleted,
                                                           phase: phase,
                                                           special: special,
-                                                          isHatching: false)
+                                                          isHatching: false,
+                                                          victoryReward: victoryReward)
         return GameBalance.scaledChallengePearlReward(baseAmount: basePearls,
                                                       points: score,
                                                       multiplier: shellRewardMultiplier)
@@ -1409,7 +1427,8 @@ final class TideMemoryOverlay: SKNode {
                                                           reachedTarget: reached,
                                                           phase: phase,
                                                           special: special,
-                                                          isHatching: false)
+                                                          isHatching: false,
+                                                          victoryReward: victoryReward)
         let pearls = projectedPearls(reached: reached)
 
         let panel = makeResultPanel(reached: reached)
@@ -1424,32 +1443,50 @@ final class TideMemoryOverlay: SKNode {
         titleLabel.fontName = "AvenirNext-DemiBold"
         titleLabel.fontSize = 18.5
         titleLabel.fontColor = GameUI.ink
-        titleLabel.position = CGPoint(x: 0, y: 62)
+        titleLabel.verticalAlignmentMode = .center
+        titleLabel.position = CGPoint(x: 0, y: 82)
+        ChallengeChrome.fitSingleLineLabel(titleLabel,
+                                           maxWidth: 286,
+                                           maxFontSize: 18.5,
+                                           minFontSize: 13.5)
         content.addChild(titleLabel)
 
         let scoreLine = SKLabelNode(text: "Pontos feitos: \(score)")
         scoreLine.fontName = "AvenirNext-Regular"
         scoreLine.fontSize = 16
         scoreLine.fontColor = GameUI.mutedInk
-        scoreLine.position = CGPoint(x: 0, y: 25)
+        scoreLine.verticalAlignmentMode = .center
+        scoreLine.position = CGPoint(x: 0, y: 48)
+        ChallengeChrome.fitSingleLineLabel(scoreLine,
+                                           maxWidth: 280,
+                                           maxFontSize: 16,
+                                           minFontSize: 12.5)
         content.addChild(scoreLine)
 
         let detailsLine = SKLabelNode(text: "Onda \(wave) • \(board.matchedPairs)/\(TideMemoryRules.pairCount) pares • \(mistakes) erros")
         detailsLine.fontName = "AvenirNext-Regular"
         detailsLine.fontSize = 13.5
         detailsLine.fontColor = GameUI.mutedInk
-        detailsLine.position = CGPoint(x: 0, y: 2)
+        detailsLine.verticalAlignmentMode = .center
+        detailsLine.position = CGPoint(x: 0, y: 24)
+        ChallengeChrome.fitSingleLineLabel(detailsLine,
+                                           maxWidth: 282,
+                                           maxFontSize: 13.5,
+                                           minFontSize: 10.5)
         content.addChild(detailsLine)
 
         let rewardLine = SKLabelNode(text: "Convertendo pontos...")
         rewardLine.fontName = "AvenirNext-DemiBold"
         rewardLine.fontSize = 17
         rewardLine.fontColor = GameUI.gold
-        rewardLine.position = CGPoint(x: 0, y: -27)
+        rewardLine.verticalAlignmentMode = .center
+        rewardLine.position = CGPoint(x: 0, y: -34)
         content.addChild(rewardLine)
         ChallengeChrome.animatePointConversion(label: rewardLine,
                                                points: score,
                                                pearls: pearls,
+                                               reachedTarget: reached,
+                                               victoryReward: victoryReward,
                                                newRecord: record.isNewRecord(score: score))
 
         let continueButton = GameUI.pill(text: "Continuar",
@@ -1461,7 +1498,7 @@ final class TideMemoryOverlay: SKNode {
                                          minWidth: 170,
                                          height: 44)
         continueButton.name = "memory_continue"
-        continueButton.position = CGPoint(x: 0, y: -82)
+        continueButton.position = CGPoint(x: 0, y: -104)
         content.addChild(continueButton)
 
         pendingResult = ChallengeResult(kind: .memory,
@@ -1469,6 +1506,7 @@ final class TideMemoryOverlay: SKNode {
                                         reachedTarget: reached,
                                         pearls: basePearls,
                                         special: special,
+                                        victoryReward: victoryReward,
                                         previousBestScore: record.bestScore,
                                         isHatching: false)
     }
@@ -1477,11 +1515,11 @@ final class TideMemoryOverlay: SKNode {
         let resultTint = reached
             ? GameUI.algae.withAlphaComponent(0.82)
             : GameUI.coral.withAlphaComponent(0.82)
-        let panel = GameUI.card(size: CGSize(width: 302, height: 244),
+        let panel = GameUI.card(size: CGSize(width: 314, height: 286),
                                 cornerRadius: 24,
                                 tint: resultTint,
                                 baseColors: [UIColor.lerp(GameUI.palePaper, resultTint, 0.28)])
-        let wash = SKShapeNode(rectOf: CGSize(width: 290, height: 232), cornerRadius: 20)
+        let wash = SKShapeNode(rectOf: CGSize(width: 302, height: 274), cornerRadius: 20)
         wash.fillColor = resultTint.withAlphaComponent(0.08)
         wash.strokeColor = .clear
         wash.zPosition = 0.5

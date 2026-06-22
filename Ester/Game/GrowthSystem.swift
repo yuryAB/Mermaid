@@ -113,31 +113,61 @@ final class GrowthSystem {
 
     @discardableResult
     func spendShellsForGrowth() -> Bool {
-        if ctx.stats.phase == .egg {
-            ctx.say("O ovo ainda precisa nascer antes de crescer.")
-            return false
-        }
-        guard let next = ctx.stats.phase.next,
-              let req = requirement(toReach: next) else {
-            ctx.say("Ciclo adulto completo. As conchas ficam para o Refúgio.")
-            return false
-        }
-        let remaining = remainingWaitSeconds(for: req)
-        guard remaining > 0 else {
-            ctx.say("A espera já abriu. Agora faltam os outros sinais do mar.")
-            return false
-        }
+        guard let remaining = growthAccelerationRemainingWait(showMessages: true) else { return false }
         let shellGrowthCost = GameBalance.growthShellCost(for: ctx.stats.phase)
         guard ctx.stats.pearls >= shellGrowthCost else {
             ctx.say("Acelerar crescimento custa \(GameUI.shellAmountText(shellGrowthCost)) conchas. Faltam \(GameUI.shellAmountText(shellGrowthCost - ctx.stats.pearls)) conchas.")
             return false
         }
-
-        let skipped = min(shellGrowthSkipSeconds, remaining)
         guard ctx.stats.spendPearls(shellGrowthCost, autosave: false) else { return false }
+        return applyGrowthAcceleration(remaining: remaining,
+                                       memoryText: "Conchas aceleraram",
+                                       messageText: "Crescimento acelerado")
+    }
+
+    func canReceiveGrowthAccelerationResource() -> Bool {
+        growthAccelerationRemainingWait(showMessages: true) != nil
+    }
+
+    @discardableResult
+    func applyGrowthAccelerationResource() -> Bool {
+        guard let remaining = growthAccelerationRemainingWait(showMessages: true) else { return false }
+        return applyGrowthAcceleration(remaining: remaining,
+                                       memoryText: "Porção acelerou",
+                                       messageText: "Porção acelerou o crescimento")
+    }
+
+    private func growthAccelerationRemainingWait(showMessages: Bool) -> Double? {
+        if ctx.stats.phase == .egg {
+            if showMessages {
+                ctx.say("O ovo ainda precisa nascer antes de crescer.")
+            }
+            return nil
+        }
+        guard let next = ctx.stats.phase.next,
+              let req = requirement(toReach: next) else {
+            if showMessages {
+                ctx.say("Ciclo adulto completo. As conchas ficam para o Refúgio.")
+            }
+            return nil
+        }
+        let remaining = remainingWaitSeconds(for: req)
+        guard remaining > 0 else {
+            if showMessages {
+                ctx.say("A espera já abriu. Agora faltam os outros sinais do mar.")
+            }
+            return nil
+        }
+        return remaining
+    }
+
+    private func applyGrowthAcceleration(remaining: Double,
+                                         memoryText: String,
+                                         messageText: String) -> Bool {
+        let skipped = min(shellGrowthSkipSeconds, remaining)
         ctx.stats.phaseStartedAt = ctx.stats.phaseStartedAt.addingTimeInterval(-skipped)
-        ctx.stats.addMemory("Conchas aceleraram \(GrowthSystem.formatDuration(skipped)) do crescimento")
-        ctx.say("Crescimento acelerado em \(GrowthSystem.formatDuration(skipped)).")
+        ctx.stats.addMemory("\(memoryText) \(GrowthSystem.formatDuration(skipped)) do crescimento")
+        ctx.say("\(messageText) em \(GrowthSystem.formatDuration(skipped)).")
         if canEvolve() { evolve() } else { ctx.stats.save(immediately: true) }
         return true
     }

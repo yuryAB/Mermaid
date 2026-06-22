@@ -965,7 +965,7 @@ final class HUDLayer: SKNode {
     }
 
     private func buildButtons() {
-        let bottomCommands: [PlayerCommand?] = [.refuge, .seekFood, nil, .challenge, .objective]
+        let bottomCommands: [PlayerCommand?] = [.refuge, .resources, nil, .challenge, .objective]
         let bottomWidth = min(CGFloat(68), (sceneSize.width - 36) / CGFloat(bottomCommands.count))
         let bottomSpacing = max(CGFloat(4), (sceneSize.width - bottomWidth * CGFloat(bottomCommands.count) - 24) / CGFloat(bottomCommands.count - 1))
         let bottomStartX = -sceneSize.width / 2 + 12 + bottomWidth / 2
@@ -1685,7 +1685,7 @@ final class HUDLayer: SKNode {
         case .wandering, .observing:
             return .explore
         case .seekingFood, .eating:
-            return .seekFood
+            return .resources
         case .resting:
             return .rest
         case .seekingChallenge, .inChallenge:
@@ -1851,8 +1851,11 @@ final class HUDLayer: SKNode {
         switch command {
         case .explore:
             node.addChild(assetIconNode(named: "compass", color: color, size: 24))
-        case .seekFood:
-            node.addChild(assetIconNode(named: "eat", color: color, size: 24))
+        case .resources:
+            node.addChild(GameUI.symbolIconNode(named: "shippingbox.fill",
+                                                fallback: "R",
+                                                color: color,
+                                                size: 24))
         case .rest:
             node.addChild(assetIconNode(named: "sleep", color: color, size: 30))
         case .challenge:

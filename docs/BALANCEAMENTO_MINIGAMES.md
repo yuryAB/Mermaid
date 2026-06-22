@@ -6,8 +6,8 @@ Este criterio define quanto a pontuacao de cada minigame vale em conchas. A regr
 
 ```text
 pontosEconomicos = round(pontosBrutos * taxaDoMinigame)
-bonusMeta = round(bonusDaFase * multiplicadorDeMeta) quando a meta foi atingida
-conchasBase = pontosEconomicos + bonusMeta
+bonusVitoria = round(pontosEconomicos * 0.50) apenas se o premio da vitoria for conchas
+conchasBase = pontosEconomicos + bonusVitoria
 conchasBase *= 3 em desafio especial
 conchasBase = min(conchasBase, pontosBrutos)
 conchasFinais = min(round(conchasBase * multiplicadorDeGanhoDeConchas), pontosBrutos)
@@ -16,6 +16,10 @@ conchasFinais = min(round(conchasBase * multiplicadorDeGanhoDeConchas), pontosBr
 `pontosBrutos` seguem visiveis na tela e continuam valendo para recordes. `pontosEconomicos` existem so para converter recompensa.
 Regra dura: conchas finais nunca podem ser maiores que pontos brutos.
 O multiplicador global de ganho de conchas comeca em 0.45x, sobe +0.02 por nivel do aprimoramento "Ganho de conchas" e trava em 1.8x.
+
+Ao vencer um desafio comum, a vitoria sorteia um premio: ou +50% nas conchas convertidas, ou 1 recurso elegivel. Os dois premios nao acumulam. Recursos de crescimento acelerado ficam fora desse sorteio. Desafios especiais nao usam esse premio comum porque ja tem regra propria de dificuldade e recompensa.
+
+Metas nao aparecem como valor fixo na lista de desafios. Quando um peixe ou POI oferece um desafio, a oferta sorteia uma meta dentro de uma faixa. Desafios comuns usam `commonChallengeGoalMultiplierRange` (1.18x...1.35x). Desafios especiais/POI usam `specialChallengeGoalMultiplierRange` (1.38x...1.62x), mantendo pontos de interesse acima dos desafios comuns.
 
 ## Criterio de Dificuldade
 
@@ -40,14 +44,14 @@ Para escolher a nota, avaliar:
 
 ## Perfis Atuais
 
-| Minigame | Volume de pontos | Dificuldade | Taxa ponto -> concha | Multiplicador de meta | Racional |
-|---|---:|---:|---:|---:|---|
-| Subida | Muito baixo | 4 | 0.58 | 0.35 | Cada bolha vale so 1 ponto; taxa ainda maior, mas sem acelerar demais o inicio. |
-| Trama | Baixo | 2 | 0.38 | 0.35 | Score cresce devagar, mas jogo e simples e perdoa bastante. |
-| Lembrancas | Medio-alto | 4 | 0.32 | 0.45 | Exige memoria e pune erro; bonus de meta paga execucao boa sem inflar tentativas ruins. |
-| Banquete | Medio-alto | 3 | 0.28 | 0.35 | Movimento e risco elevam dificuldade, mas pontuacao sobe em blocos grandes. |
-| Estalo | Alto | 2 | 0.20 | 0.20 | Pontua muito rapido em grupos e combos; concha por ponto deve ser bem menor. |
-| Ruptura | Muito alto | 5 | 0.09 | 0.50 | Score bruto e enorme; taxa baixa compensa volume, bonus paga risco. |
+| Minigame | Volume de pontos | Dificuldade | Taxa ponto -> concha | Racional |
+|---|---:|---:|---:|---|
+| Subida | Muito baixo | 4 | 0.58 | Cada bolha vale so 1 ponto; taxa ainda maior, mas sem acelerar demais o inicio. |
+| Trama | Baixo | 2 | 0.38 | Score cresce devagar, mas jogo e simples e perdoa bastante. |
+| Lembrancas | Medio-alto | 4 | 0.32 | Exige memoria e pune erro; taxa maior compensa execucao boa sem inflar tentativas ruins. |
+| Banquete | Medio-alto | 3 | 0.28 | Movimento e risco elevam dificuldade, mas pontuacao sobe em blocos grandes. |
+| Estalo | Alto | 2 | 0.20 | Pontua muito rapido em grupos e combos; concha por ponto deve ser bem menor. |
+| Ruptura | Muito alto | 5 | 0.09 | Score bruto e enorme; taxa baixa compensa volume e risco. |
 
 ## Regra de Ajuste
 
@@ -57,4 +61,4 @@ Depois de playtest, comparar conchas por minuto, nao so conchas por run. Meta sa
 - Minigame medio: concha/minuto base da economia.
 - Minigame dificil: maior teto, mas media so deve superar os faceis quando jogador joga bem.
 
-Se um minigame facil estiver dominando farm, diminuir `taxaDoMinigame`. Se um minigame dificil estiver pagando pouco apesar de boa execucao, aumentar `multiplicadorDeMeta` primeiro; isso premia vencer sem inflar tentativas ruins.
+Se um minigame facil estiver dominando farm, diminuir `taxaDoMinigame`. Se um minigame dificil estiver pagando pouco apesar de boa execucao, ajustar `taxaDoMinigame` ou a chance do premio de recurso sem inflar tentativas ruins.

@@ -261,6 +261,7 @@ class GameScene: SKScene {
     private var pendingPOIChallengeCompletion: ((ChallengeResult) -> Void)?
     private var challengeBackdrop: SKNode?
     private var challengeChoiceMenu: ChallengeChoiceOverlay?
+    private var resourceChoiceMenu: ResourceChoiceOverlay?
     private var regionMenu: RegionMenuOverlay?
     private var refugeOverlay: RefugeOverlay?
     private var refugePortal: RefugePortalNode?
@@ -434,6 +435,7 @@ class GameScene: SKScene {
         ctx.fish = FishSystem(ctx: ctx, worldNode: worldNode)
         ctx.challenges = ChallengeSystem(ctx: ctx)
         ctx.rewards = RewardSystem(ctx: ctx)
+        ctx.supportResources = ResourceSupportSystem(ctx: ctx)
         ctx.events = EventSystem(ctx: ctx, worldNode: worldNode)
         ctx.growth = GrowthSystem(ctx: ctx, worldNode: worldNode)
         ctx.regions = RegionDiscoverySystem(ctx: ctx)
@@ -466,7 +468,11 @@ class GameScene: SKScene {
         hud = HUDLayer(size: size, insets: insets, enableDebugRigToolButton: showRigDebugButton)
         hud.zPosition = 100
         hud.onCommand = { [weak self] command in
-            self?.ctx.autonomy.give(command)
+            if command == .resources {
+                self?.openResourceChoiceMenu()
+            } else {
+                self?.ctx.autonomy.give(command)
+            }
         }
         hud.onGiveSpaceTap = { [weak self] in
             self?.ctx.autonomy.startGivingSpace()
@@ -525,6 +531,7 @@ class GameScene: SKScene {
         }
 
         closeRegionMenu()
+        closeResourceChoiceMenu(playSound: false)
         closeRefuge(resume: false)
         refugePortal?.close()
         refugePortal = nil
@@ -870,7 +877,7 @@ class GameScene: SKScene {
     // MARK: - Menu de regiões
 
     func openRegionMenu() {
-        guard regionMenu == nil, challengeChoiceMenu == nil, !isChallengeOpen, refugeOverlay == nil else { return }
+        guard regionMenu == nil, challengeChoiceMenu == nil, resourceChoiceMenu == nil, !isChallengeOpen, refugeOverlay == nil else { return }
         GameAudio.shared.play(.uiOpenPanel)
         if let activeRegion {
             stats.revealExpeditionMap(in: activeRegion, near: ctx.mermaidPosition)
@@ -910,6 +917,7 @@ class GameScene: SKScene {
 
     func openChallengeChoiceMenu() {
         guard challengeChoiceMenu == nil,
+              resourceChoiceMenu == nil,
               regionMenu == nil,
               !isChallengeOpen,
               refugeOverlay == nil,
@@ -938,6 +946,103 @@ class GameScene: SKScene {
         }
         challengeChoiceMenu?.removeFromParent()
         challengeChoiceMenu = nil
+    }
+
+    // MARK: - Menu de recursos
+
+    func openResourceChoiceMenu() {
+        guard resourceChoiceMenu == nil,
+              challengeChoiceMenu == nil,
+              regionMenu == nil,
+              !isChallengeOpen,
+              refugeOverlay == nil,
+              rigDebugTool == nil else { return }
+        guard stats.phase != .egg else {
+            ctx.say("O ovo ainda não recebe recursos. Reúna energia no Desafio: Trama.")
+            return
+        }
+        GameAudio.shared.play(.uiOpenPanel)
+        let counts = Dictionary(uniqueKeysWithValues: SupportResourceKind.allCases.map {
+            ($0, ctx.supportResources.count(for: $0))
+        })
+        let menu = ResourceChoiceOverlay(size: size,
+                                         counts: counts,
+                                         onSelect: { [weak self] kind in
+                                             guard let self else { return }
+                                             self.closeResourceChoiceMenu(playSound: false)
+                                             self.deliverSupportResource(kind)
+                                         },
+                                         onUnavailable: { [weak self] kind in
+                                             GameAudio.shared.play(.uiReject)
+                                             self?.ctx.say(kind.missingMessage)
+                                         },
+                                         onClose: { [weak self] in
+                                             self?.closeResourceChoiceMenu()
+                                         })
+        menu.zPosition = 190
+        cameraNode.addChild(menu)
+        resourceChoiceMenu = menu
+    }
+
+    private func closeResourceChoiceMenu(playSound: Bool = true) {
+        if playSound && resourceChoiceMenu != nil {
+            GameAudio.shared.play(.uiClosePanel)
+        }
+        resourceChoiceMenu?.removeFromParent()
+        resourceChoiceMenu = nil
+    }
+
+    private func deliverSupportResource(_ kind: SupportResourceKind) {
+        guard ctx.supportResources.reserveForDelivery(kind) else {
+            GameAudio.shared.play(.uiReject)
+            ctx.say(kind.missingMessage)
+            return
+        }
+        GameAudio.shared.play(.uiConfirm)
+        animateSupportResourceDelivery(kind) { [weak self] in
+            self?.ctx.supportResources.applyDeliveredResource(kind)
+        }
+    }
+
+    private func animateSupportResourceDelivery(_ kind: SupportResourceKind,
+                                                completion: @escaping () -> Void) {
+        let mermaidPoint = ctx.mermaidPosition
+        let visibleHalfHeight = size.height * max(1, cameraNode.xScale) / 2
+        let start = CGPoint(x: mermaidPoint.x + CGFloat.random(in: -120...120),
+                            y: mermaidPoint.y + visibleHalfHeight + 180)
+        let end = CGPoint(x: mermaidPoint.x + CGFloat.random(in: -32...32),
+                          y: mermaidPoint.y + 66)
+        let parcel = SupportResourceVisualFactory.makeNode(for: kind)
+        parcel.position = start
+        parcel.setScale(0.78)
+        parcel.alpha = 0
+        worldNode.addChild(parcel)
+
+        let drop = SKAction.group([
+            .fadeIn(withDuration: 0.12),
+            .move(to: end, duration: 0.86),
+            .scale(to: 1.0, duration: 0.86),
+            .rotate(byAngle: CGFloat.random(in: -0.28...0.28), duration: 0.86)
+        ])
+        drop.eaeInEaseOut()
+
+        parcel.run(.sequence([
+            drop,
+            .run { [weak self, weak parcel] in
+                guard let self else { return }
+                let effect = SupportResourceVisualFactory.makeArrivalEffect(for: kind)
+                effect.position = end
+                self.worldNode.addChild(effect)
+                completion()
+                parcel?.run(.sequence([
+                    .group([
+                        .scale(to: 0.16, duration: 0.24),
+                        .fadeOut(withDuration: 0.24)
+                    ]),
+                    .removeFromParent()
+                ]))
+            }
+        ]))
     }
 
     private func challengeRecordSnapshots(for kinds: [ChallengeKind]) -> [ChallengeKind: ChallengeRecordSnapshot] {
@@ -1030,7 +1135,7 @@ class GameScene: SKScene {
 
     /// Passo 1: um portal se abre perto da sereia e ela nada até ele.
     func beginRefugeEntry() {
-        guard refugeOverlay == nil, !isChallengeOpen, refugePortal == nil else { return }
+        guard refugeOverlay == nil, resourceChoiceMenu == nil, !isChallengeOpen, refugePortal == nil else { return }
         closeRegionMenu()
         GameAudio.shared.play(.refugePortalOpen)
 
@@ -1123,7 +1228,7 @@ class GameScene: SKScene {
 
     /// Abre o desafio oferecido por um NPC (hoje, um peixe).
     func openChallenge(giver: FishNode) {
-        guard !isChallengeOpen, challengeChoiceMenu == nil, refugeOverlay == nil else { return }
+        guard !isChallengeOpen, challengeChoiceMenu == nil, resourceChoiceMenu == nil, refugeOverlay == nil else { return }
         guard let kind = giver.offeredChallenge else { return }
         guard kind.isAvailable else {
             ctx.challenges.consumeChallenge(of: giver)
@@ -1131,26 +1236,30 @@ class GameScene: SKScene {
         }
         GameAudio.shared.play(.challengeOpen)
         let special = giver.isSpecialChallenge
+        let challengeGoal = giver.offeredChallengeGoal
+            ?? ctx.challenges.makeGoal(kind: kind, special: special, at: giver.position)
         let giverDisplay = giver.makeGiverDisplayNode()
         ctx.challenges.consumeChallenge(of: giver)
-        presentChallenge(kind: kind, special: special, giverDisplay: giverDisplay)
+        presentChallenge(kind: kind, special: special, challengeGoal: challengeGoal, giverDisplay: giverDisplay)
     }
 
     /// Durante o ovo: o Desafio: Trama abre direto (energia de nascimento).
     func openHatchingChallenge() {
-        guard !isChallengeOpen, challengeChoiceMenu == nil, refugeOverlay == nil else { return }
+        guard !isChallengeOpen, challengeChoiceMenu == nil, resourceChoiceMenu == nil, refugeOverlay == nil else { return }
         GameAudio.shared.play(.challengeOpen)
-        presentChallenge(kind: .plot, special: false, giverDisplay: nil, hatching: true)
+        presentChallenge(kind: .plot, special: false, challengeGoal: 35, giverDisplay: nil, hatching: true)
     }
 
     @discardableResult
     func openPOIChallenge(for poi: WorldPOI,
                           onCompletion: @escaping (ChallengeResult) -> Void) -> Bool {
-        guard !isChallengeOpen, challengeChoiceMenu == nil, refugeOverlay == nil else { return false }
+        guard !isChallengeOpen, challengeChoiceMenu == nil, resourceChoiceMenu == nil, refugeOverlay == nil else { return false }
         pendingPOIChallengeCompletion = onCompletion
         GameAudio.shared.play(.challengeOpen)
+        let challengeGoal = ctx.challenges.makeGoal(kind: .plot, special: true, at: poi.position)
         presentChallenge(kind: .plot,
                          special: true,
+                         challengeGoal: challengeGoal,
                          giverDisplay: makePOIChallengeDisplay(for: poi))
         return true
     }
@@ -1172,13 +1281,21 @@ class GameScene: SKScene {
 
     private func presentChallenge(kind: ChallengeKind,
                                   special: Bool,
+                                  challengeGoal: Int,
                                   giverDisplay: SKNode?,
                                   hatching: Bool = false) {
         guard hatching || kind.isAvailable else { return }
         closeRegionMenu()
         closeChallengeChoiceMenu(playSound: false)
+        closeResourceChoiceMenu(playSound: false)
         let zone = ctx.depth.currentZone
         let record = challengeRecordSnapshot(for: kind)
+        let isHatchingSession = hatching || stats.phase == .egg
+        let victoryReward = GameBalance.challengeVictoryReward(
+            special: special,
+            isHatching: isHatchingSession,
+            resourceCandidates: SupportResourceKind.challengeRewardCandidates
+        )
         stats.energy = max(0, stats.energy - 8)
         ctx.autonomy.paused = true
         showChallengeBackdrop()
@@ -1186,7 +1303,7 @@ class GameScene: SKScene {
         switch kind {
         case .plot:
             let session: TideSessionType
-            if hatching || stats.phase == .egg {
+            if isHatchingSession {
                 session = .hatching
             } else if special {
                 session = .event
@@ -1201,6 +1318,8 @@ class GameScene: SKScene {
                                              session: session,
                                              phase: stats.phase,
                                              shellRewardMultiplier: stats.shellRewardMultiplier,
+                                             victoryReward: victoryReward,
+                                             challengeGoal: challengeGoal,
                                              giverDisplay: giverDisplay,
                                              record: record) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
@@ -1216,6 +1335,8 @@ class GameScene: SKScene {
                                              palette: ctx.depth.mermaidPalette(atY: ctx.mermaidPosition.y),
                                              special: special,
                                              shellRewardMultiplier: stats.shellRewardMultiplier,
+                                             victoryReward: victoryReward,
+                                             challengeGoal: challengeGoal,
                                              giverDisplay: giverDisplay,
                                              record: record) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
@@ -1231,6 +1352,8 @@ class GameScene: SKScene {
                                            phase: stats.phase,
                                            special: special,
                                            shellRewardMultiplier: stats.shellRewardMultiplier,
+                                           victoryReward: victoryReward,
+                                           challengeGoal: challengeGoal,
                                            giverDisplay: giverDisplay,
                                            record: record) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
@@ -1246,6 +1369,8 @@ class GameScene: SKScene {
                                                 phase: stats.phase,
                                                 special: special,
                                                 shellRewardMultiplier: stats.shellRewardMultiplier,
+                                                victoryReward: victoryReward,
+                                                challengeGoal: challengeGoal,
                                                 giverDisplay: giverDisplay,
                                                 record: record) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
@@ -1261,6 +1386,8 @@ class GameScene: SKScene {
                                             phase: stats.phase,
                                             special: special,
                                             shellRewardMultiplier: stats.shellRewardMultiplier,
+                                            victoryReward: victoryReward,
+                                            initialGoal: challengeGoal,
                                             giverDisplay: giverDisplay,
                                             record: record) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
@@ -1276,6 +1403,8 @@ class GameScene: SKScene {
                                                phase: stats.phase,
                                                special: special,
                                                shellRewardMultiplier: stats.shellRewardMultiplier,
+                                               victoryReward: victoryReward,
+                                               challengeGoal: challengeGoal,
                                                giverDisplay: giverDisplay,
                                                record: record) { [weak self] result in
                 self?.closeChallenge(result: result, zone: zone)
@@ -1366,17 +1495,34 @@ class GameScene: SKScene {
         let adaptation = stats.adaptation(for: zone)
         stats.setAdaptation(adaptation + 3, for: zone)
         let madeHighScore = stats.recordHighScore(result.points, for: result.kind)
+        let resourceReward: SupportResourceKind?
         if result.reachedTarget {
             stats.puzzlesSolved += 1
             stats.addMemory("Venceu o \(result.kind.title) em \(zone.displayName)")
+            if let kind = result.victoryReward.resourceKind, !result.special {
+                ctx.supportResources.grantCommonChallengeCompletionReward(kind)
+                resourceReward = kind
+            } else {
+                resourceReward = nil
+            }
+        } else {
+            resourceReward = nil
         }
         stats.save()
         if let poiCompletion {
             poiCompletion(result)
         } else {
             let recordText = madeHighScore ? " Novo recorde!" : ""
+            let victoryText: String
+            if result.reachedTarget && result.victoryReward.grantsShellBonus {
+                victoryText = " Vitória: +50% conchas."
+            } else if result.reachedTarget, let resourceReward {
+                victoryText = " Vitória: \(resourceReward.title) +1."
+            } else {
+                victoryText = ""
+            }
             ctx.say(result.reachedTarget
-                    ? "Ela adorou o \(result.kind.title)!\(recordText) 🐚+\(GameUI.shellAmountText(gainedPearls))"
+                    ? "Ela adorou o \(result.kind.title)!\(recordText) 🐚+\(GameUI.shellAmountText(gainedPearls)).\(victoryText)"
                     : "Quase!\(recordText) Ainda assim ganhou 🐚+\(GameUI.shellAmountText(gainedPearls))")
         }
     }
@@ -1384,7 +1530,7 @@ class GameScene: SKScene {
     // MARK: - Toques no mundo
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard !isChallengeOpen, challengeChoiceMenu == nil, regionMenu == nil, refugeOverlay == nil, rigDebugTool == nil,
+        guard !isChallengeOpen, challengeChoiceMenu == nil, resourceChoiceMenu == nil, regionMenu == nil, refugeOverlay == nil, rigDebugTool == nil,
               let touch = touches.first else { return }
         let location = touch.location(in: self)
 

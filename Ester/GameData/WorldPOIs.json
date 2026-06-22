@@ -93,7 +93,7 @@
     "visual": { "glyph": "~", "tint": "coral", "scale": 1.0 },
     "reward": {
       "kind": "temporaryEffect",
-      "title": "Pedidos aceitos",
+      "title": "Calma da corrente",
       "pearlAmount": 0,
       "itemId": null,
       "buffKind": "eagerCompanion",

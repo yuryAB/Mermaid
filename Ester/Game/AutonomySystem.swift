@@ -877,25 +877,9 @@ final class AutonomySystem {
         case .explore:
             guidedExplorePoint = ctx.pois.explorationTargetAfterCommand()
             desired = .wandering
-        case .seekFood:
-            if !requestIsGuaranteed && stats.hunger < GameBalance.requestFoodHungerThreshold(for: stats.phase) {
-                penalizeTrust(TrustBalance.inconvenientCareAsk)
-                refuse(command, saying: "Ela ainda está saciada e virou o rostinho.")
-                return
-            }
-            // teimosia de criança: quanto mais nova, mais recusa comer
-            if !requestIsGuaranteed && CGFloat.random(in: 0...1) < eatRefusalChance() {
-                penalizeTrust(TrustBalance.inconvenientCareAsk)
-                let excuses = [
-                    "Não quero comer agora! 😤",
-                    "Ela fechou a boquinha e virou o rosto...",
-                    "Ela fez bico: \"depois...\"",
-                    "Hmpf! Ela fingiu não estar com fome."
-                ]
-                refuse(command, saying: excuses.randomElement()!)
-                return
-            }
-            desired = .seekingFood
+        case .resources:
+            ctx.scene?.openResourceChoiceMenu()
+            return
         case .rest:
             desired = .resting
         case .travel:

@@ -71,8 +71,14 @@ final class FishNode: SKNode, ChallengeGiver {
 
     /// Desafio oferecido por este peixe (nil = peixe comum).
     var offeredChallenge: ChallengeKind? {
-        didSet { updateChallengeHighlight() }
+        didSet {
+            if offeredChallenge == nil {
+                offeredChallengeGoal = nil
+            }
+            updateChallengeHighlight()
+        }
     }
+    var offeredChallengeGoal: Int?
     var isSpecialChallenge = false
     var worldPosition: CGPoint { position }
     var isCompanionBusy: Bool {

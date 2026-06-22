@@ -22,7 +22,7 @@ private enum ShellSnapRules {
     static let frenzyThreshold = 10
 
     static func goal(for zone: DepthZone, special: Bool) -> Int {
-        94 + zone.rawValue * 8 + (special ? 36 : 0)
+        GameBalance.challengeGoalFallback(for: .snap, zone: zone, special: special)
     }
 
     static func points(removedCount: Int,
@@ -328,6 +328,7 @@ final class ShellSnapOverlay: SKNode {
     private let zone: DepthZone
     private let special: Bool
     private let shellRewardMultiplier: CGFloat
+    private let victoryReward: ChallengeVictoryReward
     private let challengeGoal: Int
     private let record: ChallengeRecordSnapshot
     private let onFinish: (ChallengeResult) -> Void
@@ -370,6 +371,8 @@ final class ShellSnapOverlay: SKNode {
          phase: MermaidPhase,
          special: Bool,
          shellRewardMultiplier: CGFloat,
+         victoryReward: ChallengeVictoryReward,
+         challengeGoal: Int,
          giverDisplay: SKNode?,
          record: ChallengeRecordSnapshot,
          onFinish: @escaping (ChallengeResult) -> Void) {
@@ -378,7 +381,8 @@ final class ShellSnapOverlay: SKNode {
         self.phase = phase
         self.special = special
         self.shellRewardMultiplier = shellRewardMultiplier
-        self.challengeGoal = ShellSnapRules.goal(for: zone, special: special)
+        self.victoryReward = victoryReward
+        self.challengeGoal = challengeGoal
         self.record = record
         self.onFinish = onFinish
         self.board = ShellSnapBoard(rows: ShellSnapRules.rows,
@@ -664,8 +668,10 @@ final class ShellSnapOverlay: SKNode {
         valueLabel.fontColor = GameUI.ink
         valueLabel.horizontalAlignmentMode = .left
         valueLabel.verticalAlignmentMode = .center
-        valueLabel.preferredMaxLayoutWidth = width - 54
-        valueLabel.numberOfLines = 1
+        ChallengeChrome.fitSingleLineLabel(valueLabel,
+                                           maxWidth: width - 64,
+                                           maxFontSize: 13.5,
+                                           minFontSize: 10.5)
         valueLabel.position = CGPoint(x: titleLabel.position.x, y: -8)
         node.addChild(valueLabel)
 
@@ -1121,6 +1127,14 @@ final class ShellSnapOverlay: SKNode {
         guard scoreLabel != nil else { return }
         scoreLabel.text = "\(score)"
         objectiveLabel.text = objectiveText()
+        ChallengeChrome.fitSingleLineLabel(scoreLabel,
+                                           maxWidth: scoreLabel.preferredMaxLayoutWidth,
+                                           maxFontSize: 13.5,
+                                           minFontSize: 10.5)
+        ChallengeChrome.fitSingleLineLabel(objectiveLabel,
+                                           maxWidth: objectiveLabel.preferredMaxLayoutWidth,
+                                           maxFontSize: 13.5,
+                                           minFontSize: 10.5)
         streakLabel.text = streak > 0 ? "Combo x\(streak)" : "Combo pronto"
         streakLabel.fontColor = frenzyActive ? Visual.hot : GameUI.palePaper.withAlphaComponent(0.86)
         updateTimerUI()
@@ -1208,7 +1222,8 @@ final class ShellSnapOverlay: SKNode {
                                                           reachedTarget: reached ?? challengeCompleted,
                                                           phase: phase,
                                                           special: special,
-                                                          isHatching: false)
+                                                          isHatching: false,
+                                                          victoryReward: victoryReward)
         return GameBalance.scaledChallengePearlReward(baseAmount: basePearls,
                                                       points: score,
                                                       multiplier: shellRewardMultiplier)
@@ -1227,7 +1242,8 @@ final class ShellSnapOverlay: SKNode {
                                                           reachedTarget: reached,
                                                           phase: phase,
                                                           special: special,
-                                                          isHatching: false)
+                                                          isHatching: false,
+                                                          victoryReward: victoryReward)
         let pearls = projectedPearls(reached: reached)
 
         let panel = makeResultPanel(reached: reached)
@@ -1242,25 +1258,38 @@ final class ShellSnapOverlay: SKNode {
         titleLabel.fontName = "AvenirNext-DemiBold"
         titleLabel.fontSize = 19
         titleLabel.fontColor = GameUI.ink
-        titleLabel.position = CGPoint(x: 0, y: 60)
+        titleLabel.verticalAlignmentMode = .center
+        titleLabel.position = CGPoint(x: 0, y: 72)
+        ChallengeChrome.fitSingleLineLabel(titleLabel,
+                                           maxWidth: 276,
+                                           maxFontSize: 19,
+                                           minFontSize: 14)
         content.addChild(titleLabel)
 
         let scoreLine = SKLabelNode(text: "Pontos feitos: \(score)")
         scoreLine.fontName = "AvenirNext-Regular"
         scoreLine.fontSize = 16
         scoreLine.fontColor = GameUI.mutedInk
-        scoreLine.position = CGPoint(x: 0, y: 24)
+        scoreLine.verticalAlignmentMode = .center
+        scoreLine.position = CGPoint(x: 0, y: 38)
+        ChallengeChrome.fitSingleLineLabel(scoreLine,
+                                           maxWidth: 266,
+                                           maxFontSize: 16,
+                                           minFontSize: 12.5)
         content.addChild(scoreLine)
 
         let rewardLine = SKLabelNode(text: "Convertendo pontos...")
         rewardLine.fontName = "AvenirNext-DemiBold"
         rewardLine.fontSize = 17
         rewardLine.fontColor = GameUI.gold
-        rewardLine.position = CGPoint(x: 0, y: -10)
+        rewardLine.verticalAlignmentMode = .center
+        rewardLine.position = CGPoint(x: 0, y: -12)
         content.addChild(rewardLine)
         ChallengeChrome.animatePointConversion(label: rewardLine,
                                                points: score,
                                                pearls: pearls,
+                                               reachedTarget: reached,
+                                               victoryReward: victoryReward,
                                                newRecord: record.isNewRecord(score: score))
 
         let continueButton = GameUI.pill(text: "Continuar",
@@ -1272,7 +1301,7 @@ final class ShellSnapOverlay: SKNode {
                                          minWidth: 170,
                                          height: 44)
         continueButton.name = "snap_continue"
-        continueButton.position = CGPoint(x: 0, y: -68)
+        continueButton.position = CGPoint(x: 0, y: -86)
         content.addChild(continueButton)
 
         pendingResult = ChallengeResult(kind: .snap,
@@ -1280,6 +1309,7 @@ final class ShellSnapOverlay: SKNode {
                                         reachedTarget: reached,
                                         pearls: basePearls,
                                         special: special,
+                                        victoryReward: victoryReward,
                                         previousBestScore: record.bestScore,
                                         isHatching: false)
     }
@@ -1288,11 +1318,11 @@ final class ShellSnapOverlay: SKNode {
         let resultTint = reached
             ? GameUI.algae.withAlphaComponent(0.82)
             : GameUI.coral.withAlphaComponent(0.82)
-        let panel = GameUI.card(size: CGSize(width: 290, height: 220),
+        let panel = GameUI.card(size: CGSize(width: 304, height: 250),
                                 cornerRadius: 24,
                                 tint: resultTint,
                                 baseColors: [UIColor.lerp(GameUI.palePaper, resultTint, 0.28)])
-        let wash = SKShapeNode(rectOf: CGSize(width: 278, height: 208), cornerRadius: 20)
+        let wash = SKShapeNode(rectOf: CGSize(width: 292, height: 238), cornerRadius: 20)
         wash.fillColor = resultTint.withAlphaComponent(0.08)
         wash.strokeColor = .clear
         wash.zPosition = 0.5

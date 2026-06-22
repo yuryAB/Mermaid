@@ -95,6 +95,7 @@ final class TideWeavingOverlay: SKNode {
     private let session: TideSessionType
     private let phase: MermaidPhase
     private let shellRewardMultiplier: CGFloat
+    private let victoryReward: ChallengeVictoryReward
     private let record: ChallengeRecordSnapshot
     private let onFinish: (ChallengeResult) -> Void
 
@@ -146,6 +147,8 @@ final class TideWeavingOverlay: SKNode {
          session: TideSessionType,
          phase: MermaidPhase,
          shellRewardMultiplier: CGFloat,
+         victoryReward: ChallengeVictoryReward,
+         challengeGoal: Int,
          giverDisplay: SKNode?,
          record: ChallengeRecordSnapshot,
          onFinish: @escaping (ChallengeResult) -> Void) {
@@ -154,22 +157,19 @@ final class TideWeavingOverlay: SKNode {
         self.session = session
         self.phase = phase
         self.shellRewardMultiplier = shellRewardMultiplier
+        self.victoryReward = victoryReward
         self.record = record
-        var goal = 18 + zone.rawValue * 4
         var bonus = GameBalance.challengeShellReward(points: 0,
                                                      kind: .plot,
                                                      reachedTarget: true,
                                                      phase: phase,
                                                      special: session == .event,
-                                                     isHatching: session == .hatching)
-        if session == .event {
-            goal += 10
-        }
+                                                     isHatching: session == .hatching,
+                                                     victoryReward: victoryReward)
         if session == .hatching {
-            goal = 35
             bonus = 0
         }
-        self.challengeGoal = goal
+        self.challengeGoal = challengeGoal
         self.challengeBonus = bonus
         self.onFinish = onFinish
 
@@ -558,8 +558,10 @@ final class TideWeavingOverlay: SKNode {
         valueLabel.fontColor = GameUI.ink
         valueLabel.horizontalAlignmentMode = .left
         valueLabel.verticalAlignmentMode = .center
-        valueLabel.preferredMaxLayoutWidth = width - 54
-        valueLabel.numberOfLines = 1
+        ChallengeChrome.fitSingleLineLabel(valueLabel,
+                                           maxWidth: width - 64,
+                                           maxFontSize: 13.5,
+                                           minFontSize: 10.5)
         valueLabel.position = CGPoint(x: titleLabel.position.x, y: -8)
         node.addChild(valueLabel)
 
@@ -1177,7 +1179,8 @@ final class TideWeavingOverlay: SKNode {
                                                           reachedTarget: reached ?? challengeCompleted,
                                                           phase: phase,
                                                           special: session == .event,
-                                                          isHatching: session == .hatching)
+                                                          isHatching: session == .hatching,
+                                                          victoryReward: victoryReward)
         return GameBalance.scaledChallengePearlReward(baseAmount: basePearls,
                                                       points: score,
                                                       multiplier: shellRewardMultiplier)
@@ -1190,6 +1193,14 @@ final class TideWeavingOverlay: SKNode {
         }
         scoreLabel.text = scoreText()
         objectiveLabel.text = objectiveText()
+        ChallengeChrome.fitSingleLineLabel(scoreLabel,
+                                           maxWidth: scoreLabel.preferredMaxLayoutWidth,
+                                           maxFontSize: 13.5,
+                                           minFontSize: 10.5)
+        ChallengeChrome.fitSingleLineLabel(objectiveLabel,
+                                           maxWidth: objectiveLabel.preferredMaxLayoutWidth,
+                                           maxFontSize: 13.5,
+                                           minFontSize: 10.5)
         updateTimerUI()
         pulseStatusLabel(scoreLabel)
         pulseStatusLabel(objectiveLabel)
@@ -1258,7 +1269,8 @@ final class TideWeavingOverlay: SKNode {
                                                           reachedTarget: reached,
                                                           phase: phase,
                                                           special: session == .event,
-                                                          isHatching: session == .hatching)
+                                                          isHatching: session == .hatching,
+                                                          victoryReward: victoryReward)
         let pearls = projectedPearls(reached: reached)
 
         let panel = makeResultPanel(reached: reached)
@@ -1279,7 +1291,12 @@ final class TideWeavingOverlay: SKNode {
         titleLabel.fontName = "AvenirNext-DemiBold"
         titleLabel.fontSize = 19
         titleLabel.fontColor = GameUI.ink
-        titleLabel.position = CGPoint(x: 0, y: 60)
+        titleLabel.verticalAlignmentMode = .center
+        titleLabel.position = CGPoint(x: 0, y: 72)
+        ChallengeChrome.fitSingleLineLabel(titleLabel,
+                                           maxWidth: 276,
+                                           maxFontSize: 19,
+                                           minFontSize: 14)
         panelContent.addChild(titleLabel)
 
         let scoreLine = SKLabelNode(text: session == .hatching
@@ -1288,7 +1305,12 @@ final class TideWeavingOverlay: SKNode {
         scoreLine.fontName = "AvenirNext-Regular"
         scoreLine.fontSize = 16
         scoreLine.fontColor = GameUI.mutedInk
-        scoreLine.position = CGPoint(x: 0, y: 24)
+        scoreLine.verticalAlignmentMode = .center
+        scoreLine.position = CGPoint(x: 0, y: 38)
+        ChallengeChrome.fitSingleLineLabel(scoreLine,
+                                           maxWidth: 266,
+                                           maxFontSize: 16,
+                                           minFontSize: 12.5)
         panelContent.addChild(scoreLine)
 
         let rewardText = session == .hatching
@@ -1298,12 +1320,15 @@ final class TideWeavingOverlay: SKNode {
         rewardLine.fontName = "AvenirNext-DemiBold"
         rewardLine.fontSize = 17
         rewardLine.fontColor = GameUI.gold
-        rewardLine.position = CGPoint(x: 0, y: -10)
+        rewardLine.verticalAlignmentMode = .center
+        rewardLine.position = CGPoint(x: 0, y: -12)
         panelContent.addChild(rewardLine)
         if session != .hatching {
             ChallengeChrome.animatePointConversion(label: rewardLine,
                                                    points: score,
                                                    pearls: pearls,
+                                                   reachedTarget: reached,
+                                                   victoryReward: victoryReward,
                                                    newRecord: record.isNewRecord(score: score,
                                                                                  isHatching: session == .hatching))
         }
@@ -1317,7 +1342,7 @@ final class TideWeavingOverlay: SKNode {
                                          minWidth: 170,
                                          height: 44)
         continueButton.name = "tide_continue"
-        continueButton.position = CGPoint(x: 0, y: -68)
+        continueButton.position = CGPoint(x: 0, y: -86)
         panelContent.addChild(continueButton)
 
         pendingResult = ChallengeResult(kind: .plot,
@@ -1325,6 +1350,7 @@ final class TideWeavingOverlay: SKNode {
                                         reachedTarget: reached,
                                         pearls: basePearls,
                                         special: session == .event,
+                                        victoryReward: victoryReward,
                                         previousBestScore: record.bestScore,
                                         isHatching: session == .hatching)
     }
@@ -1333,11 +1359,11 @@ final class TideWeavingOverlay: SKNode {
         let resultTint = reached
             ? GameUI.algae.withAlphaComponent(0.82)
             : GameUI.coral.withAlphaComponent(0.82)
-        let panel = GameUI.card(size: CGSize(width: 290, height: 220),
+        let panel = GameUI.card(size: CGSize(width: 304, height: 250),
                                 cornerRadius: 24,
                                 tint: resultTint,
                                 baseColors: [UIColor.lerp(GameUI.palePaper, resultTint, 0.28)])
-        let wash = SKShapeNode(rectOf: CGSize(width: 278, height: 208), cornerRadius: 20)
+        let wash = SKShapeNode(rectOf: CGSize(width: 292, height: 238), cornerRadius: 20)
         wash.fillColor = resultTint.withAlphaComponent(0.08)
         wash.strokeColor = .clear
         wash.zPosition = 0.5

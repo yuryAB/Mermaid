@@ -771,6 +771,10 @@ enum WorldPOICatalog {
 }
 
 final class POISystem {
+    private enum RepeatablePOIReward {
+        static let warmCurrentKey = "nascente_mid_warm_current"
+    }
+
     unowned let ctx: GameContext
     private weak var worldNode: SKNode?
     private var scanTimer: CGFloat = 0
@@ -948,8 +952,18 @@ final class POISystem {
         ctx.stats.revealExpeditionMap(in: ctx.activeRegion, near: poi.position)
 
         if ctx.stats.isPOIRewardCollected(poi.key) {
+            if grantRepeatableRewardIfReady(for: poi) {
+                return
+            }
             syncWorldNodes()
-            ctx.say("Ela voltou a \(poi.name) e reconheceu o lugar. A recompensa dali já foi coletada.")
+            ctx.say("Ela voltou a \(poi.name) e reconheceu o lugar.")
+            return
+        }
+
+        if isRepeatableRewardPOI(poi),
+           !canGrantRepeatableReward(for: poi) {
+            syncWorldNodes()
+            ctx.say("Ela sentiu a água morna da corrente e reconheceu o lugar.")
             return
         }
 
@@ -981,11 +995,43 @@ final class POISystem {
     private func grantReward(for poi: WorldPOI, prefix: String) {
         ctx.stats.collectPOIReward(poi.key)
         let rewardText = ctx.rewards.grant(poi.reward, source: poi.name)
+        markRepeatableRewardActivatedIfNeeded(for: poi)
         ctx.stats.addMemory("Interagiu com \(poi.name)")
         _ = ctx.regions.maybeRevealRegionLead(source: "POI", chance: 0.35)
         syncWorldNodes()
         ctx.stats.save()
         ctx.say("\(prefix) \(rewardText)")
+    }
+
+    private func grantRepeatableRewardIfReady(for poi: WorldPOI) -> Bool {
+        guard canGrantRepeatableReward(for: poi) else { return false }
+        let rewardText = ctx.rewards.grant(poi.reward, source: poi.name)
+        markRepeatableRewardActivatedIfNeeded(for: poi)
+        ctx.stats.addMemory("Revisitou \(poi.name)")
+        syncWorldNodes()
+        ctx.stats.save()
+        ctx.say("Ela voltou a \(poi.name). \(rewardText)")
+        return true
+    }
+
+    private func canGrantRepeatableReward(for poi: WorldPOI) -> Bool {
+        guard isRepeatableRewardPOI(poi),
+              poi.reward.kind == .temporaryEffect,
+              let buffKind = poi.reward.buffKind else {
+            return false
+        }
+        return !ctx.stats.hasActiveBuff(buffKind)
+            && ctx.stats.canActivateRepeatablePOIReward(poi.key)
+    }
+
+    private func markRepeatableRewardActivatedIfNeeded(for poi: WorldPOI) {
+        guard isRepeatableRewardPOI(poi) else { return }
+        ctx.stats.markRepeatablePOIRewardActivated(poi.key,
+                                                   activeDuration: poi.reward.duration)
+    }
+
+    private func isRepeatableRewardPOI(_ poi: WorldPOI) -> Bool {
+        poi.key == RepeatablePOIReward.warmCurrentKey
     }
 
     private func nearestUndiscoveredPOI() -> WorldPOI? {

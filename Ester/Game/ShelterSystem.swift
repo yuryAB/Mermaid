@@ -339,6 +339,7 @@ final class RefugeOverlay: SKNode {
     private var refreshTimer: CGFloat = 0
     private var displayMermaid: Mermaid?
     private var enhancementsOverlay: RefugeEnhancementsOverlay?
+    private var storeOverlay: RefugeStoreOverlay?
     private let safeAreaInsets: UIEdgeInsets
 
     init(size: CGSize,
@@ -498,14 +499,16 @@ final class RefugeOverlay: SKNode {
         memoriesLabel.position = CGPoint(x: 0, y: -64)
         card.addChild(memoriesLabel)
 
-        // botões: aprimoramentos e voltar. Acelerar fica dentro de aprimoramentos.
-        let buttonWidth = (size.width - 72) / 2
+        // botões: aprimoramentos, loja e voltar.
+        let buttonGap: CGFloat = 12
+        let buttonWidth = (size.width - 48 - buttonGap * 2) / 3
         let actions: [(name: String, text: String, color: UIColor, column: Int)] = [
             ("refuge_enhancements", "Aprimoramentos", GameUI.gold, 0),
-            ("refuge_close", "Voltar", GameUI.accent, 1)
+            ("refuge_store", "Loja", GameUI.coral, 1),
+            ("refuge_close", "Voltar", GameUI.accent, 2)
         ]
         for action in actions {
-            let x = -size.width / 2 + 24 + buttonWidth / 2 + CGFloat(action.column) * (buttonWidth + 24)
+            let x = -size.width / 2 + 24 + buttonWidth / 2 + CGFloat(action.column) * (buttonWidth + buttonGap)
             let button = SKNode()
             button.name = action.name
             button.position = CGPoint(x: x, y: buttonRowY)
@@ -564,12 +567,26 @@ final class RefugeOverlay: SKNode {
 
     private func openEnhancements() {
         enhancementsOverlay?.removeFromParent()
+        storeOverlay?.removeFromParent()
+        storeOverlay = nil
         let overlay = RefugeEnhancementsOverlay(size: overlaySize,
                                                 insets: safeAreaInsets,
                                                 stats: ctx.stats)
         overlay.zPosition = 20
         addChild(overlay)
         enhancementsOverlay = overlay
+    }
+
+    private func openStore() {
+        storeOverlay?.removeFromParent()
+        enhancementsOverlay?.removeFromParent()
+        enhancementsOverlay = nil
+        let overlay = RefugeStoreOverlay(size: overlaySize,
+                                         insets: safeAreaInsets,
+                                         stats: ctx.stats)
+        overlay.zPosition = 20
+        addChild(overlay)
+        storeOverlay = overlay
     }
 
     // MARK: - Toques
@@ -584,10 +601,33 @@ final class RefugeOverlay: SKNode {
                 openEnhancements()
                 refreshLabels()
                 return
+            case "refuge_store":
+                GameAudio.shared.play(.uiOpenPanel)
+                openStore()
+                refreshLabels()
+                return
             case "enhancements_close":
                 GameAudio.shared.play(.uiClosePanel)
                 enhancementsOverlay?.removeFromParent()
                 enhancementsOverlay = nil
+                refreshLabels()
+                return
+            case "store_close":
+                GameAudio.shared.play(.uiClosePanel)
+                storeOverlay?.removeFromParent()
+                storeOverlay = nil
+                refreshLabels()
+                return
+            case let name? where name.hasPrefix("store_item_"):
+                let itemId = String(name.dropFirst("store_item_".count))
+                guard let item = RefugeShopCatalog.item(withId: itemId) else { return }
+                if ctx.supportResources.purchase(item) {
+                    storeOverlay?.removeFromParent()
+                    storeOverlay = nil
+                    openStore()
+                } else {
+                    GameAudio.shared.play(.uiUpgradeFail)
+                }
                 refreshLabels()
                 return
             case let name? where name.hasPrefix("upgrade_"):
@@ -611,17 +651,6 @@ final class RefugeOverlay: SKNode {
                     GameAudio.shared.play(.uiUpgradeFail)
                     ctx.say("\(kind.title) já chegou ao nível máximo.")
                 }
-                return
-            case "growth_accelerate":
-                if ctx.growth.spendShellsForGrowth() {
-                    GameAudio.shared.play(.uiUpgradeBuy)
-                    enhancementsOverlay?.removeFromParent()
-                    enhancementsOverlay = nil
-                    openEnhancements()
-                } else {
-                    GameAudio.shared.play(.uiUpgradeFail)
-                }
-                refreshLabels()
                 return
             case "refuge_close":
                 GameAudio.shared.play(.uiClosePanel)
@@ -672,7 +701,7 @@ final class RefugeEnhancementsOverlay: SKNode {
         addChild(pearlLine)
 
         let rowWidth = min(size.width - 28, 420)
-        let rowCount = MermaidStats.UpgradeKind.allCases.count + 1
+        let rowCount = MermaidStats.UpgradeKind.allCases.count
         let availableHeight = max(390, size.height - insets.top - insets.bottom - 228)
         let rowHeight = min(90, max(74, availableHeight / CGFloat(rowCount)))
         let firstY = top - 148
@@ -683,9 +712,6 @@ final class RefugeEnhancementsOverlay: SKNode {
                    height: rowHeight - 8,
                    centerY: firstY - CGFloat(index) * rowHeight)
         }
-        addGrowthRow(width: rowWidth,
-                     height: rowHeight - 8,
-                     centerY: firstY - CGFloat(MermaidStats.UpgradeKind.allCases.count) * rowHeight)
 
         let closeButton = SKNode()
         closeButton.name = "enhancements_close"
@@ -754,55 +780,6 @@ final class RefugeEnhancementsOverlay: SKNode {
             buttonText = "nível\nmáximo"
         }
         let label = makeLabel(text: buttonText, fontSize: 10.5, bold: true, color: GameUI.ink)
-        label.name = actionName
-        label.numberOfLines = 2
-        label.verticalAlignmentMode = .center
-        label.zPosition = 5
-        button.addChild(label)
-    }
-
-    private func addGrowthRow(width: CGFloat,
-                              height: CGFloat,
-                              centerY: CGFloat) {
-        let row = SKNode()
-        row.position = CGPoint(x: 0, y: centerY)
-        row.zPosition = 2
-        addChild(row)
-
-        let bg = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 10)
-        bg.fillColor = UIColor.white.withAlphaComponent(0.36)
-        bg.strokeColor = GameUI.coral.withAlphaComponent(0.28)
-        bg.lineWidth = 1
-        row.addChild(bg)
-
-        let title = makeLabel(text: "Acelerar", fontSize: 13, bold: true, color: GameUI.ink)
-        title.horizontalAlignmentMode = .left
-        title.position = CGPoint(x: -width / 2 + 14, y: height / 2 - 22)
-        row.addChild(title)
-
-        let description = makeLabel(text: "Adianta 1h da espera de crescimento.", fontSize: 10.5, color: GameUI.mutedInk)
-        description.horizontalAlignmentMode = .left
-        description.preferredMaxLayoutWidth = width - 126
-        description.numberOfLines = 2
-        description.lineBreakMode = .byWordWrapping
-        description.position = CGPoint(x: -width / 2 + 14, y: -4)
-        row.addChild(description)
-
-        let actionName = "growth_accelerate"
-        let button = SKNode()
-        button.name = actionName
-        button.position = CGPoint(x: width / 2 - 56, y: -4)
-        button.zPosition = 4
-        row.addChild(button)
-
-        let buttonBg = GameUI.card(size: CGSize(width: 92, height: 48),
-                                   cornerRadius: 8,
-                                   tint: GameUI.coral)
-        buttonBg.name = actionName
-        button.addChild(buttonBg)
-
-        let cost = GameBalance.growthShellCost(for: stats.phase)
-        let label = makeLabel(text: "\(GameUI.shellAmountText(cost))\nconchas", fontSize: 10.5, bold: true, color: GameUI.ink)
         label.name = actionName
         label.numberOfLines = 2
         label.verticalAlignmentMode = .center

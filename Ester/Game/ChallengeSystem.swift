@@ -101,6 +101,8 @@ enum ChallengeKind: String, CaseIterable, Codable, Hashable {
 protocol ChallengeGiver: AnyObject {
     /// Desafio que esta entidade está oferecendo (nil = nenhum).
     var offeredChallenge: ChallengeKind? { get set }
+    /// Meta definida pela entidade que oferece o desafio.
+    var offeredChallengeGoal: Int? { get set }
     /// Recompensas maiores (desafios especiais de evento).
     var isSpecialChallenge: Bool { get set }
     /// Posição no mundo, para a sereia nadar até lá.
@@ -134,6 +136,7 @@ struct ChallengeResult {
     let reachedTarget: Bool
     let pearls: Int
     let special: Bool
+    let victoryReward: ChallengeVictoryReward
     let previousBestScore: Int
     /// Só usado pelo match-3 durante a fase de ovo.
     let isHatching: Bool
@@ -164,7 +167,7 @@ final class ChallengeSystem {
         guard nearbyGivers(to: fish.position, maxDistance: 2600).count < maxNearbyGivers else { return }
         guard Int.random(in: 0..<10) < spawnChallengeChance else { return }
         guard let kind = ChallengeKind.availableCases.randomElement() else { return }
-        fish.offeredChallenge = kind
+        assignChallenge(kind, to: fish, special: false)
     }
 
     func nearbyGivers(to point: CGPoint, maxDistance: CGFloat) -> [FishNode] {
@@ -187,9 +190,13 @@ final class ChallengeSystem {
            let existing = nearbyGivers(to: point, maxDistance: 2200)
             .filter({ $0.offeredChallenge == preferredKind })
             .min(by: { $0.position.distance(to: point) < $1.position.distance(to: point) }) {
+            ensureGoal(for: existing, kind: preferredKind)
             return existing
         }
         if preferredKind == nil, let existing = nearestGiver(to: point, maxDistance: 2200) {
+            if let kind = existing.offeredChallenge {
+                ensureGoal(for: existing, kind: kind)
+            }
             return existing
         }
         let resolvedKind: ChallengeKind
@@ -202,7 +209,7 @@ final class ChallengeSystem {
         }
         let zone = DepthZone.zone(atY: point.y)
         guard let fish = ctx.fish.spawnFish(zone: zone, near: point) else { return nil }
-        fish.offeredChallenge = resolvedKind
+        assignChallenge(resolvedKind, to: fish, special: false)
         return fish
     }
 
@@ -210,14 +217,35 @@ final class ChallengeSystem {
     func spawnSpecialGiver(near point: CGPoint, zone: DepthZone) {
         guard let kind = ChallengeKind.availableCases.randomElement() else { return }
         guard let fish = ctx.fish.spawnFish(zone: zone, near: point, rare: true) else { return }
-        fish.offeredChallenge = kind
-        fish.isSpecialChallenge = true
+        assignChallenge(kind, to: fish, special: true)
     }
 
     /// O desafio foi jogado: o peixe volta à vida normal.
     func consumeChallenge(of giver: ChallengeGiver) {
         giver.offeredChallenge = nil
+        giver.offeredChallengeGoal = nil
         giver.isSpecialChallenge = false
+    }
+
+    func makeGoal(kind: ChallengeKind, special: Bool, at point: CGPoint) -> Int {
+        GameBalance.randomChallengeGoal(for: kind,
+                                        zone: DepthZone.zone(atY: point.y),
+                                        special: special)
+    }
+
+    private func assignChallenge(_ kind: ChallengeKind, to fish: FishNode, special: Bool) {
+        fish.isSpecialChallenge = special
+        fish.offeredChallengeGoal = GameBalance.randomChallengeGoal(for: kind,
+                                                                    zone: fish.zone,
+                                                                    special: special)
+        fish.offeredChallenge = kind
+    }
+
+    private func ensureGoal(for fish: FishNode, kind: ChallengeKind) {
+        guard fish.offeredChallengeGoal == nil else { return }
+        fish.offeredChallengeGoal = GameBalance.randomChallengeGoal(for: kind,
+                                                                    zone: fish.zone,
+                                                                    special: fish.isSpecialChallenge)
     }
 }
 
@@ -268,10 +296,11 @@ final class ChallengeChoiceOverlay: SKNode {
         title.position = CGPoint(x: -panelWidth / 2 + 24, y: panelHeight / 2 - 32)
         content.addChild(title)
 
-        let subtitle = makeLabel("Qual chamado enviar para ela?",
+        let subtitle = makeLabel("Vitória comum: +50% conchas ou 1 recurso.",
                                  fontSize: 12,
                                  color: GameUI.mutedInk,
-                                 maxWidth: panelWidth - 48)
+                                 maxWidth: panelWidth - 48,
+                                 lines: 2)
         subtitle.position = CGPoint(x: -panelWidth / 2 + 24, y: panelHeight / 2 - 56)
         content.addChild(subtitle)
 
@@ -455,6 +484,32 @@ enum ChallengeChrome {
         let frame = node.calculateAccumulatedFrame()
         guard frame.height > 1 else { return 1 }
         return min(1.2, targetHeight / frame.height)
+    }
+
+    static func fitLabel(_ label: SKLabelNode,
+                         maxWidth: CGFloat,
+                         maxFontSize: CGFloat,
+                         minFontSize: CGFloat = 10,
+                         lines: Int = 1) {
+        label.numberOfLines = lines
+        label.preferredMaxLayoutWidth = maxWidth
+        label.fontSize = maxFontSize
+        for _ in 0..<12 {
+            let frame = label.calculateAccumulatedFrame()
+            guard frame.width > maxWidth, label.fontSize > minFontSize else { break }
+            label.fontSize = max(minFontSize, label.fontSize - 0.5)
+        }
+    }
+
+    static func fitSingleLineLabel(_ label: SKLabelNode,
+                                   maxWidth: CGFloat,
+                                   maxFontSize: CGFloat,
+                                   minFontSize: CGFloat = 10) {
+        fitLabel(label,
+                 maxWidth: maxWidth,
+                 maxFontSize: maxFontSize,
+                 minFontSize: minFontSize,
+                 lines: 1)
     }
 
     /// Cabeçalho com o NPC que deu o desafio em destaque + título.
@@ -696,13 +751,39 @@ enum ChallengeChrome {
     static func animatePointConversion(label: SKLabelNode,
                                        points: Int,
                                        pearls: Int,
+                                       reachedTarget: Bool = false,
+                                       victoryReward: ChallengeVictoryReward = .none,
                                        newRecord: Bool = false) {
         let duration: TimeInterval = 1.1
         let durationCGFloat = CGFloat(duration)
         label.removeAllActions()
-        if newRecord {
-            label.fontSize = min(label.fontSize, 15.5)
+        let rewardText = reachedTarget ? victoryReward.displayText : nil
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+
+        func conversionText(points shownPoints: Int, pearls shownPearls: Int) -> String {
+            let prefix = newRecord ? "Recorde! " : ""
+            let conversion = "\(prefix)\(shownPoints) pts = \(GameUI.shellAmountText(shownPearls)) conchas"
+            guard let rewardText else { return conversion }
+            return "\(conversion)\n\(rewardText)"
         }
+
+        let lineCount = rewardText == nil ? 1 : 2
+        let maxFontSize: CGFloat
+        if rewardText != nil {
+            maxFontSize = min(label.fontSize, 14.5)
+        } else if newRecord {
+            maxFontSize = min(label.fontSize, 15.5)
+        } else {
+            maxFontSize = label.fontSize
+        }
+        label.text = conversionText(points: points, pearls: pearls)
+        fitLabel(label,
+                 maxWidth: 250,
+                 maxFontSize: maxFontSize,
+                 minFontSize: 11.5,
+                 lines: lineCount)
+        let settledFontSize = label.fontSize
         label.text = newRecord ? "Novo recorde!" : "Convertendo pontos..."
 
         let count = SKAction.customAction(withDuration: duration) { node, elapsed in
@@ -711,12 +792,12 @@ enum ChallengeChrome {
             let eased = t * t * (3 - 2 * t)
             let shownPoints = Int((CGFloat(points) * eased).rounded())
             let shownPearls = Int((CGFloat(pearls) * eased).rounded())
-            let prefix = newRecord ? "Recorde! " : ""
-            label.text = "\(prefix)\(shownPoints) pts = \(GameUI.shellAmountText(shownPearls)) conchas"
+            label.fontSize = settledFontSize
+            label.text = conversionText(points: shownPoints, pearls: shownPearls)
         }
         let settle = SKAction.run {
-            let prefix = newRecord ? "Recorde! " : ""
-            label.text = "\(prefix)\(points) pts = \(GameUI.shellAmountText(pearls)) conchas"
+            label.fontSize = settledFontSize
+            label.text = conversionText(points: points, pearls: pearls)
         }
         let pulseStep = SKAction.sequence([
             .scale(to: 1.08, duration: 0.12),

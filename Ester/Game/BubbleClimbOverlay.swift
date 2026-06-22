@@ -165,6 +165,7 @@ final class BubbleClimbOverlay: SKNode {
     private let special: Bool
     private let phase: MermaidPhase
     private let shellRewardMultiplier: CGFloat
+    private let victoryReward: ChallengeVictoryReward
     private let challengeGoalBubbles: Int
     private let record: ChallengeRecordSnapshot
     private let onFinish: (ChallengeResult) -> Void
@@ -227,13 +228,16 @@ final class BubbleClimbOverlay: SKNode {
          palette: MermaidPalette,
          special: Bool,
          shellRewardMultiplier: CGFloat,
+         victoryReward: ChallengeVictoryReward,
+         challengeGoal: Int,
          giverDisplay: SKNode?,
          record: ChallengeRecordSnapshot,
          onFinish: @escaping (ChallengeResult) -> Void) {
         self.special = special
         self.phase = phase
         self.shellRewardMultiplier = shellRewardMultiplier
-        self.challengeGoalBubbles = special ? 24 : 16
+        self.victoryReward = victoryReward
+        self.challengeGoalBubbles = challengeGoal
         self.record = record
         self.onFinish = onFinish
         let availableWidth = max(260, size.width - 36)
@@ -552,8 +556,10 @@ final class BubbleClimbOverlay: SKNode {
         valueLabel.fontColor = GameUI.ink
         valueLabel.horizontalAlignmentMode = .left
         valueLabel.verticalAlignmentMode = .center
-        valueLabel.preferredMaxLayoutWidth = width - 54
-        valueLabel.numberOfLines = 1
+        ChallengeChrome.fitSingleLineLabel(valueLabel,
+                                           maxWidth: width - 64,
+                                           maxFontSize: 13.5,
+                                           minFontSize: 10.5)
         valueLabel.position = CGPoint(x: titleLabel.position.x, y: -8)
         node.addChild(valueLabel)
 
@@ -843,6 +849,14 @@ final class BubbleClimbOverlay: SKNode {
     private func updateTimerLabels() {
         timerLabel.text = progressText()
         objectiveLabel.text = objectiveText()
+        ChallengeChrome.fitSingleLineLabel(timerLabel,
+                                           maxWidth: timerLabel.preferredMaxLayoutWidth,
+                                           maxFontSize: 13.5,
+                                           minFontSize: 10.5)
+        ChallengeChrome.fitSingleLineLabel(objectiveLabel,
+                                           maxWidth: objectiveLabel.preferredMaxLayoutWidth,
+                                           maxFontSize: 13.5,
+                                           minFontSize: 10.5)
     }
 
     private func progressText() -> String {
@@ -862,7 +876,8 @@ final class BubbleClimbOverlay: SKNode {
                                                           reachedTarget: reached ?? challengeCompleted,
                                                           phase: phase,
                                                           special: special,
-                                                          isHatching: false)
+                                                          isHatching: false,
+                                                          victoryReward: victoryReward)
         return GameBalance.scaledChallengePearlReward(baseAmount: basePearls,
                                                       points: pointScore,
                                                       multiplier: shellRewardMultiplier)
@@ -1261,7 +1276,8 @@ final class BubbleClimbOverlay: SKNode {
                                                           reachedTarget: reached,
                                                           phase: phase,
                                                           special: special,
-                                                          isHatching: false)
+                                                          isHatching: false,
+                                                          victoryReward: victoryReward)
         let pearls = projectedPearls(reached: reached)
 
         let panel = makeResultPanel(reached: reached)
@@ -1276,7 +1292,12 @@ final class BubbleClimbOverlay: SKNode {
         titleLabel.fontName = "AvenirNext-DemiBold"
         titleLabel.fontSize = 19
         titleLabel.fontColor = GameUI.ink
-        titleLabel.position = CGPoint(x: 0, y: 60)
+        titleLabel.verticalAlignmentMode = .center
+        titleLabel.position = CGPoint(x: 0, y: 72)
+        ChallengeChrome.fitSingleLineLabel(titleLabel,
+                                           maxWidth: 276,
+                                           maxFontSize: 19,
+                                           minFontSize: 14)
         panelContent.addChild(titleLabel)
 
         let scoreText = "Pontos feitos: \(pointScore)"
@@ -1284,18 +1305,26 @@ final class BubbleClimbOverlay: SKNode {
         scoreLine.fontName = "AvenirNext-Regular"
         scoreLine.fontSize = 16
         scoreLine.fontColor = GameUI.mutedInk
-        scoreLine.position = CGPoint(x: 0, y: 24)
+        scoreLine.verticalAlignmentMode = .center
+        scoreLine.position = CGPoint(x: 0, y: 38)
+        ChallengeChrome.fitSingleLineLabel(scoreLine,
+                                           maxWidth: 266,
+                                           maxFontSize: 16,
+                                           minFontSize: 12.5)
         panelContent.addChild(scoreLine)
 
         let rewardLine = SKLabelNode(text: "Convertendo pontos...")
         rewardLine.fontName = "AvenirNext-DemiBold"
         rewardLine.fontSize = 17
         rewardLine.fontColor = GameUI.gold
-        rewardLine.position = CGPoint(x: 0, y: -10)
+        rewardLine.verticalAlignmentMode = .center
+        rewardLine.position = CGPoint(x: 0, y: -12)
         panelContent.addChild(rewardLine)
         ChallengeChrome.animatePointConversion(label: rewardLine,
                                                points: pointScore,
                                                pearls: pearls,
+                                               reachedTarget: reached,
+                                               victoryReward: victoryReward,
                                                newRecord: record.isNewRecord(score: pointScore))
 
         let continueButton = GameUI.pill(text: "Continuar",
@@ -1307,7 +1336,7 @@ final class BubbleClimbOverlay: SKNode {
                                          minWidth: 170,
                                          height: 44)
         continueButton.name = "climb_continue"
-        continueButton.position = CGPoint(x: 0, y: -68)
+        continueButton.position = CGPoint(x: 0, y: -86)
         panelContent.addChild(continueButton)
 
         pendingResult = ChallengeResult(kind: .ascent,
@@ -1315,6 +1344,7 @@ final class BubbleClimbOverlay: SKNode {
                                         reachedTarget: reached,
                                         pearls: basePearls,
                                         special: special,
+                                        victoryReward: victoryReward,
                                         previousBestScore: record.bestScore,
                                         isHatching: false)
     }
@@ -1323,11 +1353,11 @@ final class BubbleClimbOverlay: SKNode {
         let resultTint = reached
             ? GameUI.algae.withAlphaComponent(0.82)
             : GameUI.coral.withAlphaComponent(0.82)
-        let panel = GameUI.card(size: CGSize(width: 290, height: 220),
+        let panel = GameUI.card(size: CGSize(width: 304, height: 250),
                                 cornerRadius: 24,
                                 tint: resultTint,
                                 baseColors: [UIColor.lerp(GameUI.palePaper, resultTint, 0.28)])
-        let wash = SKShapeNode(rectOf: CGSize(width: 278, height: 208), cornerRadius: 20)
+        let wash = SKShapeNode(rectOf: CGSize(width: 292, height: 238), cornerRadius: 20)
         wash.fillColor = resultTint.withAlphaComponent(0.08)
         wash.strokeColor = .clear
         wash.zPosition = 0.5

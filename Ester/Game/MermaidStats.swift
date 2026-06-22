@@ -50,6 +50,7 @@ final class MermaidStats: Codable {
     var discoveredPOIKeys: Set<String> = []
     var visitedPOIKeys: Set<String> = []
     var collectedPOIRewardKeys: Set<String> = []
+    var repeatablePOIRewardAvailableAtByKey: [String: Date] = [:]
     var inventoryItems: [String: Int] = [:]
     var activeBuffs: [TimedBuff] = []
     var currentRegionId: String = "nascente"
@@ -87,6 +88,7 @@ final class MermaidStats: Codable {
         case puzzlesSolved, challengeHighScores, mealsEaten, memories, lastSaved, hatchProgress
         case posX, posY, discoveredRegionIds, regionProgress, expeditionRevealByRegion
         case discoveredPOIKeys, visitedPOIKeys, collectedPOIRewardKeys
+        case repeatablePOIRewardAvailableAtByKey
         case inventoryItems, activeBuffs, currentRegionId
         case mapPositionByRegion, mapEntryPointByRegion, entryTextKeys
         case pendingRegionDiscoveryId, discoveryRouteRegionId, readyRegionDiscoveryId
@@ -138,6 +140,7 @@ final class MermaidStats: Codable {
         discoveredPOIKeys = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredPOIKeys) ?? []
         visitedPOIKeys = try c.decodeIfPresent(Set<String>.self, forKey: .visitedPOIKeys) ?? []
         collectedPOIRewardKeys = try c.decodeIfPresent(Set<String>.self, forKey: .collectedPOIRewardKeys) ?? []
+        repeatablePOIRewardAvailableAtByKey = try c.decodeIfPresent([String: Date].self, forKey: .repeatablePOIRewardAvailableAtByKey) ?? [:]
         inventoryItems = try c.decodeIfPresent([String: Int].self, forKey: .inventoryItems) ?? [:]
         activeBuffs = try c.decodeIfPresent([TimedBuff].self, forKey: .activeBuffs) ?? []
         currentRegionId = try c.decodeIfPresent(String.self, forKey: .currentRegionId) ?? "nascente"
@@ -347,8 +350,46 @@ final class MermaidStats: Codable {
     // MARK: - Recompensas persistentes
 
     func collectItem(id: String) {
-        inventoryItems[id, default: 0] += 1
-        addMemory("Encontrou \(id)")
+        addInventoryItem(id: id,
+                         amount: 1,
+                         memoryText: "Encontrou \(id)",
+                         autosave: false)
+    }
+
+    func inventoryCount(for id: String) -> Int {
+        max(0, inventoryItems[id] ?? 0)
+    }
+
+    func addInventoryItem(id: String,
+                          amount: Int = 1,
+                          memoryText: String? = nil,
+                          autosave: Bool = true) {
+        guard amount > 0 else { return }
+        inventoryItems[id, default: 0] += amount
+        if let memoryText {
+            addMemory(memoryText)
+        }
+        if autosave {
+            save(immediately: true)
+        }
+    }
+
+    @discardableResult
+    func spendInventoryItem(id: String,
+                            amount: Int = 1,
+                            autosave: Bool = true) -> Bool {
+        guard amount > 0,
+              inventoryCount(for: id) >= amount else { return false }
+        let nextCount = inventoryCount(for: id) - amount
+        if nextCount > 0 {
+            inventoryItems[id] = nextCount
+        } else {
+            inventoryItems.removeValue(forKey: id)
+        }
+        if autosave {
+            save(immediately: true)
+        }
+        return true
     }
 
     func discoverPOI(_ key: String) {
@@ -373,6 +414,24 @@ final class MermaidStats: Codable {
 
     func isPOIRewardCollected(_ key: String) -> Bool {
         collectedPOIRewardKeys.contains(key)
+    }
+
+    func canActivateRepeatablePOIReward(_ key: String, at date: Date = Date()) -> Bool {
+        (repeatablePOIRewardAvailableAtByKey[key] ?? .distantPast) <= date
+    }
+
+    func markRepeatablePOIRewardActivated(_ key: String,
+                                          activeDuration: TimeInterval,
+                                          cooldownDuration: TimeInterval? = nil,
+                                          at date: Date = Date()) {
+        let active = max(1, activeDuration)
+        let cooldown = max(1, cooldownDuration ?? active)
+        repeatablePOIRewardAvailableAtByKey[key] = date.addingTimeInterval(active + cooldown)
+        pruneExpiredRepeatablePOIRewardCooldowns(at: date)
+    }
+
+    private func pruneExpiredRepeatablePOIRewardCooldowns(at date: Date = Date()) {
+        repeatablePOIRewardAvailableAtByKey = repeatablePOIRewardAvailableAtByKey.filter { $0.value > date }
     }
 
     var canUseBabyGuaranteedRequest: Bool {
