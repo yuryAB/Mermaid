@@ -38,13 +38,50 @@ final class DepthSystem {
     private static let surfaceTrafficMinY: CGFloat = -2500
     private static let boundaryAlertDuration: CGFloat = 3
     private static let boundaryBlinkDuration: CGFloat = 1.35
+    private static let paletteTransitionDuration: CGFloat = 0.75
 
     private(set) var currentZone: DepthZone = .mid
     private var paletteTimer: CGFloat = 0
+    private var currentPaletteZone: MermaidPaletteZone?
+    private var normalPaletteTransition: MermaidPaletteTransition?
+    private var currentNormalPalette: MermaidPalette?
+    private var normalPaletteNeedsUpdate = false
     private var boundaryPaletteEffect: BoundaryPaletteEffect?
     private var unlockTimer: CGFloat = 2
 
     private let waterAnchors: [(y: CGFloat, color: UIColor)]
+
+    private enum MermaidPaletteZone: Equatable {
+        case upper
+        case main
+        case abyss
+
+        var palette: MermaidPalette {
+            switch self {
+            case .upper:
+                return .upper
+            case .main:
+                return .main
+            case .abyss:
+                return .abyss
+            }
+        }
+    }
+
+    private struct MermaidPaletteTransition {
+        let fromPalette: MermaidPalette
+        let toPalette: MermaidPalette
+        var elapsed: CGFloat = 0
+
+        var isFinished: Bool {
+            elapsed >= DepthSystem.paletteTransitionDuration
+        }
+
+        func palette() -> MermaidPalette {
+            let t = DepthSystem.smoothStep(elapsed / DepthSystem.paletteTransitionDuration)
+            return .lerp(fromPalette, toPalette, t)
+        }
+    }
 
     private struct BoundaryPaletteEffect {
         let basePalette: MermaidPalette
@@ -191,26 +228,58 @@ final class DepthSystem {
         }
     }
 
-    /// Paleta do corpo: algumas camadas mudam oficialmente a cor da sereia.
-    /// O flash de limite ainda usa `BoundaryPaletteEffect`, separado desta base.
+    /// Paleta-alvo do corpo: algumas áreas mudam oficialmente a cor da sereia.
+    /// A troca visual é temporal, não proporcional à altura.
     func mermaidPalette(atY y: CGFloat) -> MermaidPalette {
-        normalMermaidPalette(atY: y)
+        paletteZone(for: DepthZone.zone(atY: y)).palette
     }
 
-    private func normalMermaidPalette(atY y: CGFloat) -> MermaidPalette {
-        zoneMermaidPalette(for: DepthZone.zone(atY: y))
+    private func updateNormalMermaidPalette(atY y: CGFloat, dt: CGFloat) -> MermaidPalette {
+        normalPaletteNeedsUpdate = false
+        let targetZone = paletteZone(for: DepthZone.zone(atY: y))
+
+        if currentPaletteZone == nil {
+            currentPaletteZone = targetZone
+            currentNormalPalette = targetZone.palette
+            normalPaletteNeedsUpdate = true
+            return targetZone.palette
+        }
+
+        if targetZone != currentPaletteZone {
+            let fromPalette = normalPaletteTransition?.palette()
+                ?? currentNormalPalette
+                ?? currentPaletteZone?.palette
+                ?? targetZone.palette
+            currentPaletteZone = targetZone
+            normalPaletteTransition = MermaidPaletteTransition(fromPalette: fromPalette,
+                                                               toPalette: targetZone.palette)
+            normalPaletteNeedsUpdate = true
+        }
+
+        if var transition = normalPaletteTransition {
+            transition.elapsed += dt
+            normalPaletteNeedsUpdate = true
+            if transition.isFinished {
+                normalPaletteTransition = nil
+                currentNormalPalette = targetZone.palette
+                return targetZone.palette
+            }
+            normalPaletteTransition = transition
+            let palette = transition.palette()
+            currentNormalPalette = palette
+            return palette
+        }
+
+        currentNormalPalette = targetZone.palette
+        return targetZone.palette
     }
 
-    private func zoneMermaidPalette(for zone: DepthZone) -> MermaidPalette {
+    private func paletteZone(for zone: DepthZone) -> MermaidPaletteZone {
         switch zone {
         case .surface, .clear:
             return .upper
-        case .shallow:
-            return .lerp(.upper, .main, 0.35)
-        case .mid, .blue:
+        case .shallow, .mid, .blue, .deep:
             return .main
-        case .deep:
-            return .lerp(.main, .abyss, 0.45)
         case .abyss:
             return .abyss
         }
@@ -239,7 +308,8 @@ final class DepthSystem {
             ctx.say("Ela nadou mais fundo do que nunca! 🐚+\(GameUI.shellAmountText(gained))")
         }
 
-        var forcePaletteUpdate = false
+        let normalPalette = updateNormalMermaidPalette(atY: y, dt: dt)
+        var forcePaletteUpdate = normalPaletteNeedsUpdate
         if var effect = boundaryPaletteEffect {
             effect.elapsed += dt
             if effect.isFinished {
@@ -253,7 +323,6 @@ final class DepthSystem {
         paletteTimer -= dt
         if forcePaletteUpdate || paletteTimer <= 0 {
             paletteTimer = boundaryPaletteEffect == nil ? 0.25 : 0
-            let normalPalette = normalMermaidPalette(atY: y)
             let displayPalette = boundaryPaletteEffect?.palette() ?? normalPalette
             ctx.mermaidEntity.mermaid.applyPalette(displayPalette)
         }
@@ -335,7 +404,9 @@ final class DepthSystem {
     }
 
     func flashBoundaryPalette(for edge: DepthBoundaryEdge) {
-        boundaryPaletteEffect = BoundaryPaletteEffect(basePalette: normalMermaidPalette(atY: ctx.mermaidPosition.y),
+        let basePalette = currentNormalPalette
+            ?? paletteZone(for: DepthZone.zone(atY: ctx.mermaidPosition.y)).palette
+        boundaryPaletteEffect = BoundaryPaletteEffect(basePalette: basePalette,
                                                       limitPalette: paletteForBoundary(edge))
         paletteTimer = 0
     }

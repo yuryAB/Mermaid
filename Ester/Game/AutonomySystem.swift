@@ -128,6 +128,8 @@ final class AutonomySystem {
     var paused = false
     /// Empuxo de eventos como correnteza.
     var drift = CGVector(dx: 0, dy: 0)
+    /// Empuxo contínuo de zonas ambientais, como uma corrente quente local.
+    var environmentDrift = CGVector(dx: 0, dy: 0)
 
     private var mermaid: Mermaid { ctx.mermaidEntity.mermaid }
     private var stats: MermaidStats { ctx.stats }
@@ -286,6 +288,15 @@ final class AutonomySystem {
         }
         if fishCompanionSessionIsActive {
             decisionCooldown = 1
+            return
+        }
+        if intent == .wandering, let destination = touchPointTarget {
+            if canReachPointWithCurrentEnergy(destination, margin: 0) {
+                target = destination
+                decisionCooldown = 1
+            } else {
+                stopDirectedDestinationForLowEnergy()
+            }
             return
         }
         decisionCooldown = .random(in: 4...8)
@@ -590,10 +601,18 @@ final class AutonomySystem {
                 target = directionalTarget
                 break
             }
+            if intent == .wandering, let destination = touchPointTarget {
+                target = destination
+                guard canReachPointWithCurrentEnergy(destination, margin: 0) else {
+                    stopDirectedDestinationForLowEnergy()
+                    break
+                }
+            }
             if let t = target, position.distance(to: t) < 90 {
                 if intent == .wandering {
                     touchPointTarget = nil
                     clearTouchDirection()
+                    commandBias = nil
                 }
                 setIntent(.idle)
                 decisionCooldown = min(decisionCooldown, .random(in: 1...2.5))
@@ -616,6 +635,7 @@ final class AutonomySystem {
     private func autoEat() {
         guard intent != .inChallenge, intent != .enteringRefuge,
               intent != .followingFish, intent != .interactingWithFish,
+              touchPointTarget == nil,
               stats.hunger >= GameBalance.autoEatHungerThreshold(for: stats.phase),
               eatCooldown <= 0 else { return }
         if let food = ctx.food.nearestFood(to: position, maxDistance: 120, includeShellCurrency: false) {
@@ -973,7 +993,10 @@ final class AutonomySystem {
                     touchPointTarget = nil
                 }
             }
-            commandBias = (desired, Date().addingTimeInterval(30))
+            let hasDirectedDestination = desired == .wandering
+                && touchPointTarget != nil
+                && guidedDirection == nil
+            commandBias = hasDirectedDestination ? nil : (desired, Date().addingTimeInterval(30))
             setIntent(desired)
             decisionCooldown = .random(in: 6...10)
             GameAudio.shared.play(.uiConfirm)
@@ -1032,6 +1055,30 @@ final class AutonomySystem {
         commandBias = nil
         setIntent(.wandering)
         decisionCooldown = CGFloat(TouchDirectionBalance.duration)
+        return true
+    }
+
+    @discardableResult
+    func requestDestinationFromTouch(_ point: CGPoint,
+                                     acceptedMessage: String,
+                                     refusalMessages: [String]) -> Bool {
+        notePlayerPressure()
+        let range = ctx.depth.allowedYRange()
+        let clampedPoint = CGPoint(x: point.x.clamped(to: horizontalRange),
+                                   y: point.y.clamped(to: range))
+        let distance = position.distance(to: clampedPoint)
+        guard distance >= TouchDirectionBalance.minimumGestureDistance else {
+            return true
+        }
+
+        guard acceptTouchRequest(for: .wandering,
+                                 acceptedMessage: acceptedMessage,
+                                 refusalMessages: refusalMessages) else { return false }
+        touchPointTarget = clampedPoint
+        clearTouchDirection()
+        commandBias = nil
+        setIntent(.wandering)
+        decisionCooldown = 1
         return true
     }
 
@@ -1395,6 +1442,18 @@ final class AutonomySystem {
                        y: position.y + dy / safeDistance * limit)
     }
 
+    private func stopDirectedDestinationForLowEnergy() {
+        touchPointTarget = nil
+        clearTouchDirection()
+        commandBias = nil
+        target = nil
+        velocity = CGVector(dx: 0, dy: 0)
+        setIntent(.resting)
+        decisionCooldown = 3
+        showEmotion(.tired, duration: 1.8)
+        ctx.say("Ela ficou sem energia para continuar até o ponto e parou para descansar.")
+    }
+
     private func directedTravelLimit() -> CGFloat {
         let phaseMultiplier: CGFloat
         switch stats.phase {
@@ -1524,8 +1583,10 @@ final class AutonomySystem {
         }
 
         var p = position
-        p.x += (velocity.dx + drift.dx) * dt
-        p.y += (velocity.dy + drift.dy) * dt
+        let combinedDrift = CGVector(dx: drift.dx + environmentDrift.dx,
+                                     dy: drift.dy + environmentDrift.dy)
+        p.x += (velocity.dx + combinedDrift.dx) * dt
+        p.y += (velocity.dy + combinedDrift.dy) * dt
         // ondulação sutil para o nado parecer vivo
         p.x += cos(wobblePhase * 0.9) * 10 * dt
         p.y += sin(wobblePhase * 1.6) * 8 * dt
@@ -1535,7 +1596,7 @@ final class AutonomySystem {
         let horizontalContact = horizontalBoundaryContact(forX: p.x, in: xRange)
         let attemptedAboveLimit = p.y > yRange.upperBound + 1
         let attemptedBelowLimit = p.y < yRange.lowerBound - 1
-        let verticalMotion = velocity.dy + drift.dy
+        let verticalMotion = velocity.dy + combinedDrift.dy
         let movingUp = verticalMotion > 20 || intent == .goingUp
         let movingDown = verticalMotion < -20 || intent == .goingDeeper
         let boundaryContact: DepthBoundaryEdge?
@@ -1611,7 +1672,8 @@ final class AutonomySystem {
     }
 
     private func updateAnimation() {
-        let effectiveVelocity = CGVector(dx: velocity.dx + drift.dx, dy: velocity.dy + drift.dy)
+        let effectiveVelocity = CGVector(dx: velocity.dx + drift.dx + environmentDrift.dx,
+                                         dy: velocity.dy + drift.dy + environmentDrift.dy)
         let currentSpeed = effectiveVelocity.length
         let mode: MovementType = currentSpeed < 30 ? .idle : (currentSpeed < 290 ? .swing : .fast)
         if mode != lastAnimation {

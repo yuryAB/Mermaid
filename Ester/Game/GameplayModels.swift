@@ -75,13 +75,11 @@ enum GameBalance {
     static func hungerRate(for phase: MermaidPhase) -> CGFloat {
         switch phase {
         case .egg: return 0
-        case .baby: return 0.18
-        case .child: return 0.15
-        case .teen: return 0.125
-        case .young: return 0.105
-        case .adult: return 0.09
+        case .baby, .child, .teen, .young, .adult: return 0.20
         }
     }
+
+    static let supportFoodBagHungerRelief: CGFloat = 22
 
     static func foodSpawnInterval(for phase: MermaidPhase) -> ClosedRange<CGFloat> {
         phase == .baby ? 16...24 : 8...15
@@ -210,6 +208,15 @@ enum GameBalance {
                                       special: Bool) -> Int {
         let range = challengeGoalRange(for: kind, zone: zone, special: special)
         return (range.lowerBound + range.upperBound) / 2
+    }
+
+    static func poiChallengeGoal(kind: ChallengeKind,
+                                 at point: CGPoint,
+                                 special: Bool,
+                                 multiplier: CGFloat) -> Int {
+        let zone = DepthZone.zone(atY: point.y)
+        let fallback = challengeGoalFallback(for: kind, zone: zone, special: special)
+        return max(1, Int(ceil(CGFloat(fallback) * max(0.1, multiplier))))
     }
 
     static func challengeVictoryReward(special: Bool,
@@ -566,6 +573,8 @@ enum RewardKind: String, Codable {
     case temporaryEffect
     case item
     case story
+    case supportResource
+    case regionMap
 }
 
 enum TimedBuffKind: String, Codable {
@@ -663,55 +672,109 @@ struct Reward: Codable {
     let buffKind: TimedBuffKind?
     let duration: TimeInterval
     let storyText: String?
+    let supportResourceKind: SupportResourceKind?
+    let quantity: Int
+    let regionId: String?
+
+    init(kind: RewardKind,
+         title: String,
+         pearlAmount: Int = 0,
+         itemId: String? = nil,
+         buffKind: TimedBuffKind? = nil,
+         duration: TimeInterval = 0,
+         storyText: String? = nil,
+         supportResourceKind: SupportResourceKind? = nil,
+         quantity: Int = 1,
+         regionId: String? = nil) {
+        self.kind = kind
+        self.title = title
+        self.pearlAmount = pearlAmount
+        self.itemId = itemId
+        self.buffKind = buffKind
+        self.duration = duration
+        self.storyText = storyText
+        self.supportResourceKind = supportResourceKind
+        self.quantity = max(1, quantity)
+        self.regionId = regionId
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case kind, title, pearlAmount, itemId, buffKind, duration, storyText
+        case supportResourceKind, quantity, regionId
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        kind = try c.decode(RewardKind.self, forKey: .kind)
+        title = try c.decode(String.self, forKey: .title)
+        pearlAmount = try c.decodeIfPresent(Int.self, forKey: .pearlAmount) ?? 0
+        itemId = try c.decodeIfPresent(String.self, forKey: .itemId)
+        buffKind = try c.decodeIfPresent(TimedBuffKind.self, forKey: .buffKind)
+        duration = try c.decodeIfPresent(TimeInterval.self, forKey: .duration) ?? 0
+        storyText = try c.decodeIfPresent(String.self, forKey: .storyText)
+        supportResourceKind = try c.decodeIfPresent(SupportResourceKind.self, forKey: .supportResourceKind)
+        quantity = max(1, try c.decodeIfPresent(Int.self, forKey: .quantity) ?? 1)
+        regionId = try c.decodeIfPresent(String.self, forKey: .regionId)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(kind, forKey: .kind)
+        try c.encode(title, forKey: .title)
+        try c.encode(pearlAmount, forKey: .pearlAmount)
+        try c.encodeIfPresent(itemId, forKey: .itemId)
+        try c.encodeIfPresent(buffKind, forKey: .buffKind)
+        try c.encode(duration, forKey: .duration)
+        try c.encodeIfPresent(storyText, forKey: .storyText)
+        try c.encodeIfPresent(supportResourceKind, forKey: .supportResourceKind)
+        try c.encode(quantity, forKey: .quantity)
+        try c.encodeIfPresent(regionId, forKey: .regionId)
+    }
 
     static func pearls(_ amount: Int, title: String = "Conchas") -> Reward {
         Reward(kind: .pearls,
                title: title,
-               pearlAmount: amount,
-               itemId: nil,
-               buffKind: nil,
-               duration: 0,
-               storyText: nil)
+               pearlAmount: amount)
     }
 
     static func item(id: String, title: String) -> Reward {
         Reward(kind: .item,
                title: title,
-               pearlAmount: 0,
-               itemId: id,
-               buffKind: nil,
-               duration: 0,
-               storyText: nil)
+               itemId: id)
     }
 
     static func temporaryEffect(_ kind: TimedBuffKind, duration: TimeInterval) -> Reward {
         Reward(kind: .temporaryEffect,
                title: kind.title,
-               pearlAmount: 0,
-               itemId: nil,
                buffKind: kind,
-               duration: duration,
-               storyText: nil)
+               duration: duration)
     }
 
     static func temporaryPet(title: String, duration: TimeInterval) -> Reward {
         Reward(kind: .temporaryPet,
                title: title,
-               pearlAmount: 0,
-               itemId: nil,
-               buffKind: nil,
-               duration: duration,
-               storyText: nil)
+               duration: duration)
     }
 
     static func story(_ text: String) -> Reward {
         Reward(kind: .story,
                title: "Memória",
-               pearlAmount: 0,
-               itemId: nil,
-               buffKind: nil,
-               duration: 0,
                storyText: text)
+    }
+
+    static func supportResource(_ kind: SupportResourceKind,
+                                quantity: Int,
+                                title: String? = nil) -> Reward {
+        Reward(kind: .supportResource,
+               title: title ?? kind.title,
+               supportResourceKind: kind,
+               quantity: quantity)
+    }
+
+    static func regionMap(_ regionId: String, title: String) -> Reward {
+        Reward(kind: .regionMap,
+               title: title,
+               regionId: regionId)
     }
 }
 
@@ -754,6 +817,21 @@ final class RewardSystem {
             let text = reward.storyText ?? reward.title
             stats.addMemory(text)
             return "Memória registrada: \(text)"
+        case .supportResource:
+            guard let kind = reward.supportResourceKind else {
+                return "Recompensa de recurso indisponível."
+            }
+            stats.addInventoryItem(id: kind.itemId,
+                                   amount: reward.quantity,
+                                   memoryText: "\(source): recebeu \(kind.title) x\(reward.quantity)",
+                                   autosave: false)
+            GameAudio.shared.play(.pearlReward)
+            return "Recompensa: \(kind.title) x\(reward.quantity)."
+        case .regionMap:
+            guard let regionId = reward.regionId else {
+                return "Mapa encontrado, mas sem destino definido."
+            }
+            return ctx.regions.unlockRegionMap(regionId, source: source)
         }
     }
 

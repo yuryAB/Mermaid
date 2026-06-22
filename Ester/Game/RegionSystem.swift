@@ -268,6 +268,10 @@ final class RegionDiscoverySystem {
     /// Tinta da região misturada na cor da água.
     func waterTint(at point: CGPoint) -> (color: UIColor, strength: CGFloat)? {
         guard let region = ctx.activeRegion else { return nil }
+        if let warmCurrentTint = ctx.pois?.warmCurrentTint(at: point) {
+            return (warmCurrentTint.color,
+                    max(region.tintStrength, warmCurrentTint.strength))
+        }
         return (region.tint, region.tintStrength)
     }
 
@@ -435,12 +439,35 @@ final class RegionDiscoverySystem {
         return true
     }
 
+    @discardableResult
+    func unlockRegionMap(_ regionId: String, source: String) -> String {
+        guard let region = RegionDiscoverySystem.region(withId: regionId) else {
+            return "Mapa encontrado, mas a região ainda não existe."
+        }
+        guard region.isAccessible(for: ctx.stats.phase) else {
+            return "\(region.name) foi marcado, mas só ficará disponível quando ela for \(region.minPhase.mapAccessDisplayName)."
+        }
+        if ctx.stats.isRegionKnown(region) {
+            return "Mapa já conhecido: \(region.name)."
+        }
+        ctx.stats.pendingRegionDiscoveryId = nil
+        ctx.stats.discoveryRouteRegionId = nil
+        ctx.stats.readyRegionDiscoveryId = nil
+        ctx.stats.discoveredRegionIds.insert(region.id)
+        ctx.stats.discoveryPointByRegion[region.id] = nil
+        ctx.stats.addMemory("\(source): recebeu mapa para \(region.name)")
+        GameAudio.shared.play(.regionDiscover)
+        ctx.scene?.showRegionDiscoveryCue(for: region)
+        return "Mapa desbloqueado: \(region.name)."
+    }
+
     private func nextDiscoverableRegion() -> Region? {
         RegionDiscoverySystem.menuRegions
             .filter { region in
                 region.isAccessible(for: ctx.stats.phase)
                     && !ctx.stats.isRegionKnown(region)
                     && !ctx.stats.hasDiscoveryLead(for: region)
+                    && region.id != "jardim_calmo"
             }
             .first
     }
@@ -550,6 +577,61 @@ enum WorldPOIKind: String, Codable, CaseIterable {
     }
 }
 
+enum WorldPOIVisualConcept: String, Codable, CaseIterable {
+    case environment
+    case object
+    case npc
+
+    var displayName: String {
+        switch self {
+        case .environment: return "Ambiente"
+        case .object: return "Objeto"
+        case .npc: return "NPC"
+        }
+    }
+}
+
+enum WorldPOIActionKind: String, Codable, CaseIterable {
+    case temporaryEffect
+    case challenge
+
+    var displayName: String {
+        switch self {
+        case .temporaryEffect: return "Efeito temporário"
+        case .challenge: return "Desafio"
+        }
+    }
+}
+
+struct POIChallenge: Codable {
+    let kind: ChallengeKind
+    let goal: Int?
+    let goalMultiplier: CGFloat
+    let special: Bool
+
+    init(kind: ChallengeKind,
+         goal: Int? = nil,
+         goalMultiplier: CGFloat = 1,
+         special: Bool = true) {
+        self.kind = kind
+        self.goal = goal
+        self.goalMultiplier = max(0.1, goalMultiplier)
+        self.special = special
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case kind, goal, goalMultiplier, special
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        kind = try c.decode(ChallengeKind.self, forKey: .kind)
+        goal = try c.decodeIfPresent(Int.self, forKey: .goal)
+        goalMultiplier = max(0.1, try c.decodeIfPresent(CGFloat.self, forKey: .goalMultiplier) ?? 1)
+        special = try c.decodeIfPresent(Bool.self, forKey: .special) ?? true
+    }
+}
+
 struct POIVisual: Codable {
     let glyph: String
     let tint: String
@@ -597,10 +679,13 @@ struct WorldPOI: Codable {
     let regionId: String
     let zone: DepthZone
     let kind: WorldPOIKind
+    let visualConcept: WorldPOIVisualConcept
+    let actionKind: WorldPOIActionKind
     let name: String
     let position: CGPoint
     let reward: Reward
     let visual: POIVisual
+    let challenge: POIChallenge?
 }
 
 enum WorldPOICatalog {
@@ -623,10 +708,16 @@ enum WorldPOICatalog {
                                 regionId: region.id,
                                 zone: zone,
                                 kind: definition.kind,
+                                visualConcept: definition.visualConcept
+                                    ?? visualConcept(for: definition.kind, key: definition.poiId),
+                                actionKind: definition.actionKind ?? actionKind(for: definition.kind),
                                 name: definition.name,
                                 position: position,
                                 reward: definition.reward,
-                                visual: definition.visual ?? .default(for: definition.kind))
+                                visual: definition.visual ?? .default(for: definition.kind),
+                                challenge: definition.challenge
+                                    ?? challenge(for: definition.actionKind ?? actionKind(for: definition.kind),
+                                                 kind: definition.kind))
             }
         }
 
@@ -648,14 +739,18 @@ enum WorldPOICatalog {
             let rawPosition = CGPoint(x: rng.next(in: xRange),
                                       y: rng.next(in: yRange))
             let position = boundedPosition(rawPosition, region: region, zone: zone)
+            let reward = reward(for: kind, region: region, zone: zone)
             return WorldPOI(key: key,
                             regionId: region.id,
                             zone: zone,
                             kind: kind,
+                            visualConcept: visualConcept(for: kind, key: key),
+                            actionKind: actionKind(for: kind),
                             name: name(for: kind, region: region, zone: zone),
                             position: position,
-                            reward: reward(for: kind, region: region, zone: zone),
-                            visual: .default(for: kind))
+                            reward: reward,
+                            visual: .default(for: kind),
+                            challenge: challenge(for: actionKind(for: kind), kind: kind))
         }
     }
 
@@ -664,9 +759,12 @@ enum WorldPOICatalog {
         let mapId: String
         let zone: String
         let kind: WorldPOIKind
+        let visualConcept: WorldPOIVisualConcept?
+        let actionKind: WorldPOIActionKind?
         let name: String
         let reward: Reward
         let visual: POIVisual?
+        let challenge: POIChallenge?
     }
 
     private static let configuredDefinitions: [POIDefinition] = {
@@ -727,15 +825,57 @@ enum WorldPOICatalog {
     private static func reward(for kind: WorldPOIKind, region: Region, zone: DepthZone) -> Reward {
         switch kind {
         case .shipwreck:
-            return .item(id: "fragmento_\(region.id)", title: "fragmento de naufrágio")
+            return .pearls(120, title: "Baú de conchas")
         case .npc:
             return .temporaryEffect(.eagerCompanion, duration: GameBalance.gameplayEffectDuration)
         case .minigame:
-            return .temporaryEffect(.swiftCurrent, duration: GameBalance.gameplayEffectDuration)
+            return .supportResource(.currentAmpoule, quantity: 3)
         case .pet:
-            return .temporaryPet(title: "peixinho companheiro", duration: GameBalance.visualEffectDuration)
+            return Reward(kind: .temporaryEffect,
+                          title: "peixinho companheiro",
+                          pearlAmount: 0,
+                          itemId: nil,
+                          buffKind: .temporaryPet,
+                          duration: GameBalance.visualEffectDuration,
+                          storyText: nil)
         case .story:
-            return .story("Ela ouviu uma história perdida em \(region.name), \(zone.displayName).")
+            return .temporaryEffect(.eagerCompanion, duration: GameBalance.gameplayEffectDuration)
+        }
+    }
+
+    private static func visualConcept(for kind: WorldPOIKind, key: String) -> WorldPOIVisualConcept {
+        if key == "nascente_mid_warm_current" { return .environment }
+        switch kind {
+        case .npc, .pet:
+            return .npc
+        case .shipwreck, .minigame, .story:
+            return .object
+        }
+    }
+
+    private static func actionKind(for kind: WorldPOIKind) -> WorldPOIActionKind {
+        switch kind {
+        case .shipwreck, .minigame:
+            return .challenge
+        case .npc, .pet, .story:
+            return .temporaryEffect
+        }
+    }
+
+    private static func challenge(for actionKind: WorldPOIActionKind,
+                                  kind: WorldPOIKind) -> POIChallenge? {
+        guard actionKind == .challenge else { return nil }
+        switch kind {
+        case .shipwreck:
+            return POIChallenge(kind: .memory, goalMultiplier: 1.35)
+        case .minigame:
+            return POIChallenge(kind: .plot, goalMultiplier: 1.25)
+        case .npc:
+            return POIChallenge(kind: .snap, goalMultiplier: 1.55)
+        case .story:
+            return POIChallenge(kind: .memory, goalMultiplier: 1.35)
+        case .pet:
+            return POIChallenge(kind: .snap, goalMultiplier: 1.25)
         }
     }
 
@@ -774,6 +914,19 @@ final class POISystem {
     private enum RepeatablePOIReward {
         static let warmCurrentKey = "nascente_mid_warm_current"
     }
+    private enum WarmCurrentEnvironment {
+        static let horizontalRadius: CGFloat = 980
+        static let verticalRadius: CGFloat = 420
+        static let coreRadius: CGFloat = 0.26
+        static let maxHorizontalDrift: CGFloat = 118
+        static let maxVerticalDrift: CGFloat = 34
+        static let audioCooldown: CGFloat = 9
+        static let tint = UIColor(red: 0.96, green: 0.48, blue: 0.32, alpha: 1)
+        static let tintStrength: CGFloat = 0.34
+    }
+    private enum InteractionBalance {
+        static let arrivalRadius: CGFloat = 150
+    }
 
     unowned let ctx: GameContext
     private weak var worldNode: SKNode?
@@ -783,6 +936,8 @@ final class POISystem {
     private var pendingInteraction: WorldPOI?
     private var visibleNodes: [String: WorldPOINode] = [:]
     private var visiblePOIs: [String: WorldPOI] = [:]
+    private var isInsideWarmCurrent = false
+    private var warmCurrentAudioCooldown: CGFloat = 0
 
     init(ctx: GameContext, worldNode: SKNode) {
         self.ctx = ctx
@@ -790,6 +945,8 @@ final class POISystem {
     }
 
     func update(dt: CGFloat) {
+        updateWarmCurrentEnvironment(dt: dt)
+
         if let focusUntil, focusUntil <= Date() {
             exploreFocusLevel = 0
             self.focusUntil = nil
@@ -831,6 +988,24 @@ final class POISystem {
             }
     }
 
+    func warmCurrentTint(at point: CGPoint) -> (color: UIColor, strength: CGFloat)? {
+        guard let warmCurrent = reachableWarmCurrentPOI(),
+              let intensity = warmCurrentIntensity(at: point, for: warmCurrent) else {
+            return nil
+        }
+        let strength = WarmCurrentEnvironment.tintStrength
+            * (0.35 + intensity * 0.65)
+        return (WarmCurrentEnvironment.tint, strength)
+    }
+
+    func warmCurrentEnvironmentLevel(at point: CGPoint) -> CGFloat {
+        guard let warmCurrent = reachableWarmCurrentPOI(),
+              let intensity = warmCurrentIntensity(at: point, for: warmCurrent) else {
+            return 0
+        }
+        return intensity
+    }
+
     @discardableResult
     func requestReturn(to poi: WorldPOI) -> Bool {
         guard ctx.stats.isPOIDiscovered(poi.key) else {
@@ -845,14 +1020,27 @@ final class POISystem {
             ctx.say("\(poi.name) está em uma profundidade que ela ainda não alcança.")
             return false
         }
+        if ctx.mermaidPosition.distance(to: poi.position) < InteractionBalance.arrivalRadius {
+            pendingInteraction = poi
+            syncWorldNodes()
+            completePendingInteractionIfReached()
+            return true
+        }
         guard ctx.autonomy.canReachPointWithCurrentEnergy(poi.position, margin: 24) else {
             ctx.say("\(poi.name) está marcado, mas longe demais para a energia atual. Aproxime-se ou deixe ela descansar antes de interagir.")
             return false
         }
-        guard ctx.autonomy.requestPointFromTouch(poi.position) else { return false }
+        guard ctx.autonomy.requestDestinationFromTouch(
+            poi.position,
+            acceptedMessage: "Ela aceitou voltar a \(poi.name) e vai nadar até lá.",
+            refusalMessages: [
+                "Ela viu \(poi.name), mas preferiu ficar por aqui.",
+                "Ela olhou para \(poi.name), mas não quis voltar agora.",
+                "Ela reconheceu o caminho para \(poi.name), mas seguiu a própria vontade."
+            ]
+        ) else { return false }
         pendingInteraction = poi
         syncWorldNodes()
-        ctx.say("Ela aceitou voltar a \(poi.name). O ponto já está visível no mundo.")
         completePendingInteractionIfReached()
         return true
     }
@@ -905,6 +1093,9 @@ final class POISystem {
     }
 
     private func shouldShowInWorld(_ poi: WorldPOI) -> Bool {
+        if isWarmCurrentPOI(poi) {
+            return isReachable(poi)
+        }
         guard ctx.stats.isPOIDiscovered(poi.key) else { return false }
         return isReachable(poi)
     }
@@ -939,10 +1130,42 @@ final class POISystem {
         }
     }
 
+    private func updateWarmCurrentEnvironment(dt: CGFloat) {
+        warmCurrentAudioCooldown = max(0, warmCurrentAudioCooldown - dt)
+        guard let warmCurrent = reachableWarmCurrentPOI(),
+              let intensity = warmCurrentIntensity(at: ctx.mermaidPosition, for: warmCurrent) else {
+            ctx.autonomy.environmentDrift = .zero
+            isInsideWarmCurrent = false
+            return
+        }
+
+        let dx = ctx.mermaidPosition.x - warmCurrent.position.x
+        let pushSign: CGFloat = dx < 0 ? -1 : 1
+        let edgeFactor = abs(dx / WarmCurrentEnvironment.horizontalRadius).clamped(to: 0...1)
+        let coreFactor = (WarmCurrentEnvironment.coreRadius - edgeFactor)
+            .clamped(to: 0...WarmCurrentEnvironment.coreRadius)
+            / WarmCurrentEnvironment.coreRadius
+        let horizontal = pushSign * WarmCurrentEnvironment.maxHorizontalDrift
+            * (0.30 + intensity * 0.70)
+            * (1 - coreFactor * 0.55)
+        let wave = sin((ctx.mermaidPosition.x - warmCurrent.position.x) / 240)
+        let vertical = wave * WarmCurrentEnvironment.maxVerticalDrift * intensity
+        ctx.autonomy.environmentDrift = CGVector(dx: horizontal, dy: vertical)
+
+        if !isInsideWarmCurrent {
+            isInsideWarmCurrent = true
+            ctx.stats.boostMood(1.5)
+        }
+        if warmCurrentAudioCooldown <= 0 {
+            warmCurrentAudioCooldown = WarmCurrentEnvironment.audioCooldown
+            GameAudio.shared.play(.currentRush, volumeMultiplier: 0.32, cooldownOverride: 1.0)
+        }
+    }
+
     private func completePendingInteractionIfReached() {
         guard let poi = pendingInteraction,
               ctx.regions.currentRegion?.id == poi.regionId,
-              ctx.mermaidPosition.distance(to: poi.position) < 150 else { return }
+              ctx.mermaidPosition.distance(to: poi.position) < InteractionBalance.arrivalRadius else { return }
         pendingInteraction = nil
         interact(with: poi)
     }
@@ -967,7 +1190,7 @@ final class POISystem {
             return
         }
 
-        if poi.kind == .minigame {
+        if poi.actionKind == .challenge {
             guard let scene = ctx.scene,
                   scene.openPOIChallenge(for: poi, onCompletion: { [weak self] result in
                       self?.finishPOIChallenge(poi, result: result)
@@ -997,7 +1220,6 @@ final class POISystem {
         let rewardText = ctx.rewards.grant(poi.reward, source: poi.name)
         markRepeatableRewardActivatedIfNeeded(for: poi)
         ctx.stats.addMemory("Interagiu com \(poi.name)")
-        _ = ctx.regions.maybeRevealRegionLead(source: "POI", chance: 0.35)
         syncWorldNodes()
         ctx.stats.save()
         ctx.say("\(prefix) \(rewardText)")
@@ -1032,6 +1254,26 @@ final class POISystem {
 
     private func isRepeatableRewardPOI(_ poi: WorldPOI) -> Bool {
         poi.key == RepeatablePOIReward.warmCurrentKey
+    }
+
+    private func reachableWarmCurrentPOI() -> WorldPOI? {
+        guard let region = ctx.regions.currentRegion else { return nil }
+        return WorldPOICatalog.pois(in: region, stats: ctx.stats)
+            .first { isWarmCurrentPOI($0) && isReachable($0) }
+    }
+
+    private func warmCurrentIntensity(at point: CGPoint, for poi: WorldPOI) -> CGFloat? {
+        let normalizedX = (point.x - poi.position.x) / WarmCurrentEnvironment.horizontalRadius
+        let normalizedY = (point.y - poi.position.y) / WarmCurrentEnvironment.verticalRadius
+        let distance = normalizedX * normalizedX + normalizedY * normalizedY
+        guard distance <= 1 else { return nil }
+        return (1 - distance).clamped(to: 0...1)
+    }
+
+    private func isWarmCurrentPOI(_ poi: WorldPOI) -> Bool {
+        poi.key == RepeatablePOIReward.warmCurrentKey
+            && poi.visualConcept == .environment
+            && poi.actionKind == .temporaryEffect
     }
 
     private func nearestUndiscoveredPOI() -> WorldPOI? {

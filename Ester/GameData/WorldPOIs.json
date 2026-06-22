@@ -4,16 +4,18 @@
     "mapId": "nascente",
     "zone": "shallow",
     "kind": "story",
+    "visualConcept": "object",
+    "actionKind": "temporaryEffect",
     "name": "Ninho de ovos abandonados",
     "visual": { "glyph": "🥚", "tint": "aqua", "scale": 1.0 },
     "reward": {
-      "kind": "story",
-      "title": "Memória",
+      "kind": "temporaryEffect",
+      "title": "Memória de origem",
       "pearlAmount": 0,
       "itemId": null,
-      "buffKind": null,
-      "duration": 0,
-      "storyText": "Ela reconheceu algo familiar e guardou uma lembrança da própria origem."
+      "buffKind": "eagerCompanion",
+      "duration": 1200,
+      "storyText": null
     }
   },
   {
@@ -21,14 +23,16 @@
     "mapId": "nascente",
     "zone": "shallow",
     "kind": "pet",
+    "visualConcept": "npc",
+    "actionKind": "temporaryEffect",
     "name": "Cardume de peixinhos bebês",
     "visual": { "glyph": "🐠", "tint": "aqua", "scale": 1.05 },
     "reward": {
-      "kind": "temporaryPet",
+      "kind": "temporaryEffect",
       "title": "cardume pequeno",
       "pearlAmount": 0,
       "itemId": null,
-      "buffKind": null,
+      "buffKind": "temporaryPet",
       "duration": 2400,
       "storyText": null
     }
@@ -38,16 +42,26 @@
     "mapId": "nascente",
     "zone": "shallow",
     "kind": "minigame",
+    "visualConcept": "object",
+    "actionKind": "challenge",
     "name": "Concha gigante com música",
     "visual": { "glyph": "♪", "tint": "gold", "scale": 1.0 },
+    "challenge": {
+      "kind": "plot",
+      "goalMultiplier": 1.35,
+      "special": true
+    },
     "reward": {
-      "kind": "temporaryEffect",
-      "title": "Nado acelerado",
+      "kind": "supportResource",
+      "title": "Ampolas de corrente",
       "pearlAmount": 0,
       "itemId": null,
-      "buffKind": "swiftCurrent",
-      "duration": 1200,
-      "storyText": null
+      "buffKind": null,
+      "duration": 0,
+      "storyText": null,
+      "supportResourceKind": "currentAmpoule",
+      "quantity": 6,
+      "regionId": null
     }
   },
   {
@@ -55,16 +69,26 @@
     "mapId": "nascente",
     "zone": "mid",
     "kind": "shipwreck",
+    "visualConcept": "object",
+    "actionKind": "challenge",
     "name": "Barquinho de brinquedo naufragado",
     "visual": { "glyph": "▧", "tint": "sand", "scale": 1.0 },
+    "challenge": {
+      "kind": "memory",
+      "goalMultiplier": 1.4,
+      "special": true
+    },
     "reward": {
-      "kind": "item",
-      "title": "peça brilhante do barquinho",
+      "kind": "regionMap",
+      "title": "Mapa para Jardim Calmo",
       "pearlAmount": 0,
-      "itemId": "peca_brilhante_do_barquinho",
+      "itemId": null,
       "buffKind": null,
       "duration": 0,
-      "storyText": null
+      "storyText": null,
+      "supportResourceKind": null,
+      "quantity": 1,
+      "regionId": "jardim_calmo"
     }
   },
   {
@@ -72,16 +96,26 @@
     "mapId": "nascente",
     "zone": "mid",
     "kind": "npc",
+    "visualConcept": "npc",
+    "actionKind": "challenge",
     "name": "Tartaruga velha",
     "visual": { "glyph": "?", "tint": "algae", "scale": 1.0 },
+    "challenge": {
+      "kind": "snap",
+      "goalMultiplier": 2.5,
+      "special": true
+    },
     "reward": {
-      "kind": "story",
-      "title": "Memória",
+      "kind": "supportResource",
+      "title": "Porções de acelerar",
       "pearlAmount": 0,
       "itemId": null,
       "buffKind": null,
       "duration": 0,
-      "storyText": "A tartaruga contou que correntes antigas ligam todos os mapas."
+      "storyText": null,
+      "supportResourceKind": "growthPotion",
+      "quantity": 24,
+      "regionId": null
     }
   },
   {
@@ -89,6 +123,8 @@
     "mapId": "nascente",
     "zone": "mid",
     "kind": "story",
+    "visualConcept": "environment",
+    "actionKind": "temporaryEffect",
     "name": "Corrente quente",
     "visual": { "glyph": "~", "tint": "coral", "scale": 1.0 },
     "reward": {
@@ -106,16 +142,26 @@
     "mapId": "jardim_calmo",
     "zone": "shallow",
     "kind": "minigame",
+    "visualConcept": "object",
+    "actionKind": "challenge",
     "name": "Planta que reage ao toque",
     "visual": { "glyph": "✿", "tint": "algae", "scale": 1.0 },
+    "challenge": {
+      "kind": "banquet",
+      "goalMultiplier": 1.45,
+      "special": true
+    },
     "reward": {
-      "kind": "temporaryEffect",
-      "title": "Fome pausada",
+      "kind": "supportResource",
+      "title": "Sacos de comida",
       "pearlAmount": 0,
       "itemId": null,
-      "buffKind": "fullBelly",
-      "duration": 1200,
-      "storyText": null
+      "buffKind": null,
+      "duration": 0,
+      "storyText": null,
+      "supportResourceKind": "foodBag",
+      "quantity": 8,
+      "regionId": null
     }
   },
   {
@@ -123,16 +169,26 @@
     "mapId": "jardim_calmo",
     "zone": "shallow",
     "kind": "npc",
+    "visualConcept": "npc",
+    "actionKind": "challenge",
     "name": "Peixe colorido",
     "visual": { "glyph": "🐠", "tint": "coral", "scale": 1.08 },
+    "challenge": {
+      "kind": "snap",
+      "goalMultiplier": 1.65,
+      "special": true
+    },
     "reward": {
-      "kind": "item",
-      "title": "escama colorida",
+      "kind": "supportResource",
+      "title": "Brinquedos de coral",
       "pearlAmount": 0,
-      "itemId": "escama_colorida",
+      "itemId": null,
       "buffKind": null,
       "duration": 0,
-      "storyText": null
+      "storyText": null,
+      "supportResourceKind": "coralToy",
+      "quantity": 6,
+      "regionId": null
     }
   },
   {
@@ -140,15 +196,17 @@
     "mapId": "jardim_calmo",
     "zone": "shallow",
     "kind": "story",
+    "visualConcept": "environment",
+    "actionKind": "temporaryEffect",
     "name": "Nuvem de bolhas subindo",
     "visual": { "glyph": "○", "tint": "aqua", "scale": 1.0 },
     "reward": {
-      "kind": "pearls",
-      "title": "Conchas",
-      "pearlAmount": 3,
+      "kind": "temporaryEffect",
+      "title": "Fôlego leve",
+      "pearlAmount": 0,
       "itemId": null,
-      "buffKind": null,
-      "duration": 0,
+      "buffKind": "swiftCurrent",
+      "duration": 900,
       "storyText": null
     }
   },
@@ -157,16 +215,26 @@
     "mapId": "jardim_calmo",
     "zone": "mid",
     "kind": "story",
+    "visualConcept": "object",
+    "actionKind": "challenge",
     "name": "Ruína coberta de algas",
     "visual": { "glyph": "▧", "tint": "violet", "scale": 1.0 },
+    "challenge": {
+      "kind": "memory",
+      "goalMultiplier": 1.6,
+      "special": true
+    },
     "reward": {
-      "kind": "story",
-      "title": "Memória",
-      "pearlAmount": 0,
+      "kind": "pearls",
+      "title": "Tesouro das algas",
+      "pearlAmount": 600,
       "itemId": null,
       "buffKind": null,
       "duration": 0,
-      "storyText": "As algas deixam ver símbolos que apontam para mapas de fases futuras."
+      "storyText": null,
+      "supportResourceKind": null,
+      "quantity": 1,
+      "regionId": null
     }
   },
   {
@@ -174,14 +242,16 @@
     "mapId": "jardim_calmo",
     "zone": "mid",
     "kind": "pet",
+    "visualConcept": "npc",
+    "actionKind": "temporaryEffect",
     "name": "Polvo bebê escondido",
     "visual": { "glyph": "🐙", "tint": "violet", "scale": 1.0 },
     "reward": {
-      "kind": "temporaryPet",
+      "kind": "temporaryEffect",
       "title": "polvo bebê",
       "pearlAmount": 0,
       "itemId": null,
-      "buffKind": null,
+      "buffKind": "temporaryPet",
       "duration": 3600,
       "storyText": null
     }
@@ -191,16 +261,18 @@
     "mapId": "jardim_calmo",
     "zone": "mid",
     "kind": "npc",
+    "visualConcept": "npc",
+    "actionKind": "temporaryEffect",
     "name": "Sereia anciã dormindo",
     "visual": { "glyph": "☾", "tint": "gold", "scale": 1.0 },
     "reward": {
-      "kind": "story",
-      "title": "Memória",
+      "kind": "temporaryEffect",
+      "title": "Sonho da anciã",
       "pearlAmount": 0,
       "itemId": null,
-      "buffKind": null,
-      "duration": 0,
-      "storyText": "A anciã sonolenta murmurou nomes de águas que ela ainda não conhece."
+      "buffKind": "eagerCompanion",
+      "duration": 1200,
+      "storyText": null
     }
   }
 ]

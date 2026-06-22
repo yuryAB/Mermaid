@@ -48,7 +48,7 @@ final class WorldPOINode: SKNode {
 
         name = "world_poi_\(poi.key)"
         isUserInteractionEnabled = false
-        zPosition = visualStyle == .warmCurrentEnvironment ? 7 : 8
+        zPosition = visualStyle == .warmCurrentEnvironment ? -6 : 8
         setScale(normalScale)
 
         halo.fillColor = baseColor.withAlphaComponent(0.12)
@@ -103,9 +103,13 @@ final class WorldPOINode: SKNode {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     func update(discovered: Bool, rewardCollected: Bool, focused: Bool) {
-        alpha = discovered ? (rewardCollected ? 0.72 : 1.0) : 0.38
+        if visualStyle == .warmCurrentEnvironment {
+            alpha = discovered ? 0.96 : 0.86
+        } else {
+            alpha = discovered ? (rewardCollected ? 0.72 : 1.0) : 0.38
+        }
         title.isHidden = !discovered
-        collectedMark.isHidden = !rewardCollected
+        collectedMark.isHidden = visualStyle == .warmCurrentEnvironment || !rewardCollected
 
         if focused {
             if showsAura {
@@ -138,12 +142,11 @@ final class WorldPOINode: SKNode {
     }
 
     private static func visualStyle(for poi: WorldPOI) -> VisualStyle {
-        switch poi.key {
-        case "nascente_mid_warm_current":
+        if poi.key == "nascente_mid_warm_current",
+           poi.visualConcept == .environment {
             return .warmCurrentEnvironment
-        default:
-            return .marker
         }
+        return .marker
     }
 
     private static func normalScale(for poi: WorldPOI, style: VisualStyle) -> CGFloat {
@@ -1416,101 +1419,7 @@ enum WorldPOIArtworkFactory {
     }
 
     private static func makeWarmCurrent(tint: UIColor) -> SKNode {
-        let node = SKNode()
-        let warm = UIColor.lerp(GameUI.coral, tint, 0.20)
-        let bright = UIColor.lerp(GameUI.gold, tint, 0.12)
-        let colors = [
-            GameUI.coral,
-            bright,
-            UIColor.lerp(tint, .white, 0.18)
-        ]
-
-        let currentField = UIBezierPath()
-        currentField.move(to: CGPoint(x: -158, y: -38))
-        currentField.addCurve(to: CGPoint(x: 154, y: -24),
-                              controlPoint1: CGPoint(x: -78, y: -70),
-                              controlPoint2: CGPoint(x: 74, y: 0))
-        currentField.addCurve(to: CGPoint(x: 151, y: 38),
-                              controlPoint1: CGPoint(x: 168, y: -8),
-                              controlPoint2: CGPoint(x: 169, y: 22))
-        currentField.addCurve(to: CGPoint(x: -151, y: 31),
-                              controlPoint1: CGPoint(x: 74, y: 72),
-                              controlPoint2: CGPoint(x: -72, y: 8))
-        currentField.addCurve(to: CGPoint(x: -158, y: -38),
-                              controlPoint1: CGPoint(x: -170, y: 13),
-                              controlPoint2: CGPoint(x: -173, y: -18))
-        let field = shape(currentField,
-                          fill: warm.withAlphaComponent(0.13),
-                          stroke: bright.withAlphaComponent(0.18),
-                          lineWidth: 1.2,
-                          glow: 12,
-                          lineCap: .round)
-        field.zPosition = -4
-        node.addChild(field)
-
-        for i in 0..<3 {
-            let band = UIBezierPath()
-            let baseY = CGFloat(i - 1) * 21
-            band.move(to: CGPoint(x: -146, y: baseY - 15))
-            band.addCurve(to: CGPoint(x: 146, y: baseY - 8),
-                          controlPoint1: CGPoint(x: -66, y: baseY - 41),
-                          controlPoint2: CGPoint(x: 55, y: baseY + 17))
-            band.addCurve(to: CGPoint(x: 143, y: baseY + 9),
-                          controlPoint1: CGPoint(x: 151, y: baseY - 4),
-                          controlPoint2: CGPoint(x: 151, y: baseY + 5))
-            band.addCurve(to: CGPoint(x: -143, y: baseY + 13),
-                          controlPoint1: CGPoint(x: 56, y: baseY + 30),
-                          controlPoint2: CGPoint(x: -58, y: baseY - 24))
-            band.addCurve(to: CGPoint(x: -146, y: baseY - 15),
-                          controlPoint1: CGPoint(x: -152, y: baseY + 7),
-                          controlPoint2: CGPoint(x: -153, y: baseY - 8))
-            let wash = shape(band,
-                             fill: colors[i].withAlphaComponent(0.09),
-                             stroke: .clear)
-            wash.zPosition = CGFloat(i) - 3
-            node.addChild(wash)
-        }
-
-        for i in 0..<6 {
-            let path = UIBezierPath()
-            let offset = CGFloat(i) * 12 - 31
-            path.move(to: CGPoint(x: -150, y: offset - 5))
-            path.addCurve(to: CGPoint(x: 150, y: offset + 3),
-                          controlPoint1: CGPoint(x: -76, y: offset + 31),
-                          controlPoint2: CGPoint(x: 59, y: offset - 32))
-            let ribbon = shape(path,
-                               fill: .clear,
-                               stroke: colors[i % colors.count].withAlphaComponent(0.72),
-                               lineWidth: 3.8 - CGFloat(i % 3) * 0.45,
-                               glow: 6,
-                               lineCap: .round)
-            ribbon.zPosition = CGFloat(i)
-            node.addChild(ribbon)
-            ribbon.run(.repeatForever(.sequence([
-                eased(.moveBy(x: 12, y: 2, duration: 1.05 + TimeInterval(i) * 0.10)),
-                eased(.moveBy(x: -12, y: -2, duration: 1.05 + TimeInterval(i) * 0.10))
-            ])))
-        }
-
-        for i in 0..<18 {
-            let mote = ellipse(width: 4.5 + CGFloat(i % 3) * 1.4,
-                               height: 2.4 + CGFloat((i + 1) % 3),
-                               fill: colors[i % colors.count].withAlphaComponent(0.60),
-                               stroke: .clear,
-                               glow: 4)
-            mote.position = CGPoint(x: -135 + CGFloat(i) * 16,
-                                    y: -30 + CGFloat((i * 17) % 64))
-            mote.zRotation = CGFloat(i % 5) * 0.18
-            mote.zPosition = 5
-            node.addChild(mote)
-            mote.run(.repeatForever(.sequence([
-                eased(.moveBy(x: 10, y: 3, duration: 1.2 + TimeInterval(i % 4) * 0.18)),
-                eased(.moveBy(x: -10, y: -3, duration: 1.2 + TimeInterval(i % 4) * 0.18))
-            ])))
-        }
-
-        field.run(makeBreathAction(amount: 1.025, duration: 1.8))
-        return node
+        return SKNode()
     }
 
     private static func makeTouchPlant(tint: UIColor) -> SKNode {

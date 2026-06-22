@@ -138,7 +138,7 @@ enum RefugeShopCatalog {
         RefugeShopItem(id: "food_bag",
                        title: "Saco de comida",
                        blurb: "Adiciona 1 pacote ao painel Recursos.",
-                       cost: 120,
+                       cost: 80,
                        tint: SupportResourceKind.foodBag.tint,
                        symbolName: SupportResourceKind.foodBag.symbolName,
                        fallbackGlyph: SupportResourceKind.foodBag.glyph,
@@ -207,7 +207,7 @@ final class ResourceSupportSystem {
         let stats = ctx.stats!
         switch kind {
         case .foodBag:
-            stats.hunger = max(0, stats.hunger - 34)
+            stats.hunger = max(0, stats.hunger - GameBalance.supportFoodBagHungerRelief)
             stats.mealsEaten += 1
             stats.boostMood(6)
             stats.trust = min(100, stats.trust + 0.8)

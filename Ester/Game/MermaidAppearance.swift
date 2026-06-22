@@ -76,7 +76,7 @@ private extension UIColor {
 }
 
 extension Mermaid {
-    /// Tinge todas as partes do corpo com a paleta interpolada pela profundidade.
+    /// Tinge todas as partes do corpo com a paleta ativa da profundidade.
     func applyPalette(_ palette: MermaidPalette) {
         figure.applyPalette(palette)
     }

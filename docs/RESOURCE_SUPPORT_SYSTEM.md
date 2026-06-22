@@ -22,7 +22,9 @@ mutation separated.
 
 ## Current Resources
 
-- `foodBag`: reduces hunger, counts as a meal, and gives a small mood/trust gain.
+- `foodBag`: reduces hunger by a fixed amount, counts as a meal, and gives a
+  small mood/trust gain. Phase differences should come from upgrades and other
+  progression systems, not from hidden resource scaling.
 - `calmShell`: reduces fear pressure and improves disposition/trust.
 - `currentAmpoule`: grants energy and a temporary `swiftCurrent` buff.
 - `coralToy`: improves mood/trust and grants a temporary `eagerCompanion` buff.

@@ -269,6 +269,8 @@ class GameScene: SKScene {
     private var oceanBackdrop: OceanParallaxBackdrop?
     private var worldChunkManager: WorldChunkManager?
     private var oceanDebugPanel: OceanVisualDebugPanel?
+    private var warmCurrentOverlay: SKNode?
+    private var warmCurrentOverlayPhase: CGFloat = 0
     private var lastRipplePosition: CGPoint?
     private var rippleCooldown: CGFloat = 0
     private var temporaryCompanionNode: SKNode?
@@ -331,6 +333,7 @@ class GameScene: SKScene {
         setupCamera()
         setupOceanBackdrop()
         setupHUD()
+        setupWarmCurrentOverlay()
         setupOceanDebugPanel()
         setupAmbientBubbles()
         lastEntryTextZone = DepthZone.zone(atY: stats.posY)
@@ -487,6 +490,89 @@ class GameScene: SKScene {
         }
         ctx.hud = hud
         cameraNode.addChild(hud)
+    }
+
+    private func setupWarmCurrentOverlay() {
+        let overlay = SKNode()
+        overlay.zPosition = 32
+        overlay.alpha = 0
+
+        let coverSize = CGSize(width: size.width * 3.0, height: size.height * 3.0)
+        let cover = SKShapeNode(rectOf: coverSize)
+        cover.fillColor = UIColor(red: 0.95, green: 0.36, blue: 0.24, alpha: 0.16)
+        cover.strokeColor = .clear
+        cover.zPosition = 0
+        overlay.addChild(cover)
+
+        let glow = SKShapeNode(rectOf: coverSize)
+        glow.fillColor = UIColor(red: 1.0, green: 0.70, blue: 0.34, alpha: 0.08)
+        glow.strokeColor = .clear
+        glow.zPosition = 1
+        overlay.addChild(glow)
+        glow.run(.repeatForever(.sequence([
+            .fadeAlpha(to: 0.36, duration: 2.4),
+            .fadeAlpha(to: 0.74, duration: 2.8)
+        ])))
+
+        let width = coverSize.width
+        for index in 0..<9 {
+            let path = UIBezierPath()
+            let y = -size.height * 1.15 + CGFloat(index) * size.height * 0.30
+            path.move(to: CGPoint(x: -width / 2, y: y))
+            path.addCurve(to: CGPoint(x: width / 2, y: y + CGFloat(index % 3 - 1) * 22),
+                          controlPoint1: CGPoint(x: -width * 0.18, y: y + 52),
+                          controlPoint2: CGPoint(x: width * 0.18, y: y - 48))
+            let ribbon = SKShapeNode(path: path.cgPath)
+            ribbon.fillColor = .clear
+            ribbon.strokeColor = UIColor(red: 1.0, green: 0.78, blue: 0.45, alpha: 0.16)
+            ribbon.lineWidth = 18 + CGFloat(index % 3) * 6
+            ribbon.lineCap = .round
+            ribbon.glowWidth = 10
+            ribbon.zPosition = 2
+            overlay.addChild(ribbon)
+            ribbon.run(.repeatForever(.sequence([
+                .moveBy(x: CGFloat(index.isMultiple(of: 2) ? 72 : -64), y: 10, duration: 3.0 + Double(index) * 0.12),
+                .moveBy(x: CGFloat(index.isMultiple(of: 2) ? -72 : 64), y: -10, duration: 3.2 + Double(index) * 0.12)
+            ])))
+        }
+
+        for index in 0..<28 {
+            let mote = SKShapeNode(ellipseOf: CGSize(width: 8 + CGFloat(index % 4) * 3,
+                                                     height: 18 + CGFloat(index % 5) * 5))
+            mote.fillColor = UIColor.white.withAlphaComponent(0.10)
+            mote.strokeColor = UIColor(red: 1.0, green: 0.78, blue: 0.45, alpha: 0.18)
+            mote.lineWidth = 0.8
+            mote.glowWidth = 3
+            mote.position = CGPoint(x: -size.width * 1.15 + CGFloat((index * 97) % Int(max(CGFloat(1), size.width * 2.3))),
+                                    y: -size.height * 1.20 + CGFloat((index * 71) % Int(max(CGFloat(1), size.height * 2.4))))
+            mote.zRotation = CGFloat(index % 7) * 0.07
+            mote.zPosition = 3
+            overlay.addChild(mote)
+            mote.run(.repeatForever(.sequence([
+                .group([
+                    .moveBy(x: CGFloat(index.isMultiple(of: 2) ? 28 : -24), y: 54, duration: 2.6 + Double(index % 5) * 0.18),
+                    .fadeAlpha(to: 0.42, duration: 1.1)
+                ]),
+                .group([
+                    .moveBy(x: CGFloat(index.isMultiple(of: 2) ? -28 : 24), y: -54, duration: 2.8 + Double(index % 5) * 0.18),
+                    .fadeAlpha(to: 1.0, duration: 1.1)
+                ])
+            ])))
+        }
+
+        cameraNode.addChild(overlay)
+        warmCurrentOverlay = overlay
+    }
+
+    private func updateWarmCurrentOverlay(dt: CGFloat, level: CGFloat) {
+        warmCurrentOverlayPhase += dt
+        let targetAlpha = level <= 0 ? 0 : (0.30 + level * 0.70).clamped(to: 0...1)
+        let blend = min(1, dt * 3.4)
+        guard let overlay = warmCurrentOverlay else { return }
+        overlay.alpha += (targetAlpha - overlay.alpha) * blend
+        overlay.isHidden = overlay.alpha <= 0.01
+        overlay.position.x = sin(warmCurrentOverlayPhase * 0.55) * 8
+        overlay.position.y = cos(warmCurrentOverlayPhase * 0.42) * 6
     }
 
     private func setupOceanDebugPanel() {
@@ -691,7 +777,14 @@ class GameScene: SKScene {
         if let tint = ctx.regions.waterTint(at: mermaidPosition) {
             water = .lerp(water, tint.color, tint.strength)
         }
+        let warmCurrentLevel = ctx.pois.warmCurrentEnvironmentLevel(at: mermaidPosition)
+        if warmCurrentLevel > 0 {
+            water = .lerp(water,
+                          UIColor(red: 0.97, green: 0.48, blue: 0.30, alpha: 1),
+                          (0.18 + warmCurrentLevel * 0.34).clamped(to: 0...0.58))
+        }
         backgroundColor = water
+        updateWarmCurrentOverlay(dt: dt, level: warmCurrentLevel)
 
         hud.refresh(stats: stats,
                     intent: ctx.autonomy.intent,
@@ -1254,11 +1347,17 @@ class GameScene: SKScene {
     func openPOIChallenge(for poi: WorldPOI,
                           onCompletion: @escaping (ChallengeResult) -> Void) -> Bool {
         guard !isChallengeOpen, challengeChoiceMenu == nil, resourceChoiceMenu == nil, refugeOverlay == nil else { return false }
+        guard let poiChallenge = poi.challenge,
+              poiChallenge.kind.isAvailable else { return false }
         pendingPOIChallengeCompletion = onCompletion
         GameAudio.shared.play(.challengeOpen)
-        let challengeGoal = ctx.challenges.makeGoal(kind: .plot, special: true, at: poi.position)
-        presentChallenge(kind: .plot,
-                         special: true,
+        let challengeGoal = poiChallenge.goal
+            ?? GameBalance.poiChallengeGoal(kind: poiChallenge.kind,
+                                            at: poi.position,
+                                            special: poiChallenge.special,
+                                            multiplier: poiChallenge.goalMultiplier)
+        presentChallenge(kind: poiChallenge.kind,
+                         special: poiChallenge.special,
                          challengeGoal: challengeGoal,
                          giverDisplay: makePOIChallengeDisplay(for: poi))
         return true
