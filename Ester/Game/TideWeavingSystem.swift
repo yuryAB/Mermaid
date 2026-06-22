@@ -154,6 +154,7 @@ final class TideWeavingOverlay: SKNode {
         self.shellRewardMultiplier = shellRewardMultiplier
         var goal = 18 + zone.rawValue * 4
         var bonus = GameBalance.challengeShellReward(points: 0,
+                                                     kind: .plot,
                                                      reachedTarget: true,
                                                      phase: phase,
                                                      special: session == .event,
@@ -1169,12 +1170,14 @@ final class TideWeavingOverlay: SKNode {
 
     private func projectedPearls(reached: Bool? = nil) -> Int {
         let basePearls = GameBalance.challengeShellReward(points: score,
+                                                          kind: .plot,
                                                           reachedTarget: reached ?? challengeCompleted,
                                                           phase: phase,
                                                           special: session == .event,
                                                           isHatching: session == .hatching)
-        return GameBalance.scaledPearlReward(baseAmount: basePearls,
-                                             multiplier: shellRewardMultiplier)
+        return GameBalance.scaledChallengePearlReward(baseAmount: basePearls,
+                                                      points: score,
+                                                      multiplier: shellRewardMultiplier)
     }
 
     private func updateChallengeProgress() {
@@ -1248,6 +1251,7 @@ final class TideWeavingOverlay: SKNode {
 
         let reached = challengeCompleted
         let basePearls = GameBalance.challengeShellReward(points: score,
+                                                          kind: .plot,
                                                           reachedTarget: reached,
                                                           phase: phase,
                                                           special: session == .event,

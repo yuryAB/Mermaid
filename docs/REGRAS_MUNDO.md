@@ -442,7 +442,11 @@ Pets temporários (ex: peixe seguindo a sereia por um tempo) são efeitos tempor
 
 ## Conchas (Moeda)
 
-Já implementado e definido — **não alterar**.
+Balanceamento base implementado em `GameBalance`.
+
+- Minigames nao convertem pontuacao bruta direto em conchas.
+- Cada minigame tem perfil economico por dificuldade e volume natural de pontos.
+- Criterio atual documentado em [`docs/BALANCEAMENTO_MINIGAMES.md`](BALANCEAMENTO_MINIGAMES.md).
 
 ---
 

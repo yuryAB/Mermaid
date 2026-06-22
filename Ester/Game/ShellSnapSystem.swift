@@ -1201,12 +1201,14 @@ final class ShellSnapOverlay: SKNode {
 
     private func projectedPearls(reached: Bool? = nil) -> Int {
         let basePearls = GameBalance.challengeShellReward(points: score,
+                                                          kind: .snap,
                                                           reachedTarget: reached ?? challengeCompleted,
                                                           phase: phase,
                                                           special: special,
                                                           isHatching: false)
-        return GameBalance.scaledPearlReward(baseAmount: basePearls,
-                                             multiplier: shellRewardMultiplier)
+        return GameBalance.scaledChallengePearlReward(baseAmount: basePearls,
+                                                      points: score,
+                                                      multiplier: shellRewardMultiplier)
     }
 
     private func finish() {
@@ -1218,6 +1220,7 @@ final class ShellSnapOverlay: SKNode {
 
         let reached = challengeCompleted
         let basePearls = GameBalance.challengeShellReward(points: score,
+                                                          kind: .snap,
                                                           reachedTarget: reached,
                                                           phase: phase,
                                                           special: special,

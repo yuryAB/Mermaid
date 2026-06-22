@@ -1307,12 +1307,14 @@ final class BanquetOfTidesOverlay: SKNode {
 
     private func projectedPearls(reached: Bool? = nil) -> Int {
         let basePearls = GameBalance.challengeShellReward(points: engine.score,
+                                                          kind: .banquet,
                                                           reachedTarget: reached ?? engine.challengeCompleted,
                                                           phase: phase,
                                                           special: special,
                                                           isHatching: false)
-        return GameBalance.scaledPearlReward(baseAmount: basePearls,
-                                             multiplier: shellRewardMultiplier)
+        return GameBalance.scaledChallengePearlReward(baseAmount: basePearls,
+                                                      points: engine.score,
+                                                      multiplier: shellRewardMultiplier)
     }
 
     // MARK: - Fim
@@ -1325,6 +1327,7 @@ final class BanquetOfTidesOverlay: SKNode {
 
         let reached = engine.challengeCompleted
         let basePearls = GameBalance.challengeShellReward(points: engine.score,
+                                                          kind: .banquet,
                                                           reachedTarget: reached,
                                                           phase: phase,
                                                           special: special,

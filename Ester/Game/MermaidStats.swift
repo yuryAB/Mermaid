@@ -644,6 +644,16 @@ final class MermaidStats: Codable {
         return amount
     }
 
+    @discardableResult
+    func awardChallengePearls(_ baseAmount: Int, points: Int) -> Int {
+        guard baseAmount > 0 else { return 0 }
+        let amount = GameBalance.scaledChallengePearlReward(baseAmount: baseAmount,
+                                                            points: points,
+                                                            multiplier: shellRewardMultiplier)
+        pearls += amount
+        return amount
+    }
+
     // MARK: - Dinâmica contínua
 
     /// Avança fome, disposição e energia. `energyDelta` é a taxa por segundo da atividade atual.

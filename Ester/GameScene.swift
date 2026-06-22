@@ -1329,7 +1329,9 @@ class GameScene: SKScene {
         let poiCompletion = pendingPOIChallengeCompletion
         pendingPOIChallengeCompletion = nil
 
-        let gainedPearls = result.isHatching ? 0 : stats.awardPearls(result.pearls)
+        let gainedPearls = result.isHatching
+            ? 0
+            : stats.awardChallengePearls(result.pearls, points: result.points)
 
         // Durante o ovo, o desafio reúne energia de nascimento
         if result.isHatching || stats.phase == .egg {

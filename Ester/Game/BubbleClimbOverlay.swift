@@ -855,12 +855,14 @@ final class BubbleClimbOverlay: SKNode {
 
     private func projectedPearls(reached: Bool? = nil) -> Int {
         let basePearls = GameBalance.challengeShellReward(points: pointScore,
+                                                          kind: .ascent,
                                                           reachedTarget: reached ?? challengeCompleted,
                                                           phase: phase,
                                                           special: special,
                                                           isHatching: false)
-        return GameBalance.scaledPearlReward(baseAmount: basePearls,
-                                             multiplier: shellRewardMultiplier)
+        return GameBalance.scaledChallengePearlReward(baseAmount: basePearls,
+                                                      points: pointScore,
+                                                      multiplier: shellRewardMultiplier)
     }
 
     private func contentY(forViewY viewY: CGFloat) -> CGFloat {
@@ -1252,6 +1254,7 @@ final class BubbleClimbOverlay: SKNode {
 
         let reached = challengeCompleted
         let basePearls = GameBalance.challengeShellReward(points: pointScore,
+                                                          kind: .ascent,
                                                           reachedTarget: reached,
                                                           phase: phase,
                                                           special: special,

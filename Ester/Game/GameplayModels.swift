@@ -87,12 +87,57 @@ enum GameBalance {
         10
     }
 
+    struct ChallengeRewardProfile {
+        let difficultyTier: Int
+        let scoreVolume: String
+        let scoreToShellRate: CGFloat
+        let completionBonusMultiplier: CGFloat
+    }
+
+    static func challengeRewardProfile(for kind: ChallengeKind) -> ChallengeRewardProfile {
+        switch kind {
+        case .plot:
+            return ChallengeRewardProfile(difficultyTier: 2,
+                                          scoreVolume: "baixo",
+                                          scoreToShellRate: 0.62,
+                                          completionBonusMultiplier: 0.50)
+        case .ascent:
+            return ChallengeRewardProfile(difficultyTier: 4,
+                                          scoreVolume: "muito baixo",
+                                          scoreToShellRate: 0.75,
+                                          completionBonusMultiplier: 0.50)
+        case .snap:
+            return ChallengeRewardProfile(difficultyTier: 2,
+                                          scoreVolume: "alto",
+                                          scoreToShellRate: 0.36,
+                                          completionBonusMultiplier: 0.35)
+        case .banquet:
+            return ChallengeRewardProfile(difficultyTier: 3,
+                                          scoreVolume: "medio-alto",
+                                          scoreToShellRate: 0.46,
+                                          completionBonusMultiplier: 0.55)
+        case .memory:
+            return ChallengeRewardProfile(difficultyTier: 4,
+                                          scoreVolume: "medio-alto",
+                                          scoreToShellRate: 0.50,
+                                          completionBonusMultiplier: 0.65)
+        case .reefAsteroids:
+            return ChallengeRewardProfile(difficultyTier: 5,
+                                          scoreVolume: "muito alto",
+                                          scoreToShellRate: 0.16,
+                                          completionBonusMultiplier: 0.75)
+        }
+    }
+
     static func challengeShellReward(points: Int,
+                                     kind: ChallengeKind,
                                      reachedTarget: Bool,
                                      phase: MermaidPhase,
                                      special: Bool,
                                      isHatching: Bool) -> Int {
         guard !isHatching else { return 0 }
+        let pointCap = max(0, points)
+        guard pointCap > 0 else { return 0 }
         let completionBonus: Int
         switch phase {
         case .egg:
@@ -108,13 +153,29 @@ enum GameBalance {
         case .adult:
             completionBonus = 45
         }
-        let base = max(0, points) + (reachedTarget ? completionBonus : 0)
-        return special ? base * 3 : base
+        let profile = challengeRewardProfile(for: kind)
+        let economicPoints = Int((CGFloat(max(0, points)) * profile.scoreToShellRate).rounded())
+        let adjustedCompletionBonus = reachedTarget
+            ? Int((CGFloat(completionBonus) * profile.completionBonusMultiplier).rounded())
+            : 0
+        let base = economicPoints + adjustedCompletionBonus
+        let specialAdjustedBase = special ? base * 3 : base
+        return min(pointCap, specialAdjustedBase)
     }
 
     static func scaledPearlReward(baseAmount: Int, multiplier: CGFloat) -> Int {
         guard baseAmount > 0 else { return 0 }
         return max(1, Int((CGFloat(baseAmount) * multiplier).rounded()))
+    }
+
+    static func scaledChallengePearlReward(baseAmount: Int,
+                                           points: Int,
+                                           multiplier: CGFloat) -> Int {
+        let pointCap = max(0, points)
+        guard pointCap > 0 else { return 0 }
+        let scaledAmount = scaledPearlReward(baseAmount: baseAmount,
+                                             multiplier: multiplier)
+        return min(pointCap, scaledAmount)
     }
 
     static func growthShellCost(for phase: MermaidPhase) -> Int {

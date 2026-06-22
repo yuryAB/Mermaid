@@ -74,9 +74,6 @@ private enum ReefAsteroidsRules {
         150 + wave * 40
     }
 
-    static func rewardPoints(score: Int) -> Int {
-        max(0, Int((CGFloat(score) * 0.18).rounded()))
-    }
 }
 
 private enum ReefRockSize: CaseIterable {
@@ -1595,14 +1592,15 @@ final class ReefAsteroidsOverlay: SKNode {
     }
 
     private func projectedPearls(reached: Bool? = nil) -> Int {
-        let rewardPoints = ReefAsteroidsRules.rewardPoints(score: engine.score)
-        let basePearls = GameBalance.challengeShellReward(points: rewardPoints,
+        let basePearls = GameBalance.challengeShellReward(points: engine.score,
+                                                          kind: .reefAsteroids,
                                                           reachedTarget: reached ?? engine.challengeCompleted,
                                                           phase: phase,
                                                           special: special,
                                                           isHatching: false)
-        return GameBalance.scaledPearlReward(baseAmount: basePearls,
-                                             multiplier: shellRewardMultiplier)
+        return GameBalance.scaledChallengePearlReward(baseAmount: basePearls,
+                                                      points: engine.score,
+                                                      multiplier: shellRewardMultiplier)
     }
 
     // MARK: - Fim
@@ -1616,8 +1614,8 @@ final class ReefAsteroidsOverlay: SKNode {
         GameAudio.shared.play(engine.challengeCompleted ? .challengeSuccess : .challengeFail)
 
         let reached = engine.challengeCompleted
-        let rewardPoints = ReefAsteroidsRules.rewardPoints(score: engine.score)
-        let basePearls = GameBalance.challengeShellReward(points: rewardPoints,
+        let basePearls = GameBalance.challengeShellReward(points: engine.score,
+                                                          kind: .reefAsteroids,
                                                           reachedTarget: reached,
                                                           phase: phase,
                                                           special: special,
