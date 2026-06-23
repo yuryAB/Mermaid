@@ -6,5 +6,5 @@
 import SpriteKit
 
 final class LivingAbyssGameScene: GameScene {
-    override class var defaultRegionId: String? { "abismo_vivo" }
+    override class var defaultRegionId: String? { "zona_abissal" }
 }

@@ -8,7 +8,7 @@ Pasta de dados compartilhados entre `MapEditor` e `Ester`.
 
 O editor deve escrever aqui durante desenvolvimento. O jogo deve ler/copiar estes dados como fonte de verdade.
 
-`Maps/birth_waters.json` e um mapa inicial pequeno para abrir o editor ja com terreno desenhado.
+`Maps/recife_tropical.json` e um mapa inicial pequeno para abrir o editor ja com terreno desenhado.
 
 ## Verificacao
 

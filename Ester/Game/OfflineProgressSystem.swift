@@ -20,7 +20,7 @@ enum OfflineProgressSystem {
         let hours = cappedSeconds / 3600
         var lines: [String] = []
         let startingRegion = RegionDiscoverySystem.region(withId: stats.currentRegionId)
-            ?? RegionDiscoverySystem.region(withId: "nascente")
+            ?? RegionDiscoverySystem.region(withId: "recife_tropical")
         let startPoint = CGPoint(x: stats.posX, y: stats.posY)
 
         // distância offline limitada: nunca cruza o mundo de uma vez

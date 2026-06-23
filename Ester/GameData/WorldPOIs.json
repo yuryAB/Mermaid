@@ -1,18 +1,18 @@
 [
   {
-    "poiId": "nascente_shallow_music_shell",
-    "mapId": "nascente",
+    "poiId": "recife_tropical_shallow_music_shell",
+    "mapId": "recife_tropical",
     "zone": "shallow",
     "kind": "minigame",
     "visualConcept": "object",
     "actionKind": "challenge",
-    "name": "Concha de origem com música",
+    "name": "Concha recifal com música",
     "visual": { "glyph": "♪", "tint": "gold", "scale": 1.0 },
     "challenge": {
       "kind": "plot",
       "goalMultiplier": 4.0,
       "special": true,
-      "introText": "A concha vibra baixo junto ao ninho antigo, como se pedisse uma sequência perfeita antes de revelar o prêmio."
+      "introText": "A concha vibra entre corais rasos, como se pedisse uma sequência perfeita antes de revelar o prêmio."
     },
     "reward": {
       "kind": "supportResource",
@@ -28,23 +28,23 @@
     }
   },
   {
-    "poiId": "nascente_mid_small_shipwreck",
-    "mapId": "nascente",
+    "poiId": "recife_tropical_mid_small_shipwreck",
+    "mapId": "recife_tropical",
     "zone": "mid",
     "kind": "shipwreck",
     "visualConcept": "object",
     "actionKind": "challenge",
-    "name": "Barquinho de brinquedo naufragado",
+    "name": "Barquinho preso no recife",
     "visual": { "glyph": "▧", "tint": "sand", "scale": 1.0 },
     "challenge": {
       "kind": "memory",
       "goalMultiplier": 4.5,
       "special": true,
-      "introText": "O barquinho range na água: se você lembrar o caminho da maré, eu mostro o mapa escondido."
+      "introText": "O barquinho range preso no coral: se você lembrar o caminho da maré, eu mostro o mapa escondido."
     },
     "reward": {
       "kind": "regionMap",
-      "title": "Mapa para Jardim Calmo",
+      "title": "Mapa para Floresta de Kelp",
       "pearlAmount": 0,
       "itemId": null,
       "buffKind": null,
@@ -52,17 +52,17 @@
       "storyText": null,
       "supportResourceKind": null,
       "quantity": 1,
-      "regionId": "jardim_calmo"
+      "regionId": "floresta_kelp"
     }
   },
   {
-    "poiId": "jardim_calmo_shallow_warm_current",
-    "mapId": "jardim_calmo",
+    "poiId": "floresta_kelp_shallow_warm_current",
+    "mapId": "floresta_kelp",
     "zone": "shallow",
     "kind": "story",
     "visualConcept": "environment",
     "actionKind": "temporaryEffect",
-    "name": "Corrente quente",
+    "name": "Corrente morna entre kelps",
     "visual": { "glyph": "~", "tint": "coral", "scale": 1.0 },
     "reward": {
       "kind": "temporaryEffect",
@@ -75,19 +75,19 @@
     }
   },
   {
-    "poiId": "jardim_calmo_mid_old_turtle",
-    "mapId": "jardim_calmo",
+    "poiId": "floresta_kelp_mid_old_sea_otter",
+    "mapId": "floresta_kelp",
     "zone": "mid",
     "kind": "npc",
     "visualConcept": "npc",
     "actionKind": "challenge",
-    "name": "Tartaruga velha",
+    "name": "Lontra-marinha experiente",
     "visual": { "glyph": "?", "tint": "algae", "scale": 1.0 },
     "challenge": {
       "kind": "snap",
       "goalMultiplier": 7.0,
       "special": true,
-      "introText": "A tartaruga velha pisca devagar: paciência, pequena. Meu teste de estalo não perdoa pressa."
+      "introText": "A lontra-marinha gira uma concha nas patas: paciência, pequena. Meu teste de estalo não perdoa pressa."
     },
     "reward": {
       "kind": "supportResource",

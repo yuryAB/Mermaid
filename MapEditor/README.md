@@ -49,7 +49,7 @@ Assim, quando uma celula e pintada ou apagada, os tiles ao redor se ajustam auto
 
 - Tiles: `../SharedGameData/Tiles/Mossy/terrain-256/`
 - Mapas: `../SharedGameData/Maps/`
-- Mapa inicial: `../SharedGameData/Maps/birth_waters.json`
+- Mapa inicial: `../SharedGameData/Maps/recife_tropical.json`
 
 ## Verificacao Leve
 

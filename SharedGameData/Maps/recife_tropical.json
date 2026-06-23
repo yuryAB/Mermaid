@@ -1,7 +1,7 @@
 {
-  "depthID" : "birth_waters",
+  "depthID" : "recife_tropical",
   "height" : 28,
-  "id" : "birth_waters_map",
+  "id" : "recife_tropical_map",
   "terrain" : [
     {
       "x" : 4,

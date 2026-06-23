@@ -50,10 +50,20 @@ struct TideTheme {
 
     private static func regionIcons(for region: Region) -> [String] {
         switch region.id {
-        case "recife":
+        case "recife_tropical":
             return ["🐠", "🦀", "🐚", "⭐️", "🐙"]
-        case "delta":
+        case "estuario":
             return ["🫧", "🐡", "🐚", "🦑", "🐠"]
+        case "floresta_kelp":
+            return ["🦦", "🐟", "🦀", "⭐️", "🫧"]
+        case "manguezal":
+            return ["🦀", "🐊", "🐟", "🫧", "🐚"]
+        case "rio_amazonico":
+            return ["🐬", "🐟", "🐢", "🫧", "🌿"]
+        case "zona_abissal", "oceano_profundo":
+            return ["🦑", "🐙", "✨", "🫧", "◇"]
+        case "regiao_polar":
+            return ["🐧", "🦭", "🫧", "⭐️", "🐋"]
         default:
             return ["🐚", "🫧", "🐠", "🦀", "⭐️"]
         }

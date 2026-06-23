@@ -272,6 +272,7 @@ class GameScene: SKScene {
     private var oceanBackdrop: OceanParallaxBackdrop?
     private var worldChunkManager: WorldChunkManager?
     private var oceanDebugPanel: OceanVisualDebugPanel?
+    private var regionMenuHiddenOceanDebugPanel = false
     private var warmCurrentOverlay: SKNode?
     private var warmCurrentOverlayPhase: CGFloat = 0
     private var lastRipplePosition: CGPoint?
@@ -392,7 +393,7 @@ class GameScene: SKScene {
     }
 
     private func configureActiveRegion() {
-        let fallback = RegionDiscoverySystem.region(withId: "nascente")!
+        let fallback = RegionDiscoverySystem.region(withId: "recife_tropical")!
         let requestedId = requestedRegionId ?? stats.currentRegionId
         let resolved = RegionDiscoverySystem.region(withId: requestedId) ?? fallback
         let phaseAllowsRegion = stats.phase == .egg
@@ -988,6 +989,13 @@ class GameScene: SKScene {
             stats.revealExpeditionMap(in: activeRegion, near: ctx.mermaidPosition)
             stats.rememberMapPosition(ctx.mermaidPosition, in: activeRegion)
         }
+        if let oceanDebugPanel, !oceanDebugPanel.isHidden {
+            regionMenuHiddenOceanDebugPanel = true
+            oceanDebugPanel.isHidden = true
+            oceanDebugPanel.isUserInteractionEnabled = false
+        } else {
+            regionMenuHiddenOceanDebugPanel = false
+        }
         let menu = RegionMenuOverlay(size: size,
                                      stats: stats,
                                      currentRegionId: activeRegion?.id,
@@ -1005,7 +1013,7 @@ class GameScene: SKScene {
                                      onClose: { [weak self] in
                                          self?.closeRegionMenu()
                                      })
-        menu.zPosition = 190
+        menu.zPosition = 300
         cameraNode.addChild(menu)
         regionMenu = menu
     }
@@ -1016,6 +1024,11 @@ class GameScene: SKScene {
         }
         regionMenu?.removeFromParent()
         regionMenu = nil
+        if regionMenuHiddenOceanDebugPanel {
+            oceanDebugPanel?.isHidden = false
+            oceanDebugPanel?.isUserInteractionEnabled = true
+            regionMenuHiddenOceanDebugPanel = false
+        }
     }
 
     // MARK: - Menu de desafios

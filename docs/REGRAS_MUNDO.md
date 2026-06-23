@@ -30,11 +30,11 @@
 
 | Fase | Mapa 1 | Mapa 2 |
 |---|---|---|
-| Bebê | Águas de Nascimento | Jardim Calmo |
-| Criança | Recife Esmeralda | Grande Delta |
-| Adolescente | Mar Azul Aberto | Boca das Cavernas |
-| Jovem | Campos de Cristal | Ruínas Antigas |
-| Adulta | Abismo Vivo | Superfície Distante |
+| Bebê | Recife Tropical | Floresta de Kelp |
+| Criança | Manguezal | Estuário |
+| Adolescente | Mar Aberto Tropical | Mar Aberto Temperado |
+| Jovem | Rio Amazônico | Oceano Profundo |
+| Adulta | Zona Abissal | Região Polar |
 
 ---
 
@@ -42,7 +42,7 @@
 
 - Cada fase dá **elegibilidade** cumulativa: **fase atual + todas as fases anteriores**.
 - Elegibilidade de fase **não descobre mapa sozinha**.
-- Apenas *Águas de Nascimento* começa conhecido por padrão.
+- Apenas *Recife Tropical* começa conhecido por padrão.
 - Todo outro mapa precisa passar pelo fluxo de pista → seguir pista → confirmar viagem.
 - Mapas de fases futuras aparecem no menu como **bloqueados**, com mensagem: *"Disponível quando ela for [Fase]"*.
 - Voltar para mapa de fase menor **sempre é permitido**.
@@ -109,7 +109,7 @@ Critérios válidos para travar uma profundidade:
 | Adaptação por camada | Global |
 | Descobertas especiais | Por mapa |
 
-**Exemplo:** adulta nada fundo globalmente, mas a entrada para *"Abismo Vivo"* precisa ser descoberta dentro daquele mapa.
+**Exemplo:** adulta nada fundo globalmente, mas a entrada para *"Zona Abissal"* precisa ser descoberta dentro daquele mapa.
 
 ---
 
@@ -221,7 +221,7 @@ Isso é análogo às camadas do Terraria, mas rotacionado: no Terraria o eixo de
 
 ### Conceito
 
-Cada combinação **mapa + profundidade** tem seus próprios POIs. Exemplo: *Águas de Nascimento × Camada Média* tem POIs distintos de *Águas de Nascimento × Camada Rasa*.
+Cada combinação **mapa + profundidade** tem seus próprios POIs. Exemplo: *Recife Tropical × Camada Média* tem POIs distintos de *Recife Tropical × Camada Rasa*.
 
 ### Tipos de POI (exemplos)
 
@@ -293,33 +293,33 @@ Na primeira versão do jogo:
 
 ### POIs da Fase Bebê
 
-#### Águas de Nascimento × Rasa
+#### Recife Tropical × Rasa
 | POI | Tipo | Descrição |
 |---|---|---|
-| Ninho de ovos abandonados | Narrativo | Ela reconhece algo familiar — momento de conexão com a própria origem |
-| Cardume de peixinhos bebês | Interação | Seguem a sereia; possível mini-interação de guiar o cardume |
-| Concha gigante com música | Minigame | Minigame de ritmo simples ao se aproximar |
+| Cardume recifal juvenil | Interação | Segue a sereia; possível mini-interação de guiar o cardume |
+| Concha recifal com música | Minigame | Minigame de ritmo simples ao se aproximar |
+| Tartaruga-verde curiosa | Narrativo | Encontro seguro para apresentar fauna real do recife |
 
-#### Águas de Nascimento × Média
+#### Recife Tropical × Média
 | POI | Tipo | Descrição |
 |---|---|---|
-| Barquinho de brinquedo naufragado | Exploração/Coleta | Brinquedo humano perdido, pequeno o bastante para a bebê explorar por dentro |
-| Tartaruga velha | NPC | Dá dica sobre o mundo; recompensa por conversar |
-| Corrente quente | Evento | Leva a sereia brevemente a uma área secreta |
+| Barquinho preso no recife | Exploração/Coleta | Objeto humano pequeno, preso entre corais |
+| Mero jovem | NPC | Dá dica sobre predadores e abrigos do recife |
+| Arraia-chita passando | Evento | Evento visual calmo e raro |
 
-#### Jardim Calmo × Rasa
+#### Floresta de Kelp × Rasa
 | POI | Tipo | Descrição |
 |---|---|---|
-| Planta que reage ao toque | Minigame | Interação leve de toque/ritmo com a planta |
-| Peixe colorido | NPC | Troca comida por item/recompensa |
+| Lâminas de kelp que reagem ao toque | Minigame | Interação leve de toque/ritmo com a floresta |
+| Lontra-marinha curiosa | NPC | Troca comida por item/recompensa |
 | Nuvem de bolhas subindo | Evento visual | Bônus pequeno + efeito visual agradável |
 
-#### Jardim Calmo × Média
+#### Floresta de Kelp × Média
 | POI | Tipo | Descrição |
 |---|---|---|
-| Ruína coberta de algas | Narrativo/Teaser | Mistério visual — teaser de conteúdo de fases futuras |
-| Polvo bebê escondido | Interação de paciência | Se revela devagar; requer que a sereia fique parada/calma |
-| Sereia anciã dormindo | NPC especial | Pode acordar ou não dependendo da interação; recompensa rara se acordar |
+| Rocha coberta de algas | Narrativo/Teaser | Mostra a estrutura de floresta fria e costeira |
+| Polvo-gigante-do-Pacífico jovem | Interação de paciência | Se revela devagar; requer que a sereia fique parada/calma |
+| Lontra-marinha experiente | NPC especial | Pode interagir ou não dependendo da aproximação; recompensa rara se confiar |
 
 ---
 

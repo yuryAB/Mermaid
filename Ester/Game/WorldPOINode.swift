@@ -114,7 +114,7 @@ final class WorldPOINode: SKNode {
     }
 
     private static func visualStyle(for poi: WorldPOI) -> VisualStyle {
-        if poi.key == "jardim_calmo_shallow_warm_current",
+        if poi.key == "floresta_kelp_shallow_warm_current",
            poi.visualConcept == .environment {
             return .warmCurrentEnvironment
         }
@@ -169,29 +169,29 @@ enum WorldPOIArtworkFactory {
 
         let node: SKNode
         switch poi.key {
-        case "nascente_shallow_abandoned_egg_nest":
+        case "recife_tropical_shallow_abandoned_egg_nest":
             node = makeAbandonedEggNest(tint: poi.visual.color)
-        case "nascente_shallow_baby_fish_school":
+        case "recife_tropical_shallow_baby_fish_school":
             node = makeBabyFishSchool(tint: poi.visual.color)
-        case "nascente_shallow_music_shell":
+        case "recife_tropical_shallow_music_shell":
             node = makeMusicShell(tint: poi.visual.color)
-        case "nascente_mid_small_shipwreck":
+        case "recife_tropical_mid_small_shipwreck":
             node = makeSmallShipwreck(tint: poi.visual.color)
-        case "jardim_calmo_mid_old_turtle":
+        case "floresta_kelp_mid_old_sea_otter":
             node = makeOldTurtle(tint: poi.visual.color)
-        case "jardim_calmo_shallow_warm_current":
+        case "floresta_kelp_shallow_warm_current":
             node = makeWarmCurrent(tint: poi.visual.color)
-        case "jardim_calmo_shallow_touch_plant":
+        case "floresta_kelp_shallow_touch_plant":
             node = makeTouchPlant(tint: poi.visual.color)
-        case "jardim_calmo_shallow_color_fish":
+        case "floresta_kelp_shallow_color_fish":
             node = makeColorFish(tint: poi.visual.color)
-        case "jardim_calmo_shallow_bubble_cloud":
+        case "floresta_kelp_shallow_bubble_cloud":
             node = makeBubbleCloud(tint: poi.visual.color)
-        case "jardim_calmo_mid_algae_ruin":
+        case "floresta_kelp_mid_algae_ruin":
             node = makeAlgaeRuin(tint: poi.visual.color)
-        case "jardim_calmo_mid_hidden_baby_octopus":
+        case "floresta_kelp_mid_hidden_baby_octopus":
             node = makeHiddenBabyOctopus(tint: poi.visual.color)
-        case "jardim_calmo_mid_sleeping_elder":
+        case "floresta_kelp_mid_sleeping_elder":
             node = makeSleepingElder(tint: poi.visual.color)
         default:
             node = makeFallback(kind: poi.kind, tint: poi.visual.color)
@@ -263,34 +263,34 @@ enum WorldPOIArtworkFactory {
             context.cgContext.setLineJoin(.round)
 
             let tint = poi.visual.color
-            if poi.key != "jardim_calmo_shallow_warm_current" {
+            if poi.key != "floresta_kelp_shallow_warm_current" {
                 drawMiniBackdrop(tint: tint)
             }
 
             switch poi.key {
-            case "nascente_shallow_abandoned_egg_nest":
+            case "recife_tropical_shallow_abandoned_egg_nest":
                 drawMiniIconEggNest(tint: tint)
-            case "nascente_shallow_baby_fish_school":
+            case "recife_tropical_shallow_baby_fish_school":
                 drawMiniIconFishSchool(tint: tint)
-            case "nascente_shallow_music_shell":
+            case "recife_tropical_shallow_music_shell":
                 drawMiniIconShell(tint: tint)
-            case "nascente_mid_small_shipwreck":
+            case "recife_tropical_mid_small_shipwreck":
                 drawMiniIconToyBoat(tint: tint)
-            case "jardim_calmo_mid_old_turtle":
+            case "floresta_kelp_mid_old_sea_otter":
                 drawMiniIconTurtle(tint: tint)
-            case "jardim_calmo_shallow_warm_current":
+            case "floresta_kelp_shallow_warm_current":
                 drawMiniIconCurrent(tint: tint)
-            case "jardim_calmo_shallow_touch_plant":
+            case "floresta_kelp_shallow_touch_plant":
                 drawMiniIconPlant(tint: tint)
-            case "jardim_calmo_shallow_color_fish":
+            case "floresta_kelp_shallow_color_fish":
                 drawMiniIconColorFish(tint: tint)
-            case "jardim_calmo_shallow_bubble_cloud":
+            case "floresta_kelp_shallow_bubble_cloud":
                 drawMiniIconBubbleCloud(tint: tint)
-            case "jardim_calmo_mid_algae_ruin":
+            case "floresta_kelp_mid_algae_ruin":
                 drawMiniIconRuin(tint: tint)
-            case "jardim_calmo_mid_hidden_baby_octopus":
+            case "floresta_kelp_mid_hidden_baby_octopus":
                 drawMiniIconOctopus(tint: tint)
-            case "jardim_calmo_mid_sleeping_elder":
+            case "floresta_kelp_mid_sleeping_elder":
                 drawMiniIconSleepingElder(tint: tint)
             default:
                 drawMiniIconFallback(kind: poi.kind, tint: tint)

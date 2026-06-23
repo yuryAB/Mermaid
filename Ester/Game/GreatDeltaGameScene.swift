@@ -6,5 +6,5 @@
 import SpriteKit
 
 final class GreatDeltaGameScene: GameScene {
-    override class var defaultRegionId: String? { "delta" }
+    override class var defaultRegionId: String? { "estuario" }
 }

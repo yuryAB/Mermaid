@@ -6,5 +6,5 @@
 import SpriteKit
 
 final class AncientRuinsGameScene: GameScene {
-    override class var defaultRegionId: String? { "ruinas" }
+    override class var defaultRegionId: String? { "oceano_profundo" }
 }

@@ -6,5 +6,5 @@
 import SpriteKit
 
 final class CrystalFieldsGameScene: GameScene {
-    override class var defaultRegionId: String? { "campos_cristal" }
+    override class var defaultRegionId: String? { "rio_amazonico" }
 }

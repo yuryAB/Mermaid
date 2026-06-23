@@ -6,5 +6,5 @@
 import SpriteKit
 
 final class CalmGardenGameScene: GameScene {
-    override class var defaultRegionId: String? { "jardim_calmo" }
+    override class var defaultRegionId: String? { "floresta_kelp" }
 }

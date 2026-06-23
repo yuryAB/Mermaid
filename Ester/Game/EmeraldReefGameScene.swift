@@ -6,5 +6,5 @@
 import SpriteKit
 
 final class EmeraldReefGameScene: GameScene {
-    override class var defaultRegionId: String? { "recife" }
+    override class var defaultRegionId: String? { "manguezal" }
 }

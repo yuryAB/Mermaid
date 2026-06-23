@@ -433,12 +433,12 @@ enum EditorMapStore {
 
 extension DepthDefinition {
     static let samples: [DepthDefinition] = [
-        .init(id: "birth_waters", name: "Birth Waters", accent: .cyan),
-        .init(id: "calm_garden", name: "Calm Garden", accent: .mint),
-        .init(id: "emerald_reef", name: "Emerald Reef", accent: .green),
-        .init(id: "cave_mouth", name: "Cave Mouth", accent: .indigo),
-        .init(id: "ancient_ruins", name: "Ancient Ruins", accent: .orange),
-        .init(id: "living_abyss", name: "Living Abyss", accent: .purple)
+        .init(id: "recife_tropical", name: "Recife Tropical", accent: .cyan),
+        .init(id: "floresta_kelp", name: "Floresta de Kelp", accent: .mint),
+        .init(id: "manguezal", name: "Manguezal", accent: .green),
+        .init(id: "estuario", name: "Estuario", accent: .orange),
+        .init(id: "oceano_profundo", name: "Oceano Profundo", accent: .indigo),
+        .init(id: "zona_abissal", name: "Zona Abissal", accent: .purple)
     ]
 }
 

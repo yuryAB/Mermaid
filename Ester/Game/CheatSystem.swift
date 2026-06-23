@@ -40,26 +40,26 @@ enum CheatSystem {
         Suggestion(code: "revealmap", description: "Revela mapa atual"),
         Suggestion(code: "revealallmaps", description: "Revela todos os mapas"),
         Suggestion(code: "unlockall", description: "Libera tudo"),
-        Suggestion(code: "unlockmapbirthwaters", description: "Descobre Birth Waters"),
-        Suggestion(code: "unlockmapcalmgarden", description: "Descobre Calm Garden"),
-        Suggestion(code: "unlockmapemeraldreef", description: "Descobre Emerald Reef"),
-        Suggestion(code: "unlockmapgreatdelta", description: "Descobre Great Delta"),
-        Suggestion(code: "unlockmapancientruins", description: "Descobre Ancient Ruins"),
-        Suggestion(code: "unlockmaplivingabyss", description: "Descobre Living Abyss"),
-        Suggestion(code: "unlockmapdistantsurface", description: "Descobre Distant Surface"),
-        Suggestion(code: "unlockmapopenbluesea", description: "Descobre Open Blue Sea"),
-        Suggestion(code: "unlockmapcrystalfields", description: "Descobre Crystal Fields"),
-        Suggestion(code: "unlockmapcavemouth", description: "Descobre Cave Mouth"),
-        Suggestion(code: "revealmapbirthwaters", description: "Revela Birth Waters"),
-        Suggestion(code: "revealmapcalmgarden", description: "Revela Calm Garden"),
-        Suggestion(code: "revealmapemeraldreef", description: "Revela Emerald Reef"),
-        Suggestion(code: "revealmapgreatdelta", description: "Revela Great Delta"),
-        Suggestion(code: "revealmapancientruins", description: "Revela Ancient Ruins"),
-        Suggestion(code: "revealmaplivingabyss", description: "Revela Living Abyss"),
-        Suggestion(code: "revealmapdistantsurface", description: "Revela Distant Surface"),
-        Suggestion(code: "revealmapopenbluesea", description: "Revela Open Blue Sea"),
-        Suggestion(code: "revealmapcrystalfields", description: "Revela Crystal Fields"),
-        Suggestion(code: "revealmapcavemouth", description: "Revela Cave Mouth")
+        Suggestion(code: "unlockmaprecifetropical", description: "Descobre Recife Tropical"),
+        Suggestion(code: "unlockmapflorestakelp", description: "Descobre Floresta de Kelp"),
+        Suggestion(code: "unlockmapmanguezal", description: "Descobre Manguezal"),
+        Suggestion(code: "unlockmapestuario", description: "Descobre Estuario"),
+        Suggestion(code: "unlockmapoceanoprofundo", description: "Descobre Oceano Profundo"),
+        Suggestion(code: "unlockmapzonaabissal", description: "Descobre Zona Abissal"),
+        Suggestion(code: "unlockmapregiaopolar", description: "Descobre Regiao Polar"),
+        Suggestion(code: "unlockmapmarabertotropical", description: "Descobre Mar Aberto Tropical"),
+        Suggestion(code: "unlockmaprioamazonico", description: "Descobre Rio Amazonico"),
+        Suggestion(code: "unlockmapmarabertotemperado", description: "Descobre Mar Aberto Temperado"),
+        Suggestion(code: "revealmaprecifetropical", description: "Revela Recife Tropical"),
+        Suggestion(code: "revealmapflorestakelp", description: "Revela Floresta de Kelp"),
+        Suggestion(code: "revealmapmanguezal", description: "Revela Manguezal"),
+        Suggestion(code: "revealmapestuario", description: "Revela Estuario"),
+        Suggestion(code: "revealmapoceanoprofundo", description: "Revela Oceano Profundo"),
+        Suggestion(code: "revealmapzonaabissal", description: "Revela Zona Abissal"),
+        Suggestion(code: "revealmapregiaopolar", description: "Revela Regiao Polar"),
+        Suggestion(code: "revealmapmarabertotropical", description: "Revela Mar Aberto Tropical"),
+        Suggestion(code: "revealmaprioamazonico", description: "Revela Rio Amazonico"),
+        Suggestion(code: "revealmapmarabertotemperado", description: "Revela Mar Aberto Temperado")
     ]
 
     static func isCheat(_ text: String) -> Bool {
@@ -323,26 +323,26 @@ enum CheatSystem {
 
     private static func regionAliases(for region: Region) -> Set<String> {
         switch region.id {
-        case "nascente":
-            return ["birthwaters", "birthwater"]
-        case "jardim_calmo":
-            return ["calmgarden"]
-        case "recife":
-            return ["emeraldreef", "reef"]
-        case "delta":
-            return ["greatdelta", "delta"]
-        case "ruinas":
-            return ["ancientruins", "ruins"]
-        case "abismo_vivo":
-            return ["livingabyss", "abyss"]
-        case "superficie_distante":
-            return ["distantsurface", "surface"]
-        case "mar_azul_aberto":
-            return ["openbluesea", "bluesea", "opensea"]
-        case "campos_cristal":
-            return ["crystalfields", "crystals"]
-        case "cavernas":
-            return ["cavemouth", "caves"]
+        case "recife_tropical":
+            return ["recifetropical", "tropicalreef", "birthwaters", "birthwater"]
+        case "floresta_kelp":
+            return ["florestakelp", "kelpforest", "calmgarden"]
+        case "manguezal":
+            return ["manguezal", "mangrove", "emeraldreef", "reef"]
+        case "estuario":
+            return ["estuario", "estuary", "greatdelta", "delta"]
+        case "oceano_profundo":
+            return ["oceanoprofundo", "deepocean", "ancientruins", "ruins"]
+        case "zona_abissal":
+            return ["zonaabissal", "abyssalzone", "livingabyss", "abyss"]
+        case "regiao_polar":
+            return ["regiaopolar", "polarregion", "distantsurface", "surface"]
+        case "mar_aberto_tropical":
+            return ["marabertotropical", "tropicalopenocean", "openbluesea", "bluesea", "opensea"]
+        case "rio_amazonico":
+            return ["rioamazonico", "amazonriver", "crystalfields", "crystals"]
+        case "mar_aberto_temperado":
+            return ["marabertotemperado", "temperateopenocean", "cavemouth", "caves"]
         default:
             return []
         }

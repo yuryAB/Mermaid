@@ -43,7 +43,7 @@ final class MermaidStats: Codable {
     var posX: CGFloat = World.startPosition.x
     var posY: CGFloat = World.startPosition.y
     /// Regiões descobertas e progresso de exploração por região.
-    var discoveredRegionIds: Set<String> = ["nascente"]
+    var discoveredRegionIds: Set<String> = ["recife_tropical"]
     var regionProgress: [String: CGFloat] = [:]
     /// Fog of war do mapa de expedição: regionId -> "col,row" -> 0...1.
     var expeditionRevealByRegion: [String: [String: CGFloat]] = [:]
@@ -53,7 +53,7 @@ final class MermaidStats: Codable {
     var repeatablePOIRewardAvailableAtByKey: [String: Date] = [:]
     var inventoryItems: [String: Int] = [:]
     var activeBuffs: [TimedBuff] = []
-    var currentRegionId: String = "nascente"
+    var currentRegionId: String = "recife_tropical"
     var mapPositionByRegion: [String: CGPoint] = [:]
     var mapEntryPointByRegion: [String: CGPoint] = [:]
     var entryTextKeys: Set<String> = []
@@ -78,6 +78,7 @@ final class MermaidStats: Codable {
     // Estado transitório, não persiste
     var moodBoost: CGFloat = 0
     var scaredTimer: CGFloat = 0
+    private var regionIdsMigratedThisSession = false
     private var cheatSessionBaselineData: Data?
     private var cheatSessionPersistenceBlocked = false
 
@@ -134,7 +135,7 @@ final class MermaidStats: Codable {
         hatchProgress = try c.decodeIfPresent(CGFloat.self, forKey: .hatchProgress) ?? 0
         posX = try c.decodeIfPresent(CGFloat.self, forKey: .posX) ?? World.startPosition.x
         posY = try c.decodeIfPresent(CGFloat.self, forKey: .posY) ?? World.startPosition.y
-        discoveredRegionIds = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredRegionIds) ?? ["nascente"]
+        discoveredRegionIds = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredRegionIds) ?? ["recife_tropical"]
         regionProgress = try c.decodeIfPresent([String: CGFloat].self, forKey: .regionProgress) ?? [:]
         expeditionRevealByRegion = try c.decodeIfPresent([String: [String: CGFloat]].self, forKey: .expeditionRevealByRegion) ?? [:]
         discoveredPOIKeys = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredPOIKeys) ?? []
@@ -143,7 +144,7 @@ final class MermaidStats: Codable {
         repeatablePOIRewardAvailableAtByKey = try c.decodeIfPresent([String: Date].self, forKey: .repeatablePOIRewardAvailableAtByKey) ?? [:]
         inventoryItems = try c.decodeIfPresent([String: Int].self, forKey: .inventoryItems) ?? [:]
         activeBuffs = try c.decodeIfPresent([TimedBuff].self, forKey: .activeBuffs) ?? []
-        currentRegionId = try c.decodeIfPresent(String.self, forKey: .currentRegionId) ?? "nascente"
+        currentRegionId = try c.decodeIfPresent(String.self, forKey: .currentRegionId) ?? "recife_tropical"
         mapPositionByRegion = try c.decodeIfPresent([String: CGPoint].self, forKey: .mapPositionByRegion) ?? [:]
         mapEntryPointByRegion = try c.decodeIfPresent([String: CGPoint].self, forKey: .mapEntryPointByRegion) ?? [:]
         entryTextKeys = try c.decodeIfPresent(Set<String>.self, forKey: .entryTextKeys) ?? []
@@ -451,18 +452,60 @@ final class MermaidStats: Codable {
     }
 
     func ensureBaselineRegionAccess() {
-        discoveredRegionIds.insert("nascente")
+        migrateRegionIdsIfNeeded()
+        discoveredRegionIds.insert("recife_tropical")
     }
 
     func isRegionKnown(_ region: Region) -> Bool {
-        if region.id == "nascente" { return true }
+        if region.id == "recife_tropical" { return true }
         return discoveredRegionIds.contains(region.id)
     }
 
     func removeLegacyAutomaticRegionAccessIfUnused() {
-        for regionId in ["jardim_calmo"] where shouldRemoveLegacyAutomaticAccess(for: regionId) {
+        for regionId in ["floresta_kelp"] where shouldRemoveLegacyAutomaticAccess(for: regionId) {
             discoveredRegionIds.remove(regionId)
         }
+    }
+
+    func migrateRegionIdsIfNeeded() {
+        guard !regionIdsMigratedThisSession else { return }
+        regionIdsMigratedThisSession = true
+        discoveredRegionIds = Set(discoveredRegionIds.map(RegionDiscoverySystem.canonicalRegionId))
+        regionProgress = canonicalized(regionProgress) { max($0, $1) }
+        expeditionRevealByRegion = canonicalized(expeditionRevealByRegion) { current, incoming in
+            var merged = current
+            for (key, value) in incoming {
+                merged[key] = max(merged[key] ?? 0, value)
+            }
+            return merged
+        }
+        mapPositionByRegion = canonicalized(mapPositionByRegion) { current, _ in current }
+        mapEntryPointByRegion = canonicalized(mapEntryPointByRegion) { current, _ in current }
+        discoveryPointByRegion = canonicalized(discoveryPointByRegion) { current, _ in current }
+        entryTextKeys = Set(entryTextKeys.map { key in
+            let parts = key.split(separator: "|", maxSplits: 1).map(String.init)
+            guard parts.count == 2 else { return key }
+            return "\(RegionDiscoverySystem.canonicalRegionId(parts[0]))|\(parts[1])"
+        })
+        currentRegionId = RegionDiscoverySystem.canonicalRegionId(currentRegionId)
+        pendingRegionDiscoveryId = pendingRegionDiscoveryId.map(RegionDiscoverySystem.canonicalRegionId)
+        discoveryRouteRegionId = discoveryRouteRegionId.map(RegionDiscoverySystem.canonicalRegionId)
+        readyRegionDiscoveryId = readyRegionDiscoveryId.map(RegionDiscoverySystem.canonicalRegionId)
+        destinationRegionId = destinationRegionId.map(RegionDiscoverySystem.canonicalRegionId)
+    }
+
+    private func canonicalized<Value>(_ dictionary: [String: Value],
+                                      merge: (Value, Value) -> Value) -> [String: Value] {
+        var result: [String: Value] = [:]
+        for (key, value) in dictionary {
+            let canonicalKey = RegionDiscoverySystem.canonicalRegionId(key)
+            if let existing = result[canonicalKey] {
+                result[canonicalKey] = merge(existing, value)
+            } else {
+                result[canonicalKey] = value
+            }
+        }
+        return result
     }
 
     private func shouldRemoveLegacyAutomaticAccess(for regionId: String) -> Bool {
@@ -762,7 +805,7 @@ final class MermaidStats: Codable {
             stats.ensureBaselineRegionAccess()
             stats.removeLegacyAutomaticRegionAccessIfUnused()
             if RegionDiscoverySystem.region(withId: stats.currentRegionId) == nil {
-                stats.currentRegionId = "nascente"
+                stats.currentRegionId = "recife_tropical"
             }
             let range = World.floorY...World.surfaceTopY
             if !range.contains(stats.posY) || !(World.minX...World.maxX).contains(stats.posX) {

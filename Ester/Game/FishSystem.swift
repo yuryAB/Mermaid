@@ -17,7 +17,21 @@ fileprivate enum FishSilhouette: CaseIterable {
     case moon
     case ray
 
-    static func random(for zone: DepthZone, rare: Bool) -> FishSilhouette {
+    static func random(for zone: DepthZone, rare: Bool, species: AquaticSpecies?) -> FishSilhouette {
+        if let group = species?.group {
+            switch group {
+            case .ray:
+                return .ray
+            case .shark, .mammal, .reptile, .bird:
+                return .needle
+            case .cephalopod, .cnidarian, .echinoderm, .mollusk, .annelid:
+                return .moon
+            case .crustacean, .arthropod:
+                return .diamond
+            case .fish:
+                break
+            }
+        }
         if rare {
             return [.moon, .ray, .diamond].randomElement()!
         }
@@ -40,7 +54,17 @@ fileprivate enum FishPattern: CaseIterable {
     case spots
     case glowDots
 
-    static func random(for zone: DepthZone, rare: Bool) -> FishPattern {
+    static func random(for zone: DepthZone, rare: Bool, species: AquaticSpecies?) -> FishPattern {
+        if let group = species?.group {
+            switch group {
+            case .mammal, .reptile, .bird:
+                return .plain
+            case .cephalopod, .cnidarian:
+                return zone == .deep || zone == .abyss ? .glowDots : .spots
+            default:
+                break
+            }
+        }
         if rare { return .glowDots }
         switch zone {
         case .surface, .clear:
@@ -64,6 +88,7 @@ fileprivate enum FishMotionMode {
 
 final class FishNode: SKNode, ChallengeGiver {
     let zone: DepthZone
+    let species: AquaticSpecies?
     var heading: CGFloat
     var baseSpeed: CGFloat
     var skittish: Bool
@@ -107,18 +132,23 @@ final class FishNode: SKNode, ChallengeGiver {
     private let silhouette: FishSilhouette
     private let pattern: FishPattern
 
-    init(zone: DepthZone, rare: Bool = false, palette: [UIColor]? = nil) {
+    init(zone: DepthZone, rare: Bool = false, palette: [UIColor]? = nil, species: AquaticSpecies? = nil) {
         self.zone = zone
+        self.species = species
         self.heading = Bool.random() ? 0 : .pi
         self.baseSpeed = .random(in: 40...110)
         self.skittish = Bool.random()
         self.isRare = rare
         self.paletteOverride = palette
-        self.silhouette = FishSilhouette.random(for: zone, rare: rare)
-        self.pattern = FishPattern.random(for: zone, rare: rare)
+        self.silhouette = FishSilhouette.random(for: zone, rare: rare, species: species)
+        self.pattern = FishPattern.random(for: zone, rare: rare, species: species)
         super.init()
+        name = species.map { "animal_\($0.id)" } ?? "animal_generic"
         if rare {
             baseSpeed = .random(in: 120...170)
+            skittish = false
+        } else if species?.group == .mammal || species?.group == .shark || species?.group == .reptile {
+            baseSpeed = .random(in: 70...130)
             skittish = false
         }
         buildShape()
@@ -129,7 +159,7 @@ final class FishNode: SKNode, ChallengeGiver {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     private func buildShape() {
-        let length = FishNode.bodyLength(for: silhouette, rare: isRare)
+        let length = FishNode.bodyLength(for: silhouette, rare: isRare, species: species)
         let height = FishNode.bodyHeight(for: silhouette, length: length)
         let color = isRare
             ? UIColor(red: 1, green: 0.85, blue: 0.4, alpha: 1)
@@ -195,7 +225,13 @@ final class FishNode: SKNode, ChallengeGiver {
         return node
     }
 
-    private static func bodyLength(for silhouette: FishSilhouette, rare: Bool) -> CGFloat {
+    private static func bodyLength(for silhouette: FishSilhouette, rare: Bool, species: AquaticSpecies?) -> CGFloat {
+        if species?.group == .mammal || species?.group == .shark || species?.group == .reptile {
+            return CGFloat.random(in: rare ? 110...150 : 76...126)
+        }
+        if species?.group == .crustacean || species?.group == .mollusk || species?.group == .echinoderm {
+            return CGFloat.random(in: rare ? 72...104 : 28...58)
+        }
         let base: ClosedRange<CGFloat> = rare ? 80...118 : 30...70
         switch silhouette {
         case .oval:
@@ -689,10 +725,10 @@ final class FishSystem {
     @discardableResult
     func spawnFish(zone: DepthZone, near point: CGPoint, rare: Bool = false) -> FishNode? {
         guard let world = worldNode else { return nil }
-        let regionPalette = ctx.regions.currentRegion.flatMap {
-            RegionDiscoverySystem.fishPalette(for: $0.id)
-        }
-        let fish = FishNode(zone: zone, rare: rare, palette: regionPalette)
+        let region = ctx.regions.currentRegion
+        let regionPalette = region.flatMap { RegionDiscoverySystem.fishPalette(for: $0.id) }
+        let species = region.flatMap { RegionDiscoverySystem.randomSpecies(for: $0.id, zone: zone) }
+        let fish = FishNode(zone: zone, rare: rare, palette: regionPalette, species: species)
         let range = zone.yRange
         let yRange = (range.lowerBound + 80)...(range.upperBound - 80)
         let angle = CGFloat.random(in: 0...(2 * .pi))

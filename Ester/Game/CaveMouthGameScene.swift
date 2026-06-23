@@ -6,5 +6,5 @@
 import SpriteKit
 
 final class CaveMouthGameScene: GameScene {
-    override class var defaultRegionId: String? { "cavernas" }
+    override class var defaultRegionId: String? { "mar_aberto_temperado" }
 }

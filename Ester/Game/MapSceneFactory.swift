@@ -13,26 +13,26 @@ enum MapSceneFactory {
 
     static func scene(for regionId: String, size: CGSize, announceArrival: Bool = false) -> GameScene {
         let scene: GameScene
-        switch regionId {
-        case "nascente":
+        switch RegionDiscoverySystem.canonicalRegionId(regionId) {
+        case "recife_tropical":
             scene = BirthWatersGameScene(size: size)
-        case "jardim_calmo":
+        case "floresta_kelp":
             scene = CalmGardenGameScene(size: size)
-        case "recife":
+        case "manguezal":
             scene = EmeraldReefGameScene(size: size)
-        case "delta":
+        case "estuario":
             scene = GreatDeltaGameScene(size: size)
-        case "mar_azul_aberto":
+        case "mar_aberto_tropical":
             scene = OpenBlueSeaGameScene(size: size)
-        case "cavernas":
+        case "mar_aberto_temperado":
             scene = CaveMouthGameScene(size: size)
-        case "campos_cristal":
+        case "rio_amazonico":
             scene = CrystalFieldsGameScene(size: size)
-        case "ruinas":
+        case "oceano_profundo":
             scene = AncientRuinsGameScene(size: size)
-        case "abismo_vivo":
+        case "zona_abissal":
             scene = LivingAbyssGameScene(size: size)
-        case "superficie_distante":
+        case "regiao_polar":
             scene = DistantSurfaceGameScene(size: size)
         default:
             scene = GameScene(size: size, regionId: regionId)

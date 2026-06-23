@@ -44,6 +44,30 @@ struct Region {
     }
 }
 
+enum AquaticAnimalGroup: String {
+    case fish
+    case shark
+    case ray
+    case mammal
+    case reptile
+    case crustacean
+    case mollusk
+    case cephalopod
+    case cnidarian
+    case echinoderm
+    case annelid
+    case bird
+    case arthropod
+}
+
+struct AquaticSpecies {
+    let id: String
+    let commonName: String
+    let scientificName: String
+    let group: AquaticAnimalGroup
+    let preferredZones: [DepthZone]
+}
+
 enum EntryTextCatalog {
     static func text(for region: Region, zone: DepthZone) -> String {
         if let specific = specificText["\(region.id)|\(zone.storageKey)"] {
@@ -69,10 +93,10 @@ enum EntryTextCatalog {
     }
 
     private static let specificText: [String: String] = [
-        "nascente|shallow": "Águas de Nascimento: conchas pequenas tremem como lembranças novas.",
-        "nascente|mid": "Águas de Nascimento: no azul médio, ela sente o berço ficando maior.",
-        "jardim_calmo|shallow": "Jardim Calmo: folhas macias balançam sem pressa ao redor dela.",
-        "jardim_calmo|mid": "Jardim Calmo: raízes antigas escondem uma calma que parece responder."
+        "recife_tropical|shallow": "Recife Tropical: corais rasos abrigam cardumes pequenos e curiosos.",
+        "recife_tropical|mid": "Recife Tropical: a parede do recife desce em cores vivas.",
+        "floresta_kelp|shallow": "Floresta de Kelp: lâminas altas balançam como uma mata submersa.",
+        "floresta_kelp|mid": "Floresta de Kelp: sombras verdes guardam lontras, peixes e ouriços."
     ]
 }
 
@@ -85,128 +109,141 @@ final class RegionDiscoverySystem {
     private var leadTimer: CGFloat = 0
 
     private static let catalogOrder = [
-        "nascente",
-        "jardim_calmo",
-        "recife",
-        "delta",
-        "mar_azul_aberto",
-        "cavernas",
-        "campos_cristal",
-        "ruinas",
-        "abismo_vivo",
-        "superficie_distante"
+        "recife_tropical",
+        "floresta_kelp",
+        "manguezal",
+        "estuario",
+        "mar_aberto_tropical",
+        "mar_aberto_temperado",
+        "rio_amazonico",
+        "oceano_profundo",
+        "zona_abissal",
+        "regiao_polar"
+    ]
+
+    private static let legacyRegionIds: [String: String] = [
+        "nascente": "recife_tropical",
+        "jardim_calmo": "floresta_kelp",
+        "recife": "manguezal",
+        "delta": "estuario",
+        "mar_azul_aberto": "mar_aberto_tropical",
+        "cavernas": "mar_aberto_temperado",
+        "campos_cristal": "rio_amazonico",
+        "ruinas": "oceano_profundo",
+        "abismo_vivo": "zona_abissal",
+        "superficie_distante": "regiao_polar"
     ]
 
     static let all: [Region] = [
-        Region(id: "abismo_vivo",
-               name: "Abismo Vivo",
+        Region(id: "zona_abissal",
+               name: "Zona Abissal",
                xRange: -50000 ... -41000,
                yRange: World.floorY ... World.surfaceTopY,
                entryZone: .abyss,
-               tint: UIColor(red: 0.18, green: 0.10, blue: 0.34, alpha: 1),
-               tintStrength: 0.36,
+               tint: UIColor(red: 0.08, green: 0.06, blue: 0.18, alpha: 1),
+               tintStrength: 0.38,
                minPhase: .adult,
-               blurb: "Vida luminosa pulsa sob pressão extrema.",
-               tideTitle: "Batimentos do Abismo",
+               blurb: "Planícies profundas, fontes hidrotermais e fauna adaptada à pressão extrema.",
+               tideTitle: "Pressão Abissal",
                tideIcons: ["✧", "◇", "◌", "◆", "✦"]),
-        Region(id: "cavernas",
-               name: "Boca das Cavernas",
+        Region(id: "mar_aberto_temperado",
+               name: "Mar Aberto Temperado",
                xRange: -40000 ... -31000,
                yRange: World.floorY ... World.surfaceTopY,
                entryZone: .blue,
-               tint: UIColor(red: 0.12, green: 0.28, blue: 0.40, alpha: 1),
-               tintStrength: 0.34,
+               tint: UIColor(red: 0.16, green: 0.34, blue: 0.50, alpha: 1),
+               tintStrength: 0.28,
                minPhase: .teen,
-               blurb: "Fendas azuis e ecos de entradas escondidas.",
-               tideTitle: "Ecos da Boca",
+               blurb: "Águas produtivas, correntes frias e grandes migradores pelágicos.",
+               tideTitle: "Correntes Temperadas",
                tideIcons: ["⌁", "▧", "◇", "◌", "≋"]),
-        Region(id: "delta",
-               name: "Grande Delta",
+        Region(id: "estuario",
+               name: "Estuário",
                xRange: -30000 ... -21000,
                yRange: World.floorY ... World.surfaceTopY,
                entryZone: .shallow,
-               tint: UIColor(red: 0.45, green: 0.5, blue: 0.3, alpha: 1),
+               tint: UIColor(red: 0.40, green: 0.50, blue: 0.36, alpha: 1),
                tintStrength: 0.3,
                minPhase: .child,
-               blurb: "Onde o rio encontra o mar, entre correntes e sementes.",
-               tideTitle: "Sementes do Delta",
+               blurb: "Mistura de rio e mar, berçário salobro para peixes, crustáceos e moluscos.",
+               tideTitle: "Marés Salobras",
                tideIcons: ["⌁", "≋", "◡", "▧", "◌"]),
-        Region(id: "ruinas",
-               name: "Ruínas Antigas",
+        Region(id: "oceano_profundo",
+               name: "Oceano Profundo",
                xRange: -20000 ... -11000,
                yRange: World.floorY ... World.surfaceTopY,
                entryZone: .deep,
-               tint: UIColor(red: 0.30, green: 0.26, blue: 0.48, alpha: 1),
-               tintStrength: 0.32,
+               tint: UIColor(red: 0.12, green: 0.18, blue: 0.36, alpha: 1),
+               tintStrength: 0.34,
                minPhase: .young,
-               blurb: "Pedras antigas guardam rotas e histórias.",
-               tideTitle: "Memória das Ruínas",
+               blurb: "Zona mesopelágica e batial com bioluminescência, lulas e predadores de mergulho.",
+               tideTitle: "Luzes Profundas",
                tideIcons: ["▧", "◇", "✦", "◌", "◆"]),
-        Region(id: "nascente",
-               name: "Águas de Nascimento",
+        Region(id: "recife_tropical",
+               name: "Recife Tropical",
                xRange: -10000 ... 0,
                yRange: World.floorY ... World.surfaceTopY,
-               entryZone: .mid,
-               tint: UIColor(red: 0.45, green: 0.65, blue: 0.9, alpha: 1),
-               tintStrength: 0.12,
+               entryZone: .shallow,
+               tint: UIColor(red: 0.25, green: 0.74, blue: 0.78, alpha: 1),
+               tintStrength: 0.18,
                minPhase: .baby,
-               blurb: "Águas calmas e seguras onde tudo começou.",
-               tideTitle: "Pérolas do Berço",
+               blurb: "Corais tropicais rasos, peixes coloridos, tartarugas e invertebrados recifais.",
+               tideTitle: "Corais Tropicais",
                tideIcons: ["○", "✦", "◡", "◌", "✧"]),
-        Region(id: "jardim_calmo",
-               name: "Jardim Calmo",
+        Region(id: "floresta_kelp",
+               name: "Floresta de Kelp",
                xRange: 1000 ... 10000,
                yRange: World.floorY ... World.surfaceTopY,
                entryZone: .shallow,
-               tint: UIColor(red: 0.36, green: 0.68, blue: 0.66, alpha: 1),
-               tintStrength: 0.18,
+               tint: UIColor(red: 0.28, green: 0.58, blue: 0.44, alpha: 1),
+               tintStrength: 0.24,
                minPhase: .baby,
-               blurb: "Jardins lentos para primeiras explorações.",
-               tideTitle: "Folhas do Jardim",
+               blurb: "Matas de algas gigantes em águas frias e ricas, com lontras, ouriços e peixes costeiros.",
+               tideTitle: "Folhas de Kelp",
                tideIcons: ["◡", "✿", "◌", "○", "⌁"]),
-        Region(id: "recife",
-               name: "Recife Esmeralda",
+        Region(id: "manguezal",
+               name: "Manguezal",
                xRange: 11000 ... 20000,
                yRange: World.floorY ... World.surfaceTopY,
                entryZone: .shallow,
-               tint: UIColor(red: 0.2, green: 0.75, blue: 0.55, alpha: 1),
-               tintStrength: 0.28,
+               tint: UIColor(red: 0.26, green: 0.54, blue: 0.34, alpha: 1),
+               tintStrength: 0.3,
                minPhase: .child,
-               blurb: "Um jardim de corais vibrante e cheio de vida.",
-               tideTitle: "Corais do Recife",
+               blurb: "Raízes alagadas, água salobra e berçários para peixes, siris, crocodilos e peixes-boi.",
+               tideTitle: "Raízes do Mangue",
                tideIcons: ["◡", "⌁", "◇", "✿", "✦"]),
-        Region(id: "superficie_distante",
-               name: "Superfície Distante",
+        Region(id: "regiao_polar",
+               name: "Região Polar",
                xRange: 21000 ... 30000,
                yRange: World.floorY ... World.surfaceTopY,
                entryZone: .surface,
-               tint: UIColor(red: 0.78, green: 0.88, blue: 0.96, alpha: 1),
-               tintStrength: 0.24,
+               tint: UIColor(red: 0.62, green: 0.78, blue: 0.92, alpha: 1),
+               tintStrength: 0.28,
                minPhase: .adult,
-               blurb: "Luz aberta onde céu e água se encontram.",
-               tideTitle: "Céu na Água",
+               blurb: "Águas geladas, gelo marinho, krill e grandes predadores adaptados ao frio.",
+               tideTitle: "Gelo Vivo",
                tideIcons: ["○", "✦", "◇", "◌", "✧"]),
-        Region(id: "mar_azul_aberto",
-               name: "Mar Azul Aberto",
+        Region(id: "mar_aberto_tropical",
+               name: "Mar Aberto Tropical",
                xRange: 31000 ... 40000,
                yRange: World.floorY ... World.surfaceTopY,
                entryZone: .blue,
-               tint: UIColor(red: 0.18, green: 0.42, blue: 0.78, alpha: 1),
-               tintStrength: 0.30,
+               tint: UIColor(red: 0.12, green: 0.44, blue: 0.84, alpha: 1),
+               tintStrength: 0.3,
                minPhase: .teen,
-               blurb: "Água ampla, rotas longas e cardumes velozes.",
-               tideTitle: "Rumos do Azul",
+               blurb: "Pelágico quente com atuns, golfinhos, tubarões oceânicos e grandes migradores.",
+               tideTitle: "Azul Tropical",
                tideIcons: ["≋", "○", "✦", "⌁", "◇"]),
-        Region(id: "campos_cristal",
-               name: "Campos de Cristal",
+        Region(id: "rio_amazonico",
+               name: "Rio Amazônico",
                xRange: 41000 ... 50000,
                yRange: World.floorY ... World.surfaceTopY,
-               entryZone: .deep,
-               tint: UIColor(red: 0.54, green: 0.76, blue: 0.94, alpha: 1),
-               tintStrength: 0.30,
+               entryZone: .mid,
+               tint: UIColor(red: 0.42, green: 0.52, blue: 0.28, alpha: 1),
+               tintStrength: 0.34,
                minPhase: .young,
-               blurb: "Cristais frios refletem caminhos profundos.",
-               tideTitle: "Luzes de Cristal",
+               blurb: "Água doce tropical, várzeas e grandes espécies amazônicas.",
+               tideTitle: "Várzea Amazônica",
                tideIcons: ["◇", "✧", "◆", "◌", "✦"])
     ]
 
@@ -214,8 +251,13 @@ final class RegionDiscoverySystem {
         self.ctx = ctx
     }
 
+    static func canonicalRegionId(_ id: String) -> String {
+        legacyRegionIds[id] ?? id
+    }
+
     static func region(withId id: String) -> Region? {
-        all.first { $0.id == id }
+        let canonicalId = canonicalRegionId(id)
+        return all.first { $0.id == canonicalId }
     }
 
     static var menuRegions: [Region] {
@@ -278,48 +320,48 @@ final class RegionDiscoverySystem {
 
     /// Paleta de peixes característica da região (nil = paleta da camada).
     static func fishPalette(for regionId: String) -> [UIColor]? {
-        switch regionId {
-        case "nascente":
-            return [UIColor(red: 0.60, green: 0.82, blue: 0.98, alpha: 1),
-                    UIColor(red: 0.92, green: 0.72, blue: 0.88, alpha: 1),
-                    UIColor(red: 0.78, green: 0.92, blue: 0.96, alpha: 1)]
-        case "jardim_calmo":
-            return [UIColor(red: 0.38, green: 0.82, blue: 0.68, alpha: 1),
-                    UIColor(red: 0.72, green: 0.88, blue: 0.58, alpha: 1),
-                    UIColor(red: 0.58, green: 0.78, blue: 0.78, alpha: 1)]
-        case "recife":
+        switch canonicalRegionId(regionId) {
+        case "recife_tropical":
             return [UIColor(red: 0.95, green: 0.5, blue: 0.25, alpha: 1),
                     UIColor(red: 0.7, green: 0.4, blue: 0.85, alpha: 1),
                     UIColor(red: 0.3, green: 0.85, blue: 0.7, alpha: 1),
                     UIColor(red: 0.95, green: 0.75, blue: 0.3, alpha: 1)]
-        case "delta":
-            return [UIColor(red: 0.55, green: 0.5, blue: 0.35, alpha: 1),
-                    UIColor(red: 0.65, green: 0.6, blue: 0.45, alpha: 1),
-                    UIColor(red: 0.5, green: 0.55, blue: 0.4, alpha: 1)]
-        case "mar_azul_aberto":
-            return [UIColor(red: 0.22, green: 0.48, blue: 0.92, alpha: 1),
-                    UIColor(red: 0.42, green: 0.68, blue: 0.98, alpha: 1),
-                    UIColor(red: 0.82, green: 0.90, blue: 1.0, alpha: 1)]
-        case "cavernas":
-            return [UIColor(red: 0.18, green: 0.38, blue: 0.48, alpha: 1),
-                    UIColor(red: 0.34, green: 0.58, blue: 0.68, alpha: 1),
-                    UIColor(red: 0.52, green: 0.80, blue: 0.86, alpha: 1)]
-        case "campos_cristal":
-            return [UIColor(red: 0.74, green: 0.92, blue: 1.0, alpha: 1),
-                    UIColor(red: 0.54, green: 0.72, blue: 0.98, alpha: 1),
-                    UIColor(red: 0.92, green: 0.96, blue: 1.0, alpha: 1)]
-        case "ruinas":
-            return [UIColor(red: 0.46, green: 0.40, blue: 0.62, alpha: 1),
-                    UIColor(red: 0.62, green: 0.58, blue: 0.74, alpha: 1),
-                    UIColor(red: 0.78, green: 0.72, blue: 0.62, alpha: 1)]
-        case "abismo_vivo":
+        case "floresta_kelp":
+            return [UIColor(red: 0.22, green: 0.62, blue: 0.42, alpha: 1),
+                    UIColor(red: 0.54, green: 0.68, blue: 0.38, alpha: 1),
+                    UIColor(red: 0.36, green: 0.54, blue: 0.62, alpha: 1)]
+        case "manguezal":
+            return [UIColor(red: 0.40, green: 0.52, blue: 0.28, alpha: 1),
+                    UIColor(red: 0.62, green: 0.52, blue: 0.34, alpha: 1),
+                    UIColor(red: 0.32, green: 0.58, blue: 0.48, alpha: 1)]
+        case "estuario":
+            return [UIColor(red: 0.56, green: 0.58, blue: 0.42, alpha: 1),
+                    UIColor(red: 0.64, green: 0.68, blue: 0.52, alpha: 1),
+                    UIColor(red: 0.40, green: 0.58, blue: 0.64, alpha: 1)]
+        case "mar_aberto_tropical":
+            return [UIColor(red: 0.16, green: 0.52, blue: 0.92, alpha: 1),
+                    UIColor(red: 0.42, green: 0.72, blue: 0.98, alpha: 1),
+                    UIColor(red: 0.88, green: 0.94, blue: 1.0, alpha: 1)]
+        case "mar_aberto_temperado":
+            return [UIColor(red: 0.20, green: 0.42, blue: 0.62, alpha: 1),
+                    UIColor(red: 0.52, green: 0.66, blue: 0.74, alpha: 1),
+                    UIColor(red: 0.74, green: 0.82, blue: 0.86, alpha: 1)]
+        case "rio_amazonico":
+            return [UIColor(red: 0.44, green: 0.48, blue: 0.22, alpha: 1),
+                    UIColor(red: 0.68, green: 0.48, blue: 0.24, alpha: 1),
+                    UIColor(red: 0.24, green: 0.40, blue: 0.28, alpha: 1)]
+        case "oceano_profundo":
+            return [UIColor(red: 0.18, green: 0.34, blue: 0.58, alpha: 1),
+                    UIColor(red: 0.26, green: 0.62, blue: 0.72, alpha: 1),
+                    UIColor(red: 0.58, green: 0.46, blue: 0.82, alpha: 1)]
+        case "zona_abissal":
             return [UIColor(red: 0.42, green: 0.18, blue: 0.70, alpha: 1),
                     UIColor(red: 0.16, green: 0.76, blue: 0.86, alpha: 1),
                     UIColor(red: 0.88, green: 0.32, blue: 0.68, alpha: 1)]
-        case "superficie_distante":
-            return [UIColor(red: 0.84, green: 0.94, blue: 1.0, alpha: 1),
-                    UIColor(red: 1.0, green: 0.86, blue: 0.52, alpha: 1),
-                    UIColor(red: 0.58, green: 0.76, blue: 0.96, alpha: 1)]
+        case "regiao_polar":
+            return [UIColor(red: 0.78, green: 0.92, blue: 1.0, alpha: 1),
+                    UIColor(red: 0.58, green: 0.74, blue: 0.92, alpha: 1),
+                    UIColor(red: 0.95, green: 0.98, blue: 1.0, alpha: 1)]
         default:
             return nil
         }
@@ -327,60 +369,74 @@ final class RegionDiscoverySystem {
 
     /// Comidas extras típicas da região.
     static func extraFood(for regionId: String) -> [FoodKind] {
-        switch regionId {
-        case "nascente":
+        switch canonicalRegionId(regionId) {
+        case "recife_tropical":
             return [
-                FoodKind(name: "plâncton de berço", weight: 4, nutrition: 12, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.72, green: 0.9, blue: 1.0, alpha: 1)),
-                FoodKind(name: "conchinha morna", weight: 2, nutrition: 0, pearls: 1, courage: 0, style: .pearl, color: UIColor(red: 0.95, green: 0.82, blue: 0.92, alpha: 1))
+                FoodKind(name: "plâncton recifal", weight: 4, nutrition: 12, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.72, green: 0.9, blue: 1.0, alpha: 1)),
+                FoodKind(name: "alga calcária solta", weight: 3, nutrition: 15, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.90, green: 0.55, blue: 0.64, alpha: 1))
             ]
-        case "jardim_calmo":
+        case "floresta_kelp":
             return [
-                FoodKind(name: "folha doce", weight: 4, nutrition: 14, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.46, green: 0.76, blue: 0.48, alpha: 1)),
-                FoodKind(name: "frutinha d'água", weight: 3, nutrition: 18, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.82, green: 0.58, blue: 0.72, alpha: 1))
+                FoodKind(name: "lâmina de kelp", weight: 4, nutrition: 16, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.34, green: 0.70, blue: 0.36, alpha: 1)),
+                FoodKind(name: "ouriço quebrado", weight: 2, nutrition: 14, pearls: 1, courage: 0, style: .pearl, color: UIColor(red: 0.54, green: 0.42, blue: 0.72, alpha: 1))
             ]
-        case "recife":
+        case "manguezal":
             return [
-                FoodKind(name: "baga de coral", weight: 3, nutrition: 20, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.95, green: 0.35, blue: 0.55, alpha: 1)),
-                FoodKind(name: "alga do recife", weight: 3, nutrition: 15, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.95, green: 0.55, blue: 0.65, alpha: 1))
+                FoodKind(name: "folha de mangue", weight: 4, nutrition: 13, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.36, green: 0.62, blue: 0.34, alpha: 1)),
+                FoodKind(name: "propágulo caído", weight: 3, nutrition: 16, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.58, green: 0.46, blue: 0.24, alpha: 1))
             ]
-        case "delta":
+        case "estuario":
             return [
-                FoodKind(name: "semente de rio", weight: 4, nutrition: 16, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.75, green: 0.65, blue: 0.35, alpha: 1)),
-                FoodKind(name: "folha do delta", weight: 3, nutrition: 13, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.5, green: 0.6, blue: 0.3, alpha: 1))
+                FoodKind(name: "detrito salobro", weight: 4, nutrition: 15, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.50, green: 0.56, blue: 0.34, alpha: 1)),
+                FoodKind(name: "concha de ostra", weight: 2, nutrition: 0, pearls: 2, courage: 0, style: .pearl, color: UIColor(red: 0.78, green: 0.74, blue: 0.64, alpha: 1))
             ]
-        case "mar_azul_aberto":
+        case "mar_aberto_tropical":
             return [
-                FoodKind(name: "sal azul", weight: 2, nutrition: 9, pearls: 1, courage: 0, style: .crystal, color: UIColor(red: 0.34, green: 0.62, blue: 1.0, alpha: 1)),
-                FoodKind(name: "alga de corrente", weight: 3, nutrition: 17, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.22, green: 0.58, blue: 0.72, alpha: 1))
+                FoodKind(name: "plâncton de corrente quente", weight: 3, nutrition: 14, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.34, green: 0.68, blue: 1.0, alpha: 1)),
+                FoodKind(name: "sargaço flutuante", weight: 3, nutrition: 17, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.42, green: 0.64, blue: 0.28, alpha: 1))
             ]
-        case "cavernas":
+        case "mar_aberto_temperado":
             return [
-                FoodKind(name: "musgo de pedra", weight: 4, nutrition: 15, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.26, green: 0.52, blue: 0.46, alpha: 1)),
-                FoodKind(name: "gota luminosa", weight: 2, nutrition: 10, pearls: 1, courage: 0, style: .glow, color: UIColor(red: 0.58, green: 0.86, blue: 0.92, alpha: 1))
+                FoodKind(name: "plâncton frio", weight: 3, nutrition: 13, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.58, green: 0.78, blue: 0.92, alpha: 1)),
+                FoodKind(name: "alga de deriva", weight: 3, nutrition: 16, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.26, green: 0.52, blue: 0.46, alpha: 1))
             ]
-        case "campos_cristal":
+        case "rio_amazonico":
             return [
-                FoodKind(name: "fruto de cristal", weight: 2, nutrition: 18, pearls: 1, courage: 0, style: .crystal, color: UIColor(red: 0.74, green: 0.9, blue: 1.0, alpha: 1)),
-                FoodKind(name: "plâncton prismático", weight: 3, nutrition: 12, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.86, green: 0.78, blue: 1.0, alpha: 1))
+                FoodKind(name: "fruto de várzea", weight: 4, nutrition: 20, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.74, green: 0.42, blue: 0.24, alpha: 1)),
+                FoodKind(name: "folha amazônica", weight: 3, nutrition: 14, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.36, green: 0.58, blue: 0.28, alpha: 1))
             ]
-        case "ruinas":
+        case "oceano_profundo":
             return [
-                FoodKind(name: "semente antiga", weight: 3, nutrition: 16, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.62, green: 0.54, blue: 0.36, alpha: 1)),
-                FoodKind(name: "concha gravada", weight: 2, nutrition: 0, pearls: 2, courage: 0, style: .pearl, color: UIColor(red: 0.76, green: 0.70, blue: 0.58, alpha: 1))
+                FoodKind(name: "neve marinha", weight: 4, nutrition: 12, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.72, green: 0.84, blue: 1.0, alpha: 1)),
+                FoodKind(name: "partícula bioluminescente", weight: 2, nutrition: 18, pearls: 1, courage: 0, style: .glow, color: UIColor(red: 0.42, green: 0.86, blue: 0.96, alpha: 1))
             ]
-        case "abismo_vivo":
+        case "zona_abissal":
             return [
-                FoodKind(name: "luz abissal", weight: 2, nutrition: 20, pearls: 1, courage: 0, style: .glow, color: UIColor(red: 0.48, green: 0.92, blue: 1.0, alpha: 1)),
-                FoodKind(name: "cristal vivo", weight: 1, nutrition: 22, pearls: 2, courage: 0, style: .crystal, color: UIColor(red: 0.76, green: 0.32, blue: 0.92, alpha: 1))
+                FoodKind(name: "detrito abissal", weight: 3, nutrition: 15, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.48, green: 0.92, blue: 1.0, alpha: 1)),
+                FoodKind(name: "mineral de fonte hidrotermal", weight: 1, nutrition: 20, pearls: 2, courage: 0, style: .crystal, color: UIColor(red: 0.76, green: 0.32, blue: 0.92, alpha: 1))
             ]
-        case "superficie_distante":
+        case "regiao_polar":
             return [
-                FoodKind(name: "gota de sol", weight: 2, nutrition: 18, pearls: 1, courage: 0, style: .glow, color: UIColor(red: 1.0, green: 0.86, blue: 0.46, alpha: 1)),
-                FoodKind(name: "fruta flutuante", weight: 3, nutrition: 20, pearls: 0, courage: 0, style: .fruit, color: UIColor(red: 0.92, green: 0.62, blue: 0.48, alpha: 1))
+                FoodKind(name: "krill disperso", weight: 4, nutrition: 16, pearls: 0, courage: 0, style: .glow, color: UIColor(red: 0.92, green: 0.58, blue: 0.62, alpha: 1)),
+                FoodKind(name: "alga de gelo", weight: 3, nutrition: 13, pearls: 0, courage: 0, style: .leaf, color: UIColor(red: 0.82, green: 0.94, blue: 1.0, alpha: 1))
             ]
         default:
             return []
         }
+    }
+
+    static func species(for regionId: String) -> [AquaticSpecies] {
+        AquaticSpeciesCatalog.species(for: canonicalRegionId(regionId))
+    }
+
+    static func species(for regionId: String, zone: DepthZone) -> [AquaticSpecies] {
+        let regional = species(for: regionId)
+        let matching = regional.filter { $0.preferredZones.contains(zone) }
+        return matching.isEmpty ? regional : matching
+    }
+
+    static func randomSpecies(for regionId: String, zone: DepthZone) -> AquaticSpecies? {
+        species(for: regionId, zone: zone).randomElement()
     }
 
     func canSelect(_ region: Region) -> Bool {
@@ -505,7 +561,7 @@ final class RegionDiscoverySystem {
                 region.isAccessible(for: ctx.stats.phase)
                     && !ctx.stats.isRegionKnown(region)
                     && !ctx.stats.hasDiscoveryLead(for: region)
-                    && region.id != "jardim_calmo"
+                    && region.id != "floresta_kelp"
             }
             .first
     }
@@ -527,6 +583,197 @@ final class RegionDiscoverySystem {
         return CGPoint(x: rawPoint.x.clamped(to: current.playableXRange),
                        y: rawPoint.y.clamped(to: DepthSystem.allowedYRange(for: ctx.stats)))
     }
+}
+
+enum AquaticSpeciesCatalog {
+    private static func s(_ id: String,
+                          _ commonName: String,
+                          _ scientificName: String,
+                          _ group: AquaticAnimalGroup,
+                          _ zones: [DepthZone]) -> AquaticSpecies {
+        AquaticSpecies(id: id,
+                       commonName: commonName,
+                       scientificName: scientificName,
+                       group: group,
+                       preferredZones: zones)
+    }
+
+    static func species(for regionId: String) -> [AquaticSpecies] {
+        speciesByRegion[regionId] ?? []
+    }
+
+    private static let speciesByRegion: [String: [AquaticSpecies]] = [
+        "recife_tropical": [
+            s("peixe_palhaco_comum", "Peixe-palhaço-comum", "Amphiprion ocellaris", .fish, [.clear, .shallow]),
+            s("peixe_cirurgiao_azul", "Peixe-cirurgião-azul", "Paracanthurus hepatus", .fish, [.shallow]),
+            s("peixe_papagaio_arco_iris", "Peixe-papagaio-arco-íris", "Scarus guacamaia", .fish, [.shallow, .mid]),
+            s("peixe_borboleta_lavrado", "Peixe-borboleta-lavrado", "Chaetodon capistratus", .fish, [.clear, .shallow]),
+            s("peixe_anjo_rainha", "Peixe-anjo-rainha", "Holacanthus ciliaris", .fish, [.shallow]),
+            s("mero_de_nassau", "Mero-de-Nassau", "Epinephelus striatus", .fish, [.mid]),
+            s("barracuda_grande", "Barracuda-grande", "Sphyraena barracuda", .fish, [.mid, .blue]),
+            s("tubarao_recife_caribenho", "Tubarão-de-recife-caribenho", "Carcharhinus perezi", .shark, [.mid, .blue]),
+            s("arraia_chita", "Arraia-chita", "Aetobatus narinari", .ray, [.shallow, .mid]),
+            s("tartaruga_verde", "Tartaruga-verde", "Chelonia mydas", .reptile, [.surface, .clear, .shallow]),
+            s("tartaruga_de_pente", "Tartaruga-de-pente", "Eretmochelys imbricata", .reptile, [.clear, .shallow]),
+            s("lagosta_espinhosa_caribenha", "Lagosta-espinhosa-caribenha", "Panulirus argus", .crustacean, [.shallow, .mid]),
+            s("polvo_do_recife_caribenho", "Polvo-do-recife-caribenho", "Octopus briareus", .cephalopod, [.shallow, .mid]),
+            s("lula_recifal_caribenha", "Lula-recifal-caribenha", "Sepioteuthis sepioidea", .cephalopod, [.clear, .shallow]),
+            s("estrela_do_mar_azul", "Estrela-do-mar-azul", "Linckia laevigata", .echinoderm, [.shallow])
+        ],
+        "floresta_kelp": [
+            s("lontra_marinha", "Lontra-marinha", "Enhydra lutris", .mammal, [.surface, .clear, .shallow]),
+            s("foca_comum", "Foca-comum", "Phoca vitulina", .mammal, [.surface, .clear]),
+            s("leao_marinho_california", "Leão-marinho-da-Califórnia", "Zalophus californianus", .mammal, [.surface, .clear, .shallow]),
+            s("garibaldi", "Garibaldi", "Hypsypops rubicundus", .fish, [.shallow]),
+            s("badejo_de_kelp", "Badejo-de-kelp", "Paralabrax clathratus", .fish, [.shallow, .mid]),
+            s("peixe_cabecao_california", "Peixe-cabeção-da-Califórnia", "Semicossyphus pulcher", .fish, [.shallow, .mid]),
+            s("robalo_gigante", "Robalo-gigante", "Stereolepis gigas", .fish, [.mid, .blue]),
+            s("rockfish_azul", "Rockfish-azul", "Sebastes mystinus", .fish, [.mid, .deep]),
+            s("cabezon", "Cabezon", "Scorpaenichthys marmoratus", .fish, [.shallow, .mid]),
+            s("tubarao_leopardo", "Tubarão-leopardo", "Triakis semifasciata", .shark, [.shallow]),
+            s("arraia_morcego", "Arraia-morcego", "Myliobatis californica", .ray, [.shallow, .mid]),
+            s("polvo_gigante_pacifico", "Polvo-gigante-do-Pacífico", "Enteroctopus dofleini", .cephalopod, [.mid, .deep]),
+            s("caranguejo_de_kelp", "Caranguejo-de-kelp", "Pugettia producta", .crustacean, [.shallow]),
+            s("ourico_roxo_do_mar", "Ouriço-roxo-do-mar", "Strongylocentrotus purpuratus", .echinoderm, [.shallow]),
+            s("abalone_vermelho", "Abalone-vermelho", "Haliotis rufescens", .mollusk, [.shallow])
+        ],
+        "manguezal": [
+            s("peixe_arqueiro", "Peixe-arqueiro", "Toxotes jaculatrix", .fish, [.clear, .shallow]),
+            s("saltador_do_lodo", "Saltador-do-lodo", "Periophthalmus barbarus", .fish, [.surface, .shallow]),
+            s("robalo_flecha", "Robalo-flecha", "Centropomus undecimalis", .fish, [.shallow, .mid]),
+            s("tarpon", "Tarpon", "Megalops atlanticus", .fish, [.surface, .shallow]),
+            s("tainha", "Tainha", "Mugil cephalus", .fish, [.shallow]),
+            s("peixe_serra_dentes_pequenos", "Peixe-serra-de-dentes-pequenos", "Pristis pectinata", .ray, [.shallow, .mid]),
+            s("tubarao_limao", "Tubarão-limão", "Negaprion brevirostris", .shark, [.shallow, .mid]),
+            s("crocodilo_americano", "Crocodilo-americano", "Crocodylus acutus", .reptile, [.surface, .shallow]),
+            s("peixe_boi_marinho", "Peixe-boi-marinho", "Trichechus manatus", .mammal, [.surface, .shallow]),
+            s("caranguejo_uca", "Caranguejo-uçá", "Ucides cordatus", .crustacean, [.surface, .shallow]),
+            s("caranguejo_violinista", "Caranguejo-violinista", "Minuca rapax", .crustacean, [.surface, .shallow]),
+            s("camarao_branco", "Camarão-branco", "Litopenaeus schmitti", .crustacean, [.shallow]),
+            s("ostra_do_mangue", "Ostra-do-mangue", "Crassostrea rhizophorae", .mollusk, [.shallow]),
+            s("siri_azul", "Siri-azul", "Callinectes sapidus", .crustacean, [.shallow, .mid]),
+            s("cavalo_marinho_focinho_longo", "Cavalo-marinho-de-focinho-longo", "Hippocampus reidi", .fish, [.shallow])
+        ],
+        "estuario": [
+            s("salmao_atlantico", "Salmão-atlântico", "Salmo salar", .fish, [.clear, .mid]),
+            s("truta_arco_iris", "Truta-arco-íris", "Oncorhynchus mykiss", .fish, [.clear, .shallow]),
+            s("esturjao_atlantico", "Esturjão-atlântico", "Acipenser oxyrinchus", .fish, [.mid, .deep]),
+            s("robalo_listrado", "Robalo-listrado", "Morone saxatilis", .fish, [.shallow, .mid]),
+            s("anchova_do_atlantico", "Anchova-do-Atlântico", "Anchoa hepsetus", .fish, [.clear, .shallow]),
+            s("tainha_estuarina", "Tainha", "Mugil cephalus", .fish, [.shallow]),
+            s("linguado_de_inverno", "Linguado-de-inverno", "Pseudopleuronectes americanus", .fish, [.shallow, .mid]),
+            s("siri_azul_estuario", "Siri-azul", "Callinectes sapidus", .crustacean, [.shallow, .mid]),
+            s("caranguejo_ferradura", "Caranguejo-ferradura", "Limulus polyphemus", .arthropod, [.shallow]),
+            s("ostra_americana", "Ostra-americana", "Crassostrea virginica", .mollusk, [.shallow]),
+            s("mexilhao_azul", "Mexilhão-azul", "Mytilus edulis", .mollusk, [.shallow]),
+            s("camarao_marrom", "Camarão-marrom", "Farfantepenaeus aztecus", .crustacean, [.shallow]),
+            s("foca_comum_estuario", "Foca-comum", "Phoca vitulina", .mammal, [.surface, .clear]),
+            s("lontra_de_rio_norte_americana", "Lontra-de-rio-norte-americana", "Lontra canadensis", .mammal, [.surface, .shallow]),
+            s("golfinho_nariz_de_garrafa_estuario", "Golfinho-nariz-de-garrafa", "Tursiops truncatus", .mammal, [.surface, .clear])
+        ],
+        "mar_aberto_tropical": [
+            s("atum_albacora", "Atum-albacora", "Thunnus albacares", .fish, [.blue]),
+            s("atum_bonito", "Atum-bonito", "Katsuwonus pelamis", .fish, [.surface, .blue]),
+            s("dourado", "Dourado", "Coryphaena hippurus", .fish, [.surface, .blue]),
+            s("agulhao_vela", "Agulhão-vela", "Istiophorus platypterus", .fish, [.surface, .blue]),
+            s("marlim_azul", "Marlim-azul", "Makaira nigricans", .fish, [.blue]),
+            s("peixe_voador", "Peixe-voador", "Cypselurus melanurus", .fish, [.surface, .clear]),
+            s("peixe_lua", "Peixe-lua", "Mola mola", .fish, [.surface, .blue]),
+            s("tubarao_baleia", "Tubarão-baleia", "Rhincodon typus", .shark, [.surface, .blue]),
+            s("tubarao_galha_branca_oceanico", "Tubarão-galha-branca-oceânico", "Carcharhinus longimanus", .shark, [.blue]),
+            s("tubarao_seda", "Tubarão-seda", "Carcharhinus falciformis", .shark, [.blue]),
+            s("raia_manta_oceanica", "Raia-manta-oceânica", "Mobula birostris", .ray, [.surface, .blue]),
+            s("golfinho_pintado_pantropical", "Golfinho-pintado-pantropical", "Stenella attenuata", .mammal, [.surface, .blue]),
+            s("golfinho_nariz_de_garrafa_tropical", "Golfinho-nariz-de-garrafa", "Tursiops truncatus", .mammal, [.surface, .blue]),
+            s("tartaruga_de_couro", "Tartaruga-de-couro", "Dermochelys coriacea", .reptile, [.surface, .blue]),
+            s("caravela_portuguesa", "Caravela-portuguesa", "Physalia physalis", .cnidarian, [.surface])
+        ],
+        "mar_aberto_temperado": [
+            s("atum_rabilho", "Atum-rabilho", "Thunnus thynnus", .fish, [.blue, .deep]),
+            s("albacora_branca", "Albacora-branca", "Thunnus alalunga", .fish, [.blue]),
+            s("cavala_do_atlantico", "Cavala-do-atlântico", "Scomber scombrus", .fish, [.clear, .blue]),
+            s("sardinha_europeia", "Sardinha-europeia", "Sardina pilchardus", .fish, [.clear, .blue]),
+            s("arenque_atlantico", "Arenque-atlântico", "Clupea harengus", .fish, [.clear, .blue]),
+            s("bacalhau_atlantico", "Bacalhau-atlântico", "Gadus morhua", .fish, [.mid, .deep]),
+            s("espadarte", "Espadarte", "Xiphias gladius", .fish, [.blue, .deep]),
+            s("tubarao_azul", "Tubarão-azul", "Prionace glauca", .shark, [.blue]),
+            s("tubarao_frade", "Tubarão-frade", "Cetorhinus maximus", .shark, [.surface, .blue]),
+            s("orca_temperada", "Orca", "Orcinus orca", .mammal, [.surface, .blue]),
+            s("baleia_jubarte_temperada", "Baleia-jubarte", "Megaptera novaeangliae", .mammal, [.surface, .blue]),
+            s("golfinho_comum", "Golfinho-comum", "Delphinus delphis", .mammal, [.surface, .blue]),
+            s("foca_cinzenta", "Foca-cinzenta", "Halichoerus grypus", .mammal, [.surface, .clear]),
+            s("lula_comum", "Lula-comum", "Loligo vulgaris", .cephalopod, [.mid, .blue]),
+            s("agua_viva_lua", "Água-viva-lua", "Aurelia aurita", .cnidarian, [.surface, .clear])
+        ],
+        "rio_amazonico": [
+            s("boto_cor_de_rosa", "Boto-cor-de-rosa", "Inia geoffrensis", .mammal, [.surface, .mid]),
+            s("tucuxi", "Tucuxi", "Sotalia fluviatilis", .mammal, [.surface, .mid]),
+            s("peixe_boi_da_amazonia", "Peixe-boi-da-Amazônia", "Trichechus inunguis", .mammal, [.shallow, .mid]),
+            s("pirarucu", "Pirarucu", "Arapaima gigas", .fish, [.surface, .shallow]),
+            s("tambaqui", "Tambaqui", "Colossoma macropomum", .fish, [.shallow, .mid]),
+            s("pacu", "Pacu", "Mylossoma duriventre", .fish, [.shallow]),
+            s("piranha_vermelha", "Piranha-vermelha", "Pygocentrus nattereri", .fish, [.shallow, .mid]),
+            s("candiru", "Candiru", "Vandellia cirrhosa", .fish, [.mid]),
+            s("bagre_dourado", "Bagre-dourado", "Brachyplatystoma rousseauxii", .fish, [.mid, .deep]),
+            s("jau", "Jaú", "Zungaro zungaro", .fish, [.mid, .deep]),
+            s("arraia_de_rio", "Arraia-de-rio", "Potamotrygon motoro", .ray, [.shallow]),
+            s("enguia_eletrica", "Enguia-elétrica", "Electrophorus electricus", .fish, [.shallow, .mid]),
+            s("jacare_acu", "Jacaré-açu", "Melanosuchus niger", .reptile, [.surface, .shallow]),
+            s("tartaruga_da_amazonia", "Tartaruga-da-Amazônia", "Podocnemis expansa", .reptile, [.surface, .shallow]),
+            s("anaconda_verde", "Anaconda-verde", "Eunectes murinus", .reptile, [.surface, .shallow])
+        ],
+        "oceano_profundo": [
+            s("cachalote", "Cachalote", "Physeter macrocephalus", .mammal, [.blue, .deep]),
+            s("lula_gigante", "Lula-gigante", "Architeuthis dux", .cephalopod, [.deep]),
+            s("peixe_lanterna", "Peixe-lanterna", "Myctophum punctatum", .fish, [.mid, .deep]),
+            s("peixe_dragao_negro", "Peixe-dragão-negro", "Idiacanthus atlanticus", .fish, [.deep]),
+            s("peixe_vibora", "Peixe-víbora", "Chauliodus sloani", .fish, [.deep]),
+            s("peixe_machado_marinho", "Peixe-machado-marinho", "Sternoptyx diaphana", .fish, [.deep]),
+            s("peixe_ogro", "Peixe-ogro", "Anoplogaster cornuta", .fish, [.deep]),
+            s("enguia_gulper", "Enguia-gulper", "Eurypharynx pelecanoides", .fish, [.deep]),
+            s("tubarao_duende", "Tubarão-duende", "Mitsukurina owstoni", .shark, [.deep]),
+            s("tubarao_de_seis_guelras", "Tubarão-de-seis-guelras", "Hexanchus griseus", .shark, [.deep]),
+            s("quimera_de_nariz_longo", "Quimera-de-nariz-longo", "Harriotta raleighana", .fish, [.deep]),
+            s("polvo_dumbo", "Polvo-dumbo", "Grimpoteuthis bathynectes", .cephalopod, [.deep, .abyss]),
+            s("camarao_de_vidro", "Camarão-de-vidro", "Pasiphaea pacifica", .crustacean, [.deep]),
+            s("agua_viva_capacete", "Água-viva-capacete", "Periphylla periphylla", .cnidarian, [.deep]),
+            s("sifonoforo_gigante", "Sifonóforo-gigante", "Praya dubia", .cnidarian, [.deep])
+        ],
+        "zona_abissal": [
+            s("pepino_do_mar_abissal", "Pepino-do-mar-abissal", "Scotoplanes globosa", .echinoderm, [.abyss]),
+            s("peixe_caracol_marianas", "Peixe-caracol-das-Marianas", "Pseudoliparis swirei", .fish, [.abyss]),
+            s("peixe_tripe", "Peixe-tripé", "Bathypterois grallator", .fish, [.abyss]),
+            s("granadeiro_abissal", "Granadeiro-abissal", "Coryphaenoides armatus", .fish, [.deep, .abyss]),
+            s("cusk_eel_abissal", "Cusk-eel abissal", "Abyssobrotula galatheae", .fish, [.abyss]),
+            s("cirroteuthis_abissal", "Polvo-cirroteuthis", "Cirroteuthis muelleri", .cephalopod, [.deep, .abyss]),
+            s("lula_vampiro", "Lula-vampiro", "Vampyroteuthis infernalis", .cephalopod, [.deep, .abyss]),
+            s("anfipode_gigante", "Anfípode-gigante", "Alicella gigantea", .crustacean, [.abyss]),
+            s("isopode_gigante", "Isópode-gigante", "Bathynomus giganteus", .crustacean, [.deep, .abyss]),
+            s("camarao_de_ventos", "Camarão-de-ventos", "Rimicaris exoculata", .crustacean, [.deep, .abyss]),
+            s("caranguejo_yeti", "Caranguejo-yeti", "Kiwa hirsuta", .crustacean, [.deep, .abyss]),
+            s("mexilhao_fonte_hidrotermal", "Mexilhão-de-fonte-hidrotermal", "Bathymodiolus thermophilus", .mollusk, [.deep, .abyss]),
+            s("verme_tubicola_gigante", "Verme-tubícola-gigante", "Riftia pachyptila", .annelid, [.deep, .abyss]),
+            s("agua_viva_atolla", "Água-viva-Atolla", "Atolla wyvillei", .cnidarian, [.deep, .abyss]),
+            s("estrela_cesto", "Estrela-cesto", "Gorgonocephalus eucnemis", .echinoderm, [.deep, .abyss])
+        ],
+        "regiao_polar": [
+            s("pinguim_imperador", "Pinguim-imperador", "Aptenodytes forsteri", .bird, [.surface, .clear]),
+            s("pinguim_adelia", "Pinguim-de-Adélia", "Pygoscelis adeliae", .bird, [.surface, .clear]),
+            s("foca_de_weddell", "Foca-de-Weddell", "Leptonychotes weddellii", .mammal, [.surface, .blue]),
+            s("foca_leopardo", "Foca-leopardo", "Hydrurga leptonyx", .mammal, [.surface, .blue]),
+            s("foca_caranguejeira", "Foca-caranguejeira", "Lobodon carcinophaga", .mammal, [.surface, .blue]),
+            s("leao_marinho_antartico", "Leão-marinho-antártico", "Arctocephalus gazella", .mammal, [.surface, .blue]),
+            s("baleia_azul_polar", "Baleia-azul", "Balaenoptera musculus", .mammal, [.surface, .blue]),
+            s("baleia_minke_antartica", "Baleia-minke-antártica", "Balaenoptera bonaerensis", .mammal, [.surface, .blue]),
+            s("orca_polar", "Orca", "Orcinus orca", .mammal, [.surface, .blue]),
+            s("krill_antartico", "Krill-antártico", "Euphausia superba", .crustacean, [.clear, .mid]),
+            s("peixe_gelo_antartico", "Peixe-gelo-antártico", "Chionodraco hamatus", .fish, [.mid, .deep]),
+            s("nototenia_antartica", "Nototênia-antártica", "Dissostichus mawsoni", .fish, [.deep]),
+            s("lula_colossal", "Lula-colossal", "Mesonychoteuthis hamiltoni", .cephalopod, [.deep]),
+            s("estrela_do_mar_antartica", "Estrela-do-mar-antártica", "Odontaster validus", .echinoderm, [.shallow, .mid]),
+            s("agua_viva_juba_de_leao", "Água-viva-juba-de-leão", "Cyanea capillata", .cnidarian, [.surface, .clear])
+        ]
+    ]
 }
 
 // MARK: - Viagem
@@ -886,7 +1133,7 @@ enum WorldPOICatalog {
     }
 
     private static func visualConcept(for kind: WorldPOIKind, key: String) -> WorldPOIVisualConcept {
-        if key == "jardim_calmo_shallow_warm_current" { return .environment }
+        if key == "floresta_kelp_shallow_warm_current" { return .environment }
         switch kind {
         case .npc, .pet:
             return .npc
@@ -954,7 +1201,7 @@ enum WorldPOICatalog {
 
 final class POISystem {
     private enum RepeatablePOIReward {
-        static let warmCurrentKey = "jardim_calmo_shallow_warm_current"
+        static let warmCurrentKey = "floresta_kelp_shallow_warm_current"
     }
     private enum WarmCurrentEnvironment {
         static let horizontalRadius: CGFloat = 980
@@ -1792,6 +2039,7 @@ final class RegionMenuOverlay: SKNode {
     private var listContentHeight: CGFloat = 0
     private var listCenterY: CGFloat = 0
     private var listScrollOffset: CGFloat = 0
+    private var listRowStep: CGFloat = 1
     private var scrollThumb: SKShapeNode?
     private var scrollThumbHeight: CGFloat = 0
     private var touchStartLocation: CGPoint = .zero
@@ -1835,6 +2083,14 @@ final class RegionMenuOverlay: SKNode {
                 label.numberOfLines = lines
             }
             return label
+        }
+
+        func fitLabel(_ label: SKLabelNode,
+                      maxWidth: CGFloat,
+                      minFontSize: CGFloat) {
+            while label.calculateAccumulatedFrame().width > maxWidth && label.fontSize > minFontSize {
+                label.fontSize -= 0.5
+            }
         }
 
         func stateBadge(text: String, color: UIColor, width: CGFloat = 82) -> SKNode {
@@ -1936,15 +2192,20 @@ final class RegionMenuOverlay: SKNode {
         }
 
         let regions = RegionDiscoverySystem.menuRegions
-        let rowCardHeight: CGFloat = 92
-        let rowSpacing: CGFloat = 9
+        let rowCardHeight: CGFloat = size.height < 720 ? 76 : 84
+        let rowSpacing: CGFloat = 8
         let rowStep = rowCardHeight + rowSpacing
-        let mapPreviewHeight: CGFloat = size.height < 520 ? 124 : min(190, size.height * 0.28)
+        listRowStep = rowStep
+        let mapPreviewHeight: CGFloat = {
+            if size.height < 720 { return 100 }
+            if size.height < 760 { return 116 }
+            return min(148, size.height * 0.18)
+        }()
         let titleHeight: CGFloat = 24
-        let currentCardHeight: CGFloat = 64
-        let poiStripHeight: CGFloat = size.height < 520 ? 30 : 36
-        let headerHeight: CGFloat = 20 + titleHeight + 10 + currentCardHeight + 12 + mapPreviewHeight + poiStripHeight + 10
-        let footerHeight: CGFloat = 64
+        let currentCardHeight: CGFloat = 56
+        let poiStripHeight: CGFloat = size.height < 520 ? 26 : 28
+        let footerHeight: CGFloat = size.height < 720 ? 104 : 116
+        let headerHeight: CGFloat = 18 + titleHeight + 8 + currentCardHeight + 10 + mapPreviewHeight + 8 + poiStripHeight + 24
         let panelWidth = min(size.width - 24, size.width >= 700 ? 500 : 392)
         let desiredPanelHeight = CGFloat(regions.count) * rowStep + headerHeight + footerHeight
         let maxPanelHeight = max(300, size.height - 42)
@@ -1966,7 +2227,7 @@ final class RegionMenuOverlay: SKNode {
         panel.addChild(panelContent)
 
         let listWidth = panelWidth - 28
-        let titleY = panelHeight / 2 - 20 - titleHeight / 2
+        let titleY = panelHeight / 2 - 18 - titleHeight / 2
         let currentMapName = currentRegionId
             .flatMap { RegionDiscoverySystem.region(withId: $0)?.name }
             ?? "Mapa desconhecido"
@@ -1981,7 +2242,7 @@ final class RegionMenuOverlay: SKNode {
         titleBadge.position = CGPoint(x: listWidth / 2 - 42, y: titleY)
         panelContent.addChild(titleBadge)
 
-        let currentCardY = titleY - titleHeight / 2 - 10 - currentCardHeight / 2
+        let currentCardY = titleY - titleHeight / 2 - 8 - currentCardHeight / 2
         let currentCard = SKShapeNode(rectOf: CGSize(width: listWidth, height: currentCardHeight),
                                       cornerRadius: 18)
         currentCard.position = CGPoint(x: 0, y: currentCardY)
@@ -1994,7 +2255,7 @@ final class RegionMenuOverlay: SKNode {
                                        fontSize: 8,
                                        color: GameUI.gold,
                                        bold: true)
-        currentEyebrow.position = CGPoint(x: -listWidth / 2 + 16, y: currentCardY + 19)
+        currentEyebrow.position = CGPoint(x: -listWidth / 2 + 16, y: currentCardY + 17)
         panelContent.addChild(currentEyebrow)
 
         let currentName = menuLabel(currentMapName,
@@ -2002,19 +2263,24 @@ final class RegionMenuOverlay: SKNode {
                                     color: GameUI.palePaper,
                                     bold: true,
                                     maxWidth: listWidth - 126)
-        currentName.position = CGPoint(x: -listWidth / 2 + 16, y: currentCardY + 1)
+        currentName.lineBreakMode = .byTruncatingTail
+        currentName.position = CGPoint(x: -listWidth / 2 + 16, y: currentCardY + 0)
+        fitLabel(currentName, maxWidth: listWidth - 126, minFontSize: 13.0)
         panelContent.addChild(currentName)
 
         let openCount = regions.filter { stats.isRegionKnown($0) && $0.isAccessible(for: stats.phase) }.count
         let currentMeta = menuLabel("\(stats.phase.displayName) · \(openCount)/\(regions.count) mapas abertos",
                                     fontSize: 10,
                                     color: GameUI.palePaper.withAlphaComponent(0.76),
-                                    bold: false)
-        currentMeta.position = CGPoint(x: -listWidth / 2 + 16, y: currentCardY - 20)
+                                    bold: false,
+                                    maxWidth: listWidth - 126)
+        currentMeta.lineBreakMode = .byTruncatingTail
+        currentMeta.position = CGPoint(x: -listWidth / 2 + 16, y: currentCardY - 18)
+        fitLabel(currentMeta, maxWidth: listWidth - 126, minFontSize: 8.5)
         panelContent.addChild(currentMeta)
 
         let currentBadge = stateBadge(text: "ATUAL", color: GameUI.gold, width: 66)
-        currentBadge.position = CGPoint(x: listWidth / 2 - 45, y: currentCardY + 8)
+        currentBadge.position = CGPoint(x: listWidth / 2 - 45, y: currentCardY + 6)
         panelContent.addChild(currentBadge)
 
         if let destinationId,
@@ -2026,7 +2292,9 @@ final class RegionMenuOverlay: SKNode {
                                   bold: true,
                                   maxWidth: 108)
             route.horizontalAlignmentMode = .right
-            route.position = CGPoint(x: listWidth / 2 - 16, y: currentCardY - 20)
+            route.lineBreakMode = .byTruncatingTail
+            route.position = CGPoint(x: listWidth / 2 - 16, y: currentCardY - 18)
+            fitLabel(route, maxWidth: 108, minFontSize: 8.0)
             panelContent.addChild(route)
         }
 
@@ -2040,7 +2308,7 @@ final class RegionMenuOverlay: SKNode {
                                         stats: stats,
                                         region: previewRegion,
                                         currentPosition: currentPosition)
-            map.position = CGPoint(x: 0, y: currentCardY - currentCardHeight / 2 - 12 - mapPreviewHeight / 2)
+            map.position = CGPoint(x: 0, y: currentCardY - currentCardHeight / 2 - 10 - mapPreviewHeight / 2)
             map.zPosition = 4
             panelContent.addChild(map)
 
@@ -2054,7 +2322,7 @@ final class RegionMenuOverlay: SKNode {
             }
         }
 
-        let poiStripY = currentCardY - currentCardHeight / 2 - 12 - mapPreviewHeight - poiStripHeight / 2 - 4
+        let poiStripY = currentCardY - currentCardHeight / 2 - 10 - mapPreviewHeight - poiStripHeight / 2 - 8
         let poiStrip = poiIndicatorStrip(region: previewRegion,
                                          stats: stats,
                                          width: listWidth,
@@ -2070,9 +2338,12 @@ final class RegionMenuOverlay: SKNode {
         panelContent.addChild(routeHeading)
 
         let listTopY = panelHeight / 2 - headerHeight
-        let listBottomY = -panelHeight / 2 + footerHeight
-        listCenterY = (listTopY + listBottomY) / 2
-        listViewportHeight = max(96, listTopY - listBottomY)
+        let footerTopY = -panelHeight / 2 + footerHeight
+        let listBottomY = footerTopY
+        let rawListViewportHeight = max(rowCardHeight, listTopY - listBottomY)
+        let visibleRowCount = max(1, min(regions.count, Int(floor((rawListViewportHeight + rowSpacing) / rowStep))))
+        listViewportHeight = CGFloat(visibleRowCount) * rowStep - rowSpacing
+        listCenterY = listTopY - listViewportHeight / 2
         listContentHeight = max(0, CGFloat(regions.count) * rowStep - rowSpacing)
         listViewportRect = CGRect(x: content.position.x - listWidth / 2,
                                   y: listCenterY - listViewportHeight / 2,
@@ -2165,6 +2436,7 @@ final class RegionMenuOverlay: SKNode {
             rowContent.zPosition = 5
             row.addChild(rowContent)
             let leftX = -listWidth / 2 + 58
+            let textWidth = max(132, listWidth - 204)
 
             let stripe = SKShapeNode(rectOf: CGSize(width: 5, height: rowCardHeight - 18), cornerRadius: 2.5)
             stripe.position = CGPoint(x: -listWidth / 2 + 8, y: 0)
@@ -2172,8 +2444,8 @@ final class RegionMenuOverlay: SKNode {
             stripe.strokeColor = .clear
             rowContent.addChild(stripe)
 
-            let emblem = SKShapeNode(circleOfRadius: 18)
-            emblem.position = CGPoint(x: -listWidth / 2 + 32, y: 12)
+            let emblem = SKShapeNode(circleOfRadius: 17)
+            emblem.position = CGPoint(x: -listWidth / 2 + 32, y: 4)
             emblem.fillColor = isLocked
                 ? GameUI.fadedPaper.withAlphaComponent(0.62)
                 : UIColor.lerp(GameUI.palePaper, rowTint, 0.20)
@@ -2192,25 +2464,16 @@ final class RegionMenuOverlay: SKNode {
 
             let name = SKLabelNode(text: region.name)
             name.fontName = "AvenirNext-DemiBold"
-            name.fontSize = isCurrent ? 15.5 : 14.5
+            name.fontSize = isCurrent ? 15.0 : 14.2
             name.fontColor = isLocked ? GameUI.mutedInk : GameUI.ink
             name.horizontalAlignmentMode = .left
             name.verticalAlignmentMode = .center
-            name.preferredMaxLayoutWidth = max(130, listWidth - 166)
+            name.preferredMaxLayoutWidth = textWidth
             name.numberOfLines = 1
-            name.position = CGPoint(x: leftX, y: 24)
+            name.lineBreakMode = .byTruncatingTail
+            name.position = CGPoint(x: leftX, y: 22)
+            fitLabel(name, maxWidth: textWidth, minFontSize: 11.5)
             rowContent.addChild(name)
-
-            let blurb = SKLabelNode(text: region.blurb)
-            blurb.fontName = "AvenirNext-Regular"
-            blurb.fontSize = 10
-            blurb.fontColor = isLocked ? GameUI.mutedInk.withAlphaComponent(0.72) : GameUI.mutedInk
-            blurb.horizontalAlignmentMode = .left
-            blurb.verticalAlignmentMode = .center
-            blurb.preferredMaxLayoutWidth = max(130, listWidth - 166)
-            blurb.numberOfLines = 2
-            blurb.position = CGPoint(x: leftX, y: 3)
-            rowContent.addChild(blurb)
 
             let discoveryProgress = stats.mapDiscoveryProgress(in: region)
             let progress = Int((discoveryProgress * 100).rounded(.down))
@@ -2218,21 +2481,23 @@ final class RegionMenuOverlay: SKNode {
                                    fontSize: 10.5,
                                    color: isLocked ? GameUI.mutedInk.withAlphaComponent(0.78) : (hasLead || isDestination || isCurrent ? GameUI.gold : GameUI.accent),
                                    bold: true,
-                                   maxWidth: max(130, listWidth - 166))
-            status.position = CGPoint(x: leftX, y: -22)
+                                   maxWidth: textWidth)
+            status.lineBreakMode = .byTruncatingTail
+            status.position = CGPoint(x: leftX, y: -2)
+            fitLabel(status, maxWidth: textWidth, minFontSize: 8.6)
             rowContent.addChild(status)
 
             let barWidth = max(72, min(150, listWidth - 190))
             let bar = progressBar(width: barWidth,
                                   progress: discoveryProgress,
                                   color: rowTint)
-            bar.position = CGPoint(x: leftX + barWidth / 2, y: -36)
+            bar.position = CGPoint(x: leftX + barWidth / 2, y: -24)
             rowContent.addChild(bar)
 
             let badge = stateBadge(text: badgeText,
                                    color: badgeColor,
                                    width: badgeText.count > 7 ? 86 : 70)
-            badge.position = CGPoint(x: listWidth / 2 - (badgeText.count > 7 ? 52 : 44), y: 22)
+            badge.position = CGPoint(x: listWidth / 2 - (badgeText.count > 7 ? 52 : 44), y: 20)
             rowContent.addChild(badge)
 
             let phase = menuLabel(region.minPhase.displayName,
@@ -2240,7 +2505,7 @@ final class RegionMenuOverlay: SKNode {
                                   color: isLocked ? GameUI.mutedInk.withAlphaComponent(0.64) : GameUI.mutedInk,
                                   bold: true)
             phase.horizontalAlignmentMode = .right
-            phase.position = CGPoint(x: listWidth / 2 - 18, y: -16)
+            phase.position = CGPoint(x: listWidth / 2 - 18, y: -18)
             rowContent.addChild(phase)
         }
 
@@ -2265,6 +2530,23 @@ final class RegionMenuOverlay: SKNode {
         }
         updateListScroll(0)
 
+        let footerScrimSize = CGSize(width: panelWidth - 10, height: footerHeight)
+        let footerScrim = SKShapeNode(rectOf: footerScrimSize, cornerRadius: 0)
+        footerScrim.fillTexture = GameUI.paperTexture(size: footerScrimSize,
+                                                      base: UIColor.lerp(GameUI.paper, GameUI.palePaper, 0.08))
+        footerScrim.fillColor = .white
+        footerScrim.strokeColor = .clear
+        footerScrim.position = CGPoint(x: 0, y: footerTopY - footerHeight / 2)
+        footerScrim.zPosition = 16
+        panelContent.addChild(footerScrim)
+
+        let footerDivider = SKShapeNode(rectOf: CGSize(width: listWidth - 24, height: 1.2), cornerRadius: 0.6)
+        footerDivider.fillColor = GameUI.line.withAlphaComponent(0.16)
+        footerDivider.strokeColor = .clear
+        footerDivider.position = CGPoint(x: 0, y: footerTopY - 4)
+        footerDivider.zPosition = 18
+        panelContent.addChild(footerDivider)
+
         let close = GameUI.pill(text: "Fechar registro",
                                 fontSize: 14,
                                 bold: false,
@@ -2274,7 +2556,7 @@ final class RegionMenuOverlay: SKNode {
                                 hPadding: 20,
                                 height: 32)
         close.name = "region_close"
-        close.position = CGPoint(x: 0, y: -panelHeight / 2 + 30)
+        close.position = CGPoint(x: 0, y: -panelHeight / 2 + 38)
         close.zPosition = 20
         closeButtonRect = CGRect(x: content.position.x + close.position.x - 110,
                                  y: close.position.y - 24,
@@ -2319,7 +2601,10 @@ final class RegionMenuOverlay: SKNode {
             return
         }
 
-        guard !didScrollDuringTouch else { return }
+        if didScrollDuringTouch {
+            snapListScrollToRow()
+            return
+        }
 
         var node: SKNode? = atPoint(location)
         while let current = node {
@@ -2361,5 +2646,11 @@ final class RegionMenuOverlay: SKNode {
         let topY = listCenterY + listViewportHeight / 2 - scrollThumbHeight / 2 - 5
         let bottomY = listCenterY - listViewportHeight / 2 + scrollThumbHeight / 2 + 5
         scrollThumb.position.y = topY + (bottomY - topY) * progress
+    }
+
+    private func snapListScrollToRow() {
+        guard listRowStep > 1 else { return }
+        let snapped = (listScrollOffset / listRowStep).rounded() * listRowStep
+        updateListScroll(snapped)
     }
 }

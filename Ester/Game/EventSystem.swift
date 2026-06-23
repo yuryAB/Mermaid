@@ -126,8 +126,8 @@ final class EventSystem {
                 options.append((2, fallingObject))
             }
         }
-        // o Grande Delta é terra de correntes
-        if ctx.regions.currentRegion?.id == "delta" {
+        // Estuários concentram mistura de maré, rio e correntes.
+        if ctx.regions.currentRegion?.id == "estuario" {
             options.append((3, current))
         }
 
