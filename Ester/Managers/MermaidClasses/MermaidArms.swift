@@ -39,6 +39,11 @@ class MermaidArms {
         left.zPosition = 3
         left.position = lPosition
     }
+
+    func setRestPositions(left: CGPoint, right: CGPoint) {
+        lPosition = left
+        rPosition = right
+    }
     
     private func moveArms(to position: Orientation) {
         let increment:CGFloat = (position == .vertical) ? 0 : 45
@@ -133,19 +138,21 @@ extension MermaidArms: MovementDirectionProtocol {
     func setDownMoveMode() {
         removeAllAnimations()
         moveArms(to: .vertical)
-        armZposition(rightZ: -3, leftZ: -3)
+        armZposition(rightZ: -6, leftZ: -6)
         
-        let movedown:SKAction = .moveTo(y: rPosition.y+200, duration: 1.0)
-        let moveup:SKAction = .moveTo(y: rPosition.y, duration: 0.5)
+        let moveRightDown:SKAction = .moveTo(y: rPosition.y+200, duration: 1.0)
+        let moveLeftDown:SKAction = .moveTo(y: lPosition.y+200, duration: 1.0)
+        let moveRightUp:SKAction = .moveTo(y: rPosition.y, duration: 0.5)
+        let moveLeftUp:SKAction = .moveTo(y: lPosition.y, duration: 0.5)
         
-        let rArmDown:SKAction = .group([rightArmRotationAction(to: .down),movedown])
+        let rArmDown:SKAction = .group([rightArmRotationAction(to: .down), moveRightDown])
         
-        let lArmDown:SKAction = .group([leftArmRotationAction(to: .down),movedown])
+        let lArmDown:SKAction = .group([leftArmRotationAction(to: .down), moveLeftDown])
         
         let wait:SKAction = .wait(forDuration: 2)
         
-        let rArmUp:SKAction = .group([rightArmRotationAction(),moveup])
-        let lArmUp:SKAction = .group([leftArmRotationAction(),moveup])
+        let rArmUp:SKAction = .group([rightArmRotationAction(), moveRightUp])
+        let lArmUp:SKAction = .group([leftArmRotationAction(), moveLeftUp])
         
         let swing:SKAction = .repeatForever(.sequence([
             .rotate(toDegrees: 6, duration: 1),

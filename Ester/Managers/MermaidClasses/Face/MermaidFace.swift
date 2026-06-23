@@ -13,6 +13,7 @@ class MermaidFace {
     let eyebrows:MermaidEyebrows
     let eyes: MermaidEyes
     let mouth: MermaidMouth
+    private var restPosition: CGPoint = .zero
     
     init() {
         base = SKSpriteNode()
@@ -27,11 +28,15 @@ class MermaidFace {
         base.addChild(eyes.base)
         base.addChild(mouth.base)
     }
+
+    func setRestPosition(_ position: CGPoint) {
+        restPosition = position
+    }
 }
 
 extension MermaidFace: MovementTypeProtocol {
     func applyIdleMoveMode() {
-        let moveto:SKAction = .move(to: CGPoint(x: 0, y: 0), duration: 0.5)
+        let moveto:SKAction = .move(to: restPosition, duration: 0.5)
         moveto.eaeInEaseOut()
         base.run(moveto)
     }
@@ -43,26 +48,30 @@ extension MermaidFace: MovementTypeProtocol {
 
 extension MermaidFace: MovementDirectionProtocol {
     func setUpMoveMode() {
-        let moveto:SKAction = .move(to: CGPoint(x: 0, y: 40), duration: 0.5)
+        let moveto:SKAction = .move(to: offset(dx: 0, dy: 40), duration: 0.5)
         moveto.eaeInEaseOut()
         base.run(moveto)
     }
     
     func setDownMoveMode() {
-        let moveto:SKAction = .move(to: CGPoint(x: 0, y: -10), duration: 0.5)
+        let moveto:SKAction = .move(to: offset(dx: 0, dy: -10), duration: 0.5)
         moveto.eaeInEaseOut()
         base.run(moveto)
     }
     
     func setRightMoveMode() {
-        let moveto:SKAction = .move(to: CGPoint(x: 20, y: 0), duration: 0.5)
+        let moveto:SKAction = .move(to: offset(dx: 20, dy: 0), duration: 0.5)
         moveto.eaeInEaseOut()
         base.run(moveto)
     }
     
     func setLeftMoveMode() {
-        let moveto:SKAction = .move(to: CGPoint(x: -20, y: 0), duration: 0.5)
+        let moveto:SKAction = .move(to: offset(dx: -20, dy: 0), duration: 0.5)
         moveto.eaeInEaseOut()
         base.run(moveto)
+    }
+
+    private func offset(dx: CGFloat, dy: CGFloat) -> CGPoint {
+        CGPoint(x: restPosition.x + dx, y: restPosition.y + dy)
     }
 }

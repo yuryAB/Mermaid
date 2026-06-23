@@ -11,7 +11,9 @@ final class BabyMermaidFigure: MermaidFigure {
 
     private let flip = SKNode()
     private let upperBody = SKNode()
+    private let bodyCore = SKNode()
     private let waistGroup = SKNode()
+    private let chestCore = SKNode()
     private let tail = SKNode()
 
     private let hairBack = SKSpriteNode(imageNamed: "baby-hairBack")
@@ -30,6 +32,9 @@ final class BabyMermaidFigure: MermaidFigure {
     private let handLeft = SKSpriteNode(imageNamed: "baby-hand1-1")
     private let handRight = SKSpriteNode(imageNamed: "baby-hand1")
     private let rig: BabyMermaidRig
+    private var visualDirection: MovementDirection?
+    private var currentAnimationMode: MovementType = .idle
+    private var faceDirectionOffset: CGPoint = .zero
 
     init(rig: BabyMermaidRig = MermaidRigStore.shared.document.baby) {
         self.rig = rig
@@ -41,7 +46,8 @@ final class BabyMermaidFigure: MermaidFigure {
     private func assembleNodes() {
         root.addChild(flip)
         flip.addChild(upperBody)
-        flip.addChild(waistGroup)
+        flip.addChild(bodyCore)
+        bodyCore.addChild(waistGroup)
 
         hairBack.zPosition = rig.hairBack.z
         hairBack.position = rig.hairBack.point
@@ -85,13 +91,14 @@ final class BabyMermaidFigure: MermaidFigure {
         mouth.setScale(rig.mouth.scale)
         upperBody.addChild(mouth)
 
-        hairFront.zPosition = rig.hairFront.z
+        hairFront.zPosition = hairFrontZ
         hairFront.position = rig.hairFront.point
         hairFront.setScale(rig.hairFront.scale)
         upperBody.addChild(hairFront)
 
         waistGroup.position = rig.waistGroup.point
         waistGroup.zPosition = rig.waistGroup.z
+        waistGroup.addChild(chestCore)
 
         waistBack.zPosition = rig.waistBack.z
         waistBack.position = rig.waistBack.point
@@ -103,8 +110,8 @@ final class BabyMermaidFigure: MermaidFigure {
         waistFront.setScale(rig.waistFront.scale)
         waistGroup.addChild(waistFront)
 
-        tail.position = .zero
-        tail.zPosition = 0
+        tail.position = rig.tail.point
+        tail.zPosition = rig.tail.z
         tail.setScale(1)
         waistGroup.addChild(tail)
 
@@ -116,18 +123,19 @@ final class BabyMermaidFigure: MermaidFigure {
 
         handLeft.anchorPoint = CGPoint(x: 0.5, y: 1.0)
         handLeft.zPosition = rig.handLeft.z
-        handLeft.position = rig.handLeft.point
+        handLeft.position = handLeftRestPosition
         handLeft.setScale(rig.handLeft.scale)
-        upperBody.addChild(handLeft)
+        chestCore.addChild(handLeft)
 
         handRight.anchorPoint = CGPoint(x: 0.5, y: 1.0)
         handRight.zPosition = rig.handRight.z
-        handRight.position = rig.handRight.point
+        handRight.position = handRightRestPosition
         handRight.setScale(rig.handRight.scale)
-        upperBody.addChild(handRight)
+        chestCore.addChild(handRight)
     }
 
     func applyAnimationMode(_ mode: MovementType) {
+        currentAnimationMode = mode
         switch mode {
         case .idle:
             applyModeMotion(bobAmplitude: 12, bobDuration: 1.4,
@@ -145,19 +153,21 @@ final class BabyMermaidFigure: MermaidFigure {
                             finDegrees: 6, finDuration: 0.22,
                             handDegrees: 16, handDuration: 0.4)
         }
+
+        switch mode {
+        case .idle:
+            visualDirection = nil
+            resetDirectionalPose(animated: true)
+        case .swing, .fast:
+            if let visualDirection {
+                applyDirectionalPose(visualDirection, animated: true)
+            }
+        }
     }
 
     func applyDirection(_ direction: MovementDirection) {
-        switch direction {
-        case .up:
-            tilt(toDegrees: 10)
-        case .down:
-            tilt(toDegrees: -12)
-        case .right:
-            tilt(toDegrees: -6, flipX: 1)
-        case .left:
-            tilt(toDegrees: 6, flipX: -1)
-        }
+        visualDirection = direction
+        applyDirectionalPose(direction, animated: true)
     }
 
     func applyPalette(_ palette: MermaidPalette) {
@@ -182,27 +192,37 @@ final class BabyMermaidFigure: MermaidFigure {
         eyeLeft.xScale = -1
         eyeLeft.yScale = 1
         eyeRight.setScale(1)
-        eyeLeftNode.applyFaceTransform(position: faceRig.eyeLeft.point,
+        eyeLeftNode.applyFaceTransform(position: offset(faceRig.eyeLeft.point,
+                                                       dx: faceDirectionOffset.x,
+                                                       dy: faceDirectionOffset.y),
                                        scale: faceRig.eyeLeft.scale,
                                        mirrored: false,
                                        rotationDegrees: 0,
                                        animated: animated)
-        eyeRightNode.applyFaceTransform(position: faceRig.eyeRight.point,
+        eyeRightNode.applyFaceTransform(position: offset(faceRig.eyeRight.point,
+                                                        dx: faceDirectionOffset.x,
+                                                        dy: faceDirectionOffset.y),
                                         scale: faceRig.eyeRight.scale,
                                         mirrored: false,
                                         rotationDegrees: 0,
                                         animated: animated)
-        eyebrowLeft.applyFaceTransform(position: faceRig.eyebrowLeft.point + pose.leftEyebrowOffset,
+        eyebrowLeft.applyFaceTransform(position: offset(faceRig.eyebrowLeft.point + pose.leftEyebrowOffset,
+                                                       dx: faceDirectionOffset.x,
+                                                       dy: faceDirectionOffset.y),
                                        scale: faceRig.eyebrowLeft.scale,
                                        mirrored: true,
                                        rotationDegrees: 6 + pose.leftEyebrowRotationDelta,
                                        animated: animated)
-        eyebrowRight.applyFaceTransform(position: faceRig.eyebrowRight.point + pose.rightEyebrowOffset,
+        eyebrowRight.applyFaceTransform(position: offset(faceRig.eyebrowRight.point + pose.rightEyebrowOffset,
+                                                        dx: faceDirectionOffset.x,
+                                                        dy: faceDirectionOffset.y),
                                         scale: faceRig.eyebrowRight.scale,
                                         mirrored: false,
                                         rotationDegrees: -6 + pose.rightEyebrowRotationDelta,
                                         animated: animated)
-        mouth.applyFaceTransform(position: faceRig.mouth.point + pose.mouthOffset,
+        mouth.applyFaceTransform(position: offset(faceRig.mouth.point + pose.mouthOffset,
+                                                 dx: faceDirectionOffset.x,
+                                                 dy: faceDirectionOffset.y),
                                  scale: faceRig.mouth.scale * pose.mouthScale,
                                  mirrored: false,
                                  rotationDegrees: 0,
@@ -323,15 +343,260 @@ final class BabyMermaidFigure: MermaidFigure {
         return action
     }
 
-    private func tilt(toDegrees degrees: CGFloat, flipX: CGFloat? = nil) {
-        let rotate = SKAction.rotate(toDegrees: degrees, duration: 0.5)
-        rotate.eaeInEaseOut()
-        flip.run(rotate)
+    private func applyDirectionalPose(_ direction: MovementDirection, animated: Bool) {
+        let duration = animated ? 1.0 : 0
+        let tempo = directionalTempo
 
-        if let flipX {
-            let scale = SKAction.scaleX(to: flipX, duration: 0.3)
-            scale.eaeInEaseOut()
-            flip.run(scale)
+        switch direction {
+        case .up:
+            move(flip, to: .zero, duration: duration)
+            rotate(flip, toDegrees: 0, duration: duration)
+            scaleX(flip, to: 1, duration: duration)
+            runDirectionalTail(centerDegrees: -5, amplitude: 5, duration: tempo.tail)
+            applyCorePose(upperDegrees: 0, waistDegrees: 0, tailX: 0, tailY: -4,
+                          duration: duration)
+            applyPartOffsets(faceX: 0, faceY: 28, hairBackX: 0, hairBackY: -22,
+                             hairFrontX: 0, hairFrontY: 12, headX: 0, headY: 6,
+                             waistX: 0, waistY: -8, duration: duration)
+            keepHairBehindFace()
+            runDirectionalHands(leftPosition: offset(handLeftRestPosition, dx: 4, dy: 2),
+                                rightPosition: offset(handRightRestPosition, dx: -4, dy: 2),
+                                leftZ: 3,
+                                rightZ: 3,
+                                leftRestDegrees: -4,
+                                rightRestDegrees: 4,
+                                swingDegrees: 7,
+                                duration: tempo.hand)
+        case .down:
+            move(flip, to: .zero, duration: duration)
+            rotate(flip, toDegrees: 0, duration: duration)
+            scaleX(flip, to: 1, duration: duration)
+            runDirectionalTail(centerDegrees: 8, amplitude: 5, duration: tempo.tail)
+            applyCorePose(upperDegrees: 180, waistDegrees: 0, tailX: 0, tailY: 8,
+                          duration: duration)
+            applyPartOffsets(faceX: 0, faceY: -14, hairBackX: 0, hairBackY: 50,
+                             hairFrontX: 0, hairFrontY: -6, headX: 0, headY: -6,
+                             waistX: 0, waistY: 12, duration: duration)
+            keepHairBehindFace()
+            tail.zPosition = rig.tail.z - 1
+            runDirectionalHands(leftPosition: offset(handLeftRestPosition, dx: 4, dy: 2),
+                                rightPosition: offset(handRightRestPosition, dx: -4, dy: 2),
+                                leftZ: -6,
+                                rightZ: -6,
+                                leftRestDegrees: -6,
+                                rightRestDegrees: 6,
+                                swingDegrees: 6,
+                                duration: tempo.hand)
+        case .right:
+            applyLateralDirection(flipX: 1, duration: duration, tempo: tempo)
+        case .left:
+            applyLateralDirection(flipX: -1, duration: duration, tempo: tempo)
         }
+    }
+
+    private func applyLateralDirection(
+        flipX: CGFloat,
+        duration: Double,
+        tempo: (tail: Double, hand: Double)
+    ) {
+        move(flip, to: .zero, duration: duration)
+        rotate(flip, toDegrees: 0, duration: duration)
+        scaleX(flip, to: flipX, duration: duration)
+        runDirectionalTail(centerDegrees: 0, amplitude: 6, duration: tempo.tail)
+        applyCorePose(upperDegrees: -90,
+                      waistDegrees: 0,
+                      tailX: 0,
+                      tailY: 0,
+                      duration: duration)
+        applyPartOffsets(faceX: 16, faceY: 0, hairBackX: -24, hairBackY: 20,
+                         hairFrontX: -4, hairFrontY: 0, headX: 0, headY: 0,
+                         waistX: 8, waistY: 0, duration: duration)
+        keepHairBehindFace()
+        tail.zPosition = rig.tail.z + 1
+        runDirectionalHands(leftPosition: offset(handLeftRestPosition, dx: 4, dy: 0),
+                            rightPosition: offset(handRightRestPosition, dx: -4, dy: 0),
+                            leftZ: 3,
+                            rightZ: 3,
+                            leftRestDegrees: -12,
+                            rightRestDegrees: 12,
+                            swingDegrees: 8,
+                            duration: tempo.hand)
+    }
+
+    private func resetDirectionalPose(animated: Bool) {
+        let duration = animated ? 1.0 : 0
+        move(flip, to: .zero, duration: duration)
+        rotate(flip, toDegrees: 0, duration: duration)
+        scaleX(flip, to: 1, duration: duration)
+        applyCorePose(upperDegrees: 0, waistDegrees: 0, tailX: 0, tailY: 0,
+                      duration: duration)
+        applyPartOffsets(faceX: 0, faceY: 0, hairBackX: 0, hairBackY: 0,
+                         hairFrontX: 0, hairFrontY: 0, headX: 0, headY: 0,
+                         waistX: 0, waistY: 0, duration: duration)
+        hairBack.zPosition = rig.hairBack.z
+        hairFront.zPosition = hairFrontZ
+        tail.zPosition = rig.tail.z
+        handLeft.zPosition = rig.handLeft.z
+        handRight.zPosition = rig.handRight.z
+        move(handLeft, to: handLeftRestPosition, duration: duration)
+        move(handRight, to: handRightRestPosition, duration: duration)
+    }
+
+    private var directionalTempo: (tail: Double, hand: Double) {
+        switch currentAnimationMode {
+        case .idle:
+            return (tail: 0.9, hand: 1.1)
+        case .swing:
+            return (tail: 0.48, hand: 0.62)
+        case .fast:
+            return (tail: 0.22, hand: 0.34)
+        }
+    }
+
+    private func applyPartOffsets(
+        faceX: CGFloat,
+        faceY: CGFloat,
+        hairBackX: CGFloat,
+        hairBackY: CGFloat,
+        hairFrontX: CGFloat,
+        hairFrontY: CGFloat,
+        headX: CGFloat,
+        headY: CGFloat,
+        waistX: CGFloat,
+        waistY: CGFloat,
+        duration: Double
+    ) {
+        faceDirectionOffset = CGPoint(x: faceX, y: faceY)
+        move(head, to: offset(rig.head.point, dx: headX, dy: headY), duration: duration)
+        move(hairBack, to: offset(rig.hairBack.point, dx: hairBackX, dy: hairBackY), duration: duration)
+        move(hairFront, to: offset(rig.hairFront.point, dx: hairFrontX, dy: hairFrontY), duration: duration)
+        move(eyeLeftNode, to: offset(rig.eyeLeft.point, dx: faceX, dy: faceY), duration: duration)
+        move(eyeRightNode, to: offset(rig.eyeRight.point, dx: faceX, dy: faceY), duration: duration)
+        move(eyebrowLeft, to: offset(rig.eyebrowLeft.point, dx: faceX, dy: faceY), duration: duration)
+        move(eyebrowRight, to: offset(rig.eyebrowRight.point, dx: faceX, dy: faceY), duration: duration)
+        move(mouth, to: offset(rig.mouth.point, dx: faceX, dy: faceY), duration: duration)
+        move(waistGroup, to: offset(rig.waistGroup.point, dx: waistX, dy: waistY), duration: duration)
+    }
+
+    private func applyCorePose(
+        upperDegrees: CGFloat,
+        waistDegrees: CGFloat,
+        tailX: CGFloat,
+        tailY: CGFloat,
+        duration: Double
+    ) {
+        rotate(bodyCore, toDegrees: upperDegrees, duration: duration)
+        rotate(waistGroup, toDegrees: waistDegrees, duration: duration)
+        move(tail, to: offset(rig.tail.point, dx: tailX, dy: tailY), duration: duration)
+    }
+
+    private func keepHairBehindFace() {
+        hairFront.zPosition = hairFrontZ
+        hairBack.zPosition = min(rig.hairBack.z, hairFrontZ - 0.5)
+    }
+
+    private var hairFrontZ: CGFloat {
+        let lowestFaceZ = min(eyeLeftNode.zPosition,
+                              eyeRightNode.zPosition,
+                              eyebrowLeft.zPosition,
+                              eyebrowRight.zPosition,
+                              mouth.zPosition)
+        return min(rig.hairFront.z, lowestFaceZ - 0.5)
+    }
+
+    private func runDirectionalTail(centerDegrees: CGFloat, amplitude: CGFloat, duration: Double) {
+        tail.removeAllActions()
+        tailFin.removeAllActions()
+        tail.run(centeredSwing(centerDegrees: centerDegrees, amplitude: amplitude, duration: duration),
+                 withKey: "directionTail")
+        tailFin.run(centeredSwing(centerDegrees: centerDegrees * -0.6,
+                                  amplitude: amplitude * 1.1,
+                                  duration: duration),
+                    withKey: "directionFin")
+    }
+
+    private func runDirectionalHands(
+        leftPosition: CGPoint,
+        rightPosition: CGPoint,
+        leftZ: CGFloat,
+        rightZ: CGFloat,
+        leftRestDegrees: CGFloat,
+        rightRestDegrees: CGFloat,
+        swingDegrees: CGFloat,
+        duration: Double
+    ) {
+        handLeft.removeAllActions()
+        handRight.removeAllActions()
+        handLeft.zPosition = leftZ
+        handRight.zPosition = rightZ
+
+        let leftSettle = SKAction.group([
+            moveAction(to: leftPosition, duration: 0.18),
+            rotateAction(toDegrees: leftRestDegrees, duration: 0.18)
+        ])
+        let rightSettle = SKAction.group([
+            moveAction(to: rightPosition, duration: 0.18),
+            rotateAction(toDegrees: rightRestDegrees, duration: 0.18)
+        ])
+        handLeft.run(.sequence([
+            leftSettle,
+            centeredSwing(centerDegrees: leftRestDegrees, amplitude: swingDegrees, duration: duration)
+        ]), withKey: "directionHand")
+        handRight.run(.sequence([
+            rightSettle,
+            centeredSwing(centerDegrees: rightRestDegrees, amplitude: swingDegrees, duration: duration)
+        ]), withKey: "directionHand")
+    }
+
+    private func centeredSwing(centerDegrees: CGFloat, amplitude: CGFloat, duration: Double) -> SKAction {
+        let action = SKAction.repeatForever(.sequence([
+            rotateAction(toDegrees: centerDegrees + amplitude, duration: duration),
+            rotateAction(toDegrees: centerDegrees - amplitude, duration: duration)
+        ]))
+        action.eaeInEaseOut()
+        return action
+    }
+
+    private func move(_ node: SKNode, to position: CGPoint, duration: Double) {
+        node.run(moveAction(to: position, duration: duration), withKey: "directionPosition")
+    }
+
+    private func rotate(_ node: SKNode, toDegrees degrees: CGFloat, duration: Double) {
+        node.run(rotateAction(toDegrees: degrees, duration: duration), withKey: "directionRotation")
+    }
+
+    private func scaleX(_ node: SKNode, to value: CGFloat, duration: Double) {
+        let scale = SKAction.scaleX(to: value, duration: duration)
+        scale.eaeInEaseOut()
+        node.run(scale, withKey: "directionScaleX")
+    }
+
+    private func moveAction(to position: CGPoint, duration: Double) -> SKAction {
+        let action = SKAction.move(to: position, duration: duration)
+        action.eaeInEaseOut()
+        return action
+    }
+
+    private func rotateAction(toDegrees degrees: CGFloat, duration: Double) -> SKAction {
+        let rotate = SKAction.rotate(toDegrees: degrees, duration: duration)
+        rotate.eaeInEaseOut()
+        return rotate
+    }
+
+    private func offset(_ point: CGPoint, dx: CGFloat = 0, dy: CGFloat = 0) -> CGPoint {
+        CGPoint(x: point.x + dx, y: point.y + dy)
+    }
+
+    private var handLeftRestPosition: CGPoint {
+        pointInChestCore(rig.handLeft.point)
+    }
+
+    private var handRightRestPosition: CGPoint {
+        pointInChestCore(rig.handRight.point)
+    }
+
+    private func pointInChestCore(_ point: CGPoint) -> CGPoint {
+        CGPoint(x: point.x - rig.waistGroup.point.x,
+                y: point.y - rig.waistGroup.point.y)
     }
 }

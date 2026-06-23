@@ -25,7 +25,7 @@ final class YoungMermaidFigure: MermaidFigure {
 
     private func assembleNodes() {
         body.body.zPosition = 1
-        head.headNode.addChild(body.body)
+        head.base.addChild(body.body)
 
         face.base.zPosition = 3
         head.headNode.addChild(face.base)
@@ -46,12 +46,14 @@ final class YoungMermaidFigure: MermaidFigure {
         head.hairFrontNode.position = rig.hairFront.point
         head.hairFrontNode.zPosition = rig.hairFront.z
         head.hairFrontNode.setScale(rig.hairFront.scale)
+        head.setRestPositions(hairFront: rig.hairFront.point)
         body.body.position = rig.body.point
         body.body.zPosition = rig.body.z
         body.body.setScale(rig.body.scale)
         face.base.position = rig.face.point
         face.base.zPosition = rig.face.z
         face.base.setScale(rig.face.scale)
+        face.setRestPosition(rig.face.point)
         face.eyebrows.base.position = rig.eyebrowGroup.point
         face.eyebrows.base.zPosition = rig.eyebrowGroup.z
         face.eyebrows.base.setScale(rig.eyebrowGroup.scale)
@@ -93,6 +95,7 @@ final class YoungMermaidFigure: MermaidFigure {
         arms.right.position = rig.handRight.point
         arms.right.zPosition = rig.handRight.z
         arms.right.setScale(rig.handRight.scale)
+        arms.setRestPositions(left: rig.handLeft.point, right: rig.handRight.point)
     }
 
     func applyAnimationMode(_ mode: MovementType) {

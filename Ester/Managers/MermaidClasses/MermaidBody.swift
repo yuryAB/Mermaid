@@ -17,6 +17,32 @@ class MermaidBody {
     let finScale: SKSpriteNode
     /// Segmento adicional da cauda, exclusivo da forma adulta.
     private(set) var extraSegment: SKSpriteNode?
+    private struct MotionProfile {
+        let bodyDegree: CGFloat
+        let bodyDuration: Double
+        let waistDegree: CGFloat
+        let waistDuration: Double
+        let articulationDegree: CGFloat
+        let articulationDuration: Double
+        let finDegree: CGFloat
+        let finDuration: Double
+    }
+    private var currentProfile = MotionProfile(bodyDegree: 5, bodyDuration: 2,
+                                               waistDegree: 5.5, waistDuration: 2,
+                                               articulationDegree: 6, articulationDuration: 2,
+                                               finDegree: 6.5, finDuration: 2)
+    private struct DirectionalCore {
+        let bodyCenter: CGFloat
+        let waistCenter: CGFloat
+        let articulationCenter: CGFloat
+        let finCenter: CGFloat
+        let bodyZ: CGFloat
+    }
+    private var currentDirectionalCore = DirectionalCore(bodyCenter: 0,
+                                                         waistCenter: 0,
+                                                         articulationCenter: 0,
+                                                         finCenter: 0,
+                                                         bodyZ: 1)
     
     init() {
         body = SKSpriteNode(imageNamed: "roundPiece")
@@ -82,9 +108,11 @@ class MermaidBody {
         fin.addChild(finScale)
     }
     
-    private func swingAnimation(degrees: CGFloat, duration: Double ) -> SKAction {
-        let rotateL = SKAction.rotate(toDegrees: degrees, duration: duration)
-        let rotateR = SKAction.rotate(toDegrees: -degrees, duration: duration)
+    private func swingAnimation(centerDegrees: CGFloat = 0,
+                                degrees: CGFloat,
+                                duration: Double ) -> SKAction {
+        let rotateL = SKAction.rotate(toDegrees: centerDegrees + degrees, duration: duration)
+        let rotateR = SKAction.rotate(toDegrees: centerDegrees - degrees, duration: duration)
         let swing = SKAction.repeatForever(.sequence([rotateL,rotateR]))
         swing.eaeInEaseOut()
         
@@ -94,14 +122,26 @@ class MermaidBody {
     func runSwingAnimation(bodyDegree:CGFloat, bodyDuration:Double,
                            waistDegree:CGFloat, waistDuration:Double,
                            articulationDegree:CGFloat, articulationDuration:Double,
-                           finDegree:CGFloat, finDuration:Double) {
+                           finDegree:CGFloat, finDuration:Double,
+                           bodyCenter: CGFloat = 0,
+                           waistCenter: CGFloat = 0,
+                           articulationCenter: CGFloat = 0,
+                           finCenter: CGFloat = 0) {
         
         let wait = SKAction.wait(forDuration: 0.1)
-        body.run(swingAnimation(degrees: bodyDegree, duration: bodyDuration))
-        waist.run(.sequence([wait, swingAnimation(degrees: waistDegree, duration: waistDuration)]))
-        articulation.run(.sequence([wait,swingAnimation(degrees: articulationDegree, duration: articulationDuration)]))
-        extraSegment?.run(.sequence([wait, swingAnimation(degrees: finDegree * 0.85, duration: finDuration)]))
-        fin.run(.sequence([wait,swingAnimation(degrees: finDegree, duration: finDuration)]))
+        body.run(swingAnimation(centerDegrees: bodyCenter, degrees: bodyDegree, duration: bodyDuration))
+        waist.run(.sequence([wait, swingAnimation(centerDegrees: waistCenter,
+                                                  degrees: waistDegree,
+                                                  duration: waistDuration)]))
+        articulation.run(.sequence([wait,swingAnimation(centerDegrees: articulationCenter,
+                                                        degrees: articulationDegree,
+                                                        duration: articulationDuration)]))
+        extraSegment?.run(.sequence([wait, swingAnimation(centerDegrees: articulationCenter * 1.15,
+                                                          degrees: finDegree * 0.85,
+                                                          duration: finDuration)]))
+        fin.run(.sequence([wait,swingAnimation(centerDegrees: finCenter,
+                                               degrees: finDegree,
+                                               duration: finDuration)]))
     }
 
     private func removeAllAnimations() {
@@ -151,50 +191,99 @@ class MermaidBody {
         
         return sequence
     }
+
+    private func applyMotion(_ profile: MotionProfile,
+                             directionalCore: DirectionalCore? = nil) {
+        currentProfile = profile
+        if let directionalCore {
+            currentDirectionalCore = directionalCore
+        }
+        body.zPosition = currentDirectionalCore.bodyZ
+        removeAllAnimations()
+        runSwingAnimation(bodyDegree: profile.bodyDegree,
+                          bodyDuration: profile.bodyDuration,
+                          waistDegree: profile.waistDegree,
+                          waistDuration: profile.waistDuration,
+                          articulationDegree: profile.articulationDegree,
+                          articulationDuration: profile.articulationDuration,
+                          finDegree: profile.finDegree,
+                          finDuration: profile.finDuration,
+                          bodyCenter: currentDirectionalCore.bodyCenter,
+                          waistCenter: currentDirectionalCore.waistCenter,
+                          articulationCenter: currentDirectionalCore.articulationCenter,
+                          finCenter: currentDirectionalCore.finCenter)
+    }
+
+    private func applyDirectionalCore(bodyCenter: CGFloat,
+                                      waistCenter: CGFloat,
+                                      articulationCenter: CGFloat,
+                                      finCenter: CGFloat,
+                                      bodyZ: CGFloat = 1) {
+        let core = DirectionalCore(bodyCenter: bodyCenter,
+                                   waistCenter: waistCenter,
+                                   articulationCenter: articulationCenter,
+                                   finCenter: finCenter,
+                                   bodyZ: bodyZ)
+        applyMotion(currentProfile, directionalCore: core)
+    }
 }
 
 extension MermaidBody: MovementTypeProtocol {
     func applyIdleMoveMode() {
-        removeAllAnimations()
-        body.run(bodyZPosition())
-        runSwingAnimation(bodyDegree: 5, bodyDuration: 2,
-                          waistDegree: 5.5, waistDuration: 2,
-                          articulationDegree: 6, articulationDuration: 2,
-                          finDegree: 6.5, finDuration: 2)
+        applyMotion(MotionProfile(bodyDegree: 5, bodyDuration: 2,
+                                  waistDegree: 5.5, waistDuration: 2,
+                                  articulationDegree: 6, articulationDuration: 2,
+                                  finDegree: 6.5, finDuration: 2),
+                    directionalCore: DirectionalCore(bodyCenter: 0,
+                                                     waistCenter: 0,
+                                                     articulationCenter: 0,
+                                                     finCenter: 0,
+                                                     bodyZ: 1))
     }
     
     func applySwingMoveMode() {
-        removeAllAnimations()
-        runSwingAnimation(bodyDegree: 5, bodyDuration: 0.5,
-                          waistDegree: 6, waistDuration: 0.5,
-                          articulationDegree: 7, articulationDuration: 0.5,
-                          finDegree: 8, finDuration: 0.5)
+        applyMotion(MotionProfile(bodyDegree: 5, bodyDuration: 0.5,
+                                  waistDegree: 6, waistDuration: 0.5,
+                                  articulationDegree: 7, articulationDuration: 0.5,
+                                  finDegree: 8, finDuration: 0.5))
     }
     
     func applyFastMoveMode() {
-        removeAllAnimations()
-        runSwingAnimation(bodyDegree: 5, bodyDuration: 0.2,
-                          waistDegree: 5, waistDuration: 0.2,
-                          articulationDegree: 5, articulationDuration: 0.2,
-                          finDegree: 6, finDuration: 0.1)
+        applyMotion(MotionProfile(bodyDegree: 5, bodyDuration: 0.2,
+                                  waistDegree: 5, waistDuration: 0.2,
+                                  articulationDegree: 5, articulationDuration: 0.2,
+                                  finDegree: 6, finDuration: 0.1))
         
     }
 }
 
 extension MermaidBody: MovementDirectionProtocol {
     func setUpMoveMode() {
-        body.run(bodyZPosition())
+        applyDirectionalCore(bodyCenter: 0,
+                             waistCenter: 0,
+                             articulationCenter: 0,
+                             finCenter: 0)
     }
     
     func setDownMoveMode() {
-        body.run(bodyZPosition(isDownMoveMode: true))
+        applyDirectionalCore(bodyCenter: 0,
+                             waistCenter: 0,
+                             articulationCenter: 0,
+                             finCenter: 0,
+                             bodyZ: -2)
     }
     
     func setRightMoveMode() {
-        body.run(bodyZPosition())
+        applyDirectionalCore(bodyCenter: 0,
+                             waistCenter: 0,
+                             articulationCenter: 0,
+                             finCenter: 0)
     }
     
     func setLeftMoveMode() {
-        body.run(bodyZPosition())
+        applyDirectionalCore(bodyCenter: 0,
+                             waistCenter: 0,
+                             articulationCenter: 0,
+                             finCenter: 0)
     }
 }

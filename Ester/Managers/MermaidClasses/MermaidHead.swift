@@ -13,6 +13,8 @@ class MermaidHead {
     var hairFrontNode: SKSpriteNode
     var hairBackNode: SKSpriteNode
     var base: SKSpriteNode
+    private var hairBackBasePosition: CGPoint = .zero
+    private var hairFrontPosition: CGPoint = .zero
     
     init() {
         headNode = SKSpriteNode(texture: SKTexture(imageNamed: "MermHead"))
@@ -47,6 +49,11 @@ class MermaidHead {
         hairBackNode.yScale = hairLengthScale
     }
 
+    func setRestPositions(hairBackBase: CGPoint = .zero, hairFront: CGPoint) {
+        hairBackBasePosition = hairBackBase
+        hairFrontPosition = hairFront
+    }
+
     private func hairBackAnimation() {
         let fill: SKAction = .group([
             .scaleX(to: 1.07, duration: 0.8),
@@ -69,12 +76,16 @@ extension MermaidHead: MovementTypeProtocol {
         hairBackAnimation()
         let idleAction = SKAction.group([
             .rotate(toDegrees: 0, duration: 0.5),
-            .move(to: CGPoint.zero, duration: 0.5)])
+            .move(to: hairBackBasePosition, duration: 0.5)])
+        let hairFrontIdleAction = SKAction.group([
+            .rotate(toDegrees: 0, duration: 0.5),
+            .move(to: hairFrontPosition, duration: 0.5)])
         
         idleAction.eaeInEaseOut()
+        hairFrontIdleAction.eaeInEaseOut()
         
         self.base.run(idleAction)
-        self.hairFrontNode.run(idleAction)
+        self.hairFrontNode.run(hairFrontIdleAction)
     }
     
     func applySwingMoveMode() { }
@@ -86,8 +97,8 @@ extension MermaidHead: MovementDirectionProtocol {
     func setUpMoveMode() {
         let upActionForHairBack = SKAction.group([
             .rotate(toDegrees: 0, duration: 1),
-            .move(to: CGPoint(x: 0, y: -25), duration: 0.5)])
-        let upActionForHairFront = SKAction.move(to: CGPoint(x: 0, y: 15), duration: 0.5)
+            .move(to: offset(hairBackBasePosition, dx: 0, dy: -25), duration: 0.5)])
+        let upActionForHairFront = SKAction.move(to: offset(hairFrontPosition, dx: 0, dy: 15), duration: 0.5)
         
         upActionForHairBack.eaeInEaseOut()
         upActionForHairFront.eaeInEaseOut()
@@ -101,8 +112,8 @@ extension MermaidHead: MovementDirectionProtocol {
         
         let downActionForHairBack = SKAction.group([
             .rotate(toAngle: degree, duration: 1, shortestUnitArc: true),
-            .move(to: CGPoint(x: 0, y: 150), duration: 1)])
-        let downActionForHairfront = SKAction.move(to: CGPoint.zero, duration: 1)
+            .move(to: offset(hairBackBasePosition, dx: 0, dy: 150), duration: 1)])
+        let downActionForHairfront = SKAction.move(to: hairFrontPosition, duration: 1)
         
         downActionForHairBack.eaeInEaseOut()
         downActionForHairfront.eaeInEaseOut()
@@ -114,8 +125,8 @@ extension MermaidHead: MovementDirectionProtocol {
     func setRightMoveMode() {
         let rightActionForHairBack = SKAction.group([
             .rotate(toAngle: -CGFloat.pi / 2, duration: 1, shortestUnitArc: true),
-            .move(to: CGPoint(x: -55, y: 55), duration: 1)])
-        let rightActionForHairFront = SKAction.move(to: CGPoint.zero, duration: 1)
+            .move(to: offset(hairBackBasePosition, dx: -55, dy: 55), duration: 1)])
+        let rightActionForHairFront = SKAction.move(to: hairFrontPosition, duration: 1)
         
         rightActionForHairBack.eaeInEaseOut()
         rightActionForHairFront.eaeInEaseOut()
@@ -127,13 +138,17 @@ extension MermaidHead: MovementDirectionProtocol {
     func setLeftMoveMode() {
         let leftActionForHairBack = SKAction.group([
             .rotate(toAngle: CGFloat.pi / 2, duration: 1, shortestUnitArc: true),
-            .move(to: CGPoint(x: 55, y: 55), duration: 1)])
-        let leftActionForHairFront = SKAction.move(to: CGPoint.zero, duration: 1)
+            .move(to: offset(hairBackBasePosition, dx: 55, dy: 55), duration: 1)])
+        let leftActionForHairFront = SKAction.move(to: hairFrontPosition, duration: 1)
         
         leftActionForHairBack.eaeInEaseOut()
         leftActionForHairFront.eaeInEaseOut()
         
         self.base.run(leftActionForHairBack)
         self.hairFrontNode.run(leftActionForHairFront)
+    }
+
+    private func offset(_ point: CGPoint, dx: CGFloat, dy: CGFloat) -> CGPoint {
+        CGPoint(x: point.x + dx, y: point.y + dy)
     }
 }
