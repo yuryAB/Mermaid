@@ -361,9 +361,9 @@ final class ResourceChoiceOverlay: SKNode {
         let panelWidth = min(size.width - 32, size.width >= 700 ? 444 : 370)
         let rowSpacing: CGFloat = 10
         let maxPanelHeight = size.height - 52
-        let reservedHeight: CGFloat = 156
+        let reservedHeight: CGFloat = 166
         let spacingTotal = CGFloat(max(0, resources.count - 1)) * rowSpacing
-        let rowHeight = min(82, max(62, (maxPanelHeight - reservedHeight - spacingTotal) / CGFloat(resources.count)))
+        let rowHeight = min(84, max(64, (maxPanelHeight - reservedHeight - spacingTotal) / CGFloat(resources.count)))
         let panelHeight = min(maxPanelHeight,
                               reservedHeight + CGFloat(resources.count) * rowHeight + spacingTotal)
 
@@ -427,21 +427,37 @@ final class ResourceChoiceOverlay: SKNode {
             rowContent.addChild(icon)
 
             let longTitle = kind.title.count > 24
+            let compactRow = rowHeight < 76
+            let titleWidth = rowWidth - 122
+            let bodyWidth = rowWidth - 154
+            let titleFontSize: CGFloat = longTitle
+                ? (compactRow ? 11.3 : 12.2)
+                : (compactRow ? 13.6 : 14.5)
+            let titleY: CGFloat = longTitle
+                ? (compactRow ? 18 : 23)
+                : (compactRow ? 18 : 20)
+            let blurbFontSize: CGFloat = longTitle
+                ? (compactRow ? 9.2 : 9.8)
+                : (compactRow ? 9.8 : 10.5)
+            let blurbY: CGFloat = longTitle
+                ? (compactRow ? -14 : -18)
+                : (compactRow ? -9 : -8)
+
             let name = makeLabel(kind.title,
-                                 fontSize: longTitle ? 12.8 : 14.5,
+                                 fontSize: titleFontSize,
                                  color: GameUI.ink,
                                  bold: true,
-                                 maxWidth: rowWidth - 154,
+                                 maxWidth: titleWidth,
                                  lines: longTitle ? 2 : 1)
-            name.position = CGPoint(x: -rowWidth / 2 + 74, y: 20)
+            name.position = CGPoint(x: -rowWidth / 2 + 74, y: titleY)
             rowContent.addChild(name)
 
             let blurb = makeLabel(kind.blurb,
-                                  fontSize: 10.5,
+                                  fontSize: blurbFontSize,
                                   color: GameUI.mutedInk,
-                                  maxWidth: rowWidth - 154,
+                                  maxWidth: bodyWidth,
                                   lines: 2)
-            blurb.position = CGPoint(x: -rowWidth / 2 + 74, y: -8)
+            blurb.position = CGPoint(x: -rowWidth / 2 + 74, y: blurbY)
             rowContent.addChild(blurb)
 
             let count = SKLabelNode(text: "x\(stock)")

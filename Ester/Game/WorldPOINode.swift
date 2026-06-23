@@ -1240,16 +1240,17 @@ enum WorldPOIArtworkFactory {
     private static func makeMusicShell(tint: UIColor) -> SKNode {
         let node = SKNode()
         let shellColor = UIColor.lerp(GameUI.gold, tint, 0.28)
-        let sand = makeSeafloorPatch(width: 86,
-                                     height: 28,
-                                     color: UIColor(red: 0.63, green: 0.52, blue: 0.34, alpha: 0.36),
-                                     stroke: shellColor.withAlphaComponent(0.20))
-        sand.position = CGPoint(x: -4, y: -30)
-        sand.zPosition = -3
-        node.addChild(sand)
+        let island = makeVegetatedIsland(width: 118,
+                                         height: 42,
+                                         tint: tint,
+                                         sandTint: shellColor,
+                                         plantCount: 7)
+        island.position = CGPoint(x: -5, y: -32)
+        island.zPosition = -5
+        node.addChild(island)
 
         let shell = makeShell(width: 58, height: 42, color: shellColor)
-        shell.position = CGPoint(x: -2, y: -8)
+        shell.position = CGPoint(x: -2, y: -7)
         node.addChild(shell)
 
         for i in 0..<3 {
@@ -1286,13 +1287,14 @@ enum WorldPOIArtworkFactory {
         let node = SKNode()
         let wood = UIColor(red: 0.45, green: 0.31, blue: 0.18, alpha: 1)
         let wetWood = UIColor.lerp(wood, tint, 0.22)
-        let sand = makeSeafloorPatch(width: 104,
-                                     height: 30,
-                                     color: UIColor(red: 0.59, green: 0.48, blue: 0.33, alpha: 0.38),
-                                     stroke: wetWood.withAlphaComponent(0.22))
-        sand.position = CGPoint(x: -2, y: -31)
-        sand.zPosition = -4
-        node.addChild(sand)
+        let island = makeVegetatedIsland(width: 132,
+                                         height: 44,
+                                         tint: tint,
+                                         sandTint: wetWood,
+                                         plantCount: 8)
+        island.position = CGPoint(x: -4, y: -34)
+        island.zPosition = -6
+        node.addChild(island)
 
         let hullPath = UIBezierPath()
         hullPath.move(to: CGPoint(x: -34, y: -12))
@@ -1926,6 +1928,59 @@ enum WorldPOIArtworkFactory {
                      fill: color,
                      stroke: stroke,
                      lineWidth: 0.9)
+    }
+
+    private static func makeVegetatedIsland(width: CGFloat,
+                                            height: CGFloat,
+                                            tint: UIColor,
+                                            sandTint: UIColor,
+                                            plantCount: Int) -> SKNode {
+        let node = SKNode()
+        let sand = UIColor(red: 0.62, green: 0.51, blue: 0.34, alpha: 1)
+        let base = makeSeafloorPatch(width: width,
+                                     height: height,
+                                     color: UIColor.lerp(sand, sandTint, 0.20).withAlphaComponent(0.52),
+                                     stroke: UIColor.lerp(sandTint, .black, 0.18).withAlphaComponent(0.28))
+        base.zPosition = -4
+        node.addChild(base)
+
+        let lowerShade = makeSeafloorPatch(width: width * 0.82,
+                                           height: height * 0.34,
+                                           color: UIColor.lerp(sand, .black, 0.32).withAlphaComponent(0.20),
+                                           stroke: .clear)
+        lowerShade.position = CGPoint(x: 4, y: -height * 0.18)
+        lowerShade.zPosition = -5
+        node.addChild(lowerShade)
+
+        let plantColor = UIColor.lerp(GameUI.algae, tint, 0.18)
+        for index in 0..<plantCount {
+            let denom = CGFloat(max(1, plantCount - 1))
+            let progress = CGFloat(index) / denom
+            let sideBias = progress < 0.5 ? -1.0 : 1.0
+            let x = -width * 0.42 + progress * width * 0.84
+            let heightJitter = CGFloat(index % 3) * 4
+            let leaf = makeLeaf(width: 5.2,
+                                height: 18 + heightJitter,
+                                color: plantColor.withAlphaComponent(0.62))
+            leaf.position = CGPoint(x: x, y: height * 0.06 + CGFloat(index % 2) * 2)
+            leaf.zRotation = CGFloat(sideBias) * 0.36 + CGFloat(index % 4) * 0.08
+            leaf.zPosition = -1
+            node.addChild(leaf)
+        }
+
+        for index in 0..<5 {
+            let x = -width * 0.32 + CGFloat(index) * width * 0.16
+            let pebble = ellipse(width: 6 + CGFloat(index % 2) * 2,
+                                 height: 3.6,
+                                 fill: UIColor.lerp(sandTint, .white, 0.18).withAlphaComponent(0.38),
+                                 stroke: UIColor.white.withAlphaComponent(0.10),
+                                 lineWidth: 0.4)
+            pebble.position = CGPoint(x: x, y: -height * 0.16 + CGFloat(index % 2) * 2)
+            pebble.zPosition = -2
+            node.addChild(pebble)
+        }
+
+        return node
     }
 
     private static func makeFish(length: CGFloat,
