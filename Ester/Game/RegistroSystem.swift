@@ -594,6 +594,16 @@ enum RegistroCatalog {
 }
 
 final class RegistroOverlay: SKNode {
+    private struct ViewState {
+        var showingMermaid = true
+        var selectedRegionIndex = 0
+        var selectedSpeciesId: String?
+        var selectedSpeciesByRegionId: [String: String] = [:]
+        var speciesPage = 0
+    }
+
+    private static var lastViewState = ViewState()
+
     private let size: CGSize
     private let insets: UIEdgeInsets
     private let stats: MermaidStats
@@ -608,8 +618,18 @@ final class RegistroOverlay: SKNode {
     private var scrollOffsets: [String: CGFloat] = [:]
     private var scrollMaxOffsets: [String: CGFloat] = [:]
     private var scrollViewFrames: [String: CGRect] = [:]
+    private var scrollContentNodes: [String: SKNode] = [:]
+    private var scrollThumbNodes: [String: SKNode] = [:]
+    private var scrollViewportHeights: [String: CGFloat] = [:]
+    private var scrollContentHeights: [String: CGFloat] = [:]
+    private var scrollThumbTravel: [String: CGFloat] = [:]
+    private var scrollThumbCenterY: [String: CGFloat] = [:]
     private var activeScrollKey: String?
     private var lastScrollTouchY: CGFloat = 0
+    private var touchStartPoint: CGPoint?
+    private var pendingTapName: String?
+    private var didMoveTouch = false
+    private var isClosing = false
 
     init(size: CGSize,
          insets: UIEdgeInsets,
@@ -620,6 +640,7 @@ final class RegistroOverlay: SKNode {
         self.stats = stats
         self.onClose = onClose
         super.init()
+        restoreViewState()
         isUserInteractionEnabled = true
         #if DEBUG
         RegistroCatalog.validateCatalogForDebug()
@@ -640,14 +661,19 @@ final class RegistroOverlay: SKNode {
     private var currentChapterIndex: Int { showingMermaid ? 0 : selectedRegionIndex + 1 }
 
     private func render() {
+        persistViewState()
         removeAllChildren()
         scrollViewFrames.removeAll()
         scrollMaxOffsets.removeAll()
+        scrollContentNodes.removeAll()
+        scrollThumbNodes.removeAll()
+        scrollViewportHeights.removeAll()
+        scrollContentHeights.removeAll()
+        scrollThumbTravel.removeAll()
+        scrollThumbCenterY.removeAll()
 
         let backdrop = SKShapeNode(rectOf: CGSize(width: size.width * 2, height: size.height * 2))
-        backdrop.fillTexture = GameUI.paperTexture(size: CGSize(width: size.width * 2, height: size.height * 2),
-                                                   base: GameUI.palePaper)
-        backdrop.fillColor = .white
+        backdrop.fillColor = GameUI.palePaper
         backdrop.strokeColor = .clear
         addChild(backdrop)
 
@@ -704,6 +730,27 @@ final class RegistroOverlay: SKNode {
         }
     }
 
+    private func restoreViewState() {
+        let saved = Self.lastViewState
+        let regions = RegionDiscoverySystem.menuRegions
+        showingMermaid = saved.showingMermaid
+        selectedRegionIndex = saved.selectedRegionIndex.clamped(to: 0...max(0, regions.count - 1))
+        selectedSpeciesId = saved.selectedSpeciesId
+        selectedSpeciesByRegionId = saved.selectedSpeciesByRegionId
+        speciesPage = max(0, saved.speciesPage)
+        if showingMermaid {
+            selectedSpeciesId = nil
+        }
+    }
+
+    private func persistViewState() {
+        Self.lastViewState = ViewState(showingMermaid: showingMermaid,
+                                       selectedRegionIndex: selectedRegionIndex,
+                                       selectedSpeciesId: selectedSpeciesId,
+                                       selectedSpeciesByRegionId: selectedSpeciesByRegionId,
+                                       speciesPage: speciesPage)
+    }
+
     private func addHeader(top: CGFloat, width: CGFloat, narrow: Bool) {
         let title = makeLabel("Registro", fontSize: narrow ? 23 : 24, bold: true, color: GameUI.ink)
         title.position = CGPoint(x: 0, y: top - 30)
@@ -731,12 +778,11 @@ final class RegistroOverlay: SKNode {
     }
 
     private func addCloseButton(top: CGFloat) {
-        let close = GameUI.pill(text: "Voltar",
-                                fontSize: 12,
-                                fill: [GameUI.coral.withAlphaComponent(0.92)],
-                                strokeColor: GameUI.coral.withAlphaComponent(0.55),
-                                minWidth: 86,
-                                height: 34)
+        let close = registroButton(text: "Voltar",
+                                   tint: GameUI.coral,
+                                   minWidth: 86,
+                                   height: 34,
+                                   fontSize: 12)
         close.name = "registro_close"
         close.position = CGPoint(x: size.width / 2 - 58, y: top - 34)
         close.zPosition = 6
@@ -765,24 +811,22 @@ final class RegistroOverlay: SKNode {
 
         let buttonWidth: CGFloat = 38
         let cardWidth = max(180, width - buttonWidth * 2 - 18)
-        let previous = GameUI.pill(text: "‹",
-                                   fontSize: 18,
-                                   fill: [tint.withAlphaComponent(0.82)],
-                                   strokeColor: tint.withAlphaComponent(0.38),
-                                   minWidth: buttonWidth,
-                                   height: 34)
+        let previous = registroButton(text: "‹",
+                                      tint: tint,
+                                      minWidth: buttonWidth,
+                                      height: 34,
+                                      fontSize: 18)
         previous.position = CGPoint(x: center.x - width / 2 + buttonWidth / 2, y: center.y)
         previous.zPosition = 6
         previous.name = "registro_chapter_prev"
         nameTree(previous, "registro_chapter_prev")
         addChild(previous)
 
-        let next = GameUI.pill(text: "›",
-                               fontSize: 18,
-                               fill: [tint.withAlphaComponent(0.82)],
-                               strokeColor: tint.withAlphaComponent(0.38),
-                               minWidth: buttonWidth,
-                               height: 34)
+        let next = registroButton(text: "›",
+                                  tint: tint,
+                                  minWidth: buttonWidth,
+                                  height: 34,
+                                  fontSize: 18)
         next.position = CGPoint(x: center.x + width / 2 - buttonWidth / 2, y: center.y)
         next.zPosition = 6
         next.name = "registro_chapter_next"
@@ -815,10 +859,9 @@ final class RegistroOverlay: SKNode {
     }
 
     private func addNavigationPanel(width: CGFloat, height: CGFloat, center: CGPoint) {
-        let panel = GameUI.card(size: CGSize(width: width, height: height),
-                                cornerRadius: 9,
-                                tint: GameUI.accent,
-                                baseColors: [GameUI.paper])
+        let panel = registroCard(size: CGSize(width: width, height: height),
+                                 cornerRadius: 9,
+                                 tint: GameUI.accent)
         panel.position = center
         panel.zPosition = 2
         addChild(panel)
@@ -943,8 +986,8 @@ final class RegistroOverlay: SKNode {
         addChild(count)
 
         let rowWidth = width - 42
-        let rowHeight: CGFloat = 88
-        let rowSpacing: CGFloat = 100
+        let rowHeight: CGFloat = 112
+        let rowSpacing: CGFloat = 124
         let viewportTop = center.y + height / 2 - 188
         let viewportBottom = center.y - height / 2 + 22
         let viewportHeight = max(148, viewportTop - viewportBottom)
@@ -1016,6 +1059,7 @@ final class RegistroOverlay: SKNode {
                 selectedSpeciesByRegionId[region.id] = selectedSpeciesId
             }
         }
+        persistViewState()
 
         let compact = usesNarrowLayout || width < 520
         let listWidth = compact ? width - 34 : min(width * 0.48, 240)
@@ -1025,20 +1069,28 @@ final class RegistroOverlay: SKNode {
         let listTop = bar.position.y - 28
         let rowHeight: CGFloat = compact ? 52 : 56
 
-        for (index, definition) in pageSpecies.enumerated() {
-            addSpeciesRow(definition,
-                          selected: definition.id == selectedSpeciesId,
-                          width: listWidth,
-                          height: rowHeight - 5,
-                          center: CGPoint(x: listX, y: listTop - CGFloat(index) * rowHeight))
+        if compact {
+            addSpeciesPicker(pageSpecies,
+                             selectedSpeciesId: selectedSpeciesId,
+                             width: listWidth,
+                             topY: listTop,
+                             centerX: listX)
+        } else {
+            for (index, definition) in pageSpecies.enumerated() {
+                addSpeciesRow(definition,
+                              selected: definition.id == selectedSpeciesId,
+                              width: listWidth,
+                              height: rowHeight - 5,
+                              center: CGPoint(x: listX, y: listTop - CGFloat(index) * rowHeight))
+            }
         }
 
         let controlsY: CGFloat
         let detailHeight: CGFloat
         let detailCenterY: CGFloat
         if compact {
-            controlsY = listTop - CGFloat(max(1, pageSpecies.count)) * rowHeight - 18
-            let detailTop = controlsY - 28
+            controlsY = listTop - 92
+            let detailTop = controlsY - 30
             let detailBottom = center.y - height / 2 + 14
             detailHeight = max(150, detailTop - detailBottom)
             detailCenterY = (detailTop + detailBottom) / 2
@@ -1062,13 +1114,82 @@ final class RegistroOverlay: SKNode {
     }
 
     private func addPanelBackground(width: CGFloat, height: CGFloat, center: CGPoint, tint: UIColor) {
-        let panel = GameUI.card(size: CGSize(width: width, height: height),
-                                cornerRadius: 9,
-                                tint: tint,
-                                baseColors: [GameUI.paper])
+        let panel = registroCard(size: CGSize(width: width, height: height),
+                                 cornerRadius: 9,
+                                 tint: tint)
         panel.position = center
         panel.zPosition = 2
         addChild(panel)
+    }
+
+    private func registroCard(size: CGSize, cornerRadius: CGFloat, tint: UIColor) -> SKNode {
+        let container = SKNode()
+
+        let shadow = SKShapeNode(rectOf: size, cornerRadius: cornerRadius)
+        shadow.fillColor = UIColor(white: 0, alpha: 0.18)
+        shadow.strokeColor = .clear
+        shadow.position = CGPoint(x: 2, y: -4)
+        shadow.zPosition = -2
+        container.addChild(shadow)
+
+        let base = SKShapeNode(rectOf: size, cornerRadius: cornerRadius)
+        base.fillColor = GameUI.paper
+        base.strokeColor = tint.withAlphaComponent(0.58)
+        base.lineWidth = 1.3
+        container.addChild(base)
+
+        let tab = SKShapeNode(rectOf: CGSize(width: max(12, size.width - 18), height: 4),
+                              cornerRadius: 2)
+        tab.fillColor = tint.withAlphaComponent(0.62)
+        tab.strokeColor = .clear
+        tab.position = CGPoint(x: 0, y: size.height / 2 - 9)
+        tab.zPosition = 2
+        container.addChild(tab)
+
+        let inner = SKShapeNode(rectOf: CGSize(width: size.width - 8, height: size.height - 8),
+                                cornerRadius: max(2, cornerRadius - 2))
+        inner.fillColor = .clear
+        inner.strokeColor = UIColor.white.withAlphaComponent(0.18)
+        inner.lineWidth = 1
+        inner.zPosition = 3
+        container.addChild(inner)
+
+        return container
+    }
+
+    private func registroButton(text: String,
+                                tint: UIColor,
+                                minWidth: CGFloat,
+                                height: CGFloat,
+                                fontSize: CGFloat,
+                                enabled: Bool = true) -> SKNode {
+        let container = SKNode()
+        let labelColor = enabled ? GameUI.ink : GameUI.mutedInk.withAlphaComponent(0.45)
+        let label = makeLabel(text, fontSize: fontSize, bold: true, color: labelColor)
+        label.zPosition = 4
+
+        let contentWidth = max(label.frame.width + 32, minWidth)
+        let background = SKShapeNode(rectOf: CGSize(width: contentWidth, height: height),
+                                     cornerRadius: min(12, height / 2))
+        background.fillColor = enabled
+            ? UIColor.lerp(GameUI.paper, tint, 0.16)
+            : GameUI.fadedPaper.withAlphaComponent(0.62)
+        background.strokeColor = tint.withAlphaComponent(enabled ? 0.42 : 0.18)
+        background.lineWidth = 1.15
+        background.zPosition = 0
+        container.addChild(background)
+
+        let highlight = SKShapeNode(rectOf: CGSize(width: contentWidth - 6, height: height - 6),
+                                    cornerRadius: min(9, (height - 6) / 2))
+        highlight.fillColor = .clear
+        highlight.strokeColor = UIColor.white.withAlphaComponent(enabled ? 0.22 : 0.10)
+        highlight.lineWidth = 0.8
+        highlight.zPosition = 1
+        container.addChild(highlight)
+
+        label.position = CGPoint(x: 0, y: -0.5)
+        container.addChild(label)
+        return container
     }
 
     private func addObservationRow(_ observation: RegistroMermaidObservation,
@@ -1088,7 +1209,7 @@ final class RegistroOverlay: SKNode {
         parent.addChild(bg)
 
         let seal = makeLabel(observation.unlocked ? "✓" : "?", fontSize: 18, bold: true, color: tint)
-        seal.position = CGPoint(x: center.x - width / 2 + 24, y: center.y + 12)
+        seal.position = CGPoint(x: center.x - width / 2 + 24, y: center.y + 10)
         seal.zPosition = 5
         parent.addChild(seal)
 
@@ -1097,7 +1218,7 @@ final class RegistroOverlay: SKNode {
                               bold: true,
                               color: GameUI.ink)
         title.horizontalAlignmentMode = .left
-        title.position = CGPoint(x: center.x - width / 2 + 52, y: center.y + 21)
+        title.position = CGPoint(x: center.x - width / 2 + 52, y: center.y + 30)
         title.preferredMaxLayoutWidth = width - 66
         title.numberOfLines = 1
         title.lineBreakMode = .byTruncatingTail
@@ -1108,7 +1229,8 @@ final class RegistroOverlay: SKNode {
                              fontSize: 12.2,
                              color: GameUI.mutedInk)
         body.horizontalAlignmentMode = .left
-        body.position = CGPoint(x: title.position.x, y: center.y - 6)
+        body.verticalAlignmentMode = .top
+        body.position = CGPoint(x: title.position.x, y: center.y + 8)
         body.preferredMaxLayoutWidth = width - 66
         body.numberOfLines = 3
         body.lineBreakMode = .byWordWrapping
@@ -1171,6 +1293,70 @@ final class RegistroOverlay: SKNode {
         row.addChild(detail)
     }
 
+    private func addSpeciesPicker(_ definitions: [RegistroSpeciesDefinition],
+                                  selectedSpeciesId: String?,
+                                  width: CGFloat,
+                                  topY: CGFloat,
+                                  centerX: CGFloat) {
+        let count = max(1, definitions.count)
+        let gap: CGFloat = 8
+        let tileWidth = min(74, max(52, (width - CGFloat(count - 1) * gap) / CGFloat(count)))
+        let tileHeight: CGFloat = 58
+        let totalWidth = CGFloat(count) * tileWidth + CGFloat(count - 1) * gap
+        let startX = centerX - totalWidth / 2 + tileWidth / 2
+        let y = topY - tileHeight / 2
+
+        for (index, definition) in definitions.enumerated() {
+            addSpeciesTile(definition,
+                           selected: definition.id == selectedSpeciesId,
+                           width: tileWidth,
+                           height: tileHeight,
+                           center: CGPoint(x: startX + CGFloat(index) * (tileWidth + gap), y: y))
+        }
+    }
+
+    private func addSpeciesTile(_ definition: RegistroSpeciesDefinition,
+                                selected: Bool,
+                                width: CGFloat,
+                                height: CGFloat,
+                                center: CGPoint) {
+        let discovered = stats.isSpeciesRegistered(definition.id)
+        let actionName = "registro_species_\(definition.id)"
+        let tint = discovered ? definition.category.registroTint : GameUI.mutedInk
+        let tile = SKNode()
+        tile.name = actionName
+        tile.position = center
+        tile.zPosition = 5
+        addChild(tile)
+
+        let bg = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 10)
+        bg.fillColor = selected
+            ? UIColor.lerp(GameUI.paper, tint, 0.20)
+            : UIColor.white.withAlphaComponent(discovered ? 0.30 : 0.16)
+        bg.strokeColor = selected ? tint.withAlphaComponent(0.76) : tint.withAlphaComponent(0.22)
+        bg.lineWidth = selected ? 1.7 : 0.9
+        bg.name = actionName
+        tile.addChild(bg)
+
+        let icon = FishNode.makeSpeciesDisplayNode(species: definition.species,
+                                                   discovered: discovered,
+                                                   scale: discovered ? 0.42 : 0.34)
+        icon.position = CGPoint(x: 0, y: 2)
+        icon.zPosition = 2
+        icon.name = actionName
+        tile.addChild(icon)
+
+        if selected {
+            let marker = SKShapeNode(rectOf: CGSize(width: max(20, width - 20), height: 4), cornerRadius: 2)
+            marker.fillColor = tint.withAlphaComponent(0.82)
+            marker.strokeColor = .clear
+            marker.position = CGPoint(x: 0, y: -height / 2 + 7)
+            marker.zPosition = 4
+            marker.name = actionName
+            tile.addChild(marker)
+        }
+    }
+
     private func addSpeciesDetail(_ definition: RegistroSpeciesDefinition,
                                   width: CGFloat,
                                   height: CGFloat,
@@ -1207,6 +1393,157 @@ final class RegistroOverlay: SKNode {
             let contentWidth = right - left
             let headerTextX = min(left + 110, right - 132)
             let headerWidth = max(124, right - headerTextX)
+
+            if compact {
+                let stageWidth = min(contentWidth, 248)
+                let stageHeight: CGFloat = 88
+                let stage = SKShapeNode(rectOf: CGSize(width: stageWidth, height: stageHeight), cornerRadius: 12)
+                stage.fillColor = UIColor.lerp(GameUI.paper, tint, 0.08)
+                stage.strokeColor = tint.withAlphaComponent(0.20)
+                stage.lineWidth = 1
+                stage.position = CGPoint(x: 0, y: top - stageHeight / 2)
+                stage.zPosition = 4
+                content.addChild(stage)
+
+                let art = FishNode.makeSpeciesDisplayNode(species: definition.species,
+                                                          discovered: discovered,
+                                                          scale: discovered ? 0.78 : 0.60)
+                art.position = stage.position
+                art.zPosition = 5
+                content.addChild(art)
+
+                let status = makeLabel(discovered ? "REGISTRADA" : "A DESCOBRIR",
+                                       fontSize: 11.4,
+                                       bold: true,
+                                       color: tint)
+                status.position = CGPoint(x: 0, y: top - stageHeight - 23)
+                status.zPosition = 5
+                content.addChild(status)
+
+                let titleText = discovered ? definition.commonName : "Espécie não registrada"
+                let titleFont: CGFloat = 17.2
+                let titleLineCount = estimateLineCount(titleText,
+                                                       width: contentWidth,
+                                                       fontSize: titleFont).clamped(to: 1...2)
+                let title = makeLabel(titleText,
+                                      fontSize: titleFont,
+                                      bold: true,
+                                      color: GameUI.ink)
+                title.position = CGPoint(x: 0, y: status.position.y - 29)
+                title.preferredMaxLayoutWidth = contentWidth
+                title.numberOfLines = titleLineCount
+                title.lineBreakMode = .byWordWrapping
+                title.zPosition = 5
+                content.addChild(title)
+
+                let identityText = discovered
+                    ? definition.scientificNote
+                    : "Nome científico e notas de campo ficam ocultos até a primeira conclusão."
+                let identityLineCount = estimateLineCount(identityText,
+                                                           width: contentWidth,
+                                                           fontSize: bodyFont).clamped(to: 2...4)
+                let identity = makeLabel(identityText,
+                                         fontSize: bodyFont,
+                                         color: GameUI.mutedInk)
+                identity.horizontalAlignmentMode = .left
+                identity.verticalAlignmentMode = .top
+                identity.position = CGPoint(x: left,
+                                            y: title.position.y - CGFloat(titleLineCount) * (titleFont + 5) - 12)
+                identity.preferredMaxLayoutWidth = contentWidth
+                identity.numberOfLines = identityLineCount
+                identity.lineBreakMode = .byWordWrapping
+                identity.zPosition = 5
+                content.addChild(identity)
+
+                let lines: [String]
+                if discovered {
+                    lines = [
+                        "Bioma: \(definition.biomeName) • \(definition.category.registroDisplayName)",
+                        "Zonas: \(definition.zoneText)"
+                    ]
+                } else {
+                    lines = [
+                        "Bioma: \(definition.biomeName)",
+                        "Zonas prováveis: \(definition.zoneText)",
+                        definition.unlockRequirementText
+                    ]
+                }
+
+                var y = identity.position.y - CGFloat(identityLineCount) * (bodyFont + 5) - 18
+                for line in lines {
+                    let metadataFont: CGFloat = 13.0
+                    let lineCount = estimateLineCount(line,
+                                                      width: contentWidth,
+                                                      fontSize: metadataFont).clamped(to: 1...3)
+                    let label = makeLabel(line,
+                                          fontSize: metadataFont,
+                                          bold: true,
+                                          color: GameUI.ink)
+                    label.horizontalAlignmentMode = .left
+                    label.verticalAlignmentMode = .top
+                    label.position = CGPoint(x: left, y: y)
+                    label.preferredMaxLayoutWidth = contentWidth
+                    label.numberOfLines = lineCount
+                    label.lineBreakMode = .byWordWrapping
+                    label.zPosition = 5
+                    content.addChild(label)
+                    y -= CGFloat(lineCount) * (metadataFont + 5) + 13
+                }
+
+                y -= 8
+                if discovered {
+                    y = addDetailBlock(to: content,
+                                       title: "Resumo",
+                                       body: definition.shortDescription,
+                                       topY: y,
+                                       x: left,
+                                       width: contentWidth,
+                                       tint: tint,
+                                       bodyFont: bodyFont)
+                    y = addDetailBlock(to: content,
+                                       title: "Observação",
+                                       body: definition.fieldObservation,
+                                       topY: y,
+                                       x: left,
+                                       width: contentWidth,
+                                       tint: tint,
+                                       bodyFont: bodyFont)
+                    y = addDetailBlock(to: content,
+                                       title: "Nota de campo",
+                                       body: definition.naturalHistoryNote,
+                                       topY: y,
+                                       x: left,
+                                       width: contentWidth,
+                                       tint: tint,
+                                       bodyFont: bodyFont)
+                    y = addDetailBlock(to: content,
+                                       title: "Papel no bioma",
+                                       body: definition.biomeRole,
+                                       topY: y,
+                                       x: left,
+                                       width: contentWidth,
+                                       tint: tint,
+                                       bodyFont: bodyFont)
+                    _ = addDetailBlock(to: content,
+                                       title: "Leitura visual",
+                                       body: definition.visualNotes,
+                                       topY: y,
+                                       x: left,
+                                       width: contentWidth,
+                                       tint: tint,
+                                       bodyFont: bodyFont)
+                } else {
+                    _ = addDetailBlock(to: content,
+                                       title: "Pista",
+                                       body: "A silhueta confirma que há algo para encontrar neste bioma, mas a ficha científica ainda está bloqueada.",
+                                       topY: y,
+                                       x: left,
+                                       width: contentWidth,
+                                       tint: tint,
+                                       bodyFont: bodyFont)
+                }
+                return
+            }
 
             let art = FishNode.makeSpeciesDisplayNode(species: definition.species,
                                                       discovered: discovered,
@@ -1398,15 +1735,71 @@ final class RegistroOverlay: SKNode {
         let compact = usesNarrowLayout || viewportWidth < 340
         let titleFont: CGFloat = compact ? 17.2 : 18.0
         let titleText = discovered ? definition.commonName : "Espécie não registrada"
+        let titleMeasureWidth = compact ? contentWidth : headerWidth
         let titleLines = estimateLineCount(titleText,
-                                           width: headerWidth,
+                                           width: titleMeasureWidth,
                                            fontSize: titleFont).clamped(to: 1...2)
         let identityText = discovered
             ? definition.scientificNote
             : "Nome científico e notas de campo ficam ocultos até a primeira conclusão."
+        let identityMeasureWidth = compact ? contentWidth : headerWidth
         let identityLines = estimateLineCount(identityText,
-                                              width: headerWidth,
+                                              width: identityMeasureWidth,
                                               fontSize: bodyFont).clamped(to: 2...4)
+        if compact {
+            let metadataLines: [String]
+            if discovered {
+                metadataLines = [
+                    "Bioma: \(definition.biomeName) • \(definition.category.registroDisplayName)",
+                    "Zonas: \(definition.zoneText)"
+                ]
+            } else {
+                metadataLines = [
+                    "Bioma: \(definition.biomeName)",
+                    "Zonas prováveis: \(definition.zoneText)",
+                    definition.unlockRequirementText
+                ]
+            }
+
+            let metadataFont: CGFloat = 13.0
+            let metadataLineHeight: CGFloat = metadataFont + 5
+            let metadataHeight = metadataLines.reduce(CGFloat(0)) { partial, line in
+                let lines = estimateLineCount(line,
+                                              width: contentWidth,
+                                              fontSize: metadataFont).clamped(to: 1...3)
+                return partial + CGFloat(lines) * metadataLineHeight + 13
+            }
+
+            var total: CGFloat = 150
+                + CGFloat(titleLines) * (titleFont + 5)
+                + CGFloat(identityLines) * (bodyFont + 5)
+                + metadataHeight
+
+            if discovered {
+                total += detailBlockHeight(body: definition.shortDescription,
+                                           width: contentWidth,
+                                           bodyFont: bodyFont)
+                total += detailBlockHeight(body: definition.fieldObservation,
+                                           width: contentWidth,
+                                           bodyFont: bodyFont)
+                total += detailBlockHeight(body: definition.naturalHistoryNote,
+                                           width: contentWidth,
+                                           bodyFont: bodyFont)
+                total += detailBlockHeight(body: definition.biomeRole,
+                                           width: contentWidth,
+                                           bodyFont: bodyFont)
+                total += detailBlockHeight(body: definition.visualNotes,
+                                           width: contentWidth,
+                                           bodyFont: bodyFont)
+            } else {
+                total += detailBlockHeight(body: "A silhueta confirma que há algo para encontrar neste bioma, mas a ficha científica ainda está bloqueada.",
+                                           width: contentWidth,
+                                           bodyFont: bodyFont)
+            }
+
+            return max(viewportHeight, total + 44)
+        }
+
         var total: CGFloat = 162
             + CGFloat(max(0, titleLines - 1)) * (titleFont + 4)
             + CGFloat(max(0, identityLines - 2)) * (bodyFont + 4)
@@ -1459,6 +1852,8 @@ final class RegistroOverlay: SKNode {
         let offset = min(max(scrollOffsets[key] ?? 0, 0), maxOffset)
         scrollOffsets[key] = offset
         scrollMaxOffsets[key] = maxOffset
+        scrollViewportHeights[key] = height
+        scrollContentHeights[key] = contentHeight
         scrollViewFrames[key] = CGRect(x: center.x - width / 2,
                                        y: center.y - height / 2,
                                        width: width,
@@ -1476,6 +1871,7 @@ final class RegistroOverlay: SKNode {
         let content = SKNode()
         content.position = CGPoint(x: 0, y: (height - contentHeight) / 2 + offset)
         buildContent(content, contentHeight)
+        scrollContentNodes[key] = content
         crop.addChild(content)
         addChild(crop)
 
@@ -1497,16 +1893,38 @@ final class RegistroOverlay: SKNode {
         thumb.position = CGPoint(x: track.position.x,
                                  y: center.y + travel / 2 - progress * travel)
         thumb.zPosition = 8
+        scrollThumbNodes[key] = thumb
+        scrollThumbTravel[key] = travel
+        scrollThumbCenterY[key] = center.y
         addChild(thumb)
     }
 
+    private func updateScrollViewPosition(for key: String) -> Bool {
+        guard let content = scrollContentNodes[key],
+              let height = scrollViewportHeights[key],
+              let contentHeight = scrollContentHeights[key],
+              let maxOffset = scrollMaxOffsets[key] else { return false }
+        let offset = min(max(scrollOffsets[key] ?? 0, 0), maxOffset)
+        content.position = CGPoint(x: content.position.x,
+                                   y: (height - contentHeight) / 2 + offset)
+
+        if let thumb = scrollThumbNodes[key],
+           let travel = scrollThumbTravel[key],
+           let centerY = scrollThumbCenterY[key] {
+            let progress = maxOffset > 0 ? offset / maxOffset : 0
+            thumb.position = CGPoint(x: thumb.position.x,
+                                     y: centerY + travel / 2 - progress * travel)
+        }
+        return true
+    }
+
     private func addPageControls(page: Int, maxPage: Int, center: CGPoint, width: CGFloat) {
-        let prev = GameUI.pill(text: "‹",
-                               fontSize: 18,
-                               fill: [page > 0 ? GameUI.accent : GameUI.fadedPaper],
-                               strokeColor: GameUI.accent.withAlphaComponent(0.35),
-                               minWidth: 42,
-                               height: 30)
+        let prev = registroButton(text: "‹",
+                                  tint: GameUI.accent,
+                                  minWidth: 42,
+                                  height: 30,
+                                  fontSize: 18,
+                                  enabled: page > 0)
         prev.position = CGPoint(x: center.x - width / 2 + 25, y: center.y)
         prev.zPosition = 6
         prev.name = "registro_prev"
@@ -1518,12 +1936,12 @@ final class RegistroOverlay: SKNode {
         label.zPosition = 6
         addChild(label)
 
-        let next = GameUI.pill(text: "›",
-                               fontSize: 18,
-                               fill: [page < maxPage ? GameUI.accent : GameUI.fadedPaper],
-                               strokeColor: GameUI.accent.withAlphaComponent(0.35),
-                               minWidth: 42,
-                               height: 30)
+        let next = registroButton(text: "›",
+                                  tint: GameUI.accent,
+                                  minWidth: 42,
+                                  height: 30,
+                                  fontSize: 18,
+                                  enabled: page < maxPage)
         next.position = CGPoint(x: center.x + width / 2 - 25, y: center.y)
         next.zPosition = 6
         next.name = "registro_next"
@@ -1625,106 +2043,156 @@ final class RegistroOverlay: SKNode {
         }?.key
     }
 
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else { return }
-        let point = touch.location(in: self)
-        activeScrollKey = scrollKey(containing: point)
-        lastScrollTouchY = point.y
+    private func requestClose() {
+        guard !isClosing else { return }
+        isClosing = true
+        isUserInteractionEnabled = false
+        activeScrollKey = nil
+        removeAllActions()
+        run(.sequence([
+            .wait(forDuration: 0),
+            .run { [weak self] in
+                self?.onClose()
+            }
+        ]))
+    }
+
+    private func actionableName(at point: CGPoint) -> String? {
         var node: SKNode? = atPoint(point)
         while let current = node {
             if let name = current.name {
-                if name == "registro_close" {
-                    onClose()
-                    return
-                }
-                if name == "registro_chapter_prev" {
-                    selectChapter(at: currentChapterIndex - 1)
-                    GameAudio.shared.play(.uiTap)
-                    render()
-                    return
-                }
-                if name == "registro_chapter_next" {
-                    selectChapter(at: currentChapterIndex + 1)
-                    GameAudio.shared.play(.uiTap)
-                    render()
-                    return
-                }
-                if name == "registro_mermaid" {
-                    selectChapter(at: 0)
-                    GameAudio.shared.play(.uiTap)
-                    render()
-                    return
-                }
-                if name.hasPrefix("registro_biome_"),
-                   let index = Int(String(name.dropFirst("registro_biome_".count))),
-                   RegionDiscoverySystem.menuRegions.indices.contains(index) {
-                    selectChapter(at: index + 1)
-                    GameAudio.shared.play(.uiTap)
-                    render()
-                    return
-                }
-                if name.hasPrefix("registro_species_") {
-                    let speciesId = String(name.dropFirst("registro_species_".count))
-                    if selectedSpeciesId == speciesId { return }
-                    if RegionDiscoverySystem.menuRegions.indices.contains(selectedRegionIndex) {
-                        let region = RegionDiscoverySystem.menuRegions[selectedRegionIndex]
-                        selectedSpeciesByRegionId[region.id] = speciesId
-                    }
-                    showingMermaid = false
-                    selectedSpeciesId = speciesId
-                    GameAudio.shared.play(.uiTap)
-                    render()
-                    return
-                }
-                if name == "registro_prev" {
-                    guard speciesPage > 0 else { return }
-                    speciesPage -= 1
-                    selectedSpeciesId = nil
-                    GameAudio.shared.play(.uiTap)
-                    render()
-                    return
-                }
-                if name == "registro_next" {
-                    let regions = RegionDiscoverySystem.menuRegions
-                    guard regions.indices.contains(selectedRegionIndex) else { return }
-                    let count = RegistroCatalog.species(in: regions[selectedRegionIndex]).count
-                    let maxPage = max(0, Int(ceil(CGFloat(count) / CGFloat(currentSpeciesPageSize))) - 1)
-                    guard speciesPage < maxPage else { return }
-                    speciesPage += 1
-                    selectedSpeciesId = nil
-                    GameAudio.shared.play(.uiTap)
-                    render()
-                    return
+                if name == "registro_close"
+                    || name == "registro_chapter_prev"
+                    || name == "registro_chapter_next"
+                    || name == "registro_mermaid"
+                    || name == "registro_prev"
+                    || name == "registro_next"
+                    || name.hasPrefix("registro_biome_")
+                    || name.hasPrefix("registro_species_") {
+                    return name
                 }
             }
             node = current.parent
         }
+        return nil
+    }
+
+    private func handleTap(named name: String) {
+        if name == "registro_close" {
+            requestClose()
+            return
+        }
+        if name == "registro_chapter_prev" {
+            selectChapter(at: currentChapterIndex - 1)
+            GameAudio.shared.play(.uiTap)
+            render()
+            return
+        }
+        if name == "registro_chapter_next" {
+            selectChapter(at: currentChapterIndex + 1)
+            GameAudio.shared.play(.uiTap)
+            render()
+            return
+        }
+        if name == "registro_mermaid" {
+            selectChapter(at: 0)
+            GameAudio.shared.play(.uiTap)
+            render()
+            return
+        }
+        if name.hasPrefix("registro_biome_"),
+           let index = Int(String(name.dropFirst("registro_biome_".count))),
+           RegionDiscoverySystem.menuRegions.indices.contains(index) {
+            selectChapter(at: index + 1)
+            GameAudio.shared.play(.uiTap)
+            render()
+            return
+        }
+        if name.hasPrefix("registro_species_") {
+            let speciesId = String(name.dropFirst("registro_species_".count))
+            if selectedSpeciesId == speciesId { return }
+            if RegionDiscoverySystem.menuRegions.indices.contains(selectedRegionIndex) {
+                let region = RegionDiscoverySystem.menuRegions[selectedRegionIndex]
+                selectedSpeciesByRegionId[region.id] = speciesId
+            }
+            showingMermaid = false
+            selectedSpeciesId = speciesId
+            GameAudio.shared.play(.uiTap)
+            render()
+            return
+        }
+        if name == "registro_prev" {
+            guard speciesPage > 0 else { return }
+            speciesPage -= 1
+            selectedSpeciesId = nil
+            GameAudio.shared.play(.uiTap)
+            render()
+            return
+        }
+        if name == "registro_next" {
+            let regions = RegionDiscoverySystem.menuRegions
+            guard regions.indices.contains(selectedRegionIndex) else { return }
+            let count = RegistroCatalog.species(in: regions[selectedRegionIndex]).count
+            let maxPage = max(0, Int(ceil(CGFloat(count) / CGFloat(currentSpeciesPageSize))) - 1)
+            guard speciesPage < maxPage else { return }
+            speciesPage += 1
+            selectedSpeciesId = nil
+            GameAudio.shared.play(.uiTap)
+            render()
+        }
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard !isClosing else { return }
+        guard let touch = touches.first else { return }
+        let point = touch.location(in: self)
+        activeScrollKey = scrollKey(containing: point)
+        lastScrollTouchY = point.y
+        touchStartPoint = point
+        pendingTapName = actionableName(at: point)
+        didMoveTouch = false
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first,
-              let key = activeScrollKey,
+        guard !isClosing else { return }
+        guard let touch = touches.first else { return }
+        let point = touch.location(in: self)
+        if let start = touchStartPoint, point.distance(to: start) > 8 {
+            didMoveTouch = true
+            pendingTapName = nil
+        }
+        guard let key = activeScrollKey,
               let maxOffset = scrollMaxOffsets[key],
               maxOffset > 1 else { return }
-        let point = touch.location(in: self)
         let deltaY = point.y - lastScrollTouchY
         guard abs(deltaY) > 0.5 else { return }
-        let nextOffset = min(max((scrollOffsets[key] ?? 0) - deltaY, 0), maxOffset)
+        let nextOffset = min(max((scrollOffsets[key] ?? 0) + deltaY, 0), maxOffset)
         guard abs(nextOffset - (scrollOffsets[key] ?? 0)) > 0.1 else {
             lastScrollTouchY = point.y
             return
         }
         scrollOffsets[key] = nextOffset
         lastScrollTouchY = point.y
-        render()
+        if !updateScrollViewPosition(for: key) {
+            render()
+        }
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if !isClosing, !didMoveTouch, let name = pendingTapName {
+            handleTap(named: name)
+        }
         activeScrollKey = nil
+        touchStartPoint = nil
+        pendingTapName = nil
+        didMoveTouch = false
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         activeScrollKey = nil
+        touchStartPoint = nil
+        pendingTapName = nil
+        didMoveTouch = false
     }
 }
 

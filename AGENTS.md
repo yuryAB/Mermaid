@@ -9,6 +9,17 @@
 - Lightweight checks that do not replace a build or test run, such as file reads, searches, `git diff --check`, and static inspections, may be used when they help validate an edit.
 - If a task truly requires a build or test run for diagnosis, explain that to the user and wait for explicit confirmation before running it.
 
+## Architecture And Ownership
+
+- Do not place new feature flows, modal lifecycles, overlay state, rendering logic, or domain-specific UI behavior directly in `GameScene.swift`.
+- `GameScene.swift` must stay an orchestration shell: route input, own scene-level wiring, and delegate feature work to dedicated systems/controllers.
+- Every new gameplay/UI flow must have an owning file/type under `Ester/Game/`, such as `RegistroFlowController.swift`, `RegionSystem.swift`, or `ResourceSupportSystem.swift`.
+- If a change needs scene-wide coordination, create a small coordinator/controller with explicit dependencies instead of adding broad state and lifecycle logic to `GameScene.swift`.
+- Before adding logic to `GameScene.swift`, first search for the existing owner. If none exists, create one and keep `GameScene.swift` changes to construction, dependency injection, and one-line delegation.
+- Do not hide feature state in unrelated systems or global helpers. State should live with its owner and expose narrow methods such as `open`, `close`, `update`, and `isOpen`.
+- Modal overlays must be true modals: they block background input/update paths through their flow owner and must not rely on scattered guards across unrelated methods.
+- When touching an existing messy area, move responsibility toward the correct owner instead of adding another special case in `GameScene.swift`.
+
 ## Icons And Assets
 
 - Before adding, exporting, renaming, resizing, replacing, or organizing icons/assets, read and follow `docs/ICON_EXPORT_INSTRUCTIONS.md`.

@@ -266,7 +266,7 @@ class GameScene: SKScene {
     private var challengeChoiceMenu: ChallengeChoiceOverlay?
     private var resourceChoiceMenu: ResourceChoiceOverlay?
     private var refugeStoreOverlay: RefugeStoreOverlay?
-    private var registroOverlay: RegistroOverlay?
+    private var registroFlow: RegistroFlowController!
     private var regionMenu: RegionMenuOverlay?
     private var refugeOverlay: RefugeOverlay?
     private var refugePortal: RefugePortalNode?
@@ -290,6 +290,9 @@ class GameScene: SKScene {
 #endif
     }
     private let showRigDebugButton = false
+    private var isRegistroOpen: Bool {
+        registroFlow?.isOpen == true
+    }
 
     private let ctx = GameContext()
     private var stats: MermaidStats!
@@ -343,6 +346,7 @@ class GameScene: SKScene {
         setupCamera()
         setupOceanBackdrop()
         setupHUD()
+        setupRegistroFlow()
         setupWarmCurrentOverlay()
         setupOceanDebugPanel()
         setupAmbientBubbles()
@@ -504,6 +508,24 @@ class GameScene: SKScene {
         }
         ctx.hud = hud
         cameraNode.addChild(hud)
+    }
+
+    private func setupRegistroFlow() {
+        registroFlow = RegistroFlowController(cameraNode: cameraNode,
+                                              hud: hud,
+                                              stats: stats,
+                                              sizeProvider: { [weak self] in
+                                                  self?.size ?? .zero
+                                              },
+                                              insetsProvider: { [weak self] in
+                                                  self?.view?.safeAreaInsets ?? .zero
+                                              },
+                                              isAutonomyPaused: { [weak self] in
+                                                  self?.ctx.autonomy.paused ?? false
+                                              },
+                                              setAutonomyPaused: { [weak self] paused in
+                                                  self?.ctx.autonomy.paused = paused
+                                              })
     }
 
     private func setupWarmCurrentOverlay() {
@@ -754,6 +776,11 @@ class GameScene: SKScene {
         lastUpdateTime = currentTime
         dt = min(dt, 0.1)
 
+        if isRegistroOpen {
+            updateWhileRegistroOpen(dt: dt)
+            return
+        }
+
         ctx.growth.update(dt: dt)
         ctx.autonomy.update(dt: dt)
         ctx.depth.update(dt: dt)
@@ -817,6 +844,33 @@ class GameScene: SKScene {
         worldChunkManager?.update(dt: dt,
                                   cameraPosition: cameraNode.position,
                                   region: activeRegion ?? ctx.activeRegion)
+        updateOceanBackdrop(dt: dt, waterColor: water)
+        if refugeOverlay == nil {
+            GameAudio.shared.updateOceanAmbience(for: ctx.depth.currentZone)
+        }
+
+        saveTimer += dt
+        if saveTimer > 20 {
+            saveTimer = 0
+            persistAndSave()
+        }
+    }
+
+    private func updateWhileRegistroOpen(dt: CGFloat) {
+        let mermaidPosition = ctx.mermaidPosition
+        let environment = ctx.depth.environment(atY: mermaidPosition.y)
+        var water = environment.waterColor
+        if let tint = ctx.regions.waterTint(at: mermaidPosition) {
+            water = .lerp(water, tint.color, tint.strength)
+        }
+        let warmCurrentLevel = ctx.pois.warmCurrentEnvironmentLevel(at: mermaidPosition)
+        if warmCurrentLevel > 0 {
+            water = .lerp(water,
+                          UIColor(red: 0.97, green: 0.48, blue: 0.30, alpha: 1),
+                          (0.18 + warmCurrentLevel * 0.34).clamped(to: 0...0.58))
+        }
+        backgroundColor = water
+        updateWarmCurrentOverlay(dt: dt, level: warmCurrentLevel)
         updateOceanBackdrop(dt: dt, waterColor: water)
         if refugeOverlay == nil {
             GameAudio.shared.updateOceanAmbience(for: ctx.depth.currentZone)
@@ -992,7 +1046,7 @@ class GameScene: SKScene {
               challengeChoiceMenu == nil,
               resourceChoiceMenu == nil,
               refugeStoreOverlay == nil,
-              registroOverlay == nil,
+              !isRegistroOpen,
               poiChallengeOffer == nil,
               !isChallengeOpen,
               refugeOverlay == nil else { return }
@@ -1050,7 +1104,7 @@ class GameScene: SKScene {
               resourceChoiceMenu == nil,
               regionMenu == nil,
               refugeStoreOverlay == nil,
-              registroOverlay == nil,
+              !isRegistroOpen,
               !isChallengeOpen,
               poiChallengeOffer == nil,
               refugeOverlay == nil,
@@ -1096,7 +1150,7 @@ class GameScene: SKScene {
               challengeChoiceMenu == nil,
               regionMenu == nil,
               refugeStoreOverlay == nil,
-              registroOverlay == nil,
+              !isRegistroOpen,
               !isChallengeOpen,
               poiChallengeOffer == nil,
               refugeOverlay == nil,
@@ -1141,7 +1195,7 @@ class GameScene: SKScene {
               resourceChoiceMenu == nil,
               challengeChoiceMenu == nil,
               regionMenu == nil,
-              registroOverlay == nil,
+              !isRegistroOpen,
               !isChallengeOpen,
               poiChallengeOffer == nil,
               refugeOverlay == nil,
@@ -1178,7 +1232,7 @@ class GameScene: SKScene {
     }
 
     func openRegistro(playSound: Bool = true) {
-        guard registroOverlay == nil,
+        guard !isRegistroOpen,
               refugeStoreOverlay == nil,
               resourceChoiceMenu == nil,
               challengeChoiceMenu == nil,
@@ -1187,26 +1241,11 @@ class GameScene: SKScene {
               poiChallengeOffer == nil,
               refugeOverlay == nil,
               rigDebugTool == nil else { return }
-        if playSound {
-            GameAudio.shared.play(.uiOpenPanel)
-        }
-        let overlay = RegistroOverlay(size: size,
-                                      insets: view?.safeAreaInsets ?? .zero,
-                                      stats: stats,
-                                      onClose: { [weak self] in
-                                          self?.closeRegistro()
-                                      })
-        overlay.zPosition = 190
-        cameraNode.addChild(overlay)
-        registroOverlay = overlay
+        registroFlow.open(playSound: playSound)
     }
 
     private func closeRegistro(playSound: Bool = true) {
-        if playSound && registroOverlay != nil {
-            GameAudio.shared.play(.uiClosePanel)
-        }
-        registroOverlay?.removeFromParent()
-        registroOverlay = nil
+        registroFlow.close(playSound: playSound)
     }
 
     private func purchaseRefugeStoreItem(_ item: RefugeShopItem) {
@@ -1364,7 +1403,7 @@ class GameScene: SKScene {
         guard refugeOverlay == nil,
               resourceChoiceMenu == nil,
               refugeStoreOverlay == nil,
-              registroOverlay == nil,
+              !isRegistroOpen,
               poiChallengeOffer == nil,
               !isChallengeOpen,
               refugePortal == nil else { return }
@@ -1464,7 +1503,7 @@ class GameScene: SKScene {
         guard !isChallengeOpen,
               challengeChoiceMenu == nil,
               resourceChoiceMenu == nil,
-              registroOverlay == nil,
+              !isRegistroOpen,
               poiChallengeOffer == nil,
               refugeOverlay == nil else { return }
         guard let kind = giver.offeredChallenge else { return }
@@ -1490,7 +1529,7 @@ class GameScene: SKScene {
         guard !isChallengeOpen,
               challengeChoiceMenu == nil,
               resourceChoiceMenu == nil,
-              registroOverlay == nil,
+              !isRegistroOpen,
               poiChallengeOffer == nil,
               refugeOverlay == nil else { return }
         pendingRegistroChallengeSpeciesId = nil
@@ -1503,7 +1542,7 @@ class GameScene: SKScene {
             && challengeChoiceMenu == nil
             && resourceChoiceMenu == nil
             && regionMenu == nil
-            && registroOverlay == nil
+            && !isRegistroOpen
             && poiChallengeOffer == nil
             && refugeOverlay == nil
             && rigDebugTool == nil
@@ -1555,7 +1594,7 @@ class GameScene: SKScene {
               challengeChoiceMenu == nil,
               resourceChoiceMenu == nil,
               regionMenu == nil,
-              registroOverlay == nil,
+              !isRegistroOpen,
               refugeOverlay == nil else { return }
         pendingPOIChallengeCompletion = onCompletion
         pendingRegistroChallengeSpeciesId = nil
@@ -1598,13 +1637,17 @@ class GameScene: SKScene {
                                   challengeGoal: Int,
                                   giverDisplay: SKNode?,
                                   hatching: Bool = false) {
+        guard !isRegistroOpen else {
+            pendingRegistroChallengeSpeciesId = nil
+            pendingPOIChallengeCompletion = nil
+            return
+        }
         guard hatching || kind.isAvailable else {
             pendingRegistroChallengeSpeciesId = nil
             pendingPOIChallengeCompletion = nil
             return
         }
         closeRegionMenu()
-        closeRegistro(playSound: false)
         closeChallengeChoiceMenu(playSound: false)
         closeResourceChoiceMenu(playSound: false)
         closePOIChallengeOffer(playSound: false)
@@ -1883,7 +1926,7 @@ class GameScene: SKScene {
               challengeChoiceMenu == nil,
               resourceChoiceMenu == nil,
               refugeStoreOverlay == nil,
-              registroOverlay == nil,
+              !isRegistroOpen,
               regionMenu == nil,
               poiChallengeOffer == nil,
               refugeOverlay == nil,

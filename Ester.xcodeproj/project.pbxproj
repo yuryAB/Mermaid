@@ -52,6 +52,9 @@
 		FAB1E1010000000000000005 /* AutonomySystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000005 /* AutonomySystem.swift */; };
 		FAB1E1010000000000000006 /* FoodSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000006 /* FoodSystem.swift */; };
 		FAB1E1010000000000000007 /* FishSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000007 /* FishSystem.swift */; };
+		FAB1E1010000000000000032 /* FishVisualModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000032 /* FishVisualModels.swift */; };
+		FAB1E1010000000000000033 /* FishDrawingFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000033 /* FishDrawingFactory.swift */; };
+		FAB1E1010000000000000034 /* FishNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000034 /* FishNode.swift */; };
 		FAB1E1010000000000000008 /* ShelterSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000008 /* ShelterSystem.swift */; };
 		FAB1E1010000000000000009 /* EventSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000009 /* EventSystem.swift */; };
 		FAB1E101000000000000000A /* GrowthSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000000A /* GrowthSystem.swift */; };
@@ -68,6 +71,7 @@
 		FAB1E101000000000000002E /* EchoMelodySystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000002E /* EchoMelodySystem.swift */; };
 		FAB1E101000000000000002B /* ReefAsteroidsSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000002B /* ReefAsteroidsSystem.swift */; };
 		FAB1E1010000000000000031 /* RegistroSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000031 /* RegistroSystem.swift */; };
+		FAB1E1010000000000000035 /* RegistroFlowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000035 /* RegistroFlowController.swift */; };
 		FAB1E1010000000000000011 /* WorldEnvironmentSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000011 /* WorldEnvironmentSystem.swift */; };
 		FAB1E101000000000000001F /* WorldEnvironmentModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000001F /* WorldEnvironmentModels.swift */; };
 		FAB1E1010000000000000020 /* WorldChunkFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000020 /* WorldChunkFactory.swift */; };
@@ -149,6 +153,9 @@
 		FAB1E0010000000000000005 /* AutonomySystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutonomySystem.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000006 /* FoodSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSystem.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000007 /* FishSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FishSystem.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000032 /* FishVisualModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FishVisualModels.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000033 /* FishDrawingFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FishDrawingFactory.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000034 /* FishNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FishNode.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000008 /* ShelterSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelterSystem.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000009 /* EventSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSystem.swift; sourceTree = "<group>"; };
 		FAB1E001000000000000000A /* GrowthSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrowthSystem.swift; sourceTree = "<group>"; };
@@ -165,6 +172,7 @@
 		FAB1E001000000000000002E /* EchoMelodySystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EchoMelodySystem.swift; sourceTree = "<group>"; };
 		FAB1E001000000000000002B /* ReefAsteroidsSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReefAsteroidsSystem.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000031 /* RegistroSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistroSystem.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000035 /* RegistroFlowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistroFlowController.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000011 /* WorldEnvironmentSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldEnvironmentSystem.swift; sourceTree = "<group>"; };
 		FAB1E001000000000000001F /* WorldEnvironmentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldEnvironmentModels.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000020 /* WorldChunkFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldChunkFactory.swift; sourceTree = "<group>"; };
@@ -358,6 +366,9 @@
 				FAB1E0010000000000000005 /* AutonomySystem.swift */,
 				FAB1E0010000000000000006 /* FoodSystem.swift */,
 				FAB1E0010000000000000007 /* FishSystem.swift */,
+				FAB1E0010000000000000034 /* FishNode.swift */,
+				FAB1E0010000000000000032 /* FishVisualModels.swift */,
+				FAB1E0010000000000000033 /* FishDrawingFactory.swift */,
 				FAB1E0010000000000000008 /* ShelterSystem.swift */,
 				FAB1E0010000000000000009 /* EventSystem.swift */,
 				FAB1E001000000000000000A /* GrowthSystem.swift */,
@@ -374,6 +385,7 @@
 				FAB1E001000000000000002E /* EchoMelodySystem.swift */,
 				FAB1E001000000000000002B /* ReefAsteroidsSystem.swift */,
 				FAB1E0010000000000000031 /* RegistroSystem.swift */,
+				FAB1E0010000000000000035 /* RegistroFlowController.swift */,
 				FAB1E0010000000000000011 /* WorldEnvironmentSystem.swift */,
 				FAB1E001000000000000001F /* WorldEnvironmentModels.swift */,
 				FAB1E0010000000000000020 /* WorldChunkFactory.swift */,
@@ -538,6 +550,9 @@
 				FAB1E1010000000000000005 /* AutonomySystem.swift in Sources */,
 				FAB1E1010000000000000006 /* FoodSystem.swift in Sources */,
 				FAB1E1010000000000000007 /* FishSystem.swift in Sources */,
+				FAB1E1010000000000000034 /* FishNode.swift in Sources */,
+				FAB1E1010000000000000032 /* FishVisualModels.swift in Sources */,
+				FAB1E1010000000000000033 /* FishDrawingFactory.swift in Sources */,
 				FAB1E1010000000000000008 /* ShelterSystem.swift in Sources */,
 				FAB1E1010000000000000009 /* EventSystem.swift in Sources */,
 				FAB1E101000000000000000A /* GrowthSystem.swift in Sources */,
@@ -554,6 +569,7 @@
 				FAB1E101000000000000002E /* EchoMelodySystem.swift in Sources */,
 				FAB1E101000000000000002B /* ReefAsteroidsSystem.swift in Sources */,
 				FAB1E1010000000000000031 /* RegistroSystem.swift in Sources */,
+				FAB1E1010000000000000035 /* RegistroFlowController.swift in Sources */,
 				FAB1E1010000000000000011 /* WorldEnvironmentSystem.swift in Sources */,
 				FAB1E101000000000000001F /* WorldEnvironmentModels.swift in Sources */,
 				FAB1E1010000000000000020 /* WorldChunkFactory.swift in Sources */,
