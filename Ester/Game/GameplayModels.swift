@@ -916,6 +916,10 @@ final class GameContext {
         hud?.showMessage(text)
     }
 
+    func showRegionMapCue(for region: Region, unlocked: Bool) {
+        hud?.showRegionMapCue(for: region, unlocked: unlocked)
+    }
+
 }
 
 // MARK: - Helpers

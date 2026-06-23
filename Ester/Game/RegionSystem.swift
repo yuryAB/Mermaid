@@ -445,6 +445,7 @@ final class RegionDiscoverySystem {
             return "Mapa encontrado, mas a região ainda não existe."
         }
         guard region.isAccessible(for: ctx.stats.phase) else {
+            ctx.showRegionMapCue(for: region, unlocked: false)
             return "\(region.name) foi marcado, mas só ficará disponível quando ela for \(region.minPhase.mapAccessDisplayName)."
         }
         if ctx.stats.isRegionKnown(region) {
@@ -458,6 +459,7 @@ final class RegionDiscoverySystem {
         ctx.stats.addMemory("\(source): recebeu mapa para \(region.name)")
         GameAudio.shared.play(.regionDiscover)
         ctx.scene?.showRegionDiscoveryCue(for: region)
+        ctx.showRegionMapCue(for: region, unlocked: true)
         return "Mapa desbloqueado: \(region.name)."
     }
 

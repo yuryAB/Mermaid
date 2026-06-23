@@ -55,6 +55,7 @@ final class HUDLayer: SKNode {
     private var messageContainer: SKNode!
     private var messageTitleLabel: SKLabelNode!
     private var messageLabel: SKLabelNode!
+    private var regionMapCue: SKNode?
     private var activeEffectsShelf: SKNode!
     private var activeEffectsSignature = ""
     private var touchCooldownChip: SKNode!
@@ -756,6 +757,223 @@ final class HUDLayer: SKNode {
             .wait(forDuration: holdTime),
             .fadeOut(withDuration: 0.45)
         ]))
+    }
+
+    func showRegionMapCue(for region: Region, unlocked: Bool) {
+        regionMapCue?.removeFromParent()
+
+        let panelWidth = min(sceneSize.width - 34, 364)
+        let panelHeight: CGFloat = unlocked ? 238 : 248
+        let availableTop = topPanelBottomY - 24
+        let availableBottom = buttonRowY(0) + 88
+        let lowerCenterY = availableBottom + panelHeight / 2 - 6
+        let upperCenterY = availableTop - panelHeight / 2 + 6
+        let middleY = (availableTop + availableBottom) / 2
+        let centerY = lowerCenterY <= upperCenterY
+            ? middleY.clamped(to: lowerCenterY...upperCenterY)
+            : middleY
+
+        let cue = SKNode()
+        cue.position = CGPoint(x: 0, y: centerY)
+        cue.zPosition = 34
+        cue.alpha = 0
+        cue.setScale(0.92)
+        addChild(cue)
+        regionMapCue = cue
+
+        let card = HUDLayer.paperCard(size: CGSize(width: panelWidth, height: panelHeight),
+                                      cornerRadius: 8,
+                                      fill: UIColor.lerp(HUDPalette.paper, region.tint, 0.05),
+                                      stroke: region.tint.withAlphaComponent(0.62),
+                                      shadowAlpha: 0.24)
+        card.zPosition = 1
+        cue.addChild(card)
+
+        let halfW = panelWidth / 2
+        let topY = panelHeight / 2
+        let artwork = makeRegionMapArtwork(for: region,
+                                           size: CGSize(width: min(128, panelWidth * 0.36), height: 102),
+                                           unlocked: unlocked)
+        artwork.position = CGPoint(x: -halfW + 78, y: topY - 82)
+        artwork.zPosition = 5
+        cue.addChild(artwork)
+
+        let eyebrow = makeLabel(text: unlocked ? "CARTA DE MAR" : "CARTA SELADA",
+                                fontSize: 8.6,
+                                style: .bodyBold,
+                                color: region.tint)
+        eyebrow.horizontalAlignmentMode = .left
+        eyebrow.position = CGPoint(x: -halfW + 146, y: topY - 39)
+        eyebrow.zPosition = 5
+        cue.addChild(eyebrow)
+
+        let title = makeLabel(text: region.name,
+                              fontSize: 18,
+                              style: .noteBold,
+                              color: HUDPalette.ink)
+        title.horizontalAlignmentMode = .left
+        title.preferredMaxLayoutWidth = panelWidth - 168
+        title.numberOfLines = 1
+        title.lineBreakMode = .byTruncatingTail
+        title.position = CGPoint(x: -halfW + 146, y: topY - 62)
+        title.zPosition = 5
+        cue.addChild(title)
+
+        let subtitle = makeLabel(text: region.blurb,
+                                 fontSize: 10.4,
+                                 style: .body,
+                                 color: HUDPalette.mutedInk)
+        subtitle.horizontalAlignmentMode = .left
+        subtitle.preferredMaxLayoutWidth = panelWidth - 168
+        subtitle.numberOfLines = 2
+        subtitle.lineBreakMode = .byWordWrapping
+        subtitle.position = CGPoint(x: -halfW + 146, y: topY - 91)
+        subtitle.zPosition = 5
+        cue.addChild(subtitle)
+
+        let divider = HUDLayer.pathNode(points: [
+            CGPoint(x: -halfW + 24, y: topY - 123),
+            CGPoint(x: halfW - 24, y: topY - 121)
+        ], color: HUDPalette.line.withAlphaComponent(0.24), width: 1)
+        divider.zPosition = 5
+        cue.addChild(divider)
+
+        let bodyText = unlocked
+            ? "A carta não é tesouro para guardar: ela abre caminho para outro mar. \(region.name) ficou no mapa de Expedição para vocês escolherem quando partir."
+            : "A carta aponta para outro mar, mas a rota ainda pede tempo. Guarde o sinal: \(region.name) desperta quando ela for \(region.minPhase.mapAccessDisplayName)."
+        let body = makeLabel(text: bodyText,
+                             fontSize: 12.0,
+                             style: .body,
+                             color: HUDPalette.ink)
+        body.horizontalAlignmentMode = .left
+        body.verticalAlignmentMode = .top
+        body.preferredMaxLayoutWidth = panelWidth - 48
+        body.numberOfLines = unlocked ? 4 : 5
+        body.lineBreakMode = .byWordWrapping
+        body.position = CGPoint(x: -halfW + 24, y: topY - 139)
+        body.zPosition = 5
+        cue.addChild(body)
+
+        let hintSize = CGSize(width: panelWidth - 48, height: 30)
+        let hint = HUDLayer.paperCard(size: hintSize,
+                                      cornerRadius: 8,
+                                      fill: HUDPalette.palePaper,
+                                      stroke: region.tint.withAlphaComponent(0.46),
+                                      shadowAlpha: 0.06)
+        hint.position = CGPoint(x: 0, y: -panelHeight / 2 + 27)
+        hint.zPosition = 5
+        cue.addChild(hint)
+
+        let icon = HUDLayer.iconNode(for: .travel, color: region.tint)
+        icon.setScale(0.72)
+        icon.position = CGPoint(x: -hintSize.width / 2 + 20, y: 0)
+        icon.zPosition = 6
+        hint.addChild(icon)
+
+        let hintText = makeLabel(text: unlocked
+                                 ? "Abra Expedição e toque no destino quando quiser viajar."
+                                 : "Expedição vai mostrar quando esta rota puder abrir.",
+                                 fontSize: 9.8,
+                                 style: .bodyBold,
+                                 color: HUDPalette.ink)
+        hintText.horizontalAlignmentMode = .left
+        hintText.preferredMaxLayoutWidth = hintSize.width - 50
+        hintText.numberOfLines = 2
+        hintText.position = CGPoint(x: -hintSize.width / 2 + 42, y: 0)
+        hintText.zPosition = 6
+        hint.addChild(hintText)
+
+        cue.run(.sequence([
+            .group([
+                .fadeAlpha(to: 1, duration: 0.20),
+                .scale(to: 1.0, duration: 0.20)
+            ]),
+            .wait(forDuration: unlocked ? 8.0 : 7.0),
+            .group([
+                .fadeOut(withDuration: 0.45),
+                .scale(to: 0.98, duration: 0.45)
+            ]),
+            .run { [weak self, weak cue] in
+                cue?.removeFromParent()
+                if self?.regionMapCue === cue {
+                    self?.regionMapCue = nil
+                }
+            }
+        ]))
+    }
+
+    private func makeRegionMapArtwork(for region: Region,
+                                      size: CGSize,
+                                      unlocked: Bool) -> SKNode {
+        let node = SKNode()
+        node.zRotation = -0.045
+
+        let map = SKShapeNode(rectOf: size, cornerRadius: 7)
+        map.fillTexture = HUDTexture.paper(size: size,
+                                           base: UIColor.lerp(HUDPalette.palePaper, region.tint, 0.08))
+        map.fillColor = .white
+        map.strokeColor = region.tint.withAlphaComponent(0.72)
+        map.lineWidth = 1.2
+        map.zPosition = 1
+        node.addChild(map)
+
+        let fold = HUDLayer.pathNode(points: [
+            CGPoint(x: -size.width * 0.16, y: -size.height / 2 + 6),
+            CGPoint(x: -size.width * 0.10, y: -size.height * 0.18),
+            CGPoint(x: -size.width * 0.18, y: size.height * 0.18),
+            CGPoint(x: -size.width * 0.12, y: size.height / 2 - 6)
+        ], color: HUDPalette.line.withAlphaComponent(0.22), width: 1)
+        fold.zPosition = 2
+        node.addChild(fold)
+
+        let route = UIBezierPath()
+        route.move(to: CGPoint(x: -size.width * 0.34, y: -size.height * 0.22))
+        route.addCurve(to: CGPoint(x: -size.width * 0.03, y: size.height * 0.08),
+                       controlPoint1: CGPoint(x: -size.width * 0.24, y: size.height * 0.06),
+                       controlPoint2: CGPoint(x: -size.width * 0.12, y: -size.height * 0.02))
+        route.addCurve(to: CGPoint(x: size.width * 0.30, y: size.height * 0.24),
+                       controlPoint1: CGPoint(x: size.width * 0.10, y: size.height * 0.24),
+                       controlPoint2: CGPoint(x: size.width * 0.18, y: size.height * 0.06))
+        let routeNode = HUDLayer.pathNode(path: route,
+                                          color: region.tint.withAlphaComponent(0.78),
+                                          width: 2.1)
+        routeNode.zPosition = 4
+        node.addChild(routeNode)
+
+        for point in [
+            CGPoint(x: -size.width * 0.34, y: -size.height * 0.22),
+            CGPoint(x: -size.width * 0.03, y: size.height * 0.08),
+            CGPoint(x: size.width * 0.30, y: size.height * 0.24)
+        ] {
+            let mark = SKShapeNode(circleOfRadius: 4)
+            mark.fillColor = HUDPalette.gold.withAlphaComponent(0.88)
+            mark.strokeColor = region.tint.withAlphaComponent(0.78)
+            mark.lineWidth = 0.8
+            mark.position = point
+            mark.zPosition = 5
+            node.addChild(mark)
+        }
+
+        let coast = HUDLayer.pathNode(points: [
+            CGPoint(x: -size.width * 0.42, y: size.height * 0.30),
+            CGPoint(x: -size.width * 0.28, y: size.height * 0.36),
+            CGPoint(x: -size.width * 0.20, y: size.height * 0.24),
+            CGPoint(x: -size.width * 0.08, y: size.height * 0.31),
+            CGPoint(x: size.width * 0.10, y: size.height * 0.22),
+            CGPoint(x: size.width * 0.24, y: size.height * 0.34)
+        ], color: HUDPalette.teal.withAlphaComponent(0.30), width: 1.2)
+        coast.zPosition = 3
+        node.addChild(coast)
+
+        let compass = GameUI.symbolIconNode(named: unlocked ? "sparkle.magnifyingglass" : "lock.fill",
+                                            fallback: unlocked ? "?" : "L",
+                                            color: unlocked ? HUDPalette.gold : HUDPalette.mutedInk,
+                                            size: 18)
+        compass.position = CGPoint(x: size.width * 0.28, y: -size.height * 0.28)
+        compass.zPosition = 6
+        node.addChild(compass)
+
+        return node
     }
 
     private func fieldNote(from rawText: String) -> (title: String, body: String) {
