@@ -8,6 +8,27 @@
 import Foundation
 import CoreGraphics
 
+enum MermaidMoodTone: Equatable {
+    case positive
+    case steady
+    case warning
+    case danger
+}
+
+enum MermaidMoodCue: Equatable {
+    case none
+    case encouraged
+    case currentLift
+    case currentStrain
+}
+
+struct MermaidEmotionalState {
+    let label: String
+    let emotion: MermaidEmotion
+    let tone: MermaidMoodTone
+    var isTransient: Bool = false
+}
+
 final class MermaidStats: Codable {
     static let defaultMermaidName = "Eistrelinha"
     private static var activeSessionStats: MermaidStats?
@@ -87,6 +108,8 @@ final class MermaidStats: Codable {
     // Estado transitório, não persiste
     var moodBoost: CGFloat = 0
     var scaredTimer: CGFloat = 0
+    private var moodCue: MermaidMoodCue = .none
+    private var moodCueTimer: CGFloat = 0
     private var regionIdsMigratedThisSession = false
     private var cheatSessionBaselineData: Data?
     private var cheatSessionPersistenceBlocked = false
@@ -192,6 +215,57 @@ final class MermaidStats: Codable {
     var disposition: CGFloat {
         get { mood }
         set { mood = newValue }
+    }
+
+    func emotionalState(for intent: MermaidIntent) -> MermaidEmotionalState {
+        if scaredTimer > 0 || intent == .avoidingDanger {
+            return .init(label: "assustada", emotion: .scared, tone: .danger, isTransient: true)
+        }
+
+        if moodCueTimer > 0 {
+            switch moodCue {
+            case .currentStrain:
+                if energy < 34 {
+                    return .init(label: "cansada", emotion: .tired, tone: .warning, isTransient: true)
+                }
+                return .init(label: "tensa", emotion: .surprised, tone: .warning, isTransient: true)
+            case .currentLift:
+                return .init(label: "embalada", emotion: .adventurous, tone: .positive, isTransient: true)
+            case .encouraged:
+                return .init(label: "animada", emotion: .happy, tone: .positive, isTransient: true)
+            case .none:
+                break
+            }
+        }
+
+        if intent == .eating { return .init(label: "alimentando", emotion: .eating, tone: .steady) }
+        if intent == .resting || energy < 18 { return .init(label: "exausta", emotion: .tired, tone: .danger) }
+        if energy < 35 { return .init(label: "cansada", emotion: .tired, tone: .warning) }
+        if hunger > 72 || intent == .seekingFood {
+            return .init(label: "faminta", emotion: .hungry, tone: .warning)
+        }
+        if disposition < 28 { return .init(label: "abatida", emotion: .sad, tone: .danger) }
+        if disposition < 50 { return .init(label: "sensível", emotion: .sad, tone: .warning) }
+
+        switch intent {
+        case .inChallenge, .seekingChallenge:
+            return .init(label: "corajosa", emotion: .adventurous, tone: .positive)
+        case .goingToObjective, .goingDeeper, .goingUp, .traveling, .enteringRefuge:
+            return .init(label: "concentrada", emotion: .focused, tone: .steady)
+        case .wandering, .observing, .followingFish:
+            return .init(label: "curiosa", emotion: .curious, tone: .steady)
+        case .interactingWithFish:
+            return .init(label: "brincalhona", emotion: .happy, tone: .positive)
+        default:
+            break
+        }
+
+        if hunger < 24 && energy > 70 && disposition > 70 {
+            return .init(label: "satisfeita", emotion: .satisfied, tone: .positive)
+        }
+        if disposition > 82 { return .init(label: "radiante", emotion: .happy, tone: .positive) }
+        if disposition > 70 { return .init(label: "animada", emotion: .happy, tone: .positive) }
+        return .init(label: "tranquila", emotion: .neutral, tone: .steady)
     }
 
     func highScore(for kind: ChallengeKind) -> Int {
@@ -737,14 +811,34 @@ final class MermaidStats: Codable {
 
     // MARK: - Ganhos
 
-    func boostMood(_ amount: CGFloat) {
+    func boostMood(_ amount: CGFloat, cue: MermaidMoodCue = .encouraged) {
         moodBoost = min(40, moodBoost + amount)
+        if amount >= 3 {
+            setMoodCue(cue, duration: 4.5)
+        }
     }
 
     func scare(duration: CGFloat) {
         scaredTimer = max(scaredTimer, duration)
         mood = max(0, mood - 8 * dispositionDrainMultiplier)
         moodBoost = max(-30, moodBoost - 10 * dispositionDrainMultiplier)
+        setMoodCue(.currentStrain, duration: min(4.5, duration))
+    }
+
+    func reactToCurrent(force: CGFloat, duration: CGFloat) {
+        let clampedForce = force.clamped(to: 0.75...1.25)
+        let isVulnerable = energy < 42 || disposition < 46
+        if isVulnerable || clampedForce > 1.08 {
+            let strain = (2.5 + clampedForce * 3.8) * dispositionDrainMultiplier
+            moodBoost = max(-30, moodBoost - strain)
+            if isVulnerable {
+                mood = max(0, mood - 1.5 * dispositionDrainMultiplier)
+            }
+            setMoodCue(.currentStrain, duration: duration + 1.2)
+        } else {
+            moodBoost = min(40, moodBoost + 1.5)
+            setMoodCue(.currentLift, duration: duration)
+        }
     }
 
     func addMemory(_ text: String) {
@@ -829,6 +923,19 @@ final class MermaidStats: Codable {
         if moodBoost > 0 { moodBoost = max(0, moodBoost - dt * 0.4) }
         if moodBoost < 0 { moodBoost = min(0, moodBoost + dt * 0.4 * dispositionDrainMultiplier) }
         if scaredTimer > 0 { scaredTimer -= dt }
+        if moodCueTimer > 0 {
+            moodCueTimer -= dt
+            if moodCueTimer <= 0 {
+                moodCue = .none
+                moodCueTimer = 0
+            }
+        }
+    }
+
+    private func setMoodCue(_ cue: MermaidMoodCue, duration: CGFloat) {
+        guard cue != .none, duration > 0 else { return }
+        moodCue = cue
+        moodCueTimer = max(moodCueTimer, duration)
     }
 
     // MARK: - Persistência

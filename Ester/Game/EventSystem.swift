@@ -198,14 +198,39 @@ final class EventSystem {
         driftDuration = .random(in: 4.2...5.4)
         driftResetTimer = driftDuration
         ctx.autonomy.drift = drift
+        let force = currentForce(for: drift)
+        ctx.stats.reactToCurrent(force: force, duration: driftDuration)
+        showCurrentReaction(force: force)
         spawnCurrentBurst(drift: drift, near: position)
         GameAudio.shared.play(.currentRush)
-        ctx.say("Uma correnteza passou! 🌊")
+        ctx.say(currentMessage(force: force))
     }
 
     private func drainEnergyFromCurrent(dt: CGFloat) {
-        let force = (activeCurrentDrift.length / 420).clamped(to: 0.75...1.25)
+        let force = currentForce(for: activeCurrentDrift)
         ctx.stats.energy = max(0, ctx.stats.energy - currentEnergyDrainPerSecond * force * dt)
+    }
+
+    private func currentForce(for drift: CGVector) -> CGFloat {
+        (drift.length / 420).clamped(to: 0.75...1.25)
+    }
+
+    private func showCurrentReaction(force: CGFloat) {
+        let state = ctx.stats.emotionalState(for: ctx.autonomy.intent)
+        let duration: CGFloat = force > 1.08 ? 1.8 : 1.3
+        ctx.mermaidEntity
+            .component(ofType: MermaidEmotionComponent.self)?
+            .show(state.emotion, duration: duration)
+    }
+
+    private func currentMessage(force: CGFloat) -> String {
+        if ctx.stats.energy < 34 {
+            return "A correnteza puxou forte; ela ficou cansada. 🌊"
+        }
+        if force > 1.08 || ctx.stats.disposition < 46 {
+            return "A correnteza passou perto; ela ficou tensa. 🌊"
+        }
+        return "A correnteza passou e ela entrou no embalo. 🌊"
     }
 
     private func spawnCurrentBurst(drift: CGVector, near position: CGPoint) {

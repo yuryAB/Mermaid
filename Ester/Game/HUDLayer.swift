@@ -1654,6 +1654,7 @@ final class HUDLayer: SKNode {
                  touchCooldownRemaining: TimeInterval,
                  bondRecoveryState: BondRecoveryHUDState) {
         let eggMode = stats.phase == .egg
+        let emotionalState = stats.emotionalState(for: intent)
         if setLabelText(titleLabel, "Registro da \(stats.mermaidName)") {
             fitLabelToWidth(titleLabel,
                             maxWidth: topPanelTitleMaxWidth,
@@ -1702,13 +1703,13 @@ final class HUDLayer: SKNode {
                             baseSize: 10,
                             minSize: 8)
         }
-        if setLabelText(moodLabel, "Humor: \(moodDescription(for: stats.disposition))") {
+        if setLabelText(moodLabel, "Humor: \(emotionalState.label)") {
             fitLabelToWidth(moodLabel,
                             maxWidth: topPanelMoodMaxWidth,
                             baseSize: 10,
                             minSize: 8)
         }
-        moodLabel.fontColor = moodTint(for: stats.disposition)
+        moodLabel.fontColor = moodTint(for: emotionalState.tone)
 
         let nourishment = 1 - stats.hunger / 100
         setBar("hunger", value: nourishment)
@@ -1740,8 +1741,8 @@ final class HUDLayer: SKNode {
         }
 
         if let mood = bars["mood"] {
-            mood.fillColor = moodTint(for: stats.disposition).withAlphaComponent(
-                stats.disposition < 35 ? 0.86 : 0.74
+            mood.fillColor = moodTint(for: emotionalState.tone).withAlphaComponent(
+                emotionalState.tone == .danger ? 0.86 : 0.74
             )
         }
 
@@ -2027,28 +2028,15 @@ final class HUDLayer: SKNode {
         bars[key]?.xScale = value.clamped(to: 0.02...1)
     }
 
-    private func moodDescription(for value: CGFloat) -> String {
-        switch value.clamped(to: 0...100) {
-        case 85...:
-            return "radiante"
-        case 70..<85:
-            return "animada"
-        case 50..<70:
-            return "tranquila"
-        case 30..<50:
-            return "sensível"
-        default:
-            return "abatida"
-        }
-    }
-
-    private func moodTint(for value: CGFloat) -> UIColor {
-        switch value.clamped(to: 0...100) {
-        case 70...:
+    private func moodTint(for tone: MermaidMoodTone) -> UIColor {
+        switch tone {
+        case .positive:
             return HUDPalette.algae
-        case 45..<70:
+        case .steady:
+            return HUDPalette.teal
+        case .warning:
             return HUDPalette.gold
-        default:
+        case .danger:
             return HUDPalette.coral
         }
     }

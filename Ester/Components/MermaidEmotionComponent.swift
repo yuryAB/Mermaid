@@ -298,7 +298,7 @@ final class MermaidEmotionComponent: GKComponent {
             }
         }
 
-        let emotion = overrideEmotion ?? emotion(for: intent, stats: stats)
+        let emotion = overrideEmotion ?? stats.emotionalState(for: intent).emotion
         if let overrideExpression {
             setExpression(overrideExpression, animated: true)
         } else {
@@ -333,32 +333,6 @@ final class MermaidEmotionComponent: GKComponent {
         currentExpression = expression
         activeBasePose = MermaidExpressionLibrary.pose(named: expression)
         mermaid.applyFacePose(activeBasePose, animated: animated)
-    }
-
-    private func emotion(for intent: MermaidIntent, stats: MermaidStats) -> MermaidEmotion {
-        if intent == .avoidingDanger { return .scared }
-        if intent == .eating { return .eating }
-        if intent == .resting || stats.energy < 18 { return .tired }
-        if stats.hunger > 72 || intent == .seekingFood { return .hungry }
-
-        switch intent {
-        case .inChallenge, .seekingChallenge:
-            return .adventurous
-        case .goingToObjective, .goingDeeper, .goingUp, .traveling, .enteringRefuge:
-            return .focused
-        case .wandering, .observing, .followingFish:
-            return .curious
-        case .interactingWithFish:
-            return .happy
-        default:
-            break
-        }
-
-        if stats.scaredTimer > 0 { return .scared }
-        if stats.disposition < 28 { return .sad }
-        if stats.hunger < 24 && stats.energy > 70 && stats.disposition > 70 { return .satisfied }
-        if stats.disposition > 82 { return .happy }
-        return .neutral
     }
 
     private func updateBlink(dt: CGFloat, emotion: MermaidEmotion) {

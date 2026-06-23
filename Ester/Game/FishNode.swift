@@ -257,7 +257,7 @@ final class FishNode: SKNode, ChallengeGiver {
                 motionMode = .normal
                 return false
             }
-            updatePlayingMotion(dt: dt, center: center)
+            updatePlayingMotion(dt: dt, center: center, mermaidPosition: mermaidPosition)
             return true
         }
     }
@@ -325,14 +325,26 @@ final class FishNode: SKNode, ChallengeGiver {
         }
     }
 
-    private func updatePlayingMotion(dt: CGFloat, center: CGPoint) {
+    private func updatePlayingMotion(dt: CGFloat, center: CGPoint, mermaidPosition: CGPoint) {
         verticalPhase += dt * CGFloat(2.4)
-        playPhase += dt * CGFloat(1.7)
-        let orbitX = cos(playPhase) * CGFloat(90)
-        let orbitY = sin(playPhase * CGFloat(1.2)) * CGFloat(54)
-        let desired = CGPoint(x: center.x + orbitX,
-                              y: center.y + orbitY)
-        swimToward(desired, speed: CGFloat(92), dt: dt, bob: CGFloat(3))
+        playPhase += dt * CGFloat(1.45)
+        let liveCenter = CGPoint(x: center.x * CGFloat(0.35) + mermaidPosition.x * CGFloat(0.65),
+                                 y: center.y * CGFloat(0.35) + mermaidPosition.y * CGFloat(0.65))
+        let orbitX = cos(playPhase) * CGFloat(145)
+        let orbitY = sin(playPhase * CGFloat(1.18)) * CGFloat(82)
+        var desired = CGPoint(x: liveCenter.x + orbitX,
+                              y: liveCenter.y + orbitY)
+
+        let distanceFromMermaid = desired.distance(to: mermaidPosition)
+        if distanceFromMermaid < CGFloat(105) {
+            let dx = desired.x - mermaidPosition.x
+            let dy = desired.y - mermaidPosition.y
+            let distance = max(CGFloat(1), sqrt(dx * dx + dy * dy))
+            desired.x = mermaidPosition.x + dx / distance * CGFloat(105)
+            desired.y = mermaidPosition.y + dy / distance * CGFloat(105)
+        }
+
+        swimToward(desired, speed: CGFloat(124), dt: dt, bob: CGFloat(3))
     }
 
     private func swimToward(_ point: CGPoint, speed: CGFloat, dt: CGFloat, bob: CGFloat) {
@@ -353,5 +365,4 @@ final class FishNode: SKNode, ChallengeGiver {
         position.y = position.y.clamped(to: (range.lowerBound + 60)...(range.upperBound - 60))
     }
 }
-
 

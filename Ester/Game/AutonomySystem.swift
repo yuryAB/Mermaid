@@ -86,6 +86,10 @@ final class AutonomySystem {
         static let meetDistance: CGFloat = 120
         static let guideChanceOnTouch: CGFloat = 0.58
         static let guidanceFollowDistance: CGFloat = 190
+        static let gatherSideOffset: CGFloat = 130
+        static let mermaidPlayRadiusX: CGFloat = 170
+        static let mermaidPlayRadiusY: CGFloat = 72
+        static let mermaidPlaySpeed: CGFloat = 0.68
     }
 
     private enum FishCompanionAction {
@@ -1333,17 +1337,14 @@ final class AutonomySystem {
         playFishTarget?.resumeNaturalSwimming()
         playFishTarget = fish
         touchFishTarget = fish
-        let midpoint = CGPoint(x: (position.x + fish.position.x) / 2,
-                               y: (position.y + fish.position.y) / 2)
-        let range = ctx.depth.allowedYRange()
-        let meetPoint = CGPoint(x: midpoint.x.clamped(to: horizontalRange),
-                                y: midpoint.y.clamped(to: range))
+        let meetPoint = fishPlayGatherPoint(for: fish)
         fishPlayMeetPoint = meetPoint
         fishPlayAnchor = nil
         fishPlayUntil = nil
         fishPlayPhase = 0
         target = meetPoint
-        fish.gatherForPlay(at: meetPoint, duration: FishPlayBalance.gatherDuration)
+        fish.gatherForPlay(at: fishPlayFishGatherPoint(for: fish, mermaidPoint: meetPoint),
+                           duration: FishPlayBalance.gatherDuration)
         stats.addTimedBuff(.fishPlay,
                            title: "Indo brincar",
                            duration: FishPlayBalance.gatherDuration)
@@ -1362,9 +1363,8 @@ final class AutonomySystem {
                 finishFishPlay(with: fish)
                 return
             }
-            fishPlayPhase += dt * 1.6
-            target = CGPoint(x: anchor.x + cos(fishPlayPhase + .pi) * 72,
-                             y: anchor.y + sin(fishPlayPhase * 1.15 + .pi) * 44)
+            fishPlayPhase += dt * FishPlayBalance.mermaidPlaySpeed
+            target = mermaidPlayPoint(around: anchor, phase: fishPlayPhase)
             return
         }
 
@@ -1377,21 +1377,52 @@ final class AutonomySystem {
     }
 
     private func beginActiveFishPlay(with fish: FishNode) {
-        let range = ctx.depth.allowedYRange()
-        let midpoint = CGPoint(x: (position.x + fish.position.x) / 2,
-                               y: (position.y + fish.position.y) / 2)
-        let anchor = CGPoint(x: midpoint.x.clamped(to: horizontalRange),
-                             y: midpoint.y.clamped(to: range))
+        let anchor = fishPlayAnchorPoint(for: fish)
         fishPlayAnchor = anchor
         fishPlayMeetPoint = nil
         fishPlayUntil = Date().addingTimeInterval(FishPlayBalance.playDuration)
         fishPlayPhase = 0
-        target = anchor
+        target = mermaidPlayPoint(around: anchor, phase: fishPlayPhase)
         fish.startPlaying(around: anchor, duration: FishPlayBalance.playDuration)
         stats.addTimedBuff(.fishPlay,
                            title: "Brincando com peixe",
                            duration: FishPlayBalance.playDuration)
         ctx.say("\(stats.mermaidName) e o peixinho chegaram pertinho e começaram a brincar.")
+    }
+
+    private func fishPlayGatherPoint(for fish: FishNode) -> CGPoint {
+        let midpoint = CGPoint(x: (position.x + fish.position.x) / 2,
+                               y: (position.y + fish.position.y) / 2)
+        let dx = fish.position.x - position.x
+        let dy = fish.position.y - position.y
+        let distance = max(CGFloat(1), sqrt(dx * dx + dy * dy))
+        let side: CGFloat = fish.position.x >= position.x ? 1 : -1
+        let perpendicular = CGVector(dx: -dy / distance * side,
+                                     dy: dx / distance * side)
+        let point = CGPoint(x: midpoint.x + perpendicular.dx * FishPlayBalance.gatherSideOffset,
+                            y: midpoint.y + perpendicular.dy * FishPlayBalance.gatherSideOffset)
+        return boundedTarget(point, yRange: ctx.depth.allowedYRange())
+    }
+
+    private func fishPlayAnchorPoint(for fish: FishNode) -> CGPoint {
+        let basePoint = fishPlayMeetPoint ?? CGPoint(x: (position.x + fish.position.x) / 2,
+                                                     y: (position.y + fish.position.y) / 2)
+        return boundedTarget(basePoint, yRange: ctx.depth.allowedYRange())
+    }
+
+    private func fishPlayFishGatherPoint(for fish: FishNode, mermaidPoint: CGPoint) -> CGPoint {
+        let dx = fish.position.x - position.x
+        let dy = fish.position.y - position.y
+        let distance = max(CGFloat(1), sqrt(dx * dx + dy * dy))
+        let point = CGPoint(x: mermaidPoint.x + dx / distance * CGFloat(145),
+                            y: mermaidPoint.y + dy / distance * CGFloat(82))
+        return boundedTarget(point, yRange: ctx.depth.allowedYRange())
+    }
+
+    private func mermaidPlayPoint(around anchor: CGPoint, phase: CGFloat) -> CGPoint {
+        let point = CGPoint(x: anchor.x + cos(phase + .pi) * FishPlayBalance.mermaidPlayRadiusX,
+                            y: anchor.y + sin(phase * 1.35 + .pi) * FishPlayBalance.mermaidPlayRadiusY)
+        return boundedTarget(point, yRange: ctx.depth.allowedYRange())
     }
 
     private func finishFishPlay(with fish: FishNode) {
