@@ -334,13 +334,45 @@ final class RefugeOverlay: SKNode {
     private var statusLabel: SKLabelNode!
     private var foodLabel: SKLabelNode!
     private var careLabel: SKLabelNode!
-    private var upgradeLabel: SKLabelNode!
     private var pearlsLabel: SKLabelNode!
+    private var memoryLabel: SKLabelNode!
+    private var behaviorLabel: SKLabelNode!
     private var refreshTimer: CGFloat = 0
+    private var behaviorTimer: CGFloat = 1.1
+    private var restingBoostTimer: CGFloat = 0
     private var displayMermaid: Mermaid?
     private var enhancementsOverlay: RefugeEnhancementsOverlay?
     private var storeOverlay: RefugeStoreOverlay?
     private let safeAreaInsets: UIEdgeInsets
+    private var restPoint: CGPoint = .zero
+    private var upgradePoint: CGPoint = .zero
+    private var storePoint: CGPoint = .zero
+    private var memoryPoint: CGPoint = .zero
+    private var driftPoints: [CGPoint] = []
+    private var currentBehavior: RefugeBehavior = .drifting
+    private var mermaidBaseScale: CGFloat = 1
+    private var memoryDisplayNodes: [SKNode] = []
+    private var memoryShelfNode: SKNode?
+    private var renderedMemoryKey = ""
+    private let mermaidBubbleLayer = SKNode()
+
+    private enum RefugeBehavior: CaseIterable {
+        case drifting
+        case resting
+        case observingMemories
+        case visitingUpgrade
+        case visitingStore
+
+        var label: String {
+            switch self {
+            case .drifting: return "nado lento pelo refúgio"
+            case .resting: return "descansando na cama de algas"
+            case .observingMemories: return "observando lembranças"
+            case .visitingUpgrade: return "conversando com o inventor"
+            case .visitingStore: return "visitando a lojista"
+            }
+        }
+    }
 
     init(size: CGSize,
          insets: UIEdgeInsets,
@@ -362,8 +394,9 @@ final class RefugeOverlay: SKNode {
     private func build(size: CGSize, insets: UIEdgeInsets) {
         let topEdge = size.height / 2 - insets.top
         let bottomEdge = -size.height / 2 + insets.bottom
+        let sideInset: CGFloat = 22
+        let contentWidth = size.width - sideInset * 2
 
-        // página do diário do refúgio
         let backdrop = SKShapeNode(rectOf: CGSize(width: size.width * 2, height: size.height * 2))
         backdrop.fillTexture = GameUI.paperTexture(size: CGSize(width: size.width * 2, height: size.height * 2),
                                                    base: GameUI.palePaper)
@@ -371,13 +404,83 @@ final class RefugeOverlay: SKNode {
         backdrop.strokeColor = .clear
         addChild(backdrop)
 
-        // bolhas suaves subindo
+        buildWaterBands(size: size)
+        buildAmbientBubbles(size: size)
+
+        let title = makeLabel(fontSize: 21, bold: true)
+        title.text = "Registro do Refúgio"
+        title.position = CGPoint(x: 0, y: topEdge - 42)
+        addChild(title)
+
+        let subtitle = makeLabel(fontSize: 12)
+        subtitle.text = "dimensão de descanso, cuidado e observação"
+        subtitle.fontColor = GameUI.mutedInk
+        subtitle.position = CGPoint(x: 0, y: topEdge - 64)
+        addChild(subtitle)
+
+        let closeButton = makeActionButton(name: "refuge_close",
+                                           text: "Voltar",
+                                           width: min(220, contentWidth * 0.58),
+                                           height: 44,
+                                           tint: GameUI.accent)
+        closeButton.position = CGPoint(x: 0, y: bottomEdge + 38)
+        closeButton.zPosition = 8
+        addChild(closeButton)
+
+        let recordHeight = min(206, max(176, size.height * 0.25))
+        let recordCenterY = bottomEdge + 94 + recordHeight / 2
+        let environmentBottom = recordCenterY + recordHeight / 2 + 20
+        let environmentTop = topEdge - 92
+        let environmentHeight = max(220, environmentTop - environmentBottom)
+        let environmentCenterY = (environmentTop + environmentBottom) / 2
+
+        buildRefugeEnvironment(size: size,
+                               width: contentWidth,
+                               top: environmentTop,
+                               bottom: environmentBottom,
+                               centerY: environmentCenterY,
+                               height: environmentHeight)
+        buildObservationRecord(width: contentWidth,
+                               height: recordHeight,
+                               centerY: recordCenterY)
+        buildMermaid(in: CGSize(width: contentWidth, height: environmentHeight),
+                     centerY: environmentCenterY)
+
+        refreshLabels()
+        chooseNextBehavior(force: .drifting)
+    }
+
+    private func buildWaterBands(size: CGSize) {
+        let colors = [
+            GameUI.accent.withAlphaComponent(0.10),
+            GameUI.algae.withAlphaComponent(0.08),
+            GameUI.coral.withAlphaComponent(0.055)
+        ]
+        for index in 0..<5 {
+            let path = UIBezierPath()
+            let y = -size.height / 2 + CGFloat(index + 1) * size.height / 6
+            path.move(to: CGPoint(x: -size.width / 2 - 40, y: y))
+            path.addCurve(to: CGPoint(x: size.width / 2 + 40, y: y + CGFloat(index % 2 == 0 ? 18 : -16)),
+                          controlPoint1: CGPoint(x: -size.width * 0.18, y: y + 34),
+                          controlPoint2: CGPoint(x: size.width * 0.24, y: y - 30))
+            let wave = SKShapeNode(path: path.cgPath)
+            wave.strokeColor = colors[index % colors.count]
+            wave.lineWidth = 18
+            wave.lineCap = .round
+            wave.zPosition = 0.2
+            addChild(wave)
+        }
+    }
+
+    private func buildAmbientBubbles(size: CGSize) {
         for i in 0..<6 {
             let bubble = SKShapeNode(circleOfRadius: .random(in: 4...10))
             bubble.fillColor = GameUI.accent.withAlphaComponent(0.08)
             bubble.strokeColor = GameUI.accent.withAlphaComponent(0.24)
+            bubble.lineWidth = 1
             bubble.position = CGPoint(x: .random(in: -size.width / 2...size.width / 2),
                                       y: .random(in: -size.height / 2...0))
+            bubble.zPosition = 0.5
             addChild(bubble)
             let rise = SKAction.repeatForever(.sequence([
                 .moveBy(x: .random(in: -20...20), y: size.height, duration: Double.random(in: 9...14)),
@@ -385,155 +488,157 @@ final class RefugeOverlay: SKNode {
             ]))
             bubble.run(.sequence([.wait(forDuration: Double(i)), rise]))
         }
+    }
 
-        let title = SKLabelNode(text: "Registro do Refúgio")
-        title.fontName = "AvenirNext-DemiBold"
-        title.fontSize = 21
-        title.fontColor = GameUI.ink
-        title.position = CGPoint(x: 0, y: topEdge - 52)
-        addChild(title)
+    private func buildRefugeEnvironment(size: CGSize,
+                                        width: CGFloat,
+                                        top: CGFloat,
+                                        bottom: CGFloat,
+                                        centerY: CGFloat,
+                                        height: CGFloat) {
+        let stage = SKNode()
+        stage.zPosition = 1
+        addChild(stage)
 
-        let subtitle = SKLabelNode(text: "abrigo portátil catalogado para descanso e cuidado")
-        subtitle.fontName = "AvenirNext-Regular"
-        subtitle.fontSize = 12
-        subtitle.fontColor = GameUI.mutedInk
-        subtitle.position = CGPoint(x: 0, y: topEdge - 72)
-        addChild(subtitle)
+        let tidePool = SKShapeNode(ellipseOf: CGSize(width: width * 0.94, height: height * 0.72))
+        tidePool.fillColor = GameUI.accent.withAlphaComponent(0.08)
+        tidePool.strokeColor = GameUI.accent.withAlphaComponent(0.20)
+        tidePool.lineWidth = 1.2
+        tidePool.position = CGPoint(x: 0, y: centerY - height * 0.04)
+        stage.addChild(tidePool)
 
-        // ---- Layout vertical sem sobreposição ----
-        // botões (uma linha) embaixo, cartão acima deles e a sereia no
-        // espaço restante entre o subtítulo e o cartão.
-        let buttonRowY = bottomEdge + 60
-        let buttonHeight: CGFloat = 48
-        let cardHeight: CGFloat = 176
-        let cardCenterY = buttonRowY + buttonHeight / 2 + 18 + cardHeight / 2
-        let cardTopY = cardCenterY + cardHeight / 2
-        let stageTopY = topEdge - 100
-        let stageBottomY = cardTopY + 24
-        let stageCenterY = (stageTopY + stageBottomY) / 2
-        let stageHeight = max(140, stageTopY - stageBottomY)
+        let shelfPath = UIBezierPath()
+        shelfPath.move(to: CGPoint(x: -width / 2 + 6, y: bottom + 26))
+        shelfPath.addCurve(to: CGPoint(x: width / 2 - 6, y: bottom + 18),
+                           controlPoint1: CGPoint(x: -width * 0.12, y: bottom + 2),
+                           controlPoint2: CGPoint(x: width * 0.16, y: bottom + 52))
+        shelfPath.addLine(to: CGPoint(x: width / 2 - 18, y: bottom - 8))
+        shelfPath.addLine(to: CGPoint(x: -width / 2 + 18, y: bottom - 8))
+        shelfPath.close()
+        let shelf = SKShapeNode(path: shelfPath.cgPath)
+        shelf.fillColor = GameUI.algae.withAlphaComponent(0.18)
+        shelf.strokeColor = GameUI.algae.withAlphaComponent(0.38)
+        shelf.lineWidth = 1.2
+        stage.addChild(shelf)
 
-        // halo de concha atrás da sereia
-        let haloRadius = min(size.width * 0.46, stageHeight * 0.56)
-        let halo = SKShapeNode(circleOfRadius: haloRadius)
-        halo.fillColor = GameUI.paper.withAlphaComponent(0.42)
-        halo.strokeColor = GameUI.coral.withAlphaComponent(0.25)
-        halo.glowWidth = 0
-        halo.position = CGPoint(x: 0, y: stageCenterY)
-        addChild(halo)
-        halo.run(.repeatForever(.sequence([
-            .fadeAlpha(to: 0.6, duration: 2.2),
-            .fadeAlpha(to: 1.0, duration: 2.2)
-        ])))
+        restPoint = CGPoint(x: -width * 0.28, y: bottom + 82)
+        upgradePoint = CGPoint(x: width * 0.29, y: bottom + height * 0.34)
+        storePoint = CGPoint(x: -width * 0.33, y: min(top - 78, bottom + height * 0.68))
+        memoryPoint = CGPoint(x: width * 0.30, y: min(top - 76, bottom + height * 0.72))
+        driftPoints = [
+            CGPoint(x: -width * 0.08, y: centerY + height * 0.10),
+            CGPoint(x: width * 0.10, y: centerY - height * 0.02),
+            CGPoint(x: -width * 0.20, y: centerY - height * 0.14),
+            CGPoint(x: width * 0.22, y: centerY + height * 0.08)
+        ]
 
-        // sereia em destaque: a forma da FASE ATUAL (bebê mostra bebê!),
-        // com paleta clara — o Refúgio é um lugar iluminado.
+        buildRestArea(at: restPoint, stage: stage)
+        buildMemoryShelf(at: memoryPoint, stage: stage)
+        buildNpc(at: upgradePoint,
+                 name: "refuge_enhancements",
+                 title: "Inventor",
+                 subtitle: "aprimorar",
+                 tint: GameUI.gold,
+                 kind: .upgrade,
+                 stage: stage)
+        buildNpc(at: storePoint,
+                 name: "refuge_store",
+                 title: "Lojista",
+                 subtitle: "itens",
+                 tint: GameUI.coral,
+                 kind: .store,
+                 stage: stage)
+    }
+
+    private func buildMermaid(in stageSize: CGSize, centerY: CGFloat) {
         let mermaid = Mermaid()
         if ctx.stats.phase != .egg {
             mermaid.setForm(for: ctx.stats.phase)
         }
         mermaid.applyPalette(.main)
         mermaid.setAnimationMode(.idle)
-        let targetMermaidHeight = min(stageHeight * 0.72,
-                                      size.height * 0.36,
-                                      size.width * 0.76)
+        let targetMermaidHeight = min(stageSize.height * 0.36,
+                                      overlaySize.height * 0.23,
+                                      stageSize.width * 0.44)
         let scale = ChallengeChrome.fitScale(for: mermaid.base,
                                              targetHeight: targetMermaidHeight)
+        mermaidBaseScale = scale
         mermaid.base.setScale(scale)
         mermaid.base.alpha = 1
         let mermaidFrame = mermaid.base.calculateAccumulatedFrame()
-        mermaid.base.position = CGPoint(x: 0, y: stageCenterY - mermaidFrame.midY)
-        mermaid.base.zPosition = 2
+        mermaid.base.position = CGPoint(x: 0, y: centerY - mermaidFrame.midY)
+        mermaid.base.zPosition = 4
         addChild(mermaid.base)
         displayMermaid = mermaid
+        mermaidBubbleLayer.zPosition = 3.8
+        addChild(mermaidBubbleLayer)
+    }
 
-        // cartão de estado (conteúdo cabe dentro do cartão)
-        let card = GameUI.card(size: CGSize(width: size.width - 48, height: cardHeight),
+    private func buildObservationRecord(width: CGFloat, height: CGFloat, centerY: CGFloat) {
+        let card = GameUI.card(size: CGSize(width: width, height: height),
                                cornerRadius: 10,
                                tint: GameUI.accent.withAlphaComponent(0.72))
-        card.position = CGPoint(x: 0, y: cardCenterY)
-        card.zPosition = 3
+        card.position = CGPoint(x: 0, y: centerY)
+        card.zPosition = 6
         addChild(card)
 
+        let clip = SKShapeNode(rectOf: CGSize(width: 74, height: 18), cornerRadius: 5)
+        clip.fillColor = GameUI.gold.withAlphaComponent(0.36)
+        clip.strokeColor = GameUI.gold.withAlphaComponent(0.72)
+        clip.position = CGPoint(x: 0, y: height / 2 + 2)
+        clip.zPosition = 8
+        card.addChild(clip)
+
+        let recordTitle = makeLabel(fontSize: 12.5, bold: true)
+        recordTitle.text = "Prancheta do biólogo"
+        recordTitle.fontColor = GameUI.accent
+        recordTitle.position = CGPoint(x: 0, y: height / 2 - 24)
+        card.addChild(recordTitle)
+
         statusLabel = makeLabel(fontSize: 13, bold: true)
-        statusLabel.position = CGPoint(x: 0, y: 64)
-        statusLabel.preferredMaxLayoutWidth = size.width - 80
+        statusLabel.position = CGPoint(x: 0, y: height / 2 - 50)
+        statusLabel.preferredMaxLayoutWidth = width - 34
         statusLabel.numberOfLines = 1
         card.addChild(statusLabel)
 
         foodLabel = makeLabel(fontSize: 13)
-        foodLabel.position = CGPoint(x: 0, y: 39)
-        foodLabel.preferredMaxLayoutWidth = size.width - 80
+        foodLabel.position = CGPoint(x: 0, y: height / 2 - 75)
+        foodLabel.preferredMaxLayoutWidth = width - 34
         foodLabel.numberOfLines = 1
         card.addChild(foodLabel)
 
         careLabel = makeLabel(fontSize: 13)
-        careLabel.position = CGPoint(x: 0, y: 17)
-        careLabel.preferredMaxLayoutWidth = size.width - 80
+        careLabel.position = CGPoint(x: 0, y: height / 2 - 98)
+        careLabel.preferredMaxLayoutWidth = width - 34
         careLabel.numberOfLines = 1
         card.addChild(careLabel)
 
         pearlsLabel = makeLabel(fontSize: 13)
-        pearlsLabel.position = CGPoint(x: 0, y: -8)
-        pearlsLabel.preferredMaxLayoutWidth = size.width - 80
+        pearlsLabel.position = CGPoint(x: 0, y: height / 2 - 121)
+        pearlsLabel.preferredMaxLayoutWidth = width - 34
         pearlsLabel.numberOfLines = 1
         card.addChild(pearlsLabel)
 
-        // memórias recentes
         let memoriesTitle = makeLabel(fontSize: 12, bold: true)
         memoriesTitle.text = "Memórias recentes"
         memoriesTitle.fontColor = GameUI.accent
-        memoriesTitle.position = CGPoint(x: 0, y: -37)
+        memoriesTitle.position = CGPoint(x: 0, y: -height / 2 + 53)
         card.addChild(memoriesTitle)
 
-        let memories = ctx.stats.memories.suffix(2)
-        let memoryText = memories.isEmpty
-            ? "Nenhuma memória registrada. Explore o oceano."
-            : memories.joined(separator: "  ·  ")
-        let memoriesLabel = makeLabel(fontSize: 11)
-        memoriesLabel.text = memoryText
-        memoriesLabel.fontColor = GameUI.mutedInk
-        memoriesLabel.preferredMaxLayoutWidth = size.width - 80
-        memoriesLabel.numberOfLines = 2
-        memoriesLabel.lineBreakMode = .byWordWrapping
-        memoriesLabel.position = CGPoint(x: 0, y: -64)
-        card.addChild(memoriesLabel)
+        memoryLabel = makeLabel(fontSize: 11)
+        memoryLabel.fontColor = GameUI.mutedInk
+        memoryLabel.preferredMaxLayoutWidth = width - 34
+        memoryLabel.numberOfLines = 2
+        memoryLabel.lineBreakMode = .byWordWrapping
+        memoryLabel.position = CGPoint(x: 0, y: -height / 2 + 27)
+        card.addChild(memoryLabel)
 
-        // botões: aprimoramentos, loja e voltar.
-        let buttonGap: CGFloat = 12
-        let buttonWidth = (size.width - 48 - buttonGap * 2) / 3
-        let actions: [(name: String, text: String, color: UIColor, column: Int)] = [
-            ("refuge_enhancements", "Aprimoramentos", GameUI.gold, 0),
-            ("refuge_store", "Loja", GameUI.coral, 1),
-            ("refuge_close", "Voltar", GameUI.accent, 2)
-        ]
-        for action in actions {
-            let x = -size.width / 2 + 24 + buttonWidth / 2 + CGFloat(action.column) * (buttonWidth + buttonGap)
-            let button = SKNode()
-            button.name = action.name
-            button.position = CGPoint(x: x, y: buttonRowY)
-            button.zPosition = 3
-            let card = GameUI.card(size: CGSize(width: buttonWidth, height: 48),
-                                   cornerRadius: 9,
-                                   tint: action.color)
-            button.addChild(card)
-            addChild(button)
-
-            let label = makeLabel(fontSize: 11.5, bold: true)
-            label.text = action.text
-            label.verticalAlignmentMode = .center
-            label.preferredMaxLayoutWidth = buttonWidth - 10
-            label.numberOfLines = 2
-            label.name = action.name
-            label.zPosition = 5
-            button.addChild(label)
-
-            if action.name == "refuge_enhancements" {
-                upgradeLabel = label
-            }
-        }
-
-        refreshLabels()
+        behaviorLabel = makeLabel(fontSize: 10.5, bold: true)
+        behaviorLabel.fontColor = GameUI.algae
+        behaviorLabel.position = CGPoint(x: 0, y: -height / 2 + 8)
+        behaviorLabel.preferredMaxLayoutWidth = width - 34
+        behaviorLabel.numberOfLines = 1
+        card.addChild(behaviorLabel)
     }
 
     private func makeLabel(fontSize: CGFloat, bold: Bool = false) -> SKLabelNode {
@@ -546,6 +651,258 @@ final class RefugeOverlay: SKNode {
         return label
     }
 
+    private enum RefugeNpcKind {
+        case upgrade
+        case store
+    }
+
+    private func makeActionButton(name: String,
+                                  text: String,
+                                  width: CGFloat,
+                                  height: CGFloat,
+                                  tint: UIColor) -> SKNode {
+        let button = SKNode()
+        button.name = name
+        let bg = GameUI.card(size: CGSize(width: width, height: height),
+                             cornerRadius: 9,
+                             tint: tint)
+        bg.name = name
+        button.addChild(bg)
+
+        let label = makeLabel(fontSize: 12.5, bold: true)
+        label.text = text
+        label.name = name
+        label.verticalAlignmentMode = .center
+        label.preferredMaxLayoutWidth = width - 12
+        label.numberOfLines = 1
+        label.zPosition = 3
+        button.addChild(label)
+        return button
+    }
+
+    private func buildRestArea(at point: CGPoint, stage: SKNode) {
+        let node = SKNode()
+        node.name = "refuge_rest"
+        node.position = point
+        node.zPosition = 2
+        stage.addChild(node)
+
+        let glow = SKShapeNode(ellipseOf: CGSize(width: 118, height: 54))
+        glow.name = "refuge_rest"
+        glow.fillColor = GameUI.algae.withAlphaComponent(0.10)
+        glow.strokeColor = GameUI.algae.withAlphaComponent(0.34)
+        glow.lineWidth = 1.4
+        glow.glowWidth = 3
+        node.addChild(glow)
+
+        for i in 0..<7 {
+            let blade = SKShapeNode(rectOf: CGSize(width: 7, height: CGFloat(28 + i * 3)), cornerRadius: 4)
+            blade.name = "refuge_rest"
+            blade.fillColor = UIColor.lerp(GameUI.algae, GameUI.accent, CGFloat(i) / 10).withAlphaComponent(0.72)
+            blade.strokeColor = .clear
+            blade.position = CGPoint(x: -42 + CGFloat(i) * 14, y: 8 + CGFloat(i % 2) * 4)
+            blade.zRotation = CGFloat(i - 3) * 0.10
+            node.addChild(blade)
+        }
+
+        let shell = SKShapeNode(ellipseOf: CGSize(width: 50, height: 22))
+        shell.name = "refuge_rest"
+        shell.fillColor = GameUI.coral.withAlphaComponent(0.18)
+        shell.strokeColor = GameUI.coral.withAlphaComponent(0.42)
+        shell.lineWidth = 1
+        shell.position = CGPoint(x: 8, y: -1)
+        node.addChild(shell)
+
+        let tag = makeMiniTag(text: "descansar", tint: GameUI.algae, name: "refuge_rest")
+        tag.position = CGPoint(x: 0, y: -38)
+        node.addChild(tag)
+    }
+
+    private func buildMemoryShelf(at point: CGPoint, stage: SKNode) {
+        let node = SKNode()
+        node.position = point
+        node.zPosition = 2
+        stage.addChild(node)
+
+        let shelf = SKShapeNode(rectOf: CGSize(width: 112, height: 18), cornerRadius: 8)
+        shelf.fillColor = GameUI.gold.withAlphaComponent(0.14)
+        shelf.strokeColor = GameUI.gold.withAlphaComponent(0.34)
+        shelf.lineWidth = 1
+        node.addChild(shelf)
+
+        let label = makeLabel(fontSize: 10.5, bold: true)
+        label.text = "lembranças"
+        label.fontColor = GameUI.mutedInk
+        label.position = CGPoint(x: 0, y: -24)
+        node.addChild(label)
+
+        memoryShelfNode = node
+        refreshMemoryTokens()
+    }
+
+    private func makeMemoryToken(index: Int, memory: String?) -> SKNode {
+        let node = SKNode()
+        let colors = [GameUI.coral, GameUI.gold, GameUI.accent]
+        let tint = colors[index % colors.count]
+        let radius: CGFloat = memory == nil ? 9 : 12
+        let gem = SKShapeNode(circleOfRadius: radius)
+        gem.fillColor = tint.withAlphaComponent(memory == nil ? 0.14 : 0.42)
+        gem.strokeColor = tint.withAlphaComponent(memory == nil ? 0.28 : 0.68)
+        gem.lineWidth = 1
+        node.addChild(gem)
+
+        if let memory {
+            let mark = makeLabel(fontSize: 7.5, bold: true)
+            mark.text = shortMemoryMark(memory, index: index)
+            mark.fontColor = GameUI.ink
+            node.addChild(mark)
+        }
+
+        node.run(.repeatForever(.sequence([
+            .moveBy(x: 0, y: 3, duration: 1.4 + Double(index) * 0.2),
+            .moveBy(x: 0, y: -3, duration: 1.4 + Double(index) * 0.2)
+        ])))
+        return node
+    }
+
+    private func buildNpc(at point: CGPoint,
+                          name: String,
+                          title: String,
+                          subtitle: String,
+                          tint: UIColor,
+                          kind: RefugeNpcKind,
+                          stage: SKNode) {
+        let npc = SKNode()
+        npc.name = name
+        npc.position = point
+        npc.zPosition = 3
+        stage.addChild(npc)
+
+        let halo = SKShapeNode(circleOfRadius: 38)
+        halo.name = name
+        halo.fillColor = tint.withAlphaComponent(0.08)
+        halo.strokeColor = tint.withAlphaComponent(0.28)
+        halo.lineWidth = 1.2
+        halo.glowWidth = 3
+        npc.addChild(halo)
+        halo.run(.repeatForever(.sequence([
+            .fadeAlpha(to: 0.48, duration: 1.0),
+            .fadeAlpha(to: 1.0, duration: 1.2)
+        ])))
+
+        switch kind {
+        case .upgrade:
+            buildSeahorseInventor(in: npc, name: name, tint: tint)
+        case .store:
+            buildCrabMerchant(in: npc, name: name, tint: tint)
+        }
+
+        let icon = GameUI.symbolIconNode(named: kind == .upgrade ? "sparkles" : "shippingbox.fill",
+                                         fallback: kind == .upgrade ? "*" : "#",
+                                         color: tint,
+                                         size: 18)
+        icon.name = name
+        icon.position = CGPoint(x: 0, y: 50)
+        icon.zPosition = 5
+        npc.addChild(icon)
+
+        let tag = makeMiniTag(text: subtitle, tint: tint, name: name)
+        tag.position = CGPoint(x: 0, y: -50)
+        npc.addChild(tag)
+
+        let titleLabel = makeLabel(fontSize: 10, bold: true)
+        titleLabel.text = title
+        titleLabel.fontColor = GameUI.ink
+        titleLabel.name = name
+        titleLabel.position = CGPoint(x: 0, y: -70)
+        npc.addChild(titleLabel)
+    }
+
+    private func buildSeahorseInventor(in npc: SKNode, name: String, tint: UIColor) {
+        let body = SKShapeNode(ellipseOf: CGSize(width: 28, height: 52))
+        body.name = name
+        body.fillColor = tint.withAlphaComponent(0.38)
+        body.strokeColor = tint.withAlphaComponent(0.78)
+        body.lineWidth = 1.2
+        body.position = CGPoint(x: 0, y: 2)
+        npc.addChild(body)
+
+        let head = SKShapeNode(ellipseOf: CGSize(width: 28, height: 22))
+        head.name = name
+        head.fillColor = tint.withAlphaComponent(0.44)
+        head.strokeColor = tint.withAlphaComponent(0.78)
+        head.position = CGPoint(x: -8, y: 31)
+        npc.addChild(head)
+
+        let snout = SKShapeNode(rectOf: CGSize(width: 22, height: 8), cornerRadius: 4)
+        snout.name = name
+        snout.fillColor = tint.withAlphaComponent(0.34)
+        snout.strokeColor = .clear
+        snout.position = CGPoint(x: -24, y: 31)
+        npc.addChild(snout)
+
+        let tail = SKShapeNode(circleOfRadius: 11)
+        tail.name = name
+        tail.fillColor = .clear
+        tail.strokeColor = tint.withAlphaComponent(0.78)
+        tail.lineWidth = 4
+        tail.position = CGPoint(x: 8, y: -30)
+        npc.addChild(tail)
+    }
+
+    private func buildCrabMerchant(in npc: SKNode, name: String, tint: UIColor) {
+        let body = SKShapeNode(ellipseOf: CGSize(width: 54, height: 34))
+        body.name = name
+        body.fillColor = tint.withAlphaComponent(0.34)
+        body.strokeColor = tint.withAlphaComponent(0.76)
+        body.lineWidth = 1.2
+        npc.addChild(body)
+
+        for side in [-1, 1] {
+            let claw = SKShapeNode(circleOfRadius: 10)
+            claw.name = name
+            claw.fillColor = tint.withAlphaComponent(0.32)
+            claw.strokeColor = tint.withAlphaComponent(0.72)
+            claw.lineWidth = 1
+            claw.position = CGPoint(x: CGFloat(side) * 38, y: 9)
+            npc.addChild(claw)
+
+            let arm = SKShapeNode(rectOf: CGSize(width: 28, height: 5), cornerRadius: 3)
+            arm.name = name
+            arm.fillColor = tint.withAlphaComponent(0.30)
+            arm.strokeColor = .clear
+            arm.position = CGPoint(x: CGFloat(side) * 25, y: 2)
+            arm.zRotation = CGFloat(side) * 0.28
+            npc.addChild(arm)
+        }
+
+        let crate = SKShapeNode(rectOf: CGSize(width: 38, height: 18), cornerRadius: 4)
+        crate.name = name
+        crate.fillColor = GameUI.gold.withAlphaComponent(0.22)
+        crate.strokeColor = GameUI.gold.withAlphaComponent(0.54)
+        crate.lineWidth = 1
+        crate.position = CGPoint(x: 0, y: -24)
+        npc.addChild(crate)
+    }
+
+    private func makeMiniTag(text: String, tint: UIColor, name: String) -> SKNode {
+        let tag = SKNode()
+        tag.name = name
+        let bg = SKShapeNode(rectOf: CGSize(width: 78, height: 22), cornerRadius: 8)
+        bg.name = name
+        bg.fillColor = GameUI.paper.withAlphaComponent(0.82)
+        bg.strokeColor = tint.withAlphaComponent(0.58)
+        bg.lineWidth = 1
+        tag.addChild(bg)
+
+        let label = makeLabel(fontSize: 9.5, bold: true)
+        label.name = name
+        label.text = text
+        label.fontColor = GameUI.ink
+        tag.addChild(label)
+        return tag
+    }
+
     // MARK: - Atualização
 
     func update(dt: CGFloat) {
@@ -553,6 +910,22 @@ final class RefugeOverlay: SKNode {
         if refreshTimer <= 0 {
             refreshTimer = 0.5
             refreshLabels()
+        }
+
+        guard enhancementsOverlay == nil, storeOverlay == nil else { return }
+
+        if currentBehavior == .resting {
+            ctx.stats.energy = (ctx.stats.energy + dt * 1.4).clamped(to: 0...100)
+        }
+
+        restingBoostTimer = max(0, restingBoostTimer - dt)
+        behaviorTimer -= dt
+        if behaviorTimer <= 0 {
+            if restingBoostTimer > 0 {
+                chooseNextBehavior(force: .resting)
+            } else {
+                chooseNextBehavior(force: nil)
+            }
         }
     }
 
@@ -562,7 +935,141 @@ final class RefugeOverlay: SKNode {
         foodLabel.text = ctx.growth.evolutionNote()
         careLabel.text = "Energia \(Int(stats.energy))% · Alimentação \(Int(100 - stats.hunger))%"
         pearlsLabel.text = "Conchas \(GameUI.shellAmountText(stats.pearls))"
-        upgradeLabel.text = "Aprimoramentos"
+        let memories = ctx.stats.memories.suffix(2)
+        memoryLabel.text = memories.isEmpty
+            ? "Nenhuma memória registrada. Explore o oceano."
+            : memories.joined(separator: "  ·  ")
+        behaviorLabel.text = "Observação: \(currentBehavior.label)"
+        refreshMemoryTokens()
+    }
+
+    private func refreshMemoryTokens() {
+        let memories = Array(ctx.stats.memories.suffix(3))
+        let key = memories.joined(separator: "|")
+        guard key != renderedMemoryKey || memoryDisplayNodes.isEmpty else { return }
+        renderedMemoryKey = key
+
+        memoryDisplayNodes.forEach { $0.removeFromParent() }
+        memoryDisplayNodes.removeAll()
+
+        let displayCount = memories.isEmpty ? 3 : memories.count
+        for i in 0..<displayCount {
+            let item = makeMemoryToken(index: i, memory: memories.indices.contains(i) ? memories[i] : nil)
+            item.position = CGPoint(x: -34 + CGFloat(i) * 34, y: 20 + CGFloat(i % 2) * 3)
+            memoryShelfNode?.addChild(item)
+            memoryDisplayNodes.append(item)
+        }
+    }
+
+    private func chooseNextBehavior(force: RefugeBehavior?) {
+        let behavior = force ?? RefugeBehavior.allCases.randomElement() ?? .drifting
+        currentBehavior = behavior
+        behaviorTimer = CGFloat.random(in: 4.2...7.2)
+        refreshLabels()
+
+        switch behavior {
+        case .drifting:
+            moveMermaid(to: driftPoints.randomElement() ?? .zero,
+                        duration: TimeInterval.random(in: 2.0...3.4),
+                        expression: .neutral,
+                        mode: .swing)
+        case .resting:
+            moveMermaid(to: restPoint + CGPoint(x: 4, y: 20),
+                        duration: 1.6,
+                        expression: .tired,
+                        mode: .idle) { [weak self] in
+                self?.beginRestPose()
+            }
+        case .observingMemories:
+            moveMermaid(to: memoryPoint + CGPoint(x: -46, y: 10),
+                        duration: 1.9,
+                        expression: .curious,
+                        mode: .swing) { [weak self] in
+                self?.emitMermaidBubbles(count: 2)
+            }
+        case .visitingUpgrade:
+            moveMermaid(to: upgradePoint + CGPoint(x: -48, y: 0),
+                        duration: 2.0,
+                        expression: .curious,
+                        mode: .swing)
+        case .visitingStore:
+            moveMermaid(to: storePoint + CGPoint(x: 50, y: -2),
+                        duration: 2.0,
+                        expression: .happy,
+                        mode: .swing)
+        }
+    }
+
+    private func moveMermaid(to point: CGPoint,
+                             duration: TimeInterval,
+                             expression: MermaidExpressionName,
+                             mode: MovementType,
+                             completion: (() -> Void)? = nil) {
+        guard let mermaid = displayMermaid else { return }
+        let base = mermaid.base
+        base.removeAction(forKey: "refuge_behavior")
+        base.removeAction(forKey: "refuge_idle_motion")
+
+        let dx = point.x - base.position.x
+        if abs(dx) > 4 {
+            mermaid.setVisualDirection(dx < 0 ? .left : .right)
+            base.xScale = abs(mermaidBaseScale) * (dx < 0 ? -1 : 1)
+            base.yScale = abs(mermaidBaseScale)
+        }
+        mermaid.applyExpression(expression, animated: true)
+        mermaid.setAnimationMode(mode)
+
+        let move = SKAction.move(to: point, duration: duration)
+        move.timingMode = .easeInEaseOut
+        let bob = SKAction.sequence([
+            .scaleX(to: base.xScale * 1.02, y: base.yScale * 0.98, duration: duration / 2),
+            .scaleX(to: base.xScale, y: base.yScale, duration: duration / 2)
+        ])
+        base.run(.sequence([
+            .group([move, bob]),
+            .run { completion?() }
+        ]), withKey: "refuge_behavior")
+    }
+
+    private func beginRestPose() {
+        guard let mermaid = displayMermaid else { return }
+        mermaid.setAnimationMode(.idle)
+        mermaid.applyExpression(.tired, animated: true)
+        let base = mermaid.base
+        base.removeAction(forKey: "refuge_idle_motion")
+        base.run(.repeatForever(.sequence([
+            .moveBy(x: 0, y: 3, duration: 1.2),
+            .run { [weak self] in self?.emitMermaidBubbles(count: 1) },
+            .moveBy(x: 0, y: -3, duration: 1.2)
+        ])), withKey: "refuge_idle_motion")
+    }
+
+    private func emitMermaidBubbles(count: Int) {
+        guard let base = displayMermaid?.base else { return }
+        for index in 0..<count {
+            let bubble = SKShapeNode(circleOfRadius: CGFloat.random(in: 3...6))
+            bubble.fillColor = UIColor.white.withAlphaComponent(0.18)
+            bubble.strokeColor = GameUI.accent.withAlphaComponent(0.34)
+            bubble.lineWidth = 1
+            bubble.position = base.position + CGPoint(x: CGFloat.random(in: -16...16),
+                                                      y: CGFloat.random(in: 20...42))
+            mermaidBubbleLayer.addChild(bubble)
+            bubble.run(.sequence([
+                .wait(forDuration: Double(index) * 0.08),
+                .group([
+                    .moveBy(x: CGFloat.random(in: -12...12), y: CGFloat.random(in: 34...54), duration: 1.4),
+                    .fadeOut(withDuration: 1.4),
+                    .scale(to: 1.45, duration: 1.4)
+                ]),
+                .removeFromParent()
+            ]))
+        }
+    }
+
+    private func shortMemoryMark(_ memory: String, index: Int) -> String {
+        let trimmed = memory.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let first = trimmed.first else { return "\(index + 1)" }
+        return String(first).uppercased()
     }
 
     private func openEnhancements() {
@@ -605,6 +1112,12 @@ final class RefugeOverlay: SKNode {
                 GameAudio.shared.play(.uiOpenPanel)
                 openStore()
                 refreshLabels()
+                return
+            case "refuge_rest":
+                GameAudio.shared.play(.uiConfirm)
+                restingBoostTimer = 8
+                chooseNextBehavior(force: .resting)
+                ctx.say("Ela se ajeitou na cama de algas para descansar.")
                 return
             case "enhancements_close":
                 GameAudio.shared.play(.uiClosePanel)
