@@ -1057,10 +1057,14 @@ final class FishNode: SKNode, ChallengeGiver {
                                        discovered: Bool,
                                        scale: CGFloat = 1) -> SKNode {
         let zone = species.preferredZones.first ?? .shallow
-        let silhouette = FishSilhouette.random(for: zone, rare: false, species: species)
+        let silhouette = discovered ? displaySilhouette(for: species) : .oval
         let profile = visualProfile(for: species)
-        let length = bodyLength(for: silhouette, rare: false, species: species) * profile.lengthMultiplier
-        let height = bodyHeight(for: silhouette, length: length)
+        let length = discovered
+            ? displayBodyLength(for: silhouette, species: species) * profile.lengthMultiplier
+            : 54
+        let height = discovered
+            ? displayBodyHeight(for: silhouette, length: length)
+            : 24
         let color = discovered
             ? profile.color
             : UIColor(red: 0.20, green: 0.28, blue: 0.34, alpha: 1)
@@ -1069,7 +1073,7 @@ final class FishNode: SKNode, ChallengeGiver {
                                   color: color,
                                   animateTail: false,
                                   silhouette: silhouette,
-                                  pattern: discovered ? (profile.pattern ?? FishPattern.random(for: zone, rare: false, species: species)) : .plain)
+                                  pattern: discovered ? (profile.pattern ?? displayPattern(for: zone, species: species)) : .plain)
         if discovered {
             addSpeciesTraits(to: drawing,
                              species: species,
@@ -1088,6 +1092,109 @@ final class FishNode: SKNode, ChallengeGiver {
         }
         drawing.setScale(scale)
         return drawing
+    }
+
+    private static func displaySilhouette(for species: AquaticSpecies) -> FishSilhouette {
+        let id = species.id.lowercased()
+        if id.contains("arraia") || id.contains("raia") || id.contains("manta") {
+            return .ray
+        }
+        if id.contains("tubarao") || id.contains("barracuda") || id.contains("agulhao") ||
+            id.contains("marlim") || id.contains("espadarte") || id.contains("enguia") ||
+            id.contains("candiru") || id.contains("lula") || id.contains("sifonoforo") ||
+            id.contains("anaconda") || id.contains("crocodilo") || id.contains("jacare") {
+            return .needle
+        }
+        if id.contains("tartaruga") || id.contains("peixe_lua") || id.contains("polvo") ||
+            id.contains("agua_viva") || id.contains("caravela") || id.contains("papagaio") {
+            return .moon
+        }
+        if id.contains("caranguejo") || id.contains("siri") || id.contains("lagosta") ||
+            id.contains("camarao") || id.contains("krill") || id.contains("isopode") ||
+            id.contains("anfipode") || id.contains("ourico") || id.contains("estrela") ||
+            id.contains("pepino") || id.contains("ostra") || id.contains("mexilhao") ||
+            id.contains("abalone") || id.contains("verme") ||
+            id.contains("borboleta") || id.contains("anjo") || id.contains("cirurgiao") {
+            return .diamond
+        }
+
+        switch species.group {
+        case .ray:
+            return .ray
+        case .shark, .mammal, .reptile, .bird:
+            return .needle
+        case .cephalopod, .cnidarian, .echinoderm, .mollusk, .annelid:
+            return .moon
+        case .crustacean, .arthropod:
+            return .diamond
+        case .fish:
+            let choices: [FishSilhouette] = [.oval, .needle, .diamond, .moon]
+            return choices[stableBucket(for: id, modulo: choices.count)]
+        }
+    }
+
+    private static func displayPattern(for zone: DepthZone, species: AquaticSpecies) -> FishPattern {
+        let id = species.id.lowercased()
+        if id.contains("palhaco") || id.contains("borboleta") || id.contains("anjo") ||
+            id.contains("leopardo") || id.contains("listrado") || id.contains("zebra") {
+            return .stripes
+        }
+        if id.contains("pintado") || id.contains("chita") || id.contains("manta") ||
+            id.contains("papagaio") || id.contains("estrela") || id.contains("polvo") ||
+            id.contains("tartaruga") {
+            return .spots
+        }
+        if zone == .deep || zone == .abyss ||
+            id.contains("lanterna") || id.contains("dragao") || id.contains("vibora") ||
+            id.contains("machado") || id.contains("ogro") || id.contains("gulper") {
+            return .glowDots
+        }
+        let choices: [FishPattern] = [.plain, .stripes, .spots]
+        return choices[stableBucket(for: species.id, modulo: choices.count)]
+    }
+
+    private static func displayBodyLength(for silhouette: FishSilhouette, species: AquaticSpecies) -> CGFloat {
+        switch species.group {
+        case .mammal, .shark, .reptile:
+            return silhouette == .needle ? 82 : 70
+        case .crustacean, .mollusk, .echinoderm, .arthropod:
+            return 46
+        case .bird:
+            return 58
+        case .cephalopod, .cnidarian, .annelid:
+            return 58
+        case .fish, .ray:
+            switch silhouette {
+            case .oval: return 54
+            case .needle: return 74
+            case .diamond: return 52
+            case .moon: return 56
+            case .ray: return 78
+            }
+        }
+    }
+
+    private static func displayBodyHeight(for silhouette: FishSilhouette, length: CGFloat) -> CGFloat {
+        switch silhouette {
+        case .oval:
+            return length * 0.42
+        case .needle:
+            return length * 0.20
+        case .diamond:
+            return length * 0.62
+        case .moon:
+            return length * 0.66
+        case .ray:
+            return length * 0.40
+        }
+    }
+
+    private static func stableBucket(for id: String, modulo: Int) -> Int {
+        guard modulo > 0 else { return 0 }
+        let value = id.unicodeScalars.reduce(0) { partial, scalar in
+            (partial &* 31 &+ Int(scalar.value)) & 0x7fffffff
+        }
+        return value % modulo
     }
 
     func startGuiding(toward target: CGPoint, duration: TimeInterval) {

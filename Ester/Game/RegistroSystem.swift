@@ -537,6 +537,11 @@ final class RegistroOverlay: SKNode {
     private var selectedSpeciesByRegionId: [String: String] = [:]
     private var speciesPage = 0
     private let speciesPerPage = 6
+    private var scrollOffsets: [String: CGFloat] = [:]
+    private var scrollMaxOffsets: [String: CGFloat] = [:]
+    private var scrollViewFrames: [String: CGRect] = [:]
+    private var activeScrollKey: String?
+    private var lastScrollTouchY: CGFloat = 0
 
     init(size: CGSize,
          insets: UIEdgeInsets,
@@ -565,6 +570,8 @@ final class RegistroOverlay: SKNode {
 
     private func render() {
         removeAllChildren()
+        scrollViewFrames.removeAll()
+        scrollMaxOffsets.removeAll()
 
         let backdrop = SKShapeNode(rectOf: CGSize(width: size.width * 2, height: size.height * 2))
         backdrop.fillTexture = GameUI.paperTexture(size: CGSize(width: size.width * 2, height: size.height * 2),
@@ -827,12 +834,12 @@ final class RegistroOverlay: SKNode {
     private func addMermaidPanel(width: CGFloat, height: CGFloat, center: CGPoint) {
         addPanelBackground(width: width, height: height, center: center, tint: GameUI.coral)
 
-        let art = makeMermaidStudyIcon(size: 94)
+        let art = makeStaticMermaidIcon(size: 106)
         art.position = CGPoint(x: center.x - width / 2 + 64, y: center.y + height / 2 - 72)
         art.zPosition = 5
         addChild(art)
 
-        let title = makeLabel(stats.mermaidName, fontSize: 20, bold: true, color: GameUI.ink)
+        let title = makeLabel(stats.mermaidName, fontSize: 23, bold: true, color: GameUI.ink)
         title.horizontalAlignmentMode = .left
         title.position = CGPoint(x: center.x - width / 2 + 124, y: center.y + height / 2 - 50)
         title.preferredMaxLayoutWidth = width - 142
@@ -842,34 +849,49 @@ final class RegistroOverlay: SKNode {
         addChild(title)
 
         let detail = makeLabel("Objeto principal de estudo • Diário científico gradual",
-                               fontSize: 11,
+                               fontSize: 13.4,
                                color: GameUI.mutedInk)
         detail.horizontalAlignmentMode = .left
-        detail.position = CGPoint(x: title.position.x, y: title.position.y - 26)
+        detail.position = CGPoint(x: title.position.x, y: title.position.y - 31)
         detail.preferredMaxLayoutWidth = width - 142
         detail.numberOfLines = 2
+        detail.lineBreakMode = .byWordWrapping
         detail.zPosition = 5
         addChild(detail)
 
         let observations = RegistroCatalog.mermaidObservations(for: stats)
         let unlockedCount = observations.filter(\.unlocked).count
         let count = makeLabel("\(unlockedCount) de \(observations.count) observações",
-                              fontSize: 11,
+                              fontSize: 13.2,
                               bold: true,
                               color: GameUI.coral)
         count.horizontalAlignmentMode = .left
-        count.position = CGPoint(x: title.position.x, y: detail.position.y - 30)
+        count.position = CGPoint(x: title.position.x, y: detail.position.y - 39)
         count.zPosition = 5
         addChild(count)
 
-        let rowWidth = width - 34
-        let rowHeight = min(CGFloat(58), max(CGFloat(44), (height - 176) / CGFloat(observations.count)))
-        let startY = center.y + height / 2 - 162
-        for (index, observation) in observations.enumerated() {
-            addObservationRow(observation,
-                              width: rowWidth,
-                              height: rowHeight - 6,
-                              center: CGPoint(x: center.x, y: startY - CGFloat(index) * rowHeight))
+        let rowWidth = width - 42
+        let rowHeight: CGFloat = 88
+        let rowSpacing: CGFloat = 100
+        let viewportTop = center.y + height / 2 - 188
+        let viewportBottom = center.y - height / 2 + 22
+        let viewportHeight = max(148, viewportTop - viewportBottom)
+        let contentHeight = max(viewportHeight, CGFloat(observations.count) * rowSpacing)
+
+        addScrollView(key: "registro_scroll_mermaid",
+                      width: rowWidth,
+                      height: viewportHeight,
+                      center: CGPoint(x: center.x, y: (viewportTop + viewportBottom) / 2),
+                      contentHeight: contentHeight,
+                      tint: GameUI.coral) { content, contentHeight in
+            let startY = contentHeight / 2 - rowSpacing / 2
+            for (index, observation) in observations.enumerated() {
+                addObservationRow(observation,
+                                  width: rowWidth,
+                                  height: rowHeight,
+                                  center: CGPoint(x: 0, y: startY - CGFloat(index) * rowSpacing),
+                                  parent: content)
+            }
         }
     }
 
@@ -929,7 +951,7 @@ final class RegistroOverlay: SKNode {
         let listX = compact ? center.x : center.x - width / 2 + 18 + listWidth / 2
         let detailX = compact ? center.x : listX + listWidth / 2 + 18 + detailWidth / 2
         let listTop = bar.position.y - 28
-        let rowHeight: CGFloat = compact ? 39 : 48
+        let rowHeight: CGFloat = compact ? 44 : 50
 
         for (index, definition) in pageSpecies.enumerated() {
             addSpeciesRow(definition,
@@ -980,7 +1002,8 @@ final class RegistroOverlay: SKNode {
     private func addObservationRow(_ observation: RegistroMermaidObservation,
                                    width: CGFloat,
                                    height: CGFloat,
-                                   center: CGPoint) {
+                                   center: CGPoint,
+                                   parent: SKNode) {
         let tint = observation.unlocked ? GameUI.coral : GameUI.mutedInk
         let bg = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 8)
         bg.fillColor = observation.unlocked
@@ -990,35 +1013,35 @@ final class RegistroOverlay: SKNode {
         bg.lineWidth = 1
         bg.position = center
         bg.zPosition = 4
-        addChild(bg)
+        parent.addChild(bg)
 
-        let seal = makeLabel(observation.unlocked ? "✓" : "?", fontSize: 14, bold: true, color: tint)
-        seal.position = CGPoint(x: center.x - width / 2 + 20, y: center.y + 7)
+        let seal = makeLabel(observation.unlocked ? "✓" : "?", fontSize: 18, bold: true, color: tint)
+        seal.position = CGPoint(x: center.x - width / 2 + 24, y: center.y + 12)
         seal.zPosition = 5
-        addChild(seal)
+        parent.addChild(seal)
 
         let title = makeLabel(observation.unlocked ? observation.title : "Observação bloqueada",
-                              fontSize: 11,
+                              fontSize: 14,
                               bold: true,
                               color: GameUI.ink)
         title.horizontalAlignmentMode = .left
-        title.position = CGPoint(x: center.x - width / 2 + 42, y: center.y + 11)
-        title.preferredMaxLayoutWidth = width - 56
+        title.position = CGPoint(x: center.x - width / 2 + 52, y: center.y + 21)
+        title.preferredMaxLayoutWidth = width - 66
         title.numberOfLines = 1
         title.lineBreakMode = .byTruncatingTail
         title.zPosition = 5
-        addChild(title)
+        parent.addChild(title)
 
         let body = makeLabel(observation.unlocked ? observation.body : "Continue observando comportamento, crescimento e exploração.",
-                             fontSize: 9.5,
+                             fontSize: 12.2,
                              color: GameUI.mutedInk)
         body.horizontalAlignmentMode = .left
-        body.position = CGPoint(x: title.position.x, y: center.y - 10)
-        body.preferredMaxLayoutWidth = width - 56
-        body.numberOfLines = 2
+        body.position = CGPoint(x: title.position.x, y: center.y - 6)
+        body.preferredMaxLayoutWidth = width - 66
+        body.numberOfLines = 3
         body.lineBreakMode = .byWordWrapping
         body.zPosition = 5
-        addChild(body)
+        parent.addChild(body)
     }
 
     private func addSpeciesRow(_ definition: RegistroSpeciesDefinition,
@@ -1053,7 +1076,7 @@ final class RegistroOverlay: SKNode {
         row.addChild(icon)
 
         let title = makeLabel(discovered ? definition.commonName : "Espécie não registrada",
-                              fontSize: 9.5,
+                              fontSize: 10.3,
                               bold: true,
                               color: discovered ? GameUI.ink : GameUI.mutedInk)
         title.horizontalAlignmentMode = .left
@@ -1064,11 +1087,11 @@ final class RegistroOverlay: SKNode {
         title.name = actionName
         row.addChild(title)
 
-        let detail = makeLabel(discovered ? definition.rowSummary : "Complete um desafio para revelar a ficha",
-                               fontSize: 8.2,
+        let detail = makeLabel(discovered ? "Ficha registrada • \(definition.category.registroDisplayName)" : "Complete um desafio para revelar a ficha",
+                               fontSize: 9.2,
                                color: GameUI.mutedInk)
         detail.horizontalAlignmentMode = .left
-        detail.position = CGPoint(x: title.position.x, y: -9)
+        detail.position = CGPoint(x: title.position.x, y: -10)
         detail.preferredMaxLayoutWidth = width - 66
         detail.numberOfLines = 1
         detail.lineBreakMode = .byTruncatingTail
@@ -1090,134 +1113,160 @@ final class RegistroOverlay: SKNode {
         bg.zPosition = 4
         addChild(bg)
 
-        let left = center.x - width / 2 + 14
-        let right = center.x + width / 2 - 14
-        let top = center.y + height / 2 - 14
-        let bottom = center.y - height / 2 + 14
+        let viewportWidth = max(120, width - 18)
+        let viewportHeight = max(120, height - 18)
         let compact = usesNarrowLayout || width < 340
+        let bodyFont: CGFloat = compact ? 12.2 : 11.8
+        let contentHeight = speciesDetailContentHeight(definition,
+                                                       viewportWidth: viewportWidth,
+                                                       viewportHeight: viewportHeight,
+                                                       bodyFont: bodyFont,
+                                                       discovered: discovered)
 
-        let art = FishNode.makeSpeciesDisplayNode(species: definition.species,
-                                                  discovered: discovered,
-                                                  scale: compact ? 0.48 : 0.60)
-        art.position = CGPoint(x: left + 42, y: top - 42)
-        art.zPosition = 5
-        addChild(art)
+        addScrollView(key: "registro_scroll_species_\(definition.id)",
+                      width: viewportWidth,
+                      height: viewportHeight,
+                      center: center,
+                      contentHeight: contentHeight,
+                      tint: tint) { content, contentHeight in
+            let left = -viewportWidth / 2 + 16
+            let right = viewportWidth / 2 - 16
+            let top = contentHeight / 2 - 18
+            let contentWidth = right - left
+            let headerTextX = min(left + 110, right - 132)
+            let headerWidth = max(124, right - headerTextX)
 
-        let status = makeLabel(discovered ? "REGISTRADA" : "A DESCOBRIR",
-                               fontSize: 9,
-                               bold: true,
-                               color: tint)
-        status.horizontalAlignmentMode = .left
-        status.position = CGPoint(x: left + 88, y: top - 13)
-        status.zPosition = 5
-        addChild(status)
+            let art = FishNode.makeSpeciesDisplayNode(species: definition.species,
+                                                      discovered: discovered,
+                                                      scale: compact ? 0.50 : 0.60)
+            art.position = CGPoint(x: left + 50, y: top - 52)
+            art.zPosition = 5
+            content.addChild(art)
 
-        let title = makeLabel(discovered ? definition.commonName : "Espécie não registrada",
-                              fontSize: compact ? 13.2 : 15.2,
-                              bold: true,
-                              color: GameUI.ink)
-        title.horizontalAlignmentMode = .left
-        title.position = CGPoint(x: status.position.x, y: top - 37)
-        title.preferredMaxLayoutWidth = max(120, right - title.position.x)
-        title.numberOfLines = 2
-        title.lineBreakMode = .byWordWrapping
-        title.zPosition = 5
-        addChild(title)
+            let status = makeLabel(discovered ? "REGISTRADA" : "A DESCOBRIR",
+                                   fontSize: 10.8,
+                                   bold: true,
+                                   color: tint)
+            status.horizontalAlignmentMode = .left
+            status.position = CGPoint(x: headerTextX, y: top - 16)
+            status.zPosition = 5
+            content.addChild(status)
 
-        let identityText = discovered
-            ? definition.scientificNote
-            : "Nome científico e notas de campo ficam ocultos até a primeira conclusão."
-        let identity = makeLabel(identityText,
-                                 fontSize: 9.0,
-                                 color: GameUI.mutedInk)
-        identity.horizontalAlignmentMode = .left
-        identity.position = CGPoint(x: title.position.x, y: top - 70)
-        identity.preferredMaxLayoutWidth = max(120, right - title.position.x)
-        identity.numberOfLines = 2
-        identity.lineBreakMode = .byWordWrapping
-        identity.zPosition = 5
-        addChild(identity)
-
-        let lines: [String]
-        if discovered {
-            lines = [
-                "Bioma: \(definition.biomeName) • \(definition.category.registroDisplayName)",
-                "Zonas: \(definition.zoneText)"
-            ]
-        } else {
-            lines = [
-                "Bioma: \(definition.biomeName)",
-                "Zonas prováveis: \(definition.zoneText)",
-                definition.unlockRequirementText
-            ]
-        }
-
-        var y = top - 112
-        for (index, line) in lines.enumerated() {
-            let label = makeLabel(line,
-                                  fontSize: 9.2,
+            let title = makeLabel(discovered ? definition.commonName : "Espécie não registrada",
+                                  fontSize: compact ? 16.5 : 17.2,
                                   bold: true,
-                                  color: index < 3 ? GameUI.ink : GameUI.mutedInk)
-            label.horizontalAlignmentMode = .left
-            label.position = CGPoint(x: left, y: y)
-            label.preferredMaxLayoutWidth = width - 28
-            label.numberOfLines = 1
-            label.lineBreakMode = .byTruncatingTail
-            label.zPosition = 5
-            addChild(label)
-            y -= 20
-        }
+                                  color: GameUI.ink)
+            title.horizontalAlignmentMode = .left
+            title.position = CGPoint(x: headerTextX, y: top - 46)
+            title.preferredMaxLayoutWidth = headerWidth
+            title.numberOfLines = 2
+            title.lineBreakMode = .byWordWrapping
+            title.zPosition = 5
+            content.addChild(title)
 
-        if discovered {
-            y -= 3
-            if y > bottom + 48 {
-                y = addDetailBlock(title: "Nota de campo",
+            let identityText = discovered
+                ? definition.scientificNote
+                : "Nome científico e notas de campo ficam ocultos até a primeira conclusão."
+            let identity = makeLabel(identityText,
+                                     fontSize: bodyFont,
+                                     color: GameUI.mutedInk)
+            identity.horizontalAlignmentMode = .left
+            identity.verticalAlignmentMode = .top
+            identity.position = CGPoint(x: headerTextX, y: top - 84)
+            identity.preferredMaxLayoutWidth = headerWidth
+            identity.numberOfLines = estimateLineCount(identityText,
+                                                       width: headerWidth,
+                                                       fontSize: bodyFont).clamped(to: 2...4)
+            identity.lineBreakMode = .byWordWrapping
+            identity.zPosition = 5
+            content.addChild(identity)
+
+            let lines: [String]
+            if discovered {
+                lines = [
+                    "Bioma: \(definition.biomeName) • \(definition.category.registroDisplayName)",
+                    "Zonas: \(definition.zoneText)"
+                ]
+            } else {
+                lines = [
+                    "Bioma: \(definition.biomeName)",
+                    "Zonas prováveis: \(definition.zoneText)",
+                    definition.unlockRequirementText
+                ]
+            }
+
+            var y = top - 144
+            for line in lines {
+                let lineCount = estimateLineCount(line,
+                                                  width: contentWidth,
+                                                  fontSize: 12.1).clamped(to: 1...2)
+                let label = makeLabel(line,
+                                      fontSize: 12.1,
+                                      bold: true,
+                                      color: GameUI.ink)
+                label.horizontalAlignmentMode = .left
+                label.verticalAlignmentMode = .top
+                label.position = CGPoint(x: left, y: y)
+                label.preferredMaxLayoutWidth = contentWidth
+                label.numberOfLines = lineCount
+                label.lineBreakMode = .byWordWrapping
+                label.zPosition = 5
+                content.addChild(label)
+                y -= CGFloat(lineCount) * 16 + 12
+            }
+
+            y -= 10
+            if discovered {
+                y = addDetailBlock(to: content,
+                                   title: "Nota de campo",
                                    body: definition.naturalHistoryNote,
                                    topY: y,
                                    x: left,
-                                   width: width - 28,
+                                   width: contentWidth,
                                    tint: tint,
-                                   maxBodyLines: compact ? 3 : 4)
-            }
-            if y > bottom + 44 {
-                y = addDetailBlock(title: "Papel no bioma",
+                                   bodyFont: bodyFont)
+                y = addDetailBlock(to: content,
+                                   title: "Papel no bioma",
                                    body: definition.biomeRole,
                                    topY: y,
                                    x: left,
-                                   width: width - 28,
+                                   width: contentWidth,
                                    tint: tint,
-                                   maxBodyLines: compact ? 3 : 4)
-            }
-            if y > bottom + 38 {
-                _ = addDetailBlock(title: "Leitura visual",
+                                   bodyFont: bodyFont)
+                _ = addDetailBlock(to: content,
+                                   title: "Leitura visual",
                                    body: definition.visualNotes,
                                    topY: y,
                                    x: left,
-                                   width: width - 28,
+                                   width: contentWidth,
                                    tint: tint,
-                                   maxBodyLines: compact ? 2 : 3)
+                                   bodyFont: bodyFont)
+            } else {
+                _ = addDetailBlock(to: content,
+                                   title: "Pista",
+                                   body: "A silhueta confirma que há algo para encontrar neste bioma, mas a ficha científica ainda está bloqueada.",
+                                   topY: y,
+                                   x: left,
+                                   width: contentWidth,
+                                   tint: tint,
+                                   bodyFont: bodyFont)
             }
-        } else if y > bottom + 52 {
-            _ = addDetailBlock(title: "Pista",
-                               body: "A silhueta confirma que há algo para encontrar neste bioma, mas a ficha científica ainda está bloqueada.",
-                               topY: y - 4,
-                               x: left,
-                               width: width - 28,
-                               tint: tint,
-                               maxBodyLines: 3)
         }
     }
 
     @discardableResult
-    private func addDetailBlock(title: String,
+    private func addDetailBlock(to parent: SKNode,
+                                title: String,
                                 body: String,
                                 topY: CGFloat,
                                 x: CGFloat,
                                 width: CGFloat,
                                 tint: UIColor,
-                                maxBodyLines: Int) -> CGFloat {
+                                bodyFont: CGFloat) -> CGFloat {
+        let lineCount = estimateLineCount(body, width: width, fontSize: bodyFont).clamped(to: 1...5)
+        let lineHeight = bodyFont + 4
         let titleLabel = makeLabel(title.uppercased(),
-                                   fontSize: 8.2,
+                                   fontSize: 10.2,
                                    bold: true,
                                    color: tint)
         titleLabel.horizontalAlignmentMode = .left
@@ -1226,20 +1275,119 @@ final class RegistroOverlay: SKNode {
         titleLabel.numberOfLines = 1
         titleLabel.lineBreakMode = .byTruncatingTail
         titleLabel.zPosition = 5
-        addChild(titleLabel)
+        parent.addChild(titleLabel)
 
         let bodyLabel = makeLabel(body,
-                                  fontSize: 9.0,
+                                  fontSize: bodyFont,
                                   color: GameUI.mutedInk)
         bodyLabel.horizontalAlignmentMode = .left
-        bodyLabel.position = CGPoint(x: x, y: topY - 17)
+        bodyLabel.verticalAlignmentMode = .top
+        bodyLabel.position = CGPoint(x: x, y: topY - 18)
         bodyLabel.preferredMaxLayoutWidth = width
-        bodyLabel.numberOfLines = maxBodyLines
+        bodyLabel.numberOfLines = lineCount
         bodyLabel.lineBreakMode = .byWordWrapping
         bodyLabel.zPosition = 5
-        addChild(bodyLabel)
+        parent.addChild(bodyLabel)
 
-        return topY - 23 - CGFloat(maxBodyLines) * 13
+        return topY - 34 - CGFloat(lineCount) * lineHeight
+    }
+
+    private func speciesDetailContentHeight(_ definition: RegistroSpeciesDefinition,
+                                            viewportWidth: CGFloat,
+                                            viewportHeight: CGFloat,
+                                            bodyFont: CGFloat,
+                                            discovered: Bool) -> CGFloat {
+        let contentWidth = max(120, viewportWidth - 32)
+        let headerWidth = max(124, contentWidth - 110)
+        let identityText = discovered
+            ? definition.scientificNote
+            : "Nome científico e notas de campo ficam ocultos até a primeira conclusão."
+        let identityLines = estimateLineCount(identityText,
+                                              width: headerWidth,
+                                              fontSize: bodyFont).clamped(to: 2...4)
+        var total: CGFloat = 162 + CGFloat(max(0, identityLines - 2)) * (bodyFont + 4)
+        total += discovered ? 66 : 94
+
+        if discovered {
+            total += detailBlockHeight(body: definition.naturalHistoryNote,
+                                       width: contentWidth,
+                                       bodyFont: bodyFont)
+            total += detailBlockHeight(body: definition.biomeRole,
+                                       width: contentWidth,
+                                       bodyFont: bodyFont)
+            total += detailBlockHeight(body: definition.visualNotes,
+                                       width: contentWidth,
+                                       bodyFont: bodyFont)
+        } else {
+            total += detailBlockHeight(body: "A silhueta confirma que há algo para encontrar neste bioma, mas a ficha científica ainda está bloqueada.",
+                                       width: contentWidth,
+                                       bodyFont: bodyFont)
+        }
+
+        return max(viewportHeight, total + 32)
+    }
+
+    private func detailBlockHeight(body: String, width: CGFloat, bodyFont: CGFloat) -> CGFloat {
+        let lines = estimateLineCount(body, width: width, fontSize: bodyFont).clamped(to: 1...5)
+        return 34 + CGFloat(lines) * (bodyFont + 4)
+    }
+
+    private func estimateLineCount(_ text: String, width: CGFloat, fontSize: CGFloat) -> Int {
+        let usableWidth = max(40, width)
+        let charactersPerLine = max(10, Int(usableWidth / max(5.4, fontSize * 0.54)))
+        return max(1, Int(ceil(CGFloat(text.count) / CGFloat(charactersPerLine))))
+    }
+
+    private func addScrollView(key: String,
+                               width: CGFloat,
+                               height: CGFloat,
+                               center: CGPoint,
+                               contentHeight: CGFloat,
+                               tint: UIColor,
+                               buildContent: (SKNode, CGFloat) -> Void) {
+        let maxOffset = max(0, contentHeight - height)
+        let offset = min(max(scrollOffsets[key] ?? 0, 0), maxOffset)
+        scrollOffsets[key] = offset
+        scrollMaxOffsets[key] = maxOffset
+        scrollViewFrames[key] = CGRect(x: center.x - width / 2,
+                                       y: center.y - height / 2,
+                                       width: width,
+                                       height: height)
+
+        let crop = SKCropNode()
+        crop.position = center
+        crop.zPosition = 5
+
+        let mask = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 6)
+        mask.fillColor = .white
+        mask.strokeColor = .clear
+        crop.maskNode = mask
+
+        let content = SKNode()
+        content.position = CGPoint(x: 0, y: (height - contentHeight) / 2 + offset)
+        buildContent(content, contentHeight)
+        crop.addChild(content)
+        addChild(crop)
+
+        guard maxOffset > 1 else { return }
+        let trackHeight = max(32, height - 16)
+        let track = SKShapeNode(rectOf: CGSize(width: 4, height: trackHeight), cornerRadius: 2)
+        track.fillColor = GameUI.line.withAlphaComponent(0.13)
+        track.strokeColor = .clear
+        track.position = CGPoint(x: center.x + width / 2 - 7, y: center.y)
+        track.zPosition = 7
+        addChild(track)
+
+        let thumbHeight = max(28, trackHeight * min(1, height / contentHeight))
+        let travel = max(0, trackHeight - thumbHeight)
+        let progress = maxOffset > 0 ? offset / maxOffset : 0
+        let thumb = SKShapeNode(rectOf: CGSize(width: 4, height: thumbHeight), cornerRadius: 2)
+        thumb.fillColor = tint.withAlphaComponent(0.55)
+        thumb.strokeColor = .clear
+        thumb.position = CGPoint(x: track.position.x,
+                                 y: center.y + travel / 2 - progress * travel)
+        thumb.zPosition = 8
+        addChild(thumb)
     }
 
     private func addPageControls(page: Int, maxPage: Int, center: CGPoint, width: CGFloat) {
@@ -1291,7 +1439,7 @@ final class RegistroOverlay: SKNode {
         return node
     }
 
-    private func makeMermaidStudyIcon(size: CGFloat) -> SKNode {
+    private func makeStaticMermaidIcon(size: CGFloat) -> SKNode {
         let node = SKNode()
         let halo = SKShapeNode(circleOfRadius: size * 0.45)
         halo.fillColor = GameUI.coral.withAlphaComponent(0.10)
@@ -1299,52 +1447,28 @@ final class RegistroOverlay: SKNode {
         halo.lineWidth = 1.2
         node.addChild(halo)
 
-        let head = SKShapeNode(circleOfRadius: size * 0.12)
-        head.fillColor = UIColor(red: 0.86, green: 0.64, blue: 0.54, alpha: 1)
-        head.strokeColor = .clear
-        head.position = CGPoint(x: -size * 0.10, y: size * 0.14)
-        head.zPosition = 3
-        node.addChild(head)
+        let mermaid = Mermaid()
+        mermaid.setForm(for: stats.phase)
+        mermaid.applyFacePose(.pose(for: .neutral), animated: false)
+        stripActions(from: mermaid.base)
 
-        let hair = SKShapeNode(ellipseOf: CGSize(width: size * 0.32, height: size * 0.22))
-        hair.fillColor = GameUI.coral.withAlphaComponent(0.82)
-        hair.strokeColor = .clear
-        hair.position = CGPoint(x: -size * 0.13, y: size * 0.18)
-        hair.zRotation = -0.25
-        hair.zPosition = 2
-        node.addChild(hair)
-
-        let body = SKShapeNode(ellipseOf: CGSize(width: size * 0.18, height: size * 0.32))
-        body.fillColor = UIColor(red: 0.78, green: 0.58, blue: 0.52, alpha: 1)
-        body.strokeColor = .clear
-        body.position = CGPoint(x: -size * 0.02, y: -size * 0.06)
-        body.zRotation = -0.28
-        node.addChild(body)
-
-        let tailPath = UIBezierPath()
-        tailPath.move(to: CGPoint(x: size * 0.03, y: -size * 0.18))
-        tailPath.addCurve(to: CGPoint(x: size * 0.31, y: -size * 0.24),
-                          controlPoint1: CGPoint(x: size * 0.15, y: -size * 0.27),
-                          controlPoint2: CGPoint(x: size * 0.23, y: -size * 0.12))
-        tailPath.addCurve(to: CGPoint(x: size * 0.12, y: -size * 0.40),
-                          controlPoint1: CGPoint(x: size * 0.31, y: -size * 0.36),
-                          controlPoint2: CGPoint(x: size * 0.22, y: -size * 0.42))
-        let tail = SKShapeNode(path: tailPath.cgPath)
-        tail.strokeColor = GameUI.accent
-        tail.lineWidth = max(5, size * 0.08)
-        tail.lineCap = .round
-        tail.fillColor = .clear
-        tail.zPosition = 1
-        node.addChild(tail)
-
-        let fin = SKShapeNode(ellipseOf: CGSize(width: size * 0.22, height: size * 0.10))
-        fin.fillColor = GameUI.accent.withAlphaComponent(0.70)
-        fin.strokeColor = .clear
-        fin.position = CGPoint(x: size * 0.18, y: -size * 0.39)
-        fin.zRotation = -0.2
-        node.addChild(fin)
+        let frame = mermaid.base.calculateAccumulatedFrame()
+        let maxDimension = max(frame.width, frame.height)
+        let fitScale = maxDimension > 0 ? (size * 0.86) / maxDimension : 0.18
+        mermaid.base.setScale(fitScale)
+        mermaid.base.position = CGPoint(x: -frame.midX * fitScale,
+                                        y: -frame.midY * fitScale)
+        mermaid.base.zPosition = 2
+        node.addChild(mermaid.base)
 
         return node
+    }
+
+    private func stripActions(from node: SKNode) {
+        node.removeAllActions()
+        for child in node.children {
+            stripActions(from: child)
+        }
     }
 
     private func makeLabel(_ text: String,
@@ -1385,9 +1509,18 @@ final class RegistroOverlay: SKNode {
         selectedSpeciesId = selectedSpeciesByRegionId[region.id]
     }
 
+    private func scrollKey(containing point: CGPoint) -> String? {
+        scrollViewFrames.first { entry in
+            entry.value.contains(point) && (scrollMaxOffsets[entry.key] ?? 0) > 1
+        }?.key
+    }
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
-        var node: SKNode? = atPoint(touch.location(in: self))
+        let point = touch.location(in: self)
+        activeScrollKey = scrollKey(containing: point)
+        lastScrollTouchY = point.y
+        var node: SKNode? = atPoint(point)
         while let current = node {
             if let name = current.name {
                 if name == "registro_close" {
@@ -1456,6 +1589,32 @@ final class RegistroOverlay: SKNode {
             }
             node = current.parent
         }
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first,
+              let key = activeScrollKey,
+              let maxOffset = scrollMaxOffsets[key],
+              maxOffset > 1 else { return }
+        let point = touch.location(in: self)
+        let deltaY = point.y - lastScrollTouchY
+        guard abs(deltaY) > 0.5 else { return }
+        let nextOffset = min(max((scrollOffsets[key] ?? 0) - deltaY, 0), maxOffset)
+        guard abs(nextOffset - (scrollOffsets[key] ?? 0)) > 0.1 else {
+            lastScrollTouchY = point.y
+            return
+        }
+        scrollOffsets[key] = nextOffset
+        lastScrollTouchY = point.y
+        render()
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        activeScrollKey = nil
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        activeScrollKey = nil
     }
 }
 
