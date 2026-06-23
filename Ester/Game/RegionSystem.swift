@@ -240,6 +240,7 @@ final class RegionDiscoverySystem {
             ctx.stats.discoveredRegionIds.insert(region.id)
             ctx.stats.addMemory("Descobriu \(region.name)")
         }
+        restoreCollectedRegionMapLeadIfNeeded(in: region)
 
         // progresso de exploração lento (0–100% em ~20 min na região)
         mapRevealTimer += dt
@@ -410,6 +411,30 @@ final class RegionDiscoverySystem {
         return true
     }
 
+    private func restoreCollectedRegionMapLeadIfNeeded(in current: Region) {
+        guard ctx.stats.pendingRegionDiscoveryId == nil,
+              ctx.stats.discoveryRouteRegionId == nil,
+              ctx.stats.readyRegionDiscoveryId == nil else { return }
+
+        for poi in WorldPOICatalog.pois(in: current, stats: ctx.stats) {
+            guard ctx.stats.isPOIRewardCollected(poi.key),
+                  poi.reward.kind == .regionMap,
+                  let regionId = poi.reward.regionId,
+                  let destination = RegionDiscoverySystem.region(withId: regionId),
+                  destination.isAccessible(for: ctx.stats.phase),
+                  !ctx.stats.isRegionKnown(destination),
+                  !ctx.stats.hasDiscoveryLead(for: destination) else { continue }
+
+            let point = discoveryRoutePoint(for: destination, from: current)
+            ctx.stats.pendingRegionDiscoveryId = destination.id
+            ctx.stats.discoveryPointByRegion[destination.id] = point
+            ctx.stats.revealExpeditionMap(in: current, near: point)
+            ctx.stats.addMemory("Mapa recuperado: passagem para \(destination.name)")
+            ctx.showRegionMapCue(for: destination, unlocked: true)
+            return
+        }
+    }
+
     @discardableResult
     func startDiscoveryRoute(to region: Region) -> Bool {
         guard let current = currentRegion,
@@ -444,6 +469,9 @@ final class RegionDiscoverySystem {
         guard let region = RegionDiscoverySystem.region(withId: regionId) else {
             return "Mapa encontrado, mas a região ainda não existe."
         }
+        guard let current = currentRegion else {
+            return "Mapa encontrado, mas a região atual não foi localizada."
+        }
         guard region.isAccessible(for: ctx.stats.phase) else {
             ctx.showRegionMapCue(for: region, unlocked: false)
             return "\(region.name) foi marcado, mas só ficará disponível quando ela for \(region.minPhase.mapAccessDisplayName)."
@@ -451,16 +479,24 @@ final class RegionDiscoverySystem {
         if ctx.stats.isRegionKnown(region) {
             return "Mapa já conhecido: \(region.name)."
         }
-        ctx.stats.pendingRegionDiscoveryId = nil
+        if ctx.stats.hasDiscoveryLead(for: region) {
+            let point = discoveryRoutePoint(for: region, from: current)
+            ctx.stats.discoveryPointByRegion[region.id] = point
+            ctx.stats.revealExpeditionMap(in: current, near: point)
+            ctx.showRegionMapCue(for: region, unlocked: true)
+            return "Mapa já marcou uma pista para \(region.name). Abra Expedição para seguir."
+        }
+
+        let point = discoveryRoutePoint(for: region, from: current)
+        ctx.stats.pendingRegionDiscoveryId = region.id
         ctx.stats.discoveryRouteRegionId = nil
         ctx.stats.readyRegionDiscoveryId = nil
-        ctx.stats.discoveredRegionIds.insert(region.id)
-        ctx.stats.discoveryPointByRegion[region.id] = nil
+        ctx.stats.discoveryPointByRegion[region.id] = point
+        ctx.stats.revealExpeditionMap(in: current, near: point)
         ctx.stats.addMemory("\(source): recebeu mapa para \(region.name)")
         GameAudio.shared.play(.regionDiscover)
-        ctx.scene?.showRegionDiscoveryCue(for: region)
         ctx.showRegionMapCue(for: region, unlocked: true)
-        return "Mapa desbloqueado: \(region.name)."
+        return "Mapa recebido: passagem para \(region.name) marcada em Expedição."
     }
 
     private func nextDiscoverableRegion() -> Region? {
@@ -1368,6 +1404,7 @@ final class ExpeditionMapNode: SKNode {
         drawRevealedCells(stats: stats, region: region)
         drawLockedVeil(stats: stats)
         drawPOIs(stats: stats, region: region)
+        drawDiscoveryLead(stats: stats, region: region)
         drawCurrentPosition(currentPosition, in: region)
         drawTitle(region.name)
     }
@@ -1612,6 +1649,62 @@ final class ExpeditionMapNode: SKNode {
             WorldPOIArtworkFactory.applyInteractionName(node.name, to: artwork)
             node.addChild(artwork)
         }
+    }
+
+    private func drawDiscoveryLead(stats: MermaidStats, region: Region) {
+        let leadId = stats.readyRegionDiscoveryId
+            ?? stats.discoveryRouteRegionId
+            ?? stats.pendingRegionDiscoveryId
+        guard let leadId,
+              let destination = RegionDiscoverySystem.region(withId: leadId),
+              let point = stats.discoveryPointByRegion[leadId],
+              region.contains(point) else { return }
+
+        let mapPoint = mapPoint(for: point, in: region)
+        let node = SKNode()
+        node.position = mapPoint
+        node.zPosition = 18
+        addChild(node)
+
+        let halo = SKShapeNode(circleOfRadius: 17)
+        halo.fillColor = GameUI.gold.withAlphaComponent(0.13)
+        halo.strokeColor = GameUI.gold.withAlphaComponent(0.52)
+        halo.lineWidth = 1
+        halo.glowWidth = 3
+        node.addChild(halo)
+
+        let marker = SKShapeNode(circleOfRadius: 8)
+        marker.fillColor = UIColor.lerp(GameUI.palePaper, destination.tint, 0.24)
+        marker.strokeColor = GameUI.gold.withAlphaComponent(0.90)
+        marker.lineWidth = 1.2
+        marker.zPosition = 2
+        node.addChild(marker)
+
+        let icon = GameUI.symbolIconNode(named: "map.fill",
+                                         fallback: "M",
+                                         color: UIColor.lerp(GameUI.ink, destination.tint, 0.24),
+                                         size: 11)
+        icon.zPosition = 3
+        node.addChild(icon)
+
+        let labelWidth = min(mapSize.width - 36, max(92, CGFloat(destination.name.count) * 5.3 + 36))
+        let label = SKShapeNode(rectOf: CGSize(width: labelWidth, height: 20), cornerRadius: 7)
+        label.position = CGPoint(x: 0, y: 24)
+        label.fillColor = UIColor(red: 0.01, green: 0.04, blue: 0.07, alpha: 0.86)
+        label.strokeColor = GameUI.gold.withAlphaComponent(0.34)
+        label.lineWidth = 0.7
+        label.zPosition = 4
+        node.addChild(label)
+
+        let text = SKLabelNode(text: stats.readyRegionDiscoveryId == leadId ? "rota pronta" : "passagem")
+        text.fontName = "AvenirNext-DemiBold"
+        text.fontSize = 8.6
+        text.fontColor = GameUI.palePaper
+        text.horizontalAlignmentMode = .center
+        text.verticalAlignmentMode = .center
+        text.position = label.position
+        text.zPosition = 5
+        node.addChild(text)
     }
 
     private func drawTitle(_ text: String) {

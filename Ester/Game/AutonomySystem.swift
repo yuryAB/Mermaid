@@ -221,6 +221,7 @@ final class AutonomySystem {
 
         tickStats(dt: dt)
         updatePassiveBond(dt: dt)
+        pursueCurrentObjectiveIfNeeded()
         autoEat()
         if decisionCooldown <= 0 { decide() }
         progressIntent(dt: dt)
@@ -281,9 +282,40 @@ final class AutonomySystem {
 
     // MARK: - Decisão por pesos
 
+    @discardableResult
+    func noticeObjectiveAvailable() -> Bool {
+        pursueCurrentObjectiveIfNeeded()
+    }
+
+    @discardableResult
+    private func pursueCurrentObjectiveIfNeeded() -> Bool {
+        guard stats.phase != .egg,
+              !paused,
+              intent != .inChallenge,
+              intent != .enteringRefuge,
+              let objective = ctx.events.currentObjective,
+              let point = objective.position() else {
+            return false
+        }
+
+        if intent != .goingToObjective {
+            commandBias = nil
+            setIntent(.goingToObjective)
+            decisionCooldown = 1
+            showEmotion(.curious, duration: 1.2)
+        } else {
+            target = point
+        }
+        return true
+    }
+
     private func decide() {
         // a caminho do portal do Refúgio: não muda de ideia no meio
         if intent == .enteringRefuge, portalPoint != nil {
+            decisionCooldown = 1
+            return
+        }
+        if pursueCurrentObjectiveIfNeeded() {
             decisionCooldown = 1
             return
         }
@@ -907,6 +939,9 @@ final class AutonomySystem {
             // o menu de regiões é interface, não depende da disposição dela
             ctx.scene?.openRegionMenu()
             return
+        case .shop:
+            ctx.scene?.openRefugeStore()
+            return
         case .refuge:
             // portal mágico: ela sempre vai, mas agora dá para VER o caminho
             if guaranteedByBondRecovery {
@@ -1097,16 +1132,10 @@ final class AutonomySystem {
             ctx.say("Nada acontecendo ali agora... 👀")
             return false
         }
-        guard acceptTouchRequest(for: .goingToObjective,
-                                 acceptedMessage: "Ela aceitou investigar...",
-                                 refusalMessages: [
-                                    "Ela percebeu o objetivo, mas não quis investigar agora.",
-                                    "Ela chegou a olhar... e decidiu nadar por conta própria.",
-                                    "Ela recusou seu pedido com um biquinho teimoso."
-                                 ]) else { return false }
+        guard intent != .inChallenge, intent != .enteringRefuge, !paused else { return false }
         commandBias = nil
         setIntent(.goingToObjective)
-        decisionCooldown = .random(in: 7...12)
+        decisionCooldown = 1
         return true
     }
 

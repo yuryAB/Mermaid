@@ -452,6 +452,7 @@ enum PlayerCommand: String, CaseIterable {
     case explore
     case resources
     case challenge
+    case shop
     case objective
     case goUp
     case goDown
@@ -466,6 +467,7 @@ enum PlayerCommand: String, CaseIterable {
         case .explore: return "Explorar"
         case .resources: return "Recursos"
         case .challenge: return "Desafio"
+        case .shop: return "Loja"
         case .objective: return "Objetivo"
         case .goUp: return "Cima"
         case .goDown: return "Baixo"
@@ -483,6 +485,7 @@ enum PlayerCommand: String, CaseIterable {
         case .explore: return "🧭"
         case .resources: return "📦"
         case .challenge: return "🏆"
+        case .shop: return "🛍"
         case .objective: return "🎯"
         case .goUp: return "⬆️"
         case .goDown: return "⬇️"
@@ -499,6 +502,7 @@ enum PlayerCommand: String, CaseIterable {
         case .explore: return "safari.fill"
         case .resources: return "shippingbox.fill"
         case .challenge: return "trophy.fill"
+        case .shop: return "cart.fill"
         case .objective: return "scope"
         case .goUp: return "arrow.up.circle.fill"
         case .goDown: return "arrow.down.circle.fill"
@@ -515,6 +519,7 @@ enum PlayerCommand: String, CaseIterable {
         case .explore: return UIColor(red: 0.16, green: 0.50, blue: 0.52, alpha: 1)
         case .resources: return UIColor(red: 0.33, green: 0.54, blue: 0.30, alpha: 1)
         case .challenge: return UIColor(red: 0.83, green: 0.62, blue: 0.25, alpha: 1)
+        case .shop: return UIColor(red: 0.78, green: 0.34, blue: 0.30, alpha: 1)
         case .objective: return UIColor(red: 0.78, green: 0.34, blue: 0.30, alpha: 1)
         case .goUp: return UIColor(red: 0.30, green: 0.64, blue: 0.72, alpha: 1)
         case .goDown: return UIColor(red: 0.04, green: 0.24, blue: 0.43, alpha: 1)

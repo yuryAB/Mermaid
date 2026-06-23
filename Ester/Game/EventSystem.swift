@@ -13,8 +13,7 @@ import UIKit
 
 // MARK: - Objetivo no mundo
 
-/// Algo acontecendo por perto que o jogador pode pedir para a sereia
-/// investigar (botão "Objetivo").
+/// Algo acontecendo por perto que a sereia investiga automaticamente.
 struct WorldObjective {
     let label: String
     /// Posição atual (nil quando o alvo sumiu do mundo).
@@ -88,6 +87,7 @@ final class EventSystem {
                                           reward: reward,
                                           onReach: onReach,
                                           timeRemaining: duration)
+        ctx.autonomy.noticeObjectiveAvailable()
     }
 
     /// A sereia chegou ao objetivo: recompensa e limpa.
@@ -314,7 +314,7 @@ final class EventSystem {
     private func glowingFood() {
         guard let food = ctx.food.spawnRare(near: ctx.mermaidPosition) else { return }
         GameAudio.shared.play(.foodRareSpawn)
-        ctx.say("Algo brilhante apareceu por perto... ✨ (Objetivo disponível)")
+        ctx.say("Algo brilhante apareceu por perto... ela foi investigar. ✨")
         setObjective(label: "algo brilhante",
                      duration: 60,
                      position: { [weak food] in
@@ -329,7 +329,7 @@ final class EventSystem {
         let zone = DepthZone.zone(atY: ctx.mermaidPosition.y)
         guard let fish = ctx.fish.spawnFish(zone: zone, near: ctx.mermaidPosition, rare: true) else { return }
         GameAudio.shared.play(.rareFishPass)
-        ctx.say("Um peixe raro está passando! 👀 (Objetivo disponível)")
+        ctx.say("Um peixe raro está passando! Ela foi observar. 👀")
         setObjective(label: "o peixe raro",
                      duration: 45,
                      position: { [weak fish] in
@@ -438,7 +438,7 @@ final class EventSystem {
             },
             .removeFromParent()
         ]))
-        ctx.say("Algo caiu da superfície! 📦 (Objetivo disponível)")
+        ctx.say("Algo caiu da superfície! Ela foi olhar de perto. 📦")
 
         setObjective(label: "o objeto que caiu",
                      duration: 75,

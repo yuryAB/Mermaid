@@ -264,6 +264,7 @@ class GameScene: SKScene {
     private var poiChallengeOffer: POIChallengeOfferOverlay?
     private var challengeChoiceMenu: ChallengeChoiceOverlay?
     private var resourceChoiceMenu: ResourceChoiceOverlay?
+    private var refugeStoreOverlay: RefugeStoreOverlay?
     private var regionMenu: RegionMenuOverlay?
     private var refugeOverlay: RefugeOverlay?
     private var refugePortal: RefugePortalNode?
@@ -473,7 +474,9 @@ class GameScene: SKScene {
         hud = HUDLayer(size: size, insets: insets, enableDebugRigToolButton: showRigDebugButton)
         hud.zPosition = 100
         hud.onCommand = { [weak self] command in
-            if command == .resources {
+            if command == .shop {
+                self?.openRefugeStore()
+            } else if command == .resources {
                 self?.openResourceChoiceMenu()
             } else {
                 self?.ctx.autonomy.give(command)
@@ -976,6 +979,7 @@ class GameScene: SKScene {
         guard regionMenu == nil,
               challengeChoiceMenu == nil,
               resourceChoiceMenu == nil,
+              refugeStoreOverlay == nil,
               poiChallengeOffer == nil,
               !isChallengeOpen,
               refugeOverlay == nil else { return }
@@ -1020,6 +1024,7 @@ class GameScene: SKScene {
         guard challengeChoiceMenu == nil,
               resourceChoiceMenu == nil,
               regionMenu == nil,
+              refugeStoreOverlay == nil,
               !isChallengeOpen,
               poiChallengeOffer == nil,
               refugeOverlay == nil,
@@ -1064,6 +1069,7 @@ class GameScene: SKScene {
         guard resourceChoiceMenu == nil,
               challengeChoiceMenu == nil,
               regionMenu == nil,
+              refugeStoreOverlay == nil,
               !isChallengeOpen,
               poiChallengeOffer == nil,
               refugeOverlay == nil,
@@ -1101,6 +1107,55 @@ class GameScene: SKScene {
         }
         resourceChoiceMenu?.removeFromParent()
         resourceChoiceMenu = nil
+    }
+
+    func openRefugeStore(playSound: Bool = true) {
+        guard refugeStoreOverlay == nil,
+              resourceChoiceMenu == nil,
+              challengeChoiceMenu == nil,
+              regionMenu == nil,
+              !isChallengeOpen,
+              poiChallengeOffer == nil,
+              refugeOverlay == nil,
+              rigDebugTool == nil else { return }
+        guard stats.phase != .egg else {
+            ctx.say("O ovo ainda não usa a Loja. Reúna energia no Desafio: Trama.")
+            return
+        }
+        if playSound {
+            GameAudio.shared.play(.uiOpenPanel)
+        }
+        let overlay = RefugeStoreOverlay(size: size,
+                                         insets: view?.safeAreaInsets ?? .zero,
+                                         stats: stats,
+                                         closeTitle: "Voltar",
+                                         handlesTouches: true,
+                                         onClose: { [weak self] in
+                                             self?.closeRefugeStore()
+                                         },
+                                         onPurchase: { [weak self] item in
+                                             self?.purchaseRefugeStoreItem(item)
+                                         })
+        overlay.zPosition = 190
+        cameraNode.addChild(overlay)
+        refugeStoreOverlay = overlay
+    }
+
+    private func closeRefugeStore(playSound: Bool = true) {
+        if playSound && refugeStoreOverlay != nil {
+            GameAudio.shared.play(.uiClosePanel)
+        }
+        refugeStoreOverlay?.removeFromParent()
+        refugeStoreOverlay = nil
+    }
+
+    private func purchaseRefugeStoreItem(_ item: RefugeShopItem) {
+        if ctx.supportResources.purchase(item) {
+            closeRefugeStore(playSound: false)
+            openRefugeStore(playSound: false)
+        } else {
+            GameAudio.shared.play(.uiUpgradeFail)
+        }
     }
 
     private func deliverSupportResource(_ kind: SupportResourceKind) {
@@ -1246,7 +1301,12 @@ class GameScene: SKScene {
 
     /// Passo 1: um portal se abre perto da sereia e ela nada até ele.
     func beginRefugeEntry() {
-        guard refugeOverlay == nil, resourceChoiceMenu == nil, poiChallengeOffer == nil, !isChallengeOpen, refugePortal == nil else { return }
+        guard refugeOverlay == nil,
+              resourceChoiceMenu == nil,
+              refugeStoreOverlay == nil,
+              poiChallengeOffer == nil,
+              !isChallengeOpen,
+              refugePortal == nil else { return }
         closeRegionMenu()
         GameAudio.shared.play(.refugePortalOpen)
 
@@ -1717,6 +1777,7 @@ class GameScene: SKScene {
         guard !isChallengeOpen,
               challengeChoiceMenu == nil,
               resourceChoiceMenu == nil,
+              refugeStoreOverlay == nil,
               regionMenu == nil,
               poiChallengeOffer == nil,
               refugeOverlay == nil,

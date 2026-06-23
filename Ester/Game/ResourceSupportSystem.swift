@@ -794,13 +794,25 @@ final class RefugeStoreOverlay: SKNode {
     private let size: CGSize
     private let insets: UIEdgeInsets
     private let stats: MermaidStats
+    private let closeTitle: String
+    private let onClose: (() -> Void)?
+    private let onPurchase: ((RefugeShopItem) -> Void)?
 
-    init(size: CGSize, insets: UIEdgeInsets, stats: MermaidStats) {
+    init(size: CGSize,
+         insets: UIEdgeInsets,
+         stats: MermaidStats,
+         closeTitle: String = "Voltar ao refúgio",
+         handlesTouches: Bool = false,
+         onClose: (() -> Void)? = nil,
+         onPurchase: ((RefugeShopItem) -> Void)? = nil) {
         self.size = size
         self.insets = insets
         self.stats = stats
+        self.closeTitle = closeTitle
+        self.onClose = onClose
+        self.onPurchase = onPurchase
         super.init()
-        isUserInteractionEnabled = false
+        isUserInteractionEnabled = handlesTouches
         build()
     }
 
@@ -851,7 +863,7 @@ final class RefugeStoreOverlay: SKNode {
                                     tint: GameUI.accent)
         closeCard.name = "store_close"
         closeButton.addChild(closeCard)
-        let closeLabel = makeLabel(text: "Voltar ao refúgio", fontSize: 13, bold: true, color: GameUI.ink)
+        let closeLabel = makeLabel(text: closeTitle, fontSize: 13, bold: true, color: GameUI.ink)
         closeLabel.name = "store_close"
         closeLabel.verticalAlignmentMode = .center
         closeLabel.zPosition = 5
@@ -931,6 +943,26 @@ final class RefugeStoreOverlay: SKNode {
         label.verticalAlignmentMode = .center
         label.zPosition = 5
         button.addChild(label)
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        var node: SKNode? = atPoint(touch.location(in: self))
+        while let current = node {
+            switch current.name {
+            case "store_close":
+                onClose?()
+                return
+            case let name? where name.hasPrefix("store_item_"):
+                let itemId = String(name.dropFirst("store_item_".count))
+                guard let item = RefugeShopCatalog.item(withId: itemId) else { return }
+                onPurchase?(item)
+                return
+            default:
+                break
+            }
+            node = current.parent
+        }
     }
 
     private func makeLabel(text: String,

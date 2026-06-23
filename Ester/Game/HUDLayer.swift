@@ -763,7 +763,7 @@ final class HUDLayer: SKNode {
         regionMapCue?.removeFromParent()
 
         let panelWidth = min(sceneSize.width - 34, 364)
-        let panelHeight: CGFloat = unlocked ? 238 : 248
+        let panelHeight = max(276, min(sceneSize.height - 76, unlocked ? CGFloat(332) : CGFloat(344)))
         let availableTop = topPanelBottomY - 24
         let availableBottom = buttonRowY(0) + 88
         let lowerCenterY = availableBottom + panelHeight / 2 - 6
@@ -778,6 +778,7 @@ final class HUDLayer: SKNode {
         cue.zPosition = 34
         cue.alpha = 0
         cue.setScale(0.92)
+        cue.name = "region_map_cue"
         addChild(cue)
         regionMapCue = cue
 
@@ -831,15 +832,16 @@ final class HUDLayer: SKNode {
         subtitle.zPosition = 5
         cue.addChild(subtitle)
 
+        let dividerY = topY - 132
         let divider = HUDLayer.pathNode(points: [
-            CGPoint(x: -halfW + 24, y: topY - 123),
-            CGPoint(x: halfW - 24, y: topY - 121)
+            CGPoint(x: -halfW + 24, y: dividerY),
+            CGPoint(x: halfW - 24, y: dividerY + 2)
         ], color: HUDPalette.line.withAlphaComponent(0.24), width: 1)
         divider.zPosition = 5
         cue.addChild(divider)
 
         let bodyText = unlocked
-            ? "A carta não é tesouro para guardar: ela abre caminho para outro mar. \(region.name) ficou no mapa de Expedição para vocês escolherem quando partir."
+            ? "A carta não abre \(region.name) de imediato. Ela marca uma passagem escondida neste mar. Abra Expedição, toque na pista e leve a sereia até esse ponto para encontrar a rota."
             : "A carta aponta para outro mar, mas a rota ainda pede tempo. Guarde o sinal: \(region.name) desperta quando ela for \(region.minPhase.mapAccessDisplayName)."
         let body = makeLabel(text: bodyText,
                              fontSize: 12.0,
@@ -848,19 +850,19 @@ final class HUDLayer: SKNode {
         body.horizontalAlignmentMode = .left
         body.verticalAlignmentMode = .top
         body.preferredMaxLayoutWidth = panelWidth - 48
-        body.numberOfLines = unlocked ? 4 : 5
+        body.numberOfLines = 5
         body.lineBreakMode = .byWordWrapping
-        body.position = CGPoint(x: -halfW + 24, y: topY - 139)
+        body.position = CGPoint(x: -halfW + 24, y: dividerY - 18)
         body.zPosition = 5
         cue.addChild(body)
 
-        let hintSize = CGSize(width: panelWidth - 48, height: 30)
+        let hintSize = CGSize(width: panelWidth - 48, height: 42)
         let hint = HUDLayer.paperCard(size: hintSize,
                                       cornerRadius: 8,
                                       fill: HUDPalette.palePaper,
                                       stroke: region.tint.withAlphaComponent(0.46),
                                       shadowAlpha: 0.06)
-        hint.position = CGPoint(x: 0, y: -panelHeight / 2 + 27)
+        hint.position = CGPoint(x: 0, y: -panelHeight / 2 + 66)
         hint.zPosition = 5
         cue.addChild(hint)
 
@@ -871,7 +873,7 @@ final class HUDLayer: SKNode {
         hint.addChild(icon)
 
         let hintText = makeLabel(text: unlocked
-                                 ? "Abra Expedição e toque no destino quando quiser viajar."
+                                 ? "No mapa: PISTA -> seguir até o ponto -> confirmar rota."
                                  : "Expedição vai mostrar quando esta rota puder abrir.",
                                  fontSize: 9.8,
                                  style: .bodyBold,
@@ -883,22 +885,45 @@ final class HUDLayer: SKNode {
         hintText.zPosition = 6
         hint.addChild(hintText)
 
+        let buttonSize = CGSize(width: panelWidth - 64, height: 36)
+        let button = HUDLayer.paperCard(size: buttonSize,
+                                        cornerRadius: 8,
+                                        fill: UIColor.lerp(HUDPalette.paper, region.tint, 0.09),
+                                        stroke: region.tint.withAlphaComponent(0.68),
+                                        shadowAlpha: 0.10)
+        button.name = "region_map_cue_close"
+        button.position = CGPoint(x: 0, y: -panelHeight / 2 + 24)
+        button.zPosition = 7
+        cue.addChild(button)
+
+        let buttonLabel = makeLabel(text: "Entendi",
+                                    fontSize: 12.6,
+                                    style: .bodyBold,
+                                    color: HUDPalette.ink)
+        buttonLabel.name = "region_map_cue_close"
+        buttonLabel.horizontalAlignmentMode = .center
+        buttonLabel.verticalAlignmentMode = .center
+        buttonLabel.zPosition = 8
+        button.addChild(buttonLabel)
+
         cue.run(.sequence([
             .group([
                 .fadeAlpha(to: 1, duration: 0.20),
                 .scale(to: 1.0, duration: 0.20)
-            ]),
-            .wait(forDuration: unlocked ? 8.0 : 7.0),
+            ])
+        ]))
+    }
+
+    private func dismissRegionMapCue() {
+        guard let cue = regionMapCue else { return }
+        regionMapCue = nil
+        cue.removeAllActions()
+        cue.run(.sequence([
             .group([
-                .fadeOut(withDuration: 0.45),
-                .scale(to: 0.98, duration: 0.45)
+                .fadeOut(withDuration: 0.18),
+                .scale(to: 0.98, duration: 0.18)
             ]),
-            .run { [weak self, weak cue] in
-                cue?.removeFromParent()
-                if self?.regionMapCue === cue {
-                    self?.regionMapCue = nil
-                }
-            }
+            .removeFromParent()
         ]))
     }
 
@@ -1183,7 +1208,7 @@ final class HUDLayer: SKNode {
     }
 
     private func buildButtons() {
-        let bottomCommands: [PlayerCommand?] = [.refuge, .resources, nil, .challenge, .objective]
+        let bottomCommands: [PlayerCommand?] = [.refuge, .resources, nil, .challenge, .shop]
         let bottomWidth = min(CGFloat(68), (sceneSize.width - 36) / CGFloat(bottomCommands.count))
         let bottomSpacing = max(CGFloat(4), (sceneSize.width - bottomWidth * CGFloat(bottomCommands.count) - 24) / CGFloat(bottomCommands.count - 1))
         let bottomStartX = -sceneSize.width / 2 + 12 + bottomWidth / 2
@@ -1929,6 +1954,20 @@ final class HUDLayer: SKNode {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
         var node: SKNode? = atPoint(location)
+
+        if regionMapCue != nil {
+            var cueNode = node
+            while let current = cueNode {
+                if current.name == "region_map_cue_close" {
+                    GameAudio.shared.play(.uiClosePanel)
+                    dismissRegionMapCue()
+                    return
+                }
+                cueNode = current.parent
+            }
+            return
+        }
+
         while let current = node {
             if let name = current.name {
                 if name == "cmd_edit_mermaid_name" {
@@ -2078,6 +2117,11 @@ final class HUDLayer: SKNode {
             node.addChild(assetIconNode(named: "sleep", color: color, size: 30))
         case .challenge:
             node.addChild(assetIconNode(named: "challenge", color: color, size: 24))
+        case .shop:
+            node.addChild(GameUI.symbolIconNode(named: "cart.fill",
+                                                fallback: "$",
+                                                color: color,
+                                                size: 24))
         case .objective:
             node.addChild(assetIconNode(named: "objective", color: color, size: 24))
         case .refuge:
