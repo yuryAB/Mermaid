@@ -75,7 +75,7 @@ enum GameBalance {
     static func hungerRate(for phase: MermaidPhase) -> CGFloat {
         switch phase {
         case .egg: return 0
-        case .baby, .child, .teen, .young, .adult: return 0.20
+        case .baby, .child, .teen, .young, .adult: return 0.28
         }
     }
 

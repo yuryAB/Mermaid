@@ -724,7 +724,7 @@ final class MermaidStats: Codable {
     }
 
     var energyDrainMultiplier: CGFloat {
-        (1.12 - CGFloat(energyUpgradeLevel) * 0.012).clamped(to: 0.45...1.12)
+        (1.35 - CGFloat(energyUpgradeLevel) * 0.012).clamped(to: 0.45...1.35)
     }
 
     var dispositionDrainMultiplier: CGFloat {
