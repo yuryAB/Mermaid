@@ -54,17 +54,17 @@ enum SupportResourceKind: String, CaseIterable, Codable, Equatable {
     var blurb: String {
         switch self {
         case .foodBag:
-            return "Comidinhas preparadas para quando a busca por alimento falhar."
+            return "Reduz 22 de fome, melhora humor e aumenta a confiança."
         case .calmShell:
-            return "Um sinal seguro para ajudar depois de sustos e pressão."
+            return "Diminui o medo por até 18 segundos e melhora o humor."
         case .currentAmpoule:
-            return "Libera uma corrente breve para nadar e explorar melhor."
+            return "Restaura 12 de energia e ativa nado acelerado por 5 minutos."
         case .coralToy:
-            return "Objeto de enriquecimento para humor e vínculo."
+            return "Aumenta humor em 16 e melhora a aceitação de pedidos por 5 minutos."
         case .growthPotion:
-            return "Porção enviada para adiantar 1h da espera de crescimento."
+            return "Adiantam 1 hora da espera de crescimento."
         case .powerfulGrowthPotion:
-            return "Poção rara que adianta 1 dia da espera de crescimento."
+            return "Adiantam 1 dia da espera de crescimento."
         }
     }
 
@@ -156,7 +156,7 @@ enum RefugeShopCatalog {
     static let items: [RefugeShopItem] = [
         RefugeShopItem(id: "food_bag",
                        title: "Saco de comida",
-                       blurb: "Adiciona 1 pacote ao painel Recursos.",
+                       blurb: "Cura 22 de fome, melhora humor e aumenta a confiança.",
                        cost: 80,
                        tint: SupportResourceKind.foodBag.tint,
                        symbolName: SupportResourceKind.foodBag.symbolName,
@@ -164,7 +164,7 @@ enum RefugeShopCatalog {
                        purchase: .resource(.foodBag, quantity: 1)),
         RefugeShopItem(id: "calm_shell",
                        title: "Concha calma",
-                       blurb: "Recurso de apoio para sustos e humor baixo.",
+                       blurb: "Diminui o medo por até 18 segundos e melhora o humor.",
                        cost: 180,
                        tint: SupportResourceKind.calmShell.tint,
                        symbolName: SupportResourceKind.calmShell.symbolName,
@@ -172,7 +172,7 @@ enum RefugeShopCatalog {
                        purchase: .resource(.calmShell, quantity: 1)),
         RefugeShopItem(id: "current_ampoule",
                        title: "Ampola corrente",
-                       blurb: "Recurso que ativa nado acelerado temporário.",
+                       blurb: "Restaura 12 de energia e ativa nado acelerado por 5 minutos.",
                        cost: 260,
                        tint: SupportResourceKind.currentAmpoule.tint,
                        symbolName: SupportResourceKind.currentAmpoule.symbolName,
@@ -180,7 +180,7 @@ enum RefugeShopCatalog {
                        purchase: .resource(.currentAmpoule, quantity: 1)),
         RefugeShopItem(id: "coral_toy",
                        title: "Brinquedo coral",
-                       blurb: "Recurso de enriquecimento para humor e vínculo.",
+                       blurb: "Aumenta humor em 16 e melhora a aceitação de pedidos por 5 minutos.",
                        cost: 220,
                        tint: SupportResourceKind.coralToy.tint,
                        symbolName: SupportResourceKind.coralToy.symbolName,
@@ -188,7 +188,7 @@ enum RefugeShopCatalog {
                        purchase: .resource(.coralToy, quantity: 1)),
         RefugeShopItem(id: "growth_potion",
                        title: "Porção acelerar",
-                       blurb: "Adiciona 1 porção ao painel Recursos.",
+                       blurb: "Adiantam 1 hora da espera de crescimento.",
                        cost: GameBalance.growthAccelerateShellCost,
                        tint: SupportResourceKind.growthPotion.tint,
                        symbolName: SupportResourceKind.growthPotion.symbolName,
@@ -196,7 +196,7 @@ enum RefugeShopCatalog {
                        purchase: .resource(.growthPotion, quantity: 1)),
         RefugeShopItem(id: "powerful_growth_potion",
                        title: "Poção de crescimento poderosa",
-                       blurb: "Só às segundas: adianta 1 dia de crescimento.",
+                       blurb: "Adiantam 1 dia da espera de crescimento. Só fica disponível às segundas-feiras.",
                        cost: 20_000,
                        tint: SupportResourceKind.powerfulGrowthPotion.tint,
                        symbolName: SupportResourceKind.powerfulGrowthPotion.symbolName,

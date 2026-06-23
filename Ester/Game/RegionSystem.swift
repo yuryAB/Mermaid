@@ -44,6 +44,12 @@ struct Region {
     }
 }
 
+extension Region {
+    var ecosystemProfile: EcosystemBiomeProfile {
+        EcosystemBiomeCatalog.profile(for: id)
+    }
+}
+
 enum AquaticAnimalGroup: String {
     case fish
     case shark
@@ -426,7 +432,14 @@ final class RegionDiscoverySystem {
     }
 
     static func species(for regionId: String) -> [AquaticSpecies] {
-        AquaticSpeciesCatalog.species(for: canonicalRegionId(regionId))
+        let resolvedRegion = canonicalRegionId(regionId)
+        let catalogSpecies = AquaticSpeciesCatalog.species(for: resolvedRegion)
+        let profileSpecies = EcosystemBiomeCatalog.profile(for: resolvedRegion)
+            .faunaAssociations
+            .compactMap { id in
+                catalogSpecies.first(where: { $0.id == id })
+            }
+        return profileSpecies.isEmpty ? catalogSpecies : profileSpecies
     }
 
     static func species(for regionId: String, zone: DepthZone) -> [AquaticSpecies] {

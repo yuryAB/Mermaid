@@ -292,6 +292,10 @@ class GameScene: SKScene {
     private let ctx = GameContext()
     private var stats: MermaidStats!
     private var activeRegion: Region!
+    private var activeEcosystemProfile: EcosystemBiomeProfile {
+        return (activeRegion ?? ctx.activeRegion).map { $0.ecosystemProfile } ??
+        EcosystemBiomeCatalog.profile(for: "recife_tropical")
+    }
     private var offlineSummary: String?
     private var lastEntryTextZone: DepthZone?
 
@@ -344,7 +348,9 @@ class GameScene: SKScene {
 
         ctx.growth.setup()
         snapCameraToTarget()
-        worldChunkManager?.update(dt: 1, cameraPosition: cameraNode.position)
+        worldChunkManager?.update(dt: 1,
+                                   cameraPosition: cameraNode.position,
+                                   region: activeRegion ?? ctx.activeRegion)
         updateOceanBackdrop(dt: 0, waterColor: ctx.depth.waterColor(atY: cameraNode.position.y))
         GameAudio.shared.updateOceanAmbience(for: ctx.depth.currentZone)
 
@@ -806,7 +812,9 @@ class GameScene: SKScene {
                     bondRecoveryState: ctx.autonomy.bondRecoveryHUDState)
 
         updateCamera(dt: dt)
-        worldChunkManager?.update(dt: dt, cameraPosition: cameraNode.position)
+        worldChunkManager?.update(dt: dt,
+                                  cameraPosition: cameraNode.position,
+                                  region: activeRegion ?? ctx.activeRegion)
         updateOceanBackdrop(dt: dt, waterColor: water)
         if refugeOverlay == nil {
             GameAudio.shared.updateOceanAmbience(for: ctx.depth.currentZone)
@@ -960,7 +968,8 @@ class GameScene: SKScene {
     private func updateOceanBackdrop(dt: CGFloat, environment: DepthEnvironment? = nil, waterColor: UIColor) {
         let cameraZone = DepthZone.zone(atY: cameraNode.position.y)
         let cameraEnvironment = environment ?? ctx.depth.environment(atY: cameraNode.position.y)
-        let biome = AquaticBiome.biome(at: cameraNode.position, zone: cameraZone)
+        let profile = activeEcosystemProfile
+        let biome = profile.subBiome(at: cameraNode.position, zone: cameraZone)
         oceanBackdrop?.update(dt: dt,
                               cameraPosition: cameraNode.position,
                               waterColor: waterColor,

@@ -20,7 +20,8 @@ final class WorldChunkManager {
         parent.addChild(rootNode)
     }
 
-    func update(dt _: CGFloat, cameraPosition: CGPoint) {
+    func update(dt _: CGFloat, cameraPosition: CGPoint, region: Region? = nil) {
+        let profile = region?.ecosystemProfile ?? EcosystemBiomeCatalog.profile(for: "recife_tropical")
         let center = WorldChunkCoord.chunkCoord(for: cameraPosition)
         guard center != lastCenter else { return }
         lastCenter = center
@@ -42,7 +43,7 @@ final class WorldChunkManager {
         }
 
         for coord in needed where chunks[coord] == nil {
-            let node = WorldChunkFactory.makeChunk(coord)
+            let node = WorldChunkFactory.makeChunk(coord, profile: profile)
             chunks[coord] = node
             rootNode.addChild(node)
         }

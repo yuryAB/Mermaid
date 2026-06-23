@@ -20,21 +20,26 @@ enum WorldChunkFactory {
         let scale: CGFloat
     }
 
-    static func makeChunk(_ coord: WorldChunkCoord) -> SKNode {
-        return makeProceduralChunk(coord, includeAmbientEmitters: true)
+    static func makeChunk(_ coord: WorldChunkCoord,
+                         profile: EcosystemBiomeProfile? = nil) -> SKNode {
+        let resolvedProfile = profile ?? EcosystemBiomeCatalog.profile(for: "recife_tropical")
+        return makeProceduralChunk(coord,
+                                  includeAmbientEmitters: true,
+                                  profile: resolvedProfile)
     }
 
     private static func makeProceduralChunk(_ coord: WorldChunkCoord,
-                                            includeAmbientEmitters: Bool) -> SKNode {
+                                            includeAmbientEmitters: Bool,
+                                            profile: EcosystemBiomeProfile) -> SKNode {
         let node = SKNode()
         node.name = "world_chunk_\(coord.x)_\(coord.y)"
         node.zPosition = CGFloat((coord.x ^ coord.y) % 5) - 2
 
         let zone = DepthZone.zone(atY: coord.center.y)
-        let biome = AquaticBiome.biome(at: coord.center, zone: zone)
+        let biome = profile.subBiome(at: coord.center, zone: zone)
         addMacroforms(to: node, coord: coord, zone: zone, biome: biome)
         addCurrents(to: node, coord: coord, zone: zone, biome: biome)
-        addReefs(to: node, coord: coord, zone: zone, biome: biome)
+        addReefs(to: node, coord: coord, zone: zone, biome: biome, profile: profile)
         if includeAmbientEmitters {
             addAmbientEmitters(to: node, coord: coord, zone: zone, biome: biome)
         }
@@ -104,9 +109,10 @@ enum WorldChunkFactory {
     private static func addReefs(to node: SKNode,
                                  coord: WorldChunkCoord,
                                  zone: DepthZone,
-                                 biome: AquaticBiome) {
+                                 biome: AquaticBiome,
+                                 profile: EcosystemBiomeProfile) {
         var rng = SeededGenerator(seed: WorldSeed.seedForChunk(coord, layer: .reef))
-        let density = reefDensity(for: zone, biome: biome, rng: &rng)
+        let density = reefDensity(for: zone, biome: biome, profile: profile, rng: &rng)
         let count = Int((density * 7).rounded())
         guard count > 0 else { return }
 
@@ -117,7 +123,11 @@ enum WorldChunkFactory {
 
         while placedCount < count && attempts < maxAttempts {
             attempts += 1
-            let cluster = makeReefCluster(zone: zone, biome: biome, rng: &rng)
+            let cluster = makeReefCluster(zone: zone,
+                                          biome: biome,
+                                          profile: profile,
+                                          y: coord.center.y,
+                                          rng: &rng)
             let scale = rng.nextCGFloat(in: 0.72...1.45)
             guard let position = reefClusterPosition(for: cluster,
                                                      scale: scale,
@@ -215,6 +225,8 @@ enum WorldChunkFactory {
 
     private static func makeReefCluster(zone: DepthZone,
                                         biome: AquaticBiome,
+                                        profile: EcosystemBiomeProfile,
+                                        y: CGFloat,
                                         rng: inout SeededGenerator) -> ReefCluster {
         let cluster = SKNode()
         let baseSize = CGSize(width: rng.nextCGFloat(in: 170...380),
@@ -262,20 +274,32 @@ enum WorldChunkFactory {
             }
         }
 
-        let kelpCount = kelpCount(for: zone, biome: biome, rng: &rng)
-        for _ in 0..<kelpCount {
-            let kelp = makeKelpSprite(zone: zone, baseSize: baseSize, rng: &rng)
-            let x = plantingX(for: kelp, baseSize: baseSize, rng: &rng)
+        let plantSlots = profile.plantSlotRange(for: zone)
+        let plantCount = rng.nextInt(in: plantSlots)
+        for _ in 0..<plantCount {
+            guard let plantRule = profile.plantRule(for: zone, y: y, rng: &rng) else { continue }
+            let plant = makePlantSprite(from: plantRule,
+                                        zone: zone,
+                                        biome: biome,
+                                        baseSize: baseSize,
+                                        rng: &rng)
+            let x = plantingX(for: plant, baseSize: baseSize, rng: &rng)
             let surfaceY = plantingSurfaceY(localX: x, baseSize: baseSize, rng: &rng)
-            kelp.position = CGPoint(x: x,
-                                    y: surfaceY - rootSink(for: kelp, rng: &rng))
-            kelp.zPosition = rng.nextCGFloat(in: -1...2)
-            cluster.addChild(kelp)
+            plant.position = CGPoint(x: x,
+                                    y: surfaceY - rootSink(for: plant, rng: &rng))
+            plant.zPosition = rng.nextCGFloat(in: -1...2)
+            cluster.addChild(plant)
         }
 
-        let detailCount = detailCount(for: zone, biome: biome, rng: &rng)
+        let detailSlots = profile.detailSlotRange(for: zone)
+        let detailCount = rng.nextInt(in: detailSlots)
         for _ in 0..<detailCount {
-            let detail = makeDetailSprite(zone: zone, biome: biome, baseSize: baseSize, rng: &rng)
+            guard let detailRule = profile.detailRule(for: zone, y: y, rng: &rng) else { continue }
+            let detail = makeDetailSprite(from: detailRule,
+                                          zone: zone,
+                                          biome: biome,
+                                          baseSize: baseSize,
+                                          rng: &rng)
             let x = plantingX(for: detail, baseSize: baseSize, rng: &rng)
             let surfaceY = plantingSurfaceY(localX: x, baseSize: baseSize, rng: &rng)
             detail.position = CGPoint(x: x,
@@ -322,26 +346,31 @@ enum WorldChunkFactory {
 
     private static func makeKelpSprite(zone: DepthZone,
                                        baseSize: CGSize,
+                                       kind: WorldStampKind? = nil,
                                        rng: inout SeededGenerator) -> SKSpriteNode {
         let height = WorldVisualPalette.kelpHeight(for: zone) * rng.nextCGFloat(in: 0.65...1.18)
-        let kind: WorldStampKind
-        let roll = rng.nextCGFloat(in: 0...1)
-        if roll < 0.34 {
-            kind = .kelpRibbon
-        } else if roll < 0.68 {
-            kind = .kelpBlade
+        let resolvedKind: WorldStampKind
+        if let kind {
+            resolvedKind = kind
         } else {
-            kind = .kelpBush
+            let roll = rng.nextCGFloat(in: 0...1)
+            if roll < 0.34 {
+                resolvedKind = .kelpRibbon
+            } else if roll < 0.68 {
+                resolvedKind = .kelpBlade
+            } else {
+                resolvedKind = .kelpBush
+            }
         }
-        let texture = WorldTextureCache.shared.texture(kind: kind,
-                                                       zone: zone,
-                                                       biome: .kelpForest,
-                                                       variant: rng.nextInt(in: 0...9))
+        let texture = WorldTextureCache.shared.texture(kind: resolvedKind,
+                                                      zone: zone,
+                                                      biome: .kelpForest,
+                                                      variant: rng.nextInt(in: 0...9))
         let kelp = SKSpriteNode(texture: texture)
         kelp.size = CGSize(width: height * rng.nextCGFloat(in: 0.24...0.48),
                            height: height)
-        kelp.anchorPoint = CGPoint(x: 0.5, y: rootAnchorY(for: kind))
-        fitPlantSprite(kelp, kind: kind, baseSize: baseSize)
+        kelp.anchorPoint = CGPoint(x: 0.5, y: rootAnchorY(for: resolvedKind))
+        fitPlantSprite(kelp, kind: resolvedKind, baseSize: baseSize)
         kelp.alpha = rng.nextCGFloat(in: 0.58...0.86)
         kelp.zRotation = rng.nextCGFloat(in: -0.12...0.12)
         if rng.chance(0.55) {
@@ -359,9 +388,9 @@ enum WorldChunkFactory {
 
     private static func makeDetailSprite(zone: DepthZone,
                                          biome: AquaticBiome,
+                                         kind: WorldStampKind,
                                          baseSize: CGSize,
                                          rng: inout SeededGenerator) -> SKSpriteNode {
-        let kind = detailStampKind(for: zone, biome: biome, rng: &rng)
         let texture = WorldTextureCache.shared.texture(kind: kind,
                                                        zone: zone,
                                                        biome: biome,
@@ -377,6 +406,34 @@ enum WorldChunkFactory {
             detail.alpha *= kind == .ventStack ? 0.86 : 0.72
         }
         return detail
+    }
+
+    private static func makePlantSprite(from rule: EcosystemVegetationRule,
+                                        zone: DepthZone,
+                                        biome: AquaticBiome,
+                                        baseSize: CGSize,
+                                        rng: inout SeededGenerator) -> SKSpriteNode {
+        switch rule.renderKind {
+        case .kelpRibbon, .kelpBlade, .kelpBush:
+            return makeKelpSprite(zone: zone,
+                                  baseSize: baseSize,
+                                  kind: rule.renderKind,
+                                  rng: &rng)
+        default:
+            return makeDetailSprite(from: rule, zone: zone, biome: biome, baseSize: baseSize, rng: &rng)
+        }
+    }
+
+    private static func makeDetailSprite(from rule: EcosystemVegetationRule,
+                                        zone: DepthZone,
+                                        biome: AquaticBiome,
+                                        baseSize: CGSize,
+                                        rng: inout SeededGenerator) -> SKSpriteNode {
+        return makeDetailSprite(zone: zone,
+                                biome: biome,
+                                kind: rule.renderKind,
+                                baseSize: baseSize,
+                                rng: &rng)
     }
 
     private static func fitPlantSprite(_ sprite: SKSpriteNode,
@@ -465,34 +522,6 @@ enum WorldChunkFactory {
         }
     }
 
-    private static func detailStampKind(for zone: DepthZone,
-                                 biome: AquaticBiome,
-                                 rng: inout SeededGenerator) -> WorldStampKind {
-        switch biome {
-        case .deepVents:
-            return rng.chance(0.72) ? .ventStack : .crystalCluster
-        case .crystalField:
-            return rng.chance(0.78) ? .crystalCluster : .spongePatch
-        case .ancientRuins:
-            return rng.chance(0.64) ? .ruinShard : .crystalCluster
-        case .cavernMouth:
-            if rng.chance(0.48) { return .ruinShard }
-            return zone == .deep || zone == .abyss ? .crystalCluster : .spongePatch
-        case .kelpForest:
-            if rng.chance(0.46) { return .spongePatch }
-            return rng.chance(0.42) ? .coralTube : .coralBranch
-        case .coralGarden, .reefWall:
-            let roll = rng.nextCGFloat(in: 0...1)
-            if roll < 0.36 { return .coralFan }
-            if roll < 0.66 { return .coralBranch }
-            if roll < 0.84 { return .coralTube }
-            return .spongePatch
-        case .openWater, .abyssPlain:
-            if zone == .deep || zone == .abyss { return rng.chance(0.45) ? .crystalCluster : .ruinShard }
-            return rng.chance(0.54) ? .spongePatch : .coralTube
-        }
-    }
-
     private static func detailSize(for kind: WorldStampKind,
                             zone: DepthZone,
                             biome: AquaticBiome,
@@ -528,7 +557,9 @@ enum WorldChunkFactory {
 
     private static func reefDensity(for zone: DepthZone,
                              biome: AquaticBiome,
+                             profile: EcosystemBiomeProfile,
                              rng: inout SeededGenerator) -> CGFloat {
+        guard profile.isDepthCompatible(zone) else { return 0 }
         let zoneBase: CGFloat
         switch zone {
         case .surface:
@@ -559,28 +590,8 @@ enum WorldChunkFactory {
             biomeBoost = -0.16
         }
 
-        return (zoneBase + biomeBoost + rng.nextCGFloat(in: -0.18...0.18)).clamped(to: 0...1)
-    }
-
-    private static func kelpCount(for zone: DepthZone,
-                           biome: AquaticBiome,
-                           rng: inout SeededGenerator) -> Int {
-        let maxCount = biome == .kelpForest ? 7 : 4
-        if zone == .deep || zone == .abyss { return rng.nextInt(in: 0...2) }
-        return rng.nextInt(in: 1...maxCount)
-    }
-
-    private static func detailCount(for zone: DepthZone,
-                             biome: AquaticBiome,
-                             rng: inout SeededGenerator) -> Int {
-        switch biome {
-        case .openWater, .abyssPlain:
-            return rng.nextInt(in: 0...2)
-        case .coralGarden, .crystalField, .deepVents:
-            return rng.nextInt(in: 3...6)
-        default:
-            return rng.nextInt(in: 2...5)
-        }
+        return (zoneBase + biomeBoost + profile.reefDensityBias(for: zone) + rng.nextCGFloat(in: -0.18...0.18))
+            .clamped(to: 0...1)
     }
 
     private static func randomPoint(in rect: CGRect,
