@@ -180,6 +180,7 @@ final class ChallengeSystem {
     func nearbyGivers(to point: CGPoint, maxDistance: CGFloat) -> [FishNode] {
         ctx.fish.fishes.filter {
             $0.offeredChallenge?.isAvailable == true
+                && $0.species != nil
                 && $0.position.distance(to: point) <= maxDistance
         }
     }
@@ -216,7 +217,7 @@ final class ChallengeSystem {
         }
         let zone = DepthZone.zone(atY: point.y)
         guard let fish = ctx.fish.spawnFish(zone: zone, near: point) else { return nil }
-        assignChallenge(resolvedKind, to: fish, special: false)
+        guard assignChallenge(resolvedKind, to: fish, special: false) else { return nil }
         return fish
     }
 
@@ -224,7 +225,7 @@ final class ChallengeSystem {
     func spawnSpecialGiver(near point: CGPoint, zone: DepthZone) {
         guard let kind = ChallengeKind.availableCases.randomElement() else { return }
         guard let fish = ctx.fish.spawnFish(zone: zone, near: point, rare: true) else { return }
-        assignChallenge(kind, to: fish, special: true)
+        _ = assignChallenge(kind, to: fish, special: true)
     }
 
     /// O desafio foi jogado: o peixe volta à vida normal.
@@ -240,12 +241,15 @@ final class ChallengeSystem {
                                         special: special)
     }
 
-    private func assignChallenge(_ kind: ChallengeKind, to fish: FishNode, special: Bool) {
+    @discardableResult
+    private func assignChallenge(_ kind: ChallengeKind, to fish: FishNode, special: Bool) -> Bool {
+        guard fish.species != nil else { return false }
         fish.isSpecialChallenge = special
         fish.offeredChallengeGoal = GameBalance.randomChallengeGoal(for: kind,
                                                                     zone: fish.zone,
                                                                     special: special)
         fish.offeredChallenge = kind
+        return true
     }
 
     private func ensureGoal(for fish: FishNode, kind: ChallengeKind) {

@@ -1478,9 +1478,7 @@ class GameScene: SKScene {
             ?? ctx.challenges.makeGoal(kind: kind, special: special, at: giver.position)
         let giverDisplay = giver.makeGiverDisplayNode()
         pendingRegistroChallengeSpeciesId = RegistroCatalog.challengeUnlockCandidate(
-            preferredSpeciesId: giver.species?.id,
-            regionId: ctx.regions.currentRegion?.id,
-            zone: giver.zone,
+            giverSpeciesId: giver.species?.id,
             stats: stats
         )?.id
         ctx.challenges.consumeChallenge(of: giver)
@@ -1560,12 +1558,7 @@ class GameScene: SKScene {
               registroOverlay == nil,
               refugeOverlay == nil else { return }
         pendingPOIChallengeCompletion = onCompletion
-        pendingRegistroChallengeSpeciesId = registroSpeciesId(for: poi).flatMap {
-            RegistroCatalog.challengeUnlockCandidate(preferredSpeciesId: $0,
-                                                     regionId: poi.regionId,
-                                                     zone: poi.zone,
-                                                     stats: stats)?.id
-        }
+        pendingRegistroChallengeSpeciesId = nil
         GameAudio.shared.play(.challengeOpen)
         presentChallenge(kind: poiChallenge.kind,
                          special: poiChallenge.special,
@@ -1588,23 +1581,6 @@ class GameScene: SKScene {
         return node
     }
 
-    private func registroSpeciesId(for poi: WorldPOI) -> String? {
-        guard poi.visualConcept == .npc || poi.kind == .pet else { return nil }
-        guard let region = RegionDiscoverySystem.region(withId: poi.regionId) else { return nil }
-        let poiName = normalizedRegistroText(poi.name)
-        return RegistroCatalog.species(in: region).first { definition in
-            let common = normalizedRegistroText(definition.commonName)
-            let firstCommonToken = common.split(separator: " ").first.map(String.init) ?? common
-            return poiName.contains(common) || (!firstCommonToken.isEmpty && poiName.contains(firstCommonToken))
-        }?.id
-    }
-
-    private func normalizedRegistroText(_ text: String) -> String {
-        text.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
-            .replacingOccurrences(of: "-", with: " ")
-            .lowercased()
-    }
-
     private func consumePendingRegistroUnlock(result: ChallengeResult) -> RegistroSpeciesDefinition? {
         defer { pendingRegistroChallengeSpeciesId = nil }
         guard result.reachedTarget,
@@ -1622,7 +1598,11 @@ class GameScene: SKScene {
                                   challengeGoal: Int,
                                   giverDisplay: SKNode?,
                                   hatching: Bool = false) {
-        guard hatching || kind.isAvailable else { return }
+        guard hatching || kind.isAvailable else {
+            pendingRegistroChallengeSpeciesId = nil
+            pendingPOIChallengeCompletion = nil
+            return
+        }
         closeRegionMenu()
         closeRegistro(playSound: false)
         closeChallengeChoiceMenu(playSound: false)

@@ -123,8 +123,8 @@ enum GameBalance {
         10
     }
 
-    static let commonChallengeGoalMultiplierRange: ClosedRange<CGFloat> = 1.18...1.35
-    static let specialChallengeGoalMultiplierRange: ClosedRange<CGFloat> = 1.38...1.62
+    static let commonChallengeGoalMultiplierRange: ClosedRange<CGFloat> = 1.38...1.62
+    static let specialChallengeGoalMultiplierRange: ClosedRange<CGFloat> = 1.70...2.00
     static let memoryChallengeWaveGoalStep = 110
     static let challengeCompletionShellBonusMultiplier: CGFloat = 0.50
     static let challengeVictoryResourceChance: CGFloat = 0.50

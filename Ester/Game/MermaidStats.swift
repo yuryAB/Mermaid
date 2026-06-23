@@ -11,6 +11,11 @@ import CoreGraphics
 final class MermaidStats: Codable {
     static let defaultMermaidName = "Eistrelinha"
     private static var activeSessionStats: MermaidStats?
+    private static var validRegistroSpeciesIds: Set<String> {
+        Set(RegionDiscoverySystem.menuRegions.flatMap { region in
+            AquaticSpeciesCatalog.species(for: region.id).map(\.id)
+        })
+    }
 
     var mermaidName: String = MermaidStats.defaultMermaidName
     // 0 = satisfeita, 100 = faminta
@@ -144,8 +149,10 @@ final class MermaidStats: Codable {
         discoveredRegionIds = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredRegionIds) ?? ["recife_tropical"]
         regionProgress = try c.decodeIfPresent([String: CGFloat].self, forKey: .regionProgress) ?? [:]
         registeredSpeciesIds = try c.decodeIfPresent(Set<String>.self, forKey: .registeredSpeciesIds) ?? []
+        sanitizeRegisteredSpeciesIds()
         mermaidObservationIds = try c.decodeIfPresent(Set<String>.self, forKey: .mermaidObservationIds) ?? ["primeiro_olhar"]
         mermaidObservationIds.insert("primeiro_olhar")
+        sanitizeMermaidObservationIds()
         expeditionRevealByRegion = try c.decodeIfPresent([String: [String: CGFloat]].self, forKey: .expeditionRevealByRegion) ?? [:]
         discoveredPOIKeys = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredPOIKeys) ?? []
         visitedPOIKeys = try c.decodeIfPresent(Set<String>.self, forKey: .visitedPOIKeys) ?? []
@@ -747,6 +754,7 @@ final class MermaidStats: Codable {
 
     @discardableResult
     func registerSpecies(_ speciesId: String, memoryText: String? = nil) -> Bool {
+        guard Self.validRegistroSpeciesIds.contains(speciesId) else { return false }
         guard registeredSpeciesIds.insert(speciesId).inserted else { return false }
         if let memoryText {
             addMemory(memoryText)
@@ -756,6 +764,15 @@ final class MermaidStats: Codable {
 
     func isSpeciesRegistered(_ speciesId: String) -> Bool {
         registeredSpeciesIds.contains(speciesId)
+    }
+
+    private func sanitizeRegisteredSpeciesIds() {
+        registeredSpeciesIds = registeredSpeciesIds.intersection(Self.validRegistroSpeciesIds)
+    }
+
+    private func sanitizeMermaidObservationIds() {
+        mermaidObservationIds = mermaidObservationIds.intersection(RegistroCatalog.validMermaidObservationIds)
+        mermaidObservationIds.insert("primeiro_olhar")
     }
 
     @discardableResult
@@ -884,6 +901,8 @@ final class MermaidStats: Codable {
         }
 
         lastSaved = Date()
+        sanitizeRegisteredSpeciesIds()
+        sanitizeMermaidObservationIds()
         if let data = try? JSONEncoder().encode(self) {
             UserDefaults.standard.set(data, forKey: MermaidStats.saveKey)
             if immediately {

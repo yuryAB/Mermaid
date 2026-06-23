@@ -10,12 +10,15 @@
 import Foundation
 import SpriteKit
 
-fileprivate enum FishSilhouette: CaseIterable {
+fileprivate enum FishSilhouette {
     case oval
     case needle
     case diamond
     case moon
     case ray
+    case turtle
+
+    private static let randomPool: [FishSilhouette] = [.oval, .needle, .diamond, .moon, .ray]
 
     static func random(for zone: DepthZone, rare: Bool, species: AquaticSpecies?) -> FishSilhouette {
         if let preferred = preferred(for: species) {
@@ -44,7 +47,7 @@ fileprivate enum FishSilhouette: CaseIterable {
         case .shallow:
             return [.oval, .diamond, .moon].randomElement()!
         case .mid, .blue:
-            return allCases.randomElement()!
+            return randomPool.randomElement()!
         case .deep, .abyss:
             return [.needle, .ray, .moon, .diamond].randomElement()!
         }
@@ -62,8 +65,10 @@ fileprivate enum FishSilhouette: CaseIterable {
             id.contains("anaconda") || id.contains("crocodilo") || id.contains("jacare") {
             return .needle
         }
-        if id.contains("tartaruga") || id.contains("peixe_lua") || id.contains("polvo") ||
-            id.contains("agua_viva") || id.contains("caravela") {
+        if id.contains("tartaruga") {
+            return .turtle
+        }
+        if id.contains("peixe_lua") || id.contains("polvo") || id.contains("agua_viva") || id.contains("caravela") {
             return .moon
         }
         if id.contains("caranguejo") || id.contains("siri") || id.contains("lagosta") ||
@@ -118,9 +123,11 @@ fileprivate enum FishPattern: CaseIterable {
             id.contains("leopardo") || id.contains("listrado") || id.contains("zebra") {
             return .stripes
         }
+        if id.contains("tartaruga") {
+            return .plain
+        }
         if id.contains("pintado") || id.contains("chita") || id.contains("manta") ||
-            id.contains("papagaio") || id.contains("estrela") || id.contains("polvo") ||
-            id.contains("tartaruga") {
+            id.contains("papagaio") || id.contains("estrela") || id.contains("polvo") {
             return .spots
         }
         if zone == .deep || zone == .abyss ||
@@ -266,7 +273,8 @@ final class FishNode: SKNode, ChallengeGiver {
                                         color: UIColor,
                                         animateTail: Bool,
                                         silhouette: FishSilhouette = .oval,
-                                        pattern: FishPattern = .plain) -> SKNode {
+                                        pattern: FishPattern = .plain,
+                                        patternSeed: String? = nil) -> SKNode {
         let node = SKNode()
 
         let body = bodyShape(length: length, height: height, silhouette: silhouette)
@@ -288,14 +296,25 @@ final class FishNode: SKNode, ChallengeGiver {
             tailNode.run(tailSwing)
         }
 
-        addFins(to: node, length: length, height: height, color: color, silhouette: silhouette)
-        addPattern(pattern, to: node, length: length, height: height, color: color, silhouette: silhouette)
-        addEye(to: node, length: length, height: height, silhouette: silhouette)
+        if silhouette != .turtle {
+            addFins(to: node, length: length, height: height, color: color, silhouette: silhouette)
+            addPattern(pattern,
+                       to: node,
+                       length: length,
+                       height: height,
+                       color: color,
+                       silhouette: silhouette,
+                       seed: patternSeed)
+            addEye(to: node, length: length, height: height, silhouette: silhouette)
+        }
 
         return node
     }
 
     private static func bodyLength(for silhouette: FishSilhouette, rare: Bool, species: AquaticSpecies?) -> CGFloat {
+        if let id = species?.id.lowercased(), id.contains("tartaruga") {
+            return CGFloat.random(in: rare ? 116...154 : 82...124)
+        }
         if species?.group == .mammal || species?.group == .shark || species?.group == .reptile {
             return CGFloat.random(in: rare ? 110...150 : 76...126)
         }
@@ -314,6 +333,8 @@ final class FishNode: SKNode, ChallengeGiver {
             return CGFloat.random(in: rare ? 88...120 : 44...78)
         case .ray:
             return CGFloat.random(in: rare ? 105...145 : 72...112)
+        case .turtle:
+            return CGFloat.random(in: rare ? 116...154 : 82...124)
         }
     }
 
@@ -329,6 +350,8 @@ final class FishNode: SKNode, ChallengeGiver {
             return length * CGFloat.random(in: 0.58...0.78)
         case .ray:
             return length * CGFloat.random(in: 0.34...0.46)
+        case .turtle:
+            return length * CGFloat.random(in: 0.46...0.55)
         }
     }
 
@@ -338,6 +361,22 @@ final class FishNode: SKNode, ChallengeGiver {
         switch silhouette {
         case .oval, .needle, .moon:
             return SKShapeNode(ellipseOf: CGSize(width: length, height: height))
+        case .turtle:
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: -length * 0.48, y: 0))
+            path.addCurve(to: CGPoint(x: -length * 0.10, y: height * 0.51),
+                          controlPoint1: CGPoint(x: -length * 0.42, y: height * 0.33),
+                          controlPoint2: CGPoint(x: -length * 0.28, y: height * 0.51))
+            path.addCurve(to: CGPoint(x: length * 0.43, y: height * 0.04),
+                          controlPoint1: CGPoint(x: length * 0.18, y: height * 0.52),
+                          controlPoint2: CGPoint(x: length * 0.42, y: height * 0.34))
+            path.addCurve(to: CGPoint(x: -length * 0.10, y: -height * 0.51),
+                          controlPoint1: CGPoint(x: length * 0.42, y: -height * 0.34),
+                          controlPoint2: CGPoint(x: length * 0.18, y: -height * 0.52))
+            path.addCurve(to: CGPoint(x: -length * 0.48, y: 0),
+                          controlPoint1: CGPoint(x: -length * 0.28, y: -height * 0.51),
+                          controlPoint2: CGPoint(x: -length * 0.42, y: -height * 0.33))
+            return SKShapeNode(path: path.cgPath)
         case .diamond:
             let path = UIBezierPath()
             path.move(to: CGPoint(x: -length * 0.5, y: 0))
@@ -365,6 +404,8 @@ final class FishNode: SKNode, ChallengeGiver {
                                   silhouette: FishSilhouette) -> SKNode {
         let node = SKNode()
         switch silhouette {
+        case .turtle:
+            return node
         case .ray:
             let path = UIBezierPath()
             path.move(to: CGPoint(x: -length * 0.45, y: -height * 0.03))
@@ -404,7 +445,7 @@ final class FishNode: SKNode, ChallengeGiver {
                                 height: CGFloat,
                                 color: UIColor,
                                 silhouette: FishSilhouette) {
-        guard silhouette != .ray else { return }
+        guard silhouette != .ray && silhouette != .turtle else { return }
 
         let finPath = UIBezierPath()
         finPath.move(to: CGPoint(x: -length * 0.08, y: height * 0.36))
@@ -431,7 +472,13 @@ final class FishNode: SKNode, ChallengeGiver {
                                    length: CGFloat,
                                    height: CGFloat,
                                    color: UIColor,
-                                   silhouette: FishSilhouette) {
+                                   silhouette: FishSilhouette,
+                                   seed: String?) {
+        func seeded(_ salt: Int) -> CGFloat {
+            guard let seed else { return CGFloat.random(in: 0...1) }
+            return stableUnit(for: seed, salt: salt)
+        }
+
         switch pattern {
         case .plain:
             return
@@ -448,22 +495,26 @@ final class FishNode: SKNode, ChallengeGiver {
                 node.addChild(stripe)
             }
         case .spots:
-            for _ in 0..<Int.random(in: 3...6) {
-                let spot = SKShapeNode(circleOfRadius: max(1.8, height * CGFloat.random(in: 0.055...0.095)))
+            let count = seed.map { 3 + stableBucket(for: "\($0)|spots", modulo: 4) } ?? Int.random(in: 3...6)
+            for i in 0..<count {
+                let radiusFactor = 0.055 + seeded(101 + i) * 0.040
+                let spot = SKShapeNode(circleOfRadius: max(1.8, height * radiusFactor))
                 spot.fillColor = UIColor.lerp(color, .white, 0.5).withAlphaComponent(0.52)
                 spot.strokeColor = .clear
-                spot.position = CGPoint(x: CGFloat.random(in: -length * 0.2...length * 0.25),
-                                        y: CGFloat.random(in: -height * 0.22...height * 0.22))
+                spot.position = CGPoint(x: -length * 0.2 + seeded(201 + i) * length * 0.45,
+                                        y: -height * 0.22 + seeded(301 + i) * height * 0.44)
                 node.addChild(spot)
             }
         case .glowDots:
-            for _ in 0..<Int.random(in: 3...7) {
-                let dot = SKShapeNode(circleOfRadius: max(2, height * CGFloat.random(in: 0.045...0.075)))
+            let count = seed.map { 3 + stableBucket(for: "\($0)|glow", modulo: 5) } ?? Int.random(in: 3...7)
+            for i in 0..<count {
+                let radiusFactor = 0.045 + seeded(401 + i) * 0.030
+                let dot = SKShapeNode(circleOfRadius: max(2, height * radiusFactor))
                 dot.fillColor = UIColor.lerp(color, .white, 0.72).withAlphaComponent(0.72)
                 dot.strokeColor = .clear
                 dot.glowWidth = 5
-                dot.position = CGPoint(x: CGFloat.random(in: -length * 0.24...length * 0.32),
-                                       y: CGFloat.random(in: -height * 0.24...height * 0.24))
+                dot.position = CGPoint(x: -length * 0.24 + seeded(501 + i) * length * 0.56,
+                                       y: -height * 0.24 + seeded(601 + i) * height * 0.48)
                 node.addChild(dot)
             }
         }
@@ -558,8 +609,10 @@ final class FishNode: SKNode, ChallengeGiver {
             color = id.contains("couro")
                 ? UIColor(red: 0.20, green: 0.22, blue: 0.24, alpha: 1)
                 : UIColor(red: 0.37, green: 0.55, blue: 0.34, alpha: 1)
-            pattern = .spots
-            lengthMultiplier = id.contains("anaconda") || id.contains("crocodilo") || id.contains("jacare") ? 1.38 : 1.05
+            pattern = id.contains("tartaruga") ? .plain : .spots
+            lengthMultiplier = id.contains("anaconda") || id.contains("crocodilo") || id.contains("jacare")
+                ? 1.38
+                : (id.contains("couro") ? 1.20 : 1.10)
         case .crustacean, .arthropod:
             color = id.contains("azul")
                 ? UIColor(red: 0.18, green: 0.48, blue: 0.76, alpha: 1)
@@ -625,7 +678,7 @@ final class FishNode: SKNode, ChallengeGiver {
             addMammalTraits(to: node, id: id, length: length, height: height, color: color)
         case .reptile:
             if id.contains("tartaruga") {
-                addTurtleTraits(to: node, length: length, height: height, color: color)
+                addTurtleTraits(to: node, id: id, length: length, height: height, color: color)
             } else {
                 addDorsalScutes(to: node, length: length, height: height, color: color)
             }
@@ -727,35 +780,172 @@ final class FishNode: SKNode, ChallengeGiver {
     }
 
     private static func addTurtleTraits(to node: SKNode,
+                                        id: String,
                                         length: CGFloat,
                                         height: CGFloat,
                                         color: UIColor) {
-        let shell = traitEllipse(size: CGSize(width: length * 0.72, height: height * 0.78),
-                                 fill: UIColor.lerp(color, GameUI.gold, 0.18).withAlphaComponent(0.62))
-        shell.strokeColor = UIColor.lerp(color, .black, 0.28).withAlphaComponent(0.48)
-        shell.lineWidth = 1
+        let shellFill = id.contains("couro")
+            ? UIColor.lerp(color, .black, 0.12).withAlphaComponent(0.88)
+            : UIColor.lerp(color, GameUI.gold, id.contains("pente") ? 0.30 : 0.18).withAlphaComponent(0.88)
+        let skin = UIColor.lerp(color, .white, id.contains("pente") ? 0.10 : 0.04)
+        let outline = UIColor.lerp(color, .black, 0.36).withAlphaComponent(0.58)
+
+        for side in [-1, 1] as [CGFloat] {
+            let front = UIBezierPath()
+            front.move(to: CGPoint(x: length * 0.12, y: side * height * 0.24))
+            front.addCurve(to: CGPoint(x: length * 0.39, y: side * height * 0.82),
+                           controlPoint1: CGPoint(x: length * 0.18, y: side * height * 0.56),
+                           controlPoint2: CGPoint(x: length * 0.31, y: side * height * 0.84))
+            front.addCurve(to: CGPoint(x: -length * 0.03, y: side * height * 0.56),
+                           controlPoint1: CGPoint(x: length * 0.22, y: side * height * 0.96),
+                           controlPoint2: CGPoint(x: length * 0.05, y: side * height * 0.76))
+            front.addCurve(to: CGPoint(x: length * 0.12, y: side * height * 0.24),
+                           controlPoint1: CGPoint(x: length * 0.02, y: side * height * 0.42),
+                           controlPoint2: CGPoint(x: length * 0.06, y: side * height * 0.30))
+            let frontFlipper = SKShapeNode(path: front.cgPath)
+            frontFlipper.fillColor = skin.withAlphaComponent(0.72)
+            frontFlipper.strokeColor = outline
+            frontFlipper.lineWidth = max(1, height * 0.025)
+            frontFlipper.zPosition = 1
+            node.addChild(frontFlipper)
+
+            let rear = UIBezierPath()
+            rear.move(to: CGPoint(x: -length * 0.20, y: side * height * 0.23))
+            rear.addCurve(to: CGPoint(x: -length * 0.52, y: side * height * 0.54),
+                          controlPoint1: CGPoint(x: -length * 0.32, y: side * height * 0.33),
+                          controlPoint2: CGPoint(x: -length * 0.45, y: side * height * 0.48))
+            rear.addCurve(to: CGPoint(x: -length * 0.38, y: side * height * 0.12),
+                          controlPoint1: CGPoint(x: -length * 0.56, y: side * height * 0.30),
+                          controlPoint2: CGPoint(x: -length * 0.48, y: side * height * 0.16))
+            rear.addCurve(to: CGPoint(x: -length * 0.20, y: side * height * 0.23),
+                          controlPoint1: CGPoint(x: -length * 0.30, y: side * height * 0.12),
+                          controlPoint2: CGPoint(x: -length * 0.24, y: side * height * 0.16))
+            let rearFlipper = SKShapeNode(path: rear.cgPath)
+            rearFlipper.fillColor = skin.withAlphaComponent(0.58)
+            rearFlipper.strokeColor = outline.withAlphaComponent(0.72)
+            rearFlipper.lineWidth = max(1, height * 0.022)
+            rearFlipper.zPosition = 1
+            node.addChild(rearFlipper)
+        }
+
+        let tail = UIBezierPath()
+        tail.move(to: CGPoint(x: -length * 0.44, y: height * 0.08))
+        tail.addLine(to: CGPoint(x: -length * 0.59, y: 0))
+        tail.addLine(to: CGPoint(x: -length * 0.44, y: -height * 0.08))
+        tail.close()
+        let tailNode = SKShapeNode(path: tail.cgPath)
+        tailNode.fillColor = skin.withAlphaComponent(0.50)
+        tailNode.strokeColor = .clear
+        tailNode.zPosition = 1
+        node.addChild(tailNode)
+
+        let neck = traitEllipse(size: CGSize(width: length * 0.18, height: height * 0.20),
+                                fill: skin.withAlphaComponent(0.70))
+        neck.position = CGPoint(x: length * 0.41, y: 0)
+        neck.zPosition = 2
+        node.addChild(neck)
+
+        let head = traitEllipse(size: CGSize(width: length * 0.23, height: height * 0.31),
+                                fill: skin.withAlphaComponent(0.88))
+        head.position = CGPoint(x: length * 0.54, y: 0)
+        head.strokeColor = outline.withAlphaComponent(0.72)
+        head.lineWidth = max(1, height * 0.025)
+        head.zPosition = 4
+        node.addChild(head)
+
+        if id.contains("pente") {
+            let beak = traitPath(points: [
+                CGPoint(x: length * 0.62, y: height * 0.04),
+                CGPoint(x: length * 0.69, y: 0),
+                CGPoint(x: length * 0.62, y: -height * 0.04)
+            ], color: outline.withAlphaComponent(0.56), width: max(1, height * 0.02))
+            beak.zPosition = 5
+            node.addChild(beak)
+        }
+
+        for side in [-1, 1] as [CGFloat] {
+            let eye = SKShapeNode(circleOfRadius: max(1.4, height * 0.038))
+            eye.fillColor = UIColor.white.withAlphaComponent(0.92)
+            eye.strokeColor = .clear
+            eye.position = CGPoint(x: length * 0.59, y: side * height * 0.06)
+            eye.zPosition = 5
+            node.addChild(eye)
+
+            let pupil = SKShapeNode(circleOfRadius: max(0.8, height * 0.019))
+            pupil.fillColor = .black
+            pupil.strokeColor = .clear
+            pupil.position = CGPoint(x: length * 0.60, y: side * height * 0.06)
+            pupil.zPosition = 6
+            node.addChild(pupil)
+        }
+
+        let shellPath = UIBezierPath()
+        shellPath.move(to: CGPoint(x: -length * 0.39, y: 0))
+        shellPath.addCurve(to: CGPoint(x: -length * 0.08, y: height * 0.40),
+                           controlPoint1: CGPoint(x: -length * 0.34, y: height * 0.27),
+                           controlPoint2: CGPoint(x: -length * 0.22, y: height * 0.40))
+        shellPath.addCurve(to: CGPoint(x: length * 0.34, y: height * 0.03),
+                           controlPoint1: CGPoint(x: length * 0.16, y: height * 0.42),
+                           controlPoint2: CGPoint(x: length * 0.33, y: height * 0.27))
+        shellPath.addCurve(to: CGPoint(x: -length * 0.08, y: -height * 0.40),
+                           controlPoint1: CGPoint(x: length * 0.33, y: -height * 0.27),
+                           controlPoint2: CGPoint(x: length * 0.16, y: -height * 0.42))
+        shellPath.addCurve(to: CGPoint(x: -length * 0.39, y: 0),
+                           controlPoint1: CGPoint(x: -length * 0.22, y: -height * 0.40),
+                           controlPoint2: CGPoint(x: -length * 0.34, y: -height * 0.27))
+        let shell = SKShapeNode(path: shellPath.cgPath)
+        shell.fillColor = shellFill
+        shell.strokeColor = outline
+        shell.lineWidth = max(1.2, height * 0.035)
         shell.zPosition = 3
         node.addChild(shell)
-        for x in [-0.18, 0, 0.18] as [CGFloat] {
-            let line = traitPath(points: [
-                CGPoint(x: length * x, y: height * 0.32),
-                CGPoint(x: length * x * 0.4, y: -height * 0.32)
-            ], color: UIColor.white.withAlphaComponent(0.26), width: 1.2)
-            line.zPosition = 4
-            node.addChild(line)
+
+        let centerRidge = traitPath(points: [
+            CGPoint(x: -length * 0.30, y: 0),
+            CGPoint(x: length * 0.27, y: 0)
+        ], color: UIColor.white.withAlphaComponent(id.contains("couro") ? 0.30 : 0.24), width: max(1, height * 0.024))
+        centerRidge.zPosition = 4
+        node.addChild(centerRidge)
+
+        for x in [-0.20, -0.04, 0.14] as [CGFloat] {
+            let plate = UIBezierPath()
+            plate.move(to: CGPoint(x: length * x, y: height * 0.31))
+            plate.addCurve(to: CGPoint(x: length * (x + 0.03), y: -height * 0.31),
+                           controlPoint1: CGPoint(x: length * (x + 0.07), y: height * 0.13),
+                           controlPoint2: CGPoint(x: length * (x + 0.07), y: -height * 0.13))
+            let plateNode = traitPath(path: plate,
+                                      color: UIColor.white.withAlphaComponent(0.22),
+                                      width: max(1, height * 0.022))
+            plateNode.zPosition = 4
+            node.addChild(plateNode)
         }
-        for spec in [
-            CGPoint(x: -length * 0.12, y: height * 0.50),
-            CGPoint(x: length * 0.12, y: height * 0.50),
-            CGPoint(x: -length * 0.18, y: -height * 0.48),
-            CGPoint(x: length * 0.18, y: -height * 0.48)
-        ] {
-            let flipper = traitEllipse(size: CGSize(width: length * 0.20, height: height * 0.13),
-                                       fill: color.withAlphaComponent(0.48))
-            flipper.position = spec
-            flipper.zRotation = spec.y > 0 ? 0.28 : -0.28
-            flipper.zPosition = 1
-            node.addChild(flipper)
+
+        for side in [-1, 1] as [CGFloat] {
+            let sidePlate = UIBezierPath()
+            sidePlate.move(to: CGPoint(x: -length * 0.25, y: side * height * 0.18))
+            sidePlate.addCurve(to: CGPoint(x: length * 0.24, y: side * height * 0.19),
+                               controlPoint1: CGPoint(x: -length * 0.08, y: side * height * 0.31),
+                               controlPoint2: CGPoint(x: length * 0.10, y: side * height * 0.30))
+            let sidePlateNode = traitPath(path: sidePlate,
+                                          color: UIColor.white.withAlphaComponent(0.18),
+                                          width: max(1, height * 0.02))
+            sidePlateNode.zPosition = 4
+            node.addChild(sidePlateNode)
+        }
+
+        if id.contains("pente") {
+            for point in [
+                CGPoint(x: -length * 0.16, y: height * 0.13),
+                CGPoint(x: length * 0.04, y: -height * 0.18),
+                CGPoint(x: length * 0.18, y: height * 0.12)
+            ] {
+                let blot = SKShapeNode(circleOfRadius: max(1.8, height * 0.050))
+                blot.fillColor = UIColor.lerp(shellFill, GameUI.gold, 0.45).withAlphaComponent(0.42)
+                blot.strokeColor = .clear
+                blot.position = point
+                blot.zPosition = 4
+                node.addChild(blot)
+            }
         }
     }
 
@@ -1043,7 +1233,8 @@ final class FishNode: SKNode, ChallengeGiver {
                                            color: bodyColor,
                                            animateTail: true,
                                            silhouette: silhouette,
-                                           pattern: displayPattern)
+                                           pattern: displayPattern,
+                                           patternSeed: species?.id)
         FishNode.addSpeciesTraits(to: drawing,
                                   species: species,
                                   length: bodyLength,
@@ -1073,7 +1264,8 @@ final class FishNode: SKNode, ChallengeGiver {
                                   color: color,
                                   animateTail: false,
                                   silhouette: silhouette,
-                                  pattern: discovered ? (profile.pattern ?? displayPattern(for: zone, species: species)) : .plain)
+                                  pattern: discovered ? (profile.pattern ?? displayPattern(for: zone, species: species)) : .plain,
+                                  patternSeed: discovered ? species.id : nil)
         if discovered {
             addSpeciesTraits(to: drawing,
                              species: species,
@@ -1105,8 +1297,11 @@ final class FishNode: SKNode, ChallengeGiver {
             id.contains("anaconda") || id.contains("crocodilo") || id.contains("jacare") {
             return .needle
         }
-        if id.contains("tartaruga") || id.contains("peixe_lua") || id.contains("polvo") ||
-            id.contains("agua_viva") || id.contains("caravela") || id.contains("papagaio") {
+        if id.contains("tartaruga") {
+            return .turtle
+        }
+        if id.contains("peixe_lua") || id.contains("polvo") || id.contains("agua_viva") ||
+            id.contains("caravela") || id.contains("papagaio") {
             return .moon
         }
         if id.contains("caranguejo") || id.contains("siri") || id.contains("lagosta") ||
@@ -1139,9 +1334,11 @@ final class FishNode: SKNode, ChallengeGiver {
             id.contains("leopardo") || id.contains("listrado") || id.contains("zebra") {
             return .stripes
         }
+        if id.contains("tartaruga") {
+            return .plain
+        }
         if id.contains("pintado") || id.contains("chita") || id.contains("manta") ||
-            id.contains("papagaio") || id.contains("estrela") || id.contains("polvo") ||
-            id.contains("tartaruga") {
+            id.contains("papagaio") || id.contains("estrela") || id.contains("polvo") {
             return .spots
         }
         if zone == .deep || zone == .abyss ||
@@ -1156,6 +1353,7 @@ final class FishNode: SKNode, ChallengeGiver {
     private static func displayBodyLength(for silhouette: FishSilhouette, species: AquaticSpecies) -> CGFloat {
         switch species.group {
         case .mammal, .shark, .reptile:
+            if silhouette == .turtle { return 78 }
             return silhouette == .needle ? 82 : 70
         case .crustacean, .mollusk, .echinoderm, .arthropod:
             return 46
@@ -1170,6 +1368,7 @@ final class FishNode: SKNode, ChallengeGiver {
             case .diamond: return 52
             case .moon: return 56
             case .ray: return 78
+            case .turtle: return 78
             }
         }
     }
@@ -1186,6 +1385,8 @@ final class FishNode: SKNode, ChallengeGiver {
             return length * 0.66
         case .ray:
             return length * 0.40
+        case .turtle:
+            return length * 0.50
         }
     }
 
@@ -1195,6 +1396,11 @@ final class FishNode: SKNode, ChallengeGiver {
             (partial &* 31 &+ Int(scalar.value)) & 0x7fffffff
         }
         return value % modulo
+    }
+
+    private static func stableUnit(for id: String, salt: Int) -> CGFloat {
+        let value = stableBucket(for: "\(id)|\(salt)", modulo: 10_000)
+        return CGFloat(value) / 9_999
     }
 
     func startGuiding(toward target: CGPoint, duration: TimeInterval) {

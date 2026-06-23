@@ -27,9 +27,28 @@ struct RegistroProgressSnapshot {
     }
 }
 
+enum RegistroUnlockRequirement {
+    case challengeFromSpecies(String)
+
+    var displayText: String {
+        switch self {
+        case .challengeFromSpecies:
+            return "Complete pela primeira vez um desafio entregue por esta espécie."
+        }
+    }
+
+    var challengeGiverSpeciesId: String? {
+        switch self {
+        case .challengeFromSpecies(let speciesId):
+            return speciesId
+        }
+    }
+}
+
 struct RegistroSpeciesDefinition {
     let species: AquaticSpecies
     let region: Region
+    let unlockRequirement: RegistroUnlockRequirement
     let shortDescription: String
     let fieldObservation: String
     let visualNotes: String
@@ -49,7 +68,7 @@ struct RegistroSpeciesDefinition {
     }
 
     var unlockRequirementText: String {
-        "Complete pela primeira vez um desafio entregue por esta espécie."
+        unlockRequirement.displayText
     }
 }
 
@@ -58,6 +77,12 @@ struct RegistroMermaidObservation {
     let title: String
     let body: String
     let unlocked: Bool
+}
+
+private struct RegistroMermaidObservationDefinition {
+    let id: String
+    let title: String
+    let body: String
 }
 
 extension AquaticAnimalGroup {
@@ -137,16 +162,143 @@ extension AquaticAnimalGroup {
 enum RegistroCatalog {
     static let mermaidEntryId = "sereia"
 
+    private static let mermaidObservationDefinitions: [RegistroMermaidObservationDefinition] = [
+        RegistroMermaidObservationDefinition(
+            id: "primeiro_olhar",
+            title: "Primeira observação",
+            body: "Indivíduo central do estudo. A presença da sereia altera a rotina dos animais próximos e orienta toda a documentação do ecossistema."),
+        RegistroMermaidObservationDefinition(
+            id: "nado_inicial",
+            title: "Nado e orientação",
+            body: "Após sair do ovo, responde a direção, descanso e exploração com hesitações próprias. O vínculo muda a chance de aceitar comandos."),
+        RegistroMermaidObservationDefinition(
+            id: "alimentacao",
+            title: "Alimentação",
+            body: "Procura alimento quando a fome aumenta. Comer estabiliza energia e disposição antes de jornadas ou desafios."),
+        RegistroMermaidObservationDefinition(
+            id: "resposta_desafios",
+            title: "Resposta a desafios",
+            body: "Demonstra aprendizado quando resolve provas trazidas por criaturas. A primeira vitória com uma espécie documenta aquela ficha no Registro."),
+        RegistroMermaidObservationDefinition(
+            id: "exploracao",
+            title: "Exploração",
+            body: "A curiosidade cresce em regiões novas. Mapas, profundidades e encontros raros aumentam o diário de campo."),
+        RegistroMermaidObservationDefinition(
+            id: "crescimento",
+            title: "Crescimento",
+            body: "Mudanças de fase alteram acesso a zonas, ritmo de nado e autonomia diante de ambientes mais difíceis."),
+        RegistroMermaidObservationDefinition(
+            id: "preferencias",
+            title: "Preferências",
+            body: "Com vínculo alto, aceita melhor convites e responde com mais calma a recursos, brincadeiras e pausas.")
+    ]
+
+    static let validMermaidObservationIds = Set(mermaidObservationDefinitions.map(\.id))
+
+    private static let speciesDefinitionsByRegionId: [String: [RegistroSpeciesDefinition]] = {
+        var definitionsByRegionId: [String: [RegistroSpeciesDefinition]] = [:]
+        for region in RegionDiscoverySystem.menuRegions {
+            definitionsByRegionId[region.id] = AquaticSpeciesCatalog.species(for: region.id).map {
+                definition(for: $0, region: region)
+            }
+        }
+        return definitionsByRegionId
+    }()
+
+    private static let speciesDefinitions: [RegistroSpeciesDefinition] = {
+        RegionDiscoverySystem.menuRegions.flatMap { region in
+            speciesDefinitionsByRegionId[region.id] ?? []
+        }
+    }()
+
+    private static let speciesDefinitionsById: [String: RegistroSpeciesDefinition] = {
+        var definitionsById: [String: RegistroSpeciesDefinition] = [:]
+        for definition in speciesDefinitions {
+            #if DEBUG
+            if definitionsById[definition.id] != nil {
+                assertionFailure("Registro species id duplicado: \(definition.id)")
+            }
+            #endif
+            if definitionsById[definition.id] == nil {
+                definitionsById[definition.id] = definition
+            }
+        }
+        return definitionsById
+    }()
+
+    private static let challengeUnlockDefinitionsByGiverSpeciesId: [String: RegistroSpeciesDefinition] = {
+        var definitionsByGiverSpeciesId: [String: RegistroSpeciesDefinition] = [:]
+        for definition in speciesDefinitions {
+            guard let giverSpeciesId = definition.unlockRequirement.challengeGiverSpeciesId else { continue }
+            #if DEBUG
+            if definitionsByGiverSpeciesId[giverSpeciesId] != nil {
+                assertionFailure("Registro challenge giver duplicado: \(giverSpeciesId)")
+            }
+            #endif
+            if definitionsByGiverSpeciesId[giverSpeciesId] == nil {
+                definitionsByGiverSpeciesId[giverSpeciesId] = definition
+            }
+        }
+        return definitionsByGiverSpeciesId
+    }()
+
+    #if DEBUG
+    private static let catalogDebugValidation: Void = {
+        for region in RegionDiscoverySystem.menuRegions {
+            let rawSpeciesCount = AquaticSpeciesCatalog.species(for: region.id).count
+            let registroSpecies = speciesDefinitionsByRegionId[region.id] ?? []
+            if rawSpeciesCount == 0 {
+                assertionFailure("Registro sem especies para bioma: \(region.id)")
+            }
+            if registroSpecies.count != rawSpeciesCount {
+                assertionFailure("Registro desalinhado em \(region.id): \(registroSpecies.count)/\(rawSpeciesCount)")
+            }
+        }
+
+        for definition in speciesDefinitions {
+            if definition.id.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                assertionFailure("Registro com species id vazio")
+            }
+            if definition.commonName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                assertionFailure("Registro sem nome comum: \(definition.id)")
+            }
+            if definition.scientificName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                assertionFailure("Registro sem nome cientifico: \(definition.id)")
+            }
+            if definition.shortDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                definition.fieldObservation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                definition.naturalHistoryNote.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                assertionFailure("Registro com ficha incompleta: \(definition.id)")
+            }
+            guard let giverSpeciesId = definition.unlockRequirement.challengeGiverSpeciesId else {
+                assertionFailure("Registro sem requisito de desafio: \(definition.id)")
+                continue
+            }
+            guard let unlockTarget = challengeUnlockDefinitionsByGiverSpeciesId[giverSpeciesId] else {
+                assertionFailure("Registro requisito sem alvo: \(giverSpeciesId)")
+                continue
+            }
+            if unlockTarget.id != definition.id {
+                assertionFailure("Registro requisito aponta para ficha errada: \(giverSpeciesId)")
+            }
+        }
+    }()
+
+    static func validateCatalogForDebug() {
+        _ = catalogDebugValidation
+    }
+    #endif
+
     static func allSpecies() -> [RegistroSpeciesDefinition] {
-        RegionDiscoverySystem.menuRegions.flatMap { species(in: $0) }
+        speciesDefinitions
     }
 
     static func species(in region: Region) -> [RegistroSpeciesDefinition] {
-        AquaticSpeciesCatalog.species(for: region.id).map { definition(for: $0, region: region) }
+        speciesDefinitionsByRegionId[region.id] ?? []
     }
 
     static func definition(for speciesId: String) -> RegistroSpeciesDefinition? {
-        allSpecies().first { $0.id == speciesId }
+        speciesDefinitionsById[speciesId]
     }
 
     static func progress(for stats: MermaidStats) -> RegistroProgressSnapshot {
@@ -161,28 +313,12 @@ enum RegistroCatalog {
         return RegistroProgressSnapshot(discovered: discovered, total: entries.count)
     }
 
-    static func challengeUnlockCandidate(preferredSpeciesId: String?,
-                                         regionId: String?,
-                                         zone: DepthZone?,
+    static func challengeUnlockCandidate(giverSpeciesId: String?,
                                          stats: MermaidStats) -> RegistroSpeciesDefinition? {
-        if let preferredSpeciesId,
-           let preferred = definition(for: preferredSpeciesId),
-           !stats.isSpeciesRegistered(preferred.id) {
-            return preferred
-        }
-
-        let region = regionId
-            .flatMap { RegionDiscoverySystem.region(withId: $0) }
-            ?? RegionDiscoverySystem.region(withId: stats.currentRegionId)
-            ?? RegionDiscoverySystem.menuRegions.first
-        guard let region else { return nil }
-
-        let candidates = species(in: region).filter { definition in
-            guard !stats.isSpeciesRegistered(definition.id) else { return false }
-            guard let zone else { return true }
-            return definition.species.preferredZones.contains(zone)
-        }
-        return candidates.first ?? species(in: region).first { !stats.isSpeciesRegistered($0.id) }
+        guard let giverSpeciesId,
+              let definition = challengeUnlockDefinitionsByGiverSpeciesId[giverSpeciesId],
+              !stats.isSpeciesRegistered(definition.id) else { return nil }
+        return definition
     }
 
     @discardableResult
@@ -212,48 +348,18 @@ enum RegistroCatalog {
 
     static func mermaidObservations(for stats: MermaidStats) -> [RegistroMermaidObservation] {
         let known = stats.mermaidObservationIds
-        return [
-            RegistroMermaidObservation(
-                id: "primeiro_olhar",
-                title: "Primeira observação",
-                body: "Indivíduo central do estudo. A presença da sereia altera a rotina dos animais próximos e orienta toda a documentação do ecossistema.",
-                unlocked: known.contains("primeiro_olhar")),
-            RegistroMermaidObservation(
-                id: "nado_inicial",
-                title: "Nado e orientação",
-                body: "Após sair do ovo, responde a direção, descanso e exploração com hesitações próprias. O vínculo muda a chance de aceitar comandos.",
-                unlocked: known.contains("nado_inicial")),
-            RegistroMermaidObservation(
-                id: "alimentacao",
-                title: "Alimentação",
-                body: "Procura alimento quando a fome aumenta. Comer estabiliza energia e disposição antes de jornadas ou desafios.",
-                unlocked: known.contains("alimentacao")),
-            RegistroMermaidObservation(
-                id: "resposta_desafios",
-                title: "Resposta a desafios",
-                body: "Demonstra aprendizado quando resolve provas trazidas por criaturas. Cada vitória também expande o Registro do bioma.",
-                unlocked: known.contains("resposta_desafios")),
-            RegistroMermaidObservation(
-                id: "exploracao",
-                title: "Exploração",
-                body: "A curiosidade cresce em regiões novas. Mapas, profundidades e encontros raros aumentam o diário de campo.",
-                unlocked: known.contains("exploracao")),
-            RegistroMermaidObservation(
-                id: "crescimento",
-                title: "Crescimento",
-                body: "Mudanças de fase alteram acesso a zonas, ritmo de nado e autonomia diante de ambientes mais difíceis.",
-                unlocked: known.contains("crescimento")),
-            RegistroMermaidObservation(
-                id: "preferencias",
-                title: "Preferências",
-                body: "Com vínculo alto, aceita melhor convites e responde com mais calma a recursos, brincadeiras e pausas.",
-                unlocked: known.contains("preferencias"))
-        ]
+        return mermaidObservationDefinitions.map { definition in
+            RegistroMermaidObservation(id: definition.id,
+                                       title: definition.title,
+                                       body: definition.body,
+                                       unlocked: known.contains(definition.id))
+        }
     }
 
     private static func definition(for species: AquaticSpecies, region: Region) -> RegistroSpeciesDefinition {
         RegistroSpeciesDefinition(species: species,
                                   region: region,
+                                  unlockRequirement: .challengeFromSpecies(species.id),
                                   shortDescription: description(for: species, region: region),
                                   fieldObservation: observation(for: species),
                                   visualNotes: visualNotes(for: species),
@@ -294,154 +400,86 @@ enum RegistroCatalog {
         }
     }
 
+    private static let observationBySpeciesId: [String: String] = [
+        "peixe_palhaco_comum": "O padrão em faixas torna o animal fácil de reconhecer entre corais e anêmonas.",
+        "peixe_cirurgiao_azul": "Corpo comprimido e coloração azul intensa ajudam na identificação à distância.",
+        "peixe_papagaio_arco_iris": "Boca forte e cores verdes/alaranjadas sugerem alimentação sobre algas e recifes.",
+        "tartaruga_verde": "O casco é o principal marcador de campo; nadadeiras largas indicam deslocamento calmo.",
+        "tartaruga_de_pente": "O casco é o principal marcador de campo; nadadeiras largas indicam deslocamento calmo.",
+        "tartaruga_de_couro": "O casco escuro e o corpo oceânico ajudam a separar esta espécie das tartarugas recifais.",
+        "peixe_lanterna": "Traços escuros, prateados ou luminosos ajudam a sobreviver na pouca luz.",
+        "peixe_dragao_negro": "Traços escuros, prateados ou luminosos ajudam a sobreviver na pouca luz.",
+        "peixe_vibora": "Traços escuros, prateados ou luminosos ajudam a sobreviver na pouca luz.",
+        "peixe_machado_marinho": "Traços escuros, prateados ou luminosos ajudam a sobreviver na pouca luz."
+    ]
+
     private static func observation(for species: AquaticSpecies) -> String {
-        let name = species.commonName.lowercased()
-        let id = species.id.lowercased()
-        if id.contains("palhaco") {
-            return "O padrão em faixas torna o animal fácil de reconhecer entre corais e anêmonas."
-        }
-        if id.contains("cirurgiao") {
-            return "Corpo comprimido e coloração azul intensa ajudam na identificação à distância."
-        }
-        if id.contains("papagaio") {
-            return "Boca forte e cores verdes/alaranjadas sugerem alimentação sobre algas e recifes."
-        }
-        if id.contains("tartaruga") || id.contains("jabuti") {
-            return "O casco é o principal marcador de campo; nadadeiras largas indicam deslocamento calmo."
-        }
-        if id.contains("tubarao") {
+        if let specific = observationBySpeciesId[species.id] { return specific }
+        switch species.group {
+        case .fish:
+            return "Silhueta, cor e zona preferida ajudam a separar esta espécie de outros peixes do bioma."
+        case .shark:
             return "Silhueta alongada, nadadeira dorsal e cauda forte indicam patrulha constante."
-        }
-        if id.contains("arraia") || id.contains("raia") {
+        case .ray:
             return "O corpo largo plana como uma asa, com cauda fina usada como estabilizador."
-        }
-        if id.contains("polvo") || id.contains("lula") {
+        case .mammal:
+            return "Respiração aérea, corpo fusiforme ou arredondado e nadadeiras revelam grande mobilidade."
+        case .reptile:
+            return "Escamas, casco ou cauda forte são os principais marcadores durante observação em campo."
+        case .crustacean, .arthropod:
+            return "Antenas, patas e carapaça denunciam movimento lateral, defesa e coleta de alimento."
+        case .mollusk:
+            return "Concha, fixação ao substrato ou corpo macio revelam adaptação a superfícies estáveis."
+        case .cephalopod:
             return "Braços e manchas cromáticas mudam a leitura do contorno durante aproximações."
-        }
-        if id.contains("caranguejo") || id.contains("siri") || id.contains("lagosta") || id.contains("camarao") || id.contains("krill") {
-            return "Antenas e patas pequenas denunciam movimentos laterais, defesa e coleta de alimento."
-        }
-        if id.contains("agua_viva") || id.contains("caravela") || id.contains("sifonoforo") {
+        case .cnidarian:
             return "A campânula translúcida e os tentáculos pedem observação à distância."
-        }
-        if id.contains("estrela") || id.contains("ourico") || id.contains("pepino") {
+        case .echinoderm:
             return "Forma radial ou espinhosa revela vida lenta, colada ao fundo do bioma."
-        }
-        if id.contains("baleia") || id.contains("golfinho") || id.contains("orca") || id.contains("boto") || id.contains("cachalote") {
-            return "Respiração aérea, corpo fusiforme e nadadeiras revelam um mamífero de grande mobilidade."
-        }
-        if id.contains("foca") || id.contains("lontra") || id.contains("leao_marinho") || id.contains("peixe_boi") {
-            return "Corpo arredondado e deslocamento flexível indicam mergulhos curtos e curiosos."
-        }
-        if id.contains("pinguim") {
+        case .annelid:
+            return "Segmentos e tubos revelam vida escondida em sedimentos ou fontes profundas."
+        case .bird:
             return "Plumagem contrastante e asas em forma de nadadeiras transformam a ave em nadadora ágil."
         }
-        if name.contains("lanterna") || name.contains("dragão") || name.contains("vibora") || name.contains("machado") {
-            return "Traços escuros, prateados ou luminosos ajudam a sobreviver na pouca luz."
-        }
-        return "Ficha preparada para receber novas notas de comportamento, distribuição e relação com a sereia."
     }
 
     private static func scientificNote(for species: AquaticSpecies) -> String {
         "\(species.scientificName) é o nome usado no caderno para separar esta espécie de parentes parecidos durante a observação de campo."
     }
 
+    private static let naturalHistoryBySpeciesId: [String: String] = [
+        "peixe_palhaco_comum": "Vive perto de anêmonas e usa faixas claras sobre corpo laranja como sinal visual forte no recife.",
+        "peixe_cirurgiao_azul": "Peixe de recife com corpo alto e comprimido; costuma circular entre corais e fendas em busca de alimento.",
+        "peixe_papagaio_arco_iris": "Raspa algas e superfícies duras com boca forte, ajudando a renovar áreas do recife.",
+        "peixe_borboleta_lavrado": "Cores contrastantes e corpo alto ajudam no reconhecimento rápido entre corais, sombras e outros peixes recifais.",
+        "peixe_anjo_rainha": "Cores contrastantes e corpo alto ajudam no reconhecimento rápido entre corais, sombras e outros peixes recifais.",
+        "garibaldi": "Peixe territorial de kelp, conhecido pela cor laranja viva e por defender pequenos trechos do fundo.",
+        "cavalo_marinho_focinho_longo": "Nada devagar e se prende a estruturas com a cauda, preferindo abrigo entre raízes, algas ou corais.",
+        "peixe_voador": "Usa nadadeiras peitorais largas para planar acima da superfície quando precisa escapar de predadores.",
+        "peixe_lua": "Corpo circular e nadadeiras altas criam uma silhueta incomum em mar aberto.",
+        "barracuda_grande": "Nadador veloz de mar aberto, com corpo alongado e cauda forte para perseguições longas.",
+        "atum_albacora": "Nadador veloz de mar aberto, com corpo alongado e cauda forte para perseguições longas.",
+        "atum_bonito": "Nadador veloz de mar aberto, com corpo alongado e cauda forte para perseguições longas.",
+        "atum_rabilho": "Nadador veloz de mar aberto, com corpo alongado e cauda forte para perseguições longas.",
+        "agulhao_vela": "Nadador veloz de mar aberto, com corpo alongado e cauda forte para perseguições longas.",
+        "marlim_azul": "Nadador veloz de mar aberto, com corpo alongado e cauda forte para perseguições longas.",
+        "espadarte": "Nadador veloz de mar aberto, com corpo alongado e cauda forte para perseguições longas.",
+        "sardinha_europeia": "Forma grupos numerosos; no Registro, indica alimento importante para predadores maiores.",
+        "arenque_atlantico": "Forma grupos numerosos; no Registro, indica alimento importante para predadores maiores.",
+        "anchova_do_atlantico": "Forma grupos numerosos; no Registro, indica alimento importante para predadores maiores.",
+        "tainha": "Forma grupos numerosos; no Registro, indica alimento importante para predadores maiores.",
+        "tainha_estuarina": "Forma grupos numerosos; no Registro, indica alimento importante para predadores maiores.",
+        "krill_antartico": "Forma grupos numerosos; no Registro, indica alimento importante para predadores maiores.",
+        "tartaruga_verde": "Respira ar na superfície e, quando adulta, pasta em áreas rasas com algas e plantas marinhas.",
+        "tartaruga_de_pente": "Tartaruga de recife com bico estreito, associada a fendas e alimento preso em estruturas duras.",
+        "tartaruga_de_couro": "Tartaruga oceânica grande, especializada em longos deslocamentos e encontros com águas-vivas.",
+        "tubarao_baleia": "Tubarão gigante filtrador; apesar do tamanho, a ficha marca comportamento ligado a alimento pequeno em suspensão.",
+        "tubarao_frade": "Tubarão gigante filtrador; apesar do tamanho, a ficha marca comportamento ligado a alimento pequeno em suspensão.",
+        "enguia_gulper": "Peixe profundo de boca expansível, preparado para encontros raros e alimento imprevisível."
+    ]
+
     private static func naturalHistory(for species: AquaticSpecies) -> String {
-        let id = species.id.lowercased()
-        let name = species.commonName.lowercased()
-        if id.contains("palhaco") {
-            return "Vive perto de anêmonas e usa faixas claras sobre corpo laranja como sinal visual forte no recife."
-        }
-        if id.contains("cirurgiao") {
-            return "Peixe de recife com corpo alto e comprimido; costuma circular entre corais e fendas em busca de alimento."
-        }
-        if id.contains("papagaio") {
-            return "Raspa algas e superfícies duras com boca forte, ajudando a renovar áreas do recife."
-        }
-        if id.contains("borboleta") || id.contains("anjo") {
-            return "Cores contrastantes e corpo alto ajudam no reconhecimento rápido entre corais, sombras e outros peixes recifais."
-        }
-        if id.contains("garibaldi") {
-            return "Peixe territorial de kelp, conhecido pela cor laranja viva e por defender pequenos trechos do fundo."
-        }
-        if id.contains("cavalo_marinho") {
-            return "Nada devagar e se prende a estruturas com a cauda, preferindo abrigo entre raízes, algas ou corais."
-        }
-        if id.contains("voador") {
-            return "Usa nadadeiras peitorais largas para planar acima da superfície quando precisa escapar de predadores."
-        }
-        if id.contains("lua") && species.group == .fish {
-            return "Corpo circular e nadadeiras altas criam uma silhueta incomum em mar aberto."
-        }
-        if id.contains("atum") || id.contains("marlim") || id.contains("agulhao") || id.contains("espadarte") || id.contains("barracuda") {
-            return "Nadador veloz de mar aberto, com corpo alongado e cauda forte para perseguições longas."
-        }
-        if id.contains("sardinha") || id.contains("arenque") || id.contains("anchova") || id.contains("tainha") || id.contains("krill") {
-            return "Forma grupos numerosos; no Registro, indica alimento importante para predadores maiores."
-        }
-        if id.contains("tartaruga_verde") {
-            return "Respira ar na superfície e, quando adulta, pasta em áreas rasas com algas e plantas marinhas."
-        }
-        if id.contains("pente") {
-            return "Tartaruga de recife com bico estreito, associada a fendas e alimento preso em estruturas duras."
-        }
-        if id.contains("couro") {
-            return "Tartaruga oceânica grande, especializada em longos deslocamentos e encontros com águas-vivas."
-        }
-        if id.contains("tartaruga") || id.contains("jacare") || id.contains("crocodilo") || id.contains("anaconda") {
-            return "Réptil que depende da superfície para respirar, mesmo quando passa longos períodos dentro d'água."
-        }
-        if id.contains("tubarao_baleia") || id.contains("tubarao_frade") {
-            return "Tubarão gigante filtrador; apesar do tamanho, a ficha marca comportamento ligado a alimento pequeno em suspensão."
-        }
-        if id.contains("tubarao") {
-            return "Predador cartilaginoso; guelras, nadadeira dorsal e cauda forte ajudam a registrar sua patrulha."
-        }
-        if id.contains("arraia") || id.contains("raia") || id.contains("peixe_serra") {
-            return "Corpo achatado e nadadeiras largas favorecem planar sobre areia, lama ou água aberta."
-        }
-        if id.contains("polvo") {
-            return "Cefalópode de braços flexíveis, olhos atentos e grande capacidade de mudar cor, postura e textura."
-        }
-        if id.contains("lula") {
-            return "Cefalópode de nado ativo; tentáculos, olhos grandes e manchas rápidas ajudam a reconhecer aproximações."
-        }
-        if id.contains("caravela") || id.contains("agua_viva") || id.contains("sifonoforo") {
-            return "Animal gelatinoso levado por correntes; tentáculos longos tornam a distância de observação parte da ficha."
-        }
-        if id.contains("estrela") || id.contains("ourico") || id.contains("pepino") {
-            return "Invertebrado do fundo, lento e radial, útil para notar a saúde de superfícies e sedimentos."
-        }
-        if id.contains("caranguejo") || id.contains("siri") {
-            return "Crustáceo de carapaça rígida; patas laterais, pinças e abrigo em fendas aparecem como sinais de campo."
-        }
-        if id.contains("lagosta") || id.contains("camarao") || id.contains("anfipode") || id.contains("isopode") {
-            return "Crustáceo com antenas e carapaça; registra alimento, limpeza do fundo e vida em frestas."
-        }
-        if id.contains("ostra") || id.contains("mexilhao") || id.contains("abalone") {
-            return "Molusco preso a superfícies; filtra partículas ou raspa alimento e deixa pistas em rochas e raízes."
-        }
-        if id.contains("verme") {
-            return "Anelídeo de fundo profundo; vive em tubos e depende de condições muito específicas do habitat."
-        }
-        if id.contains("boto") || id.contains("golfinho") || id.contains("orca") {
-            return "Mamífero social que respira ar; sons, retornos à superfície e curiosidade guiam a observação."
-        }
-        if id.contains("baleia") || id.contains("cachalote") {
-            return "Mamífero de grande porte; alterna mergulhos longos com respirações na superfície."
-        }
-        if id.contains("foca") || id.contains("lontra") || id.contains("leao_marinho") || id.contains("peixe_boi") {
-            return "Mamífero costeiro ou fluvial; mergulhos curtos e subidas para respirar ajudam a localizar o animal."
-        }
-        if id.contains("pinguim") {
-            return "Ave que nada com asas transformadas em nadadeiras e volta à superfície para respirar."
-        }
-        if name.contains("lanterna") || name.contains("dragão") || name.contains("dragao") || name.contains("vibora") || name.contains("machado") {
-            return "Peixe de pouca luz; corpo escuro, prateado ou luminoso reduz sua silhueta no profundo."
-        }
-        if id.contains("gulper") {
-            return "Peixe profundo de boca expansível, preparado para encontros raros e alimento imprevisível."
-        }
+        if let specific = naturalHistoryBySpeciesId[species.id] { return specific }
         switch species.group {
         case .fish:
             return "Peixe registrado pelas zonas preferidas, silhueta e relação com cardumes, abrigo ou alimento local."
@@ -504,24 +542,54 @@ enum RegistroCatalog {
         }
     }
 
+    private static let visualNotesBySpeciesId: [String: String] = [
+        "peixe_palhaco_comum": "Peixe • laranja com faixas claras",
+        "peixe_cirurgiao_azul": "Peixe • azul vivo e corpo comprimido",
+        "peixe_papagaio_arco_iris": "Peixe • verde, laranja e boca marcada",
+        "peixe_borboleta_lavrado": "Peixe • corpo alto com listras",
+        "peixe_anjo_rainha": "Peixe • corpo alto com listras",
+        "barracuda_grande": "Peixe • corpo longo e cauda forte",
+        "agulhao_vela": "Peixe • corpo longo e bico evidente",
+        "marlim_azul": "Peixe • corpo longo e bico evidente",
+        "espadarte": "Peixe • corpo longo e bico evidente",
+        "tartaruga_verde": "Réptil aquático • casco oval e nadadeiras",
+        "tartaruga_de_pente": "Réptil aquático • casco oval e nadadeiras",
+        "tartaruga_de_couro": "Réptil aquático • casco oval escuro e nadadeiras",
+        "peixe_lanterna": "Peixe • pontos luminosos de águas profundas",
+        "peixe_dragao_negro": "Peixe • pontos luminosos de águas profundas",
+        "peixe_vibora": "Peixe • pontos luminosos de águas profundas",
+        "pinguim_imperador": "Ave mergulhadora • preto e branco, nadadeiras laterais",
+        "pinguim_adelia": "Ave mergulhadora • preto e branco, nadadeiras laterais"
+    ]
+
     private static func visualNotes(for species: AquaticSpecies) -> String {
-        let id = species.id.lowercased()
-        var notes = [species.group.registroDisplayName]
-        if id.contains("palhaco") { notes.append("laranja com faixas claras") }
-        if id.contains("cirurgiao") { notes.append("azul vivo e corpo comprimido") }
-        if id.contains("papagaio") { notes.append("verde, laranja e boca marcada") }
-        if id.contains("borboleta") || id.contains("anjo") { notes.append("corpo alto com listras") }
-        if id.contains("barracuda") || id.contains("agulhao") || id.contains("marlim") || id.contains("espadarte") { notes.append("corpo longo e bico/cauda fortes") }
-        if id.contains("tubarao") { notes.append("dorsal triangular e guelras") }
-        if id.contains("arraia") || id.contains("raia") { notes.append("asas largas e cauda fina") }
-        if id.contains("tartaruga") { notes.append("casco oval e nadadeiras") }
-        if id.contains("polvo") || id.contains("lula") { notes.append("braços, olhos grandes e manchas") }
-        if id.contains("caranguejo") || id.contains("siri") || id.contains("lagosta") { notes.append("pinças, patas e antenas") }
-        if id.contains("agua_viva") || id.contains("caravela") { notes.append("campânula translúcida e tentáculos") }
-        if id.contains("estrela") || id.contains("ourico") { notes.append("simetria radial") }
-        if id.contains("pinguim") { notes.append("preto e branco, nadadeiras laterais") }
-        if id.contains("lanterna") || id.contains("dragao") || id.contains("vibora") { notes.append("pontos luminosos de águas profundas") }
-        return notes.joined(separator: " • ")
+        if let specific = visualNotesBySpeciesId[species.id] { return specific }
+        switch species.group {
+        case .fish:
+            return "Peixe • silhueta, cor e zona de nado"
+        case .shark:
+            return "Tubarão • dorsal triangular e guelras"
+        case .ray:
+            return "Raia • asas largas e cauda fina"
+        case .mammal:
+            return "Mamífero marinho • nadadeiras e respiração aérea"
+        case .reptile:
+            return "Réptil aquático • escamas, casco ou cauda forte"
+        case .crustacean, .arthropod:
+            return "\(species.group.registroDisplayName) • pinças, patas ou antenas"
+        case .mollusk:
+            return "Molusco • concha ou corpo macio"
+        case .cephalopod:
+            return "Cefalópode • braços, olhos grandes e manchas"
+        case .cnidarian:
+            return "Cnidário • campânula translúcida e tentáculos"
+        case .echinoderm:
+            return "Equinodermo • simetria radial"
+        case .annelid:
+            return "Anelídeo • segmentos e tubos"
+        case .bird:
+            return "Ave mergulhadora • plumagem contrastante"
+        }
     }
 }
 
@@ -553,6 +621,9 @@ final class RegistroOverlay: SKNode {
         self.onClose = onClose
         super.init()
         isUserInteractionEnabled = true
+        #if DEBUG
+        RegistroCatalog.validateCatalogForDebug()
+        #endif
         if RegistroCatalog.syncAutomaticMermaidObservations(for: stats) {
             stats.save()
         }
@@ -762,9 +833,10 @@ final class RegistroOverlay: SKNode {
         let rowHeight = min(CGFloat(40), max(CGFloat(28), (height - 62) / CGFloat(totalRows)))
         let startY = center.y + height / 2 - 56
 
+        let mermaidObservations = RegistroCatalog.mermaidObservations(for: stats)
         addNavRow(name: "registro_mermaid",
                   title: "Sereia",
-                  detail: "\(stats.mermaidObservationIds.count) notas",
+                  detail: "\(mermaidObservations.filter(\.unlocked).count) notas",
                   selected: showingMermaid,
                   tint: GameUI.coral,
                   width: width - 18,
@@ -951,7 +1023,7 @@ final class RegistroOverlay: SKNode {
         let listX = compact ? center.x : center.x - width / 2 + 18 + listWidth / 2
         let detailX = compact ? center.x : listX + listWidth / 2 + 18 + detailWidth / 2
         let listTop = bar.position.y - 28
-        let rowHeight: CGFloat = compact ? 44 : 50
+        let rowHeight: CGFloat = compact ? 52 : 56
 
         for (index, definition) in pageSpecies.enumerated() {
             addSpeciesRow(definition,
@@ -1076,22 +1148,22 @@ final class RegistroOverlay: SKNode {
         row.addChild(icon)
 
         let title = makeLabel(discovered ? definition.commonName : "Espécie não registrada",
-                              fontSize: 10.3,
+                              fontSize: 12.0,
                               bold: true,
                               color: discovered ? GameUI.ink : GameUI.mutedInk)
         title.horizontalAlignmentMode = .left
-        title.position = CGPoint(x: -width / 2 + 56, y: 8)
+        title.position = CGPoint(x: -width / 2 + 58, y: 10)
         title.preferredMaxLayoutWidth = width - 66
         title.numberOfLines = 1
         title.lineBreakMode = .byTruncatingTail
         title.name = actionName
         row.addChild(title)
 
-        let detail = makeLabel(discovered ? "Ficha registrada • \(definition.category.registroDisplayName)" : "Complete um desafio para revelar a ficha",
-                               fontSize: 9.2,
+        let detail = makeLabel(discovered ? "Ficha registrada • \(definition.category.registroDisplayName)" : "Vença um desafio da própria espécie para revelar",
+                               fontSize: 10.2,
                                color: GameUI.mutedInk)
         detail.horizontalAlignmentMode = .left
-        detail.position = CGPoint(x: title.position.x, y: -10)
+        detail.position = CGPoint(x: title.position.x, y: -12)
         detail.preferredMaxLayoutWidth = width - 66
         detail.numberOfLines = 1
         detail.lineBreakMode = .byTruncatingTail
@@ -1116,7 +1188,7 @@ final class RegistroOverlay: SKNode {
         let viewportWidth = max(120, width - 18)
         let viewportHeight = max(120, height - 18)
         let compact = usesNarrowLayout || width < 340
-        let bodyFont: CGFloat = compact ? 12.2 : 11.8
+        let bodyFont: CGFloat = compact ? 13.0 : 12.7
         let contentHeight = speciesDetailContentHeight(definition,
                                                        viewportWidth: viewportWidth,
                                                        viewportHeight: viewportHeight,
@@ -1144,7 +1216,7 @@ final class RegistroOverlay: SKNode {
             content.addChild(art)
 
             let status = makeLabel(discovered ? "REGISTRADA" : "A DESCOBRIR",
-                                   fontSize: 10.8,
+                                   fontSize: 11.4,
                                    bold: true,
                                    color: tint)
             status.horizontalAlignmentMode = .left
@@ -1152,14 +1224,19 @@ final class RegistroOverlay: SKNode {
             status.zPosition = 5
             content.addChild(status)
 
-            let title = makeLabel(discovered ? definition.commonName : "Espécie não registrada",
-                                  fontSize: compact ? 16.5 : 17.2,
+            let titleText = discovered ? definition.commonName : "Espécie não registrada"
+            let titleFont: CGFloat = compact ? 17.2 : 18.0
+            let titleLineCount = estimateLineCount(titleText,
+                                                   width: headerWidth,
+                                                   fontSize: titleFont).clamped(to: 1...2)
+            let title = makeLabel(titleText,
+                                  fontSize: titleFont,
                                   bold: true,
                                   color: GameUI.ink)
             title.horizontalAlignmentMode = .left
             title.position = CGPoint(x: headerTextX, y: top - 46)
             title.preferredMaxLayoutWidth = headerWidth
-            title.numberOfLines = 2
+            title.numberOfLines = titleLineCount
             title.lineBreakMode = .byWordWrapping
             title.zPosition = 5
             content.addChild(title)
@@ -1167,16 +1244,18 @@ final class RegistroOverlay: SKNode {
             let identityText = discovered
                 ? definition.scientificNote
                 : "Nome científico e notas de campo ficam ocultos até a primeira conclusão."
+            let identityLineCount = estimateLineCount(identityText,
+                                                       width: headerWidth,
+                                                       fontSize: bodyFont).clamped(to: 2...4)
             let identity = makeLabel(identityText,
                                      fontSize: bodyFont,
                                      color: GameUI.mutedInk)
             identity.horizontalAlignmentMode = .left
             identity.verticalAlignmentMode = .top
-            identity.position = CGPoint(x: headerTextX, y: top - 84)
+            identity.position = CGPoint(x: headerTextX,
+                                        y: title.position.y - CGFloat(titleLineCount) * (titleFont + 4) - 8)
             identity.preferredMaxLayoutWidth = headerWidth
-            identity.numberOfLines = estimateLineCount(identityText,
-                                                       width: headerWidth,
-                                                       fontSize: bodyFont).clamped(to: 2...4)
+            identity.numberOfLines = identityLineCount
             identity.lineBreakMode = .byWordWrapping
             identity.zPosition = 5
             content.addChild(identity)
@@ -1195,13 +1274,14 @@ final class RegistroOverlay: SKNode {
                 ]
             }
 
-            var y = top - 144
+            var y = identity.position.y - CGFloat(identityLineCount) * (bodyFont + 4) - 18
             for line in lines {
+                let metadataFont: CGFloat = compact ? 13.0 : 12.8
                 let lineCount = estimateLineCount(line,
                                                   width: contentWidth,
-                                                  fontSize: 12.1).clamped(to: 1...2)
+                                                  fontSize: metadataFont).clamped(to: 1...2)
                 let label = makeLabel(line,
-                                      fontSize: 12.1,
+                                      fontSize: metadataFont,
                                       bold: true,
                                       color: GameUI.ink)
                 label.horizontalAlignmentMode = .left
@@ -1212,11 +1292,27 @@ final class RegistroOverlay: SKNode {
                 label.lineBreakMode = .byWordWrapping
                 label.zPosition = 5
                 content.addChild(label)
-                y -= CGFloat(lineCount) * 16 + 12
+                y -= CGFloat(lineCount) * (metadataFont + 4) + 12
             }
 
             y -= 10
             if discovered {
+                y = addDetailBlock(to: content,
+                                   title: "Resumo",
+                                   body: definition.shortDescription,
+                                   topY: y,
+                                   x: left,
+                                   width: contentWidth,
+                                   tint: tint,
+                                   bodyFont: bodyFont)
+                y = addDetailBlock(to: content,
+                                   title: "Observação",
+                                   body: definition.fieldObservation,
+                                   topY: y,
+                                   x: left,
+                                   width: contentWidth,
+                                   tint: tint,
+                                   bodyFont: bodyFont)
                 y = addDetailBlock(to: content,
                                    title: "Nota de campo",
                                    body: definition.naturalHistoryNote,
@@ -1266,7 +1362,7 @@ final class RegistroOverlay: SKNode {
         let lineCount = estimateLineCount(body, width: width, fontSize: bodyFont).clamped(to: 1...5)
         let lineHeight = bodyFont + 4
         let titleLabel = makeLabel(title.uppercased(),
-                                   fontSize: 10.2,
+                                   fontSize: 11.2,
                                    bold: true,
                                    color: tint)
         titleLabel.horizontalAlignmentMode = .left
@@ -1299,16 +1395,30 @@ final class RegistroOverlay: SKNode {
                                             discovered: Bool) -> CGFloat {
         let contentWidth = max(120, viewportWidth - 32)
         let headerWidth = max(124, contentWidth - 110)
+        let compact = usesNarrowLayout || viewportWidth < 340
+        let titleFont: CGFloat = compact ? 17.2 : 18.0
+        let titleText = discovered ? definition.commonName : "Espécie não registrada"
+        let titleLines = estimateLineCount(titleText,
+                                           width: headerWidth,
+                                           fontSize: titleFont).clamped(to: 1...2)
         let identityText = discovered
             ? definition.scientificNote
             : "Nome científico e notas de campo ficam ocultos até a primeira conclusão."
         let identityLines = estimateLineCount(identityText,
                                               width: headerWidth,
                                               fontSize: bodyFont).clamped(to: 2...4)
-        var total: CGFloat = 162 + CGFloat(max(0, identityLines - 2)) * (bodyFont + 4)
+        var total: CGFloat = 162
+            + CGFloat(max(0, titleLines - 1)) * (titleFont + 4)
+            + CGFloat(max(0, identityLines - 2)) * (bodyFont + 4)
         total += discovered ? 66 : 94
 
         if discovered {
+            total += detailBlockHeight(body: definition.shortDescription,
+                                       width: contentWidth,
+                                       bodyFont: bodyFont)
+            total += detailBlockHeight(body: definition.fieldObservation,
+                                       width: contentWidth,
+                                       bodyFont: bodyFont)
             total += detailBlockHeight(body: definition.naturalHistoryNote,
                                        width: contentWidth,
                                        bodyFont: bodyFont)

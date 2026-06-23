@@ -1127,6 +1127,9 @@ final class HUDLayer: SKNode {
             body = cleanFieldText(rawText)
                 .replacingOccurrences(of: "(Objetivo disponivel)", with: "Objetivo disponível.")
                 .replacingOccurrences(of: "(Objetivo disponível)", with: "Objetivo disponível.")
+        } else if normalized.contains("registro:") || (normalized.contains("registrou") && normalized.contains("registro")) {
+            title = "Novo registro"
+            body = registroFieldText(rawText)
         } else if normalized.contains("refugio") {
             title = "Refúgio"
             body = cleanFieldText(rawText)
@@ -1147,6 +1150,17 @@ final class HUDLayer: SKNode {
         }
 
         return (title, body)
+    }
+
+    private func registroFieldText(_ text: String) -> String {
+        let cleaned = cleanFieldText(text)
+        if let range = cleaned.range(of: "Registro:", options: [.caseInsensitive, .diacriticInsensitive]) {
+            let speciesName = cleaned[range.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines)
+            if !speciesName.isEmpty {
+                return "Ficha registrada: \(speciesName)"
+            }
+        }
+        return cleaned
     }
 
     private func cleanFieldText(_ text: String) -> String {

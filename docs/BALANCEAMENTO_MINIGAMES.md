@@ -19,7 +19,7 @@ O multiplicador global de ganho de conchas comeca em 0.45x, sobe +0.02 por nivel
 
 Ao vencer um desafio comum, a vitoria sorteia um premio: ou +50% nas conchas convertidas, ou 1 recurso elegivel. Os dois premios nao acumulam. Recursos de crescimento acelerado ficam fora desse sorteio. Desafios especiais nao usam esse premio comum porque ja tem regra propria de dificuldade e recompensa.
 
-Metas nao aparecem como valor fixo na lista de desafios. Quando um peixe ou POI oferece um desafio, a oferta sorteia uma meta dentro de uma faixa. Desafios comuns usam `commonChallengeGoalMultiplierRange` (1.18x...1.35x). Desafios especiais/POI usam `specialChallengeGoalMultiplierRange` (1.38x...1.62x), mantendo pontos de interesse acima dos desafios comuns.
+Metas nao aparecem como valor fixo na lista de desafios. Quando um peixe ou POI oferece um desafio, a oferta sorteia uma meta dentro de uma faixa. Desafios comuns usam `commonChallengeGoalMultiplierRange` (1.38x...1.62x), que era o patamar anterior dos desafios especiais/POI. Desafios especiais/POI usam `specialChallengeGoalMultiplierRange` (1.70x...2.00x), mantendo pontos de interesse acima dos desafios comuns.
 
 ## Criterio de Dificuldade
 
