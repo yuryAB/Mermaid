@@ -448,7 +448,7 @@ final class ShellSnapOverlay: SKNode {
                                      width: chipWidth,
                                      accent: GameUI.gold)
         scoreChip.node.position = CGPoint(x: gridOrigin.x + chipWidth / 2,
-                                           y: boardWidth / 2 + 48)
+                                           y: boardWidth / 2 + 38)
         addChild(scoreChip.node)
         scoreLabel = scoreChip.valueLabel
 
@@ -461,7 +461,7 @@ final class ShellSnapOverlay: SKNode {
                                          width: chipWidth,
                                          accent: GameUI.coral)
         objectiveChip.node.position = CGPoint(x: gridOrigin.x + chipWidth * 1.5 + 14,
-                                              y: boardWidth / 2 + 48)
+                                              y: boardWidth / 2 + 38)
         addChild(objectiveChip.node)
         objectiveLabel = objectiveChip.valueLabel
 
@@ -471,12 +471,13 @@ final class ShellSnapOverlay: SKNode {
 
         streakLabel = SKLabelNode(text: "Combo pronto")
         streakLabel.fontName = "AvenirNext-DemiBold"
-        streakLabel.fontSize = 13
+        streakLabel.fontSize = 12.2
         streakLabel.fontColor = GameUI.palePaper.withAlphaComponent(0.86)
         streakLabel.verticalAlignmentMode = .center
         streakLabel.horizontalAlignmentMode = .center
-        streakLabel.position = CGPoint(x: 0, y: boardWidth / 2 + 78)
+        streakLabel.position = CGPoint(x: 0, y: boardWidth / 2 + 4)
         streakLabel.zPosition = 35
+        streakLabel.alpha = 0
         addChild(streakLabel)
 
         frenzyLabel = SKLabelNode(text: "")
@@ -1136,6 +1137,7 @@ final class ShellSnapOverlay: SKNode {
                                            maxFontSize: 13.5,
                                            minFontSize: 10.5)
         streakLabel.text = streak > 0 ? "Combo x\(streak)" : "Combo pronto"
+        streakLabel.alpha = streak > 0 ? 1 : 0
         streakLabel.fontColor = frenzyActive ? Visual.hot : GameUI.palePaper.withAlphaComponent(0.86)
         updateTimerUI()
     }

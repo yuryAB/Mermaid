@@ -688,6 +688,8 @@ enum ChallengeChrome {
                            width: CGFloat) -> SKNode {
         let header = SKNode()
 
+        let iconY: CGFloat = 12
+
         // destaque do NPC (anel dourado pulsante)
         if let giver = giverDisplay {
             let spotlight = SKShapeNode(circleOfRadius: 35)
@@ -695,7 +697,7 @@ enum ChallengeChrome {
             spotlight.strokeColor = GameUI.gold.withAlphaComponent(0.72)
             spotlight.lineWidth = 2
             spotlight.glowWidth = 1
-            spotlight.position = .zero
+            spotlight.position = CGPoint(x: 0, y: iconY)
             header.addChild(spotlight)
             spotlight.run(.repeatForever(.sequence([
                 .scale(to: 1.08, duration: 0.9),
@@ -703,10 +705,12 @@ enum ChallengeChrome {
             ])))
 
             giver.setScale(fitScale(for: giver, targetHeight: 42))
-            giver.position = .zero
+            giver.position = spotlight.position
             header.addChild(giver)
         } else {
-            header.addChild(makeSketchIcon(kind: kind))
+            let icon = makeSketchIcon(kind: kind)
+            icon.position = CGPoint(x: 0, y: iconY)
+            header.addChild(icon)
         }
 
         let title = GameUI.pill(text: kind.title,
@@ -720,13 +724,17 @@ enum ChallengeChrome {
         header.addChild(title)
 
         let sub = SKLabelNode(text: subtitle)
-        sub.fontName = "AvenirNext-Regular"
-        sub.fontSize = 13
-        sub.fontColor = GameUI.mutedInk
+        sub.fontName = "AvenirNext-DemiBold"
+        sub.fontSize = 12
+        sub.fontColor = GameUI.palePaper.withAlphaComponent(0.82)
         sub.verticalAlignmentMode = .center
-        sub.preferredMaxLayoutWidth = width - 24
-        sub.numberOfLines = 1
-        sub.position = CGPoint(x: 0, y: -94)
+        sub.horizontalAlignmentMode = .center
+        sub.position = CGPoint(x: 0, y: -34)
+        sub.zPosition = 4
+        fitSingleLineLabel(sub,
+                           maxWidth: max(120, width - 32),
+                           maxFontSize: 12,
+                           minFontSize: 10.5)
         header.addChild(sub)
 
         return header

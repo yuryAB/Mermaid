@@ -67,6 +67,7 @@
 		FAB1E101000000000000002C /* TideMemorySystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000002C /* TideMemorySystem.swift */; };
 		FAB1E101000000000000002E /* EchoMelodySystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000002E /* EchoMelodySystem.swift */; };
 		FAB1E101000000000000002B /* ReefAsteroidsSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000002B /* ReefAsteroidsSystem.swift */; };
+		FAB1E1010000000000000031 /* RegistroSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000031 /* RegistroSystem.swift */; };
 		FAB1E1010000000000000011 /* WorldEnvironmentSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000011 /* WorldEnvironmentSystem.swift */; };
 		FAB1E101000000000000001F /* WorldEnvironmentModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E001000000000000001F /* WorldEnvironmentModels.swift */; };
 		FAB1E1010000000000000020 /* WorldChunkFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000020 /* WorldChunkFactory.swift */; };
@@ -163,6 +164,7 @@
 		FAB1E001000000000000002C /* TideMemorySystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TideMemorySystem.swift; sourceTree = "<group>"; };
 		FAB1E001000000000000002E /* EchoMelodySystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EchoMelodySystem.swift; sourceTree = "<group>"; };
 		FAB1E001000000000000002B /* ReefAsteroidsSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReefAsteroidsSystem.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000031 /* RegistroSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistroSystem.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000011 /* WorldEnvironmentSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldEnvironmentSystem.swift; sourceTree = "<group>"; };
 		FAB1E001000000000000001F /* WorldEnvironmentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldEnvironmentModels.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000020 /* WorldChunkFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldChunkFactory.swift; sourceTree = "<group>"; };
@@ -371,6 +373,7 @@
 				FAB1E001000000000000002C /* TideMemorySystem.swift */,
 				FAB1E001000000000000002E /* EchoMelodySystem.swift */,
 				FAB1E001000000000000002B /* ReefAsteroidsSystem.swift */,
+				FAB1E0010000000000000031 /* RegistroSystem.swift */,
 				FAB1E0010000000000000011 /* WorldEnvironmentSystem.swift */,
 				FAB1E001000000000000001F /* WorldEnvironmentModels.swift */,
 				FAB1E0010000000000000020 /* WorldChunkFactory.swift */,
@@ -550,6 +553,7 @@
 				FAB1E101000000000000002C /* TideMemorySystem.swift in Sources */,
 				FAB1E101000000000000002E /* EchoMelodySystem.swift in Sources */,
 				FAB1E101000000000000002B /* ReefAsteroidsSystem.swift in Sources */,
+				FAB1E1010000000000000031 /* RegistroSystem.swift in Sources */,
 				FAB1E1010000000000000011 /* WorldEnvironmentSystem.swift in Sources */,
 				FAB1E101000000000000001F /* WorldEnvironmentModels.swift in Sources */,
 				FAB1E1010000000000000020 /* WorldChunkFactory.swift in Sources */,

@@ -18,6 +18,9 @@ fileprivate enum FishSilhouette: CaseIterable {
     case ray
 
     static func random(for zone: DepthZone, rare: Bool, species: AquaticSpecies?) -> FishSilhouette {
+        if let preferred = preferred(for: species) {
+            return preferred
+        }
         if let group = species?.group {
             switch group {
             case .ray:
@@ -46,6 +49,35 @@ fileprivate enum FishSilhouette: CaseIterable {
             return [.needle, .ray, .moon, .diamond].randomElement()!
         }
     }
+
+    private static func preferred(for species: AquaticSpecies?) -> FishSilhouette? {
+        guard let species else { return nil }
+        let id = species.id.lowercased()
+        if id.contains("arraia") || id.contains("raia") || id.contains("manta") {
+            return .ray
+        }
+        if id.contains("tubarao") || id.contains("barracuda") || id.contains("agulhao") ||
+            id.contains("marlim") || id.contains("espadarte") || id.contains("enguia") ||
+            id.contains("candiru") || id.contains("lula") || id.contains("sifonoforo") ||
+            id.contains("anaconda") || id.contains("crocodilo") || id.contains("jacare") {
+            return .needle
+        }
+        if id.contains("tartaruga") || id.contains("peixe_lua") || id.contains("polvo") ||
+            id.contains("agua_viva") || id.contains("caravela") {
+            return .moon
+        }
+        if id.contains("caranguejo") || id.contains("siri") || id.contains("lagosta") ||
+            id.contains("camarao") || id.contains("krill") || id.contains("isopode") ||
+            id.contains("anfipode") || id.contains("ourico") || id.contains("estrela") ||
+            id.contains("pepino") || id.contains("ostra") || id.contains("mexilhao") ||
+            id.contains("abalone") || id.contains("verme") {
+            return .diamond
+        }
+        if id.contains("borboleta") || id.contains("anjo") || id.contains("cirurgiao") {
+            return .diamond
+        }
+        return nil
+    }
 }
 
 fileprivate enum FishPattern: CaseIterable {
@@ -55,6 +87,9 @@ fileprivate enum FishPattern: CaseIterable {
     case glowDots
 
     static func random(for zone: DepthZone, rare: Bool, species: AquaticSpecies?) -> FishPattern {
+        if let preferred = preferred(for: zone, species: species) {
+            return preferred
+        }
         if let group = species?.group {
             switch group {
             case .mammal, .reptile, .bird:
@@ -74,6 +109,26 @@ fileprivate enum FishPattern: CaseIterable {
         case .blue, .deep, .abyss:
             return [.plain, .spots, .glowDots].randomElement()!
         }
+    }
+
+    private static func preferred(for zone: DepthZone, species: AquaticSpecies?) -> FishPattern? {
+        guard let species else { return nil }
+        let id = species.id.lowercased()
+        if id.contains("palhaco") || id.contains("borboleta") || id.contains("anjo") ||
+            id.contains("leopardo") || id.contains("listrado") || id.contains("zebra") {
+            return .stripes
+        }
+        if id.contains("pintado") || id.contains("chita") || id.contains("manta") ||
+            id.contains("papagaio") || id.contains("estrela") || id.contains("polvo") ||
+            id.contains("tartaruga") {
+            return .spots
+        }
+        if zone == .deep || zone == .abyss ||
+            id.contains("lanterna") || id.contains("dragao") || id.contains("vibora") ||
+            id.contains("machado") || id.contains("ogro") || id.contains("gulper") {
+            return .glowDots
+        }
+        return nil
     }
 }
 
@@ -132,6 +187,12 @@ final class FishNode: SKNode, ChallengeGiver {
     private let silhouette: FishSilhouette
     private let pattern: FishPattern
 
+    private struct SpeciesVisualProfile {
+        let color: UIColor
+        let pattern: FishPattern?
+        let lengthMultiplier: CGFloat
+    }
+
     init(zone: DepthZone, rare: Bool = false, palette: [UIColor]? = nil, species: AquaticSpecies? = nil) {
         self.zone = zone
         self.species = species
@@ -159,11 +220,14 @@ final class FishNode: SKNode, ChallengeGiver {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     private func buildShape() {
+        let visual = species.map(FishNode.visualProfile)
         let length = FishNode.bodyLength(for: silhouette, rare: isRare, species: species)
+            * (visual?.lengthMultiplier ?? 1)
         let height = FishNode.bodyHeight(for: silhouette, length: length)
         let color = isRare
             ? UIColor(red: 1, green: 0.85, blue: 0.4, alpha: 1)
-            : (paletteOverride ?? FishNode.palette(for: zone)).randomElement()!
+            : (visual?.color ?? (paletteOverride ?? FishNode.palette(for: zone)).randomElement()!)
+        let resolvedPattern = visual.flatMap(\.pattern) ?? pattern
 
         bodyLength = length
         bodyHeight = height
@@ -172,7 +236,13 @@ final class FishNode: SKNode, ChallengeGiver {
         let drawing = FishNode.fishDrawing(length: length, height: height, color: color,
                                            animateTail: true,
                                            silhouette: silhouette,
-                                           pattern: pattern)
+                                           pattern: resolvedPattern)
+        FishNode.addSpeciesTraits(to: drawing,
+                                  species: species,
+                                  length: length,
+                                  height: height,
+                                  color: color,
+                                  silhouette: silhouette)
         container.addChild(drawing)
 
         // brilho nas zonas escuras
@@ -426,13 +496,598 @@ final class FishNode: SKNode, ChallengeGiver {
         node.addChild(pupil)
     }
 
+    private static func visualProfile(for species: AquaticSpecies) -> SpeciesVisualProfile {
+        let id = species.id.lowercased()
+        let color: UIColor
+        let pattern: FishPattern?
+        let lengthMultiplier: CGFloat
+
+        switch species.group {
+        case .fish:
+            if id.contains("palhaco") {
+                color = UIColor(red: 0.94, green: 0.42, blue: 0.16, alpha: 1)
+                pattern = .stripes
+            } else if id.contains("cirurgiao") || id.contains("rockfish_azul") {
+                color = UIColor(red: 0.12, green: 0.48, blue: 0.86, alpha: 1)
+                pattern = .plain
+            } else if id.contains("papagaio") || id.contains("dourado") || id.contains("tambaqui") {
+                color = UIColor(red: 0.30, green: 0.72, blue: 0.42, alpha: 1)
+                pattern = .spots
+            } else if id.contains("borboleta") || id.contains("anjo") || id.contains("garibaldi") {
+                color = UIColor(red: 0.95, green: 0.67, blue: 0.24, alpha: 1)
+                pattern = .stripes
+            } else if id.contains("piranha") || id.contains("salm") {
+                color = UIColor(red: 0.78, green: 0.42, blue: 0.34, alpha: 1)
+                pattern = .spots
+            } else if id.contains("lanterna") || id.contains("dragao") || id.contains("vibora") ||
+                        id.contains("machado") || id.contains("ogro") || id.contains("gulper") {
+                color = UIColor(red: 0.12, green: 0.18, blue: 0.28, alpha: 1)
+                pattern = .glowDots
+            } else if id.contains("atum") || id.contains("bonito") || id.contains("cavala") ||
+                        id.contains("sardinha") || id.contains("arenque") {
+                color = UIColor(red: 0.42, green: 0.58, blue: 0.72, alpha: 1)
+                pattern = .plain
+            } else {
+                color = UIColor(red: 0.50, green: 0.72, blue: 0.76, alpha: 1)
+                pattern = nil
+            }
+            lengthMultiplier = id.contains("agulhao") || id.contains("marlim") || id.contains("espadarte") ? 1.24 : 1
+        case .shark:
+            color = id.contains("baleia")
+                ? UIColor(red: 0.34, green: 0.48, blue: 0.58, alpha: 1)
+                : UIColor(red: 0.36, green: 0.48, blue: 0.54, alpha: 1)
+            pattern = id.contains("leopardo") || id.contains("baleia") ? .spots : .plain
+            lengthMultiplier = id.contains("baleia") || id.contains("frade") ? 1.32 : 1.16
+        case .ray:
+            color = UIColor(red: 0.43, green: 0.58, blue: 0.62, alpha: 1)
+            pattern = id.contains("chita") || id.contains("manta") ? .spots : .plain
+            lengthMultiplier = id.contains("manta") ? 1.28 : 1.08
+        case .mammal:
+            if id.contains("boto") {
+                color = UIColor(red: 0.86, green: 0.54, blue: 0.58, alpha: 1)
+            } else if id.contains("orca") {
+                color = UIColor(red: 0.10, green: 0.13, blue: 0.16, alpha: 1)
+            } else if id.contains("lontra") {
+                color = UIColor(red: 0.38, green: 0.25, blue: 0.18, alpha: 1)
+            } else {
+                color = UIColor(red: 0.48, green: 0.56, blue: 0.60, alpha: 1)
+            }
+            pattern = id.contains("pintado") ? .spots : .plain
+            lengthMultiplier = id.contains("baleia") || id.contains("cachalote") ? 1.42 : 1.18
+        case .reptile:
+            color = id.contains("couro")
+                ? UIColor(red: 0.20, green: 0.22, blue: 0.24, alpha: 1)
+                : UIColor(red: 0.37, green: 0.55, blue: 0.34, alpha: 1)
+            pattern = .spots
+            lengthMultiplier = id.contains("anaconda") || id.contains("crocodilo") || id.contains("jacare") ? 1.38 : 1.05
+        case .crustacean, .arthropod:
+            color = id.contains("azul")
+                ? UIColor(red: 0.18, green: 0.48, blue: 0.76, alpha: 1)
+                : UIColor(red: 0.74, green: 0.34, blue: 0.26, alpha: 1)
+            pattern = id.contains("vidro") ? .plain : .spots
+            lengthMultiplier = id.contains("gigante") ? 1.22 : 0.92
+        case .mollusk:
+            color = UIColor(red: 0.66, green: 0.56, blue: 0.42, alpha: 1)
+            pattern = .stripes
+            lengthMultiplier = 0.9
+        case .cephalopod:
+            color = id.contains("vampiro")
+                ? UIColor(red: 0.32, green: 0.10, blue: 0.18, alpha: 1)
+                : UIColor(red: 0.24, green: 0.62, blue: 0.66, alpha: 1)
+            pattern = .spots
+            lengthMultiplier = id.contains("gigante") || id.contains("colossal") ? 1.36 : 1.06
+        case .cnidarian:
+            color = UIColor(red: 0.74, green: 0.56, blue: 0.86, alpha: 1)
+            pattern = .glowDots
+            lengthMultiplier = id.contains("gigante") ? 1.24 : 0.95
+        case .echinoderm:
+            color = id.contains("azul")
+                ? UIColor(red: 0.14, green: 0.54, blue: 0.82, alpha: 1)
+                : UIColor(red: 0.85, green: 0.55, blue: 0.20, alpha: 1)
+            pattern = .spots
+            lengthMultiplier = 0.82
+        case .annelid:
+            color = UIColor(red: 0.76, green: 0.25, blue: 0.22, alpha: 1)
+            pattern = .stripes
+            lengthMultiplier = 1.0
+        case .bird:
+            color = UIColor(red: 0.10, green: 0.16, blue: 0.22, alpha: 1)
+            pattern = .plain
+            lengthMultiplier = 1.0
+        }
+
+        return SpeciesVisualProfile(color: color,
+                                    pattern: pattern,
+                                    lengthMultiplier: lengthMultiplier)
+    }
+
+    private static func addSpeciesTraits(to node: SKNode,
+                                         species: AquaticSpecies?,
+                                         length: CGFloat,
+                                         height: CGFloat,
+                                         color: UIColor,
+                                         silhouette: FishSilhouette) {
+        guard let species else { return }
+        let id = species.id.lowercased()
+
+        switch species.group {
+        case .fish:
+            addFishSpecificTraits(to: node, id: id, length: length, height: height, color: color)
+        case .shark:
+            addDorsalFin(to: node, length: length, height: height, color: color)
+            addGillMarks(to: node, length: length, height: height)
+            if id.contains("baleia") || id.contains("leopardo") {
+                addBodySpots(to: node, length: length, height: height, color: color, count: id.contains("baleia") ? 12 : 7)
+            }
+        case .ray:
+            addBodySpots(to: node, length: length, height: height, color: color, count: id.contains("manta") ? 6 : 9)
+        case .mammal:
+            addMammalTraits(to: node, id: id, length: length, height: height, color: color)
+        case .reptile:
+            if id.contains("tartaruga") {
+                addTurtleTraits(to: node, length: length, height: height, color: color)
+            } else {
+                addDorsalScutes(to: node, length: length, height: height, color: color)
+            }
+        case .crustacean, .arthropod:
+            addCrustaceanTraits(to: node, id: id, length: length, height: height, color: color)
+        case .mollusk:
+            addShellTraits(to: node, length: length, height: height, color: color)
+        case .cephalopod:
+            addCephalopodTraits(to: node, id: id, length: length, height: height, color: color)
+        case .cnidarian:
+            addCnidarianTraits(to: node, length: length, height: height, color: color)
+        case .echinoderm:
+            addEchinodermTraits(to: node, id: id, length: length, height: height, color: color)
+        case .annelid:
+            addSegmentBands(to: node, length: length, height: height, color: color)
+        case .bird:
+            addPenguinTraits(to: node, length: length, height: height, color: color)
+        }
+
+        if silhouette == .ray {
+            addRayTailAccent(to: node, length: length, height: height, color: color)
+        }
+    }
+
+    private static func addFishSpecificTraits(to node: SKNode,
+                                              id: String,
+                                              length: CGFloat,
+                                              height: CGFloat,
+                                              color: UIColor) {
+        if id.contains("papagaio") {
+            let beak = SKShapeNode(circleOfRadius: max(3, height * 0.13))
+            beak.fillColor = UIColor(red: 0.45, green: 0.86, blue: 0.72, alpha: 1)
+            beak.strokeColor = .clear
+            beak.position = CGPoint(x: length * 0.44, y: 0)
+            beak.zPosition = 4
+            node.addChild(beak)
+        }
+        if id.contains("agulhao") || id.contains("marlim") || id.contains("espadarte") {
+            let bill = traitPath(points: [
+                CGPoint(x: length * 0.46, y: 0),
+                CGPoint(x: length * 0.76, y: height * 0.04)
+            ], color: UIColor.lerp(color, .white, 0.35), width: max(2, height * 0.08))
+            bill.zPosition = 4
+            node.addChild(bill)
+            addDorsalFin(to: node, length: length, height: height * 1.2, color: color)
+        }
+        if id.contains("peixe_lua") {
+            let top = traitEllipse(size: CGSize(width: length * 0.18, height: height * 0.46),
+                                   fill: color.withAlphaComponent(0.58))
+            top.position = CGPoint(x: 0, y: height * 0.54)
+            node.addChild(top)
+            let bottom = traitEllipse(size: CGSize(width: length * 0.18, height: height * 0.46),
+                                      fill: color.withAlphaComponent(0.48))
+            bottom.position = CGPoint(x: 0, y: -height * 0.54)
+            node.addChild(bottom)
+        }
+        if id.contains("vibora") || id.contains("ogro") || id.contains("dragao") {
+            addTeeth(to: node, length: length, height: height)
+        }
+    }
+
+    private static func addMammalTraits(to node: SKNode,
+                                        id: String,
+                                        length: CGFloat,
+                                        height: CGFloat,
+                                        color: UIColor) {
+        if id.contains("baleia") || id.contains("golfinho") || id.contains("orca") ||
+            id.contains("boto") || id.contains("cachalote") || id.contains("tucuxi") {
+            addDorsalFin(to: node, length: length, height: height, color: color)
+            let fluke = traitPath(points: [
+                CGPoint(x: -length * 0.55, y: 0),
+                CGPoint(x: -length * 0.78, y: height * 0.42),
+                CGPoint(x: -length * 0.66, y: 0),
+                CGPoint(x: -length * 0.78, y: -height * 0.42)
+            ], color: color.withAlphaComponent(0.72), width: max(2, height * 0.12))
+            fluke.zPosition = 3
+            node.addChild(fluke)
+            if id.contains("orca") {
+                let patch = traitEllipse(size: CGSize(width: length * 0.20, height: height * 0.26),
+                                         fill: UIColor.white.withAlphaComponent(0.82))
+                patch.position = CGPoint(x: length * 0.18, y: height * 0.18)
+                patch.zPosition = 4
+                node.addChild(patch)
+            }
+        } else {
+            let whiskerY = height * 0.08
+            for offset in [-0.06, 0.02, 0.10] as [CGFloat] {
+                node.addChild(traitPath(points: [
+                    CGPoint(x: length * 0.32, y: whiskerY + height * offset),
+                    CGPoint(x: length * 0.54, y: whiskerY + height * (offset + 0.08))
+                ], color: UIColor.white.withAlphaComponent(0.56), width: 1.2))
+            }
+            let flipper = traitEllipse(size: CGSize(width: length * 0.22, height: height * 0.18),
+                                       fill: color.withAlphaComponent(0.50))
+            flipper.position = CGPoint(x: length * 0.02, y: -height * 0.36)
+            flipper.zRotation = -0.25
+            node.addChild(flipper)
+        }
+    }
+
+    private static func addTurtleTraits(to node: SKNode,
+                                        length: CGFloat,
+                                        height: CGFloat,
+                                        color: UIColor) {
+        let shell = traitEllipse(size: CGSize(width: length * 0.72, height: height * 0.78),
+                                 fill: UIColor.lerp(color, GameUI.gold, 0.18).withAlphaComponent(0.62))
+        shell.strokeColor = UIColor.lerp(color, .black, 0.28).withAlphaComponent(0.48)
+        shell.lineWidth = 1
+        shell.zPosition = 3
+        node.addChild(shell)
+        for x in [-0.18, 0, 0.18] as [CGFloat] {
+            let line = traitPath(points: [
+                CGPoint(x: length * x, y: height * 0.32),
+                CGPoint(x: length * x * 0.4, y: -height * 0.32)
+            ], color: UIColor.white.withAlphaComponent(0.26), width: 1.2)
+            line.zPosition = 4
+            node.addChild(line)
+        }
+        for spec in [
+            CGPoint(x: -length * 0.12, y: height * 0.50),
+            CGPoint(x: length * 0.12, y: height * 0.50),
+            CGPoint(x: -length * 0.18, y: -height * 0.48),
+            CGPoint(x: length * 0.18, y: -height * 0.48)
+        ] {
+            let flipper = traitEllipse(size: CGSize(width: length * 0.20, height: height * 0.13),
+                                       fill: color.withAlphaComponent(0.48))
+            flipper.position = spec
+            flipper.zRotation = spec.y > 0 ? 0.28 : -0.28
+            flipper.zPosition = 1
+            node.addChild(flipper)
+        }
+    }
+
+    private static func addCrustaceanTraits(to node: SKNode,
+                                            id: String,
+                                            length: CGFloat,
+                                            height: CGFloat,
+                                            color: UIColor) {
+        let legColor = UIColor.lerp(color, .black, 0.18).withAlphaComponent(0.70)
+        for i in 0..<4 {
+            let x = -length * 0.18 + CGFloat(i) * length * 0.12
+            node.addChild(traitPath(points: [
+                CGPoint(x: x, y: height * 0.30),
+                CGPoint(x: x - length * 0.08, y: height * 0.62)
+            ], color: legColor, width: max(1.2, height * 0.045)))
+            node.addChild(traitPath(points: [
+                CGPoint(x: x, y: -height * 0.30),
+                CGPoint(x: x - length * 0.08, y: -height * 0.62)
+            ], color: legColor, width: max(1.2, height * 0.045)))
+        }
+        if id.contains("caranguejo") || id.contains("siri") || id.contains("lagosta") {
+            for side in [-1, 1] as [CGFloat] {
+                let claw = traitEllipse(size: CGSize(width: length * 0.15, height: height * 0.22),
+                                        fill: color.withAlphaComponent(0.75))
+                claw.position = CGPoint(x: length * 0.38, y: side * height * 0.34)
+                claw.zRotation = side * 0.46
+                claw.zPosition = 4
+                node.addChild(claw)
+            }
+        }
+        for side in [-1, 1] as [CGFloat] {
+            node.addChild(traitPath(points: [
+                CGPoint(x: length * 0.30, y: side * height * 0.12),
+                CGPoint(x: length * 0.58, y: side * height * 0.38)
+            ], color: UIColor.white.withAlphaComponent(0.42), width: 1.1))
+        }
+    }
+
+    private static func addCephalopodTraits(to node: SKNode,
+                                            id: String,
+                                            length: CGFloat,
+                                            height: CGFloat,
+                                            color: UIColor) {
+        let armColor = UIColor.lerp(color, .white, 0.12).withAlphaComponent(0.70)
+        let armCount = id.contains("lula") ? 5 : 7
+        for i in 0..<armCount {
+            let t = CGFloat(i) / CGFloat(max(1, armCount - 1))
+            let y = -height * 0.34 + t * height * 0.68
+            let curve = UIBezierPath()
+            curve.move(to: CGPoint(x: -length * 0.34, y: y * 0.45))
+            curve.addCurve(to: CGPoint(x: -length * 0.66, y: y),
+                           controlPoint1: CGPoint(x: -length * 0.46, y: y * 0.70 + sin(t * .pi) * height * 0.12),
+                           controlPoint2: CGPoint(x: -length * 0.56, y: y * 1.08))
+            let arm = traitPath(path: curve, color: armColor, width: max(1.4, height * 0.05))
+            arm.zPosition = 4
+            node.addChild(arm)
+        }
+        addBodySpots(to: node, length: length, height: height, color: color, count: 8)
+        if id.contains("lula") {
+            let fin = traitEllipse(size: CGSize(width: length * 0.20, height: height * 0.42),
+                                   fill: color.withAlphaComponent(0.44))
+            fin.position = CGPoint(x: -length * 0.16, y: height * 0.42)
+            fin.zRotation = 0.5
+            node.addChild(fin)
+        }
+    }
+
+    private static func addCnidarianTraits(to node: SKNode,
+                                           length: CGFloat,
+                                           height: CGFloat,
+                                           color: UIColor) {
+        let bell = traitEllipse(size: CGSize(width: length * 0.72, height: height * 0.54),
+                                fill: UIColor.lerp(color, .white, 0.35).withAlphaComponent(0.34))
+        bell.position = CGPoint(x: length * 0.02, y: height * 0.10)
+        bell.zPosition = 4
+        node.addChild(bell)
+        for i in 0..<7 {
+            let x = -length * 0.26 + CGFloat(i) * length * 0.085
+            let curve = UIBezierPath()
+            curve.move(to: CGPoint(x: x, y: -height * 0.22))
+            curve.addCurve(to: CGPoint(x: x + sin(CGFloat(i)) * length * 0.05, y: -height * 0.92),
+                           controlPoint1: CGPoint(x: x + length * 0.03, y: -height * 0.42),
+                           controlPoint2: CGPoint(x: x - length * 0.04, y: -height * 0.62))
+            node.addChild(traitPath(path: curve,
+                                    color: UIColor.lerp(color, .white, 0.24).withAlphaComponent(0.55),
+                                    width: 1.0))
+        }
+    }
+
+    private static func addEchinodermTraits(to node: SKNode,
+                                            id: String,
+                                            length: CGFloat,
+                                            height: CGFloat,
+                                            color: UIColor) {
+        if id.contains("ourico") {
+            for i in 0..<12 {
+                let angle = CGFloat(i) * .pi * 2 / 12
+                node.addChild(traitPath(points: [
+                    CGPoint(x: cos(angle) * length * 0.16, y: sin(angle) * height * 0.20),
+                    CGPoint(x: cos(angle) * length * 0.34, y: sin(angle) * height * 0.42)
+                ], color: UIColor.lerp(color, .black, 0.18), width: 1.1))
+            }
+        } else {
+            let star = UIBezierPath()
+            for i in 0..<10 {
+                let angle = CGFloat(i) * .pi / 5
+                let radius = i.isMultiple(of: 2) ? min(length, height) * 0.42 : min(length, height) * 0.18
+                let point = CGPoint(x: cos(angle) * radius, y: sin(angle) * radius)
+                i == 0 ? star.move(to: point) : star.addLine(to: point)
+            }
+            star.close()
+            let starNode = SKShapeNode(path: star.cgPath)
+            starNode.fillColor = color.withAlphaComponent(0.68)
+            starNode.strokeColor = UIColor.white.withAlphaComponent(0.25)
+            starNode.lineWidth = 1
+            starNode.zPosition = 5
+            node.addChild(starNode)
+        }
+    }
+
+    private static func addShellTraits(to node: SKNode,
+                                       length: CGFloat,
+                                       height: CGFloat,
+                                       color: UIColor) {
+        let shell = traitEllipse(size: CGSize(width: length * 0.72, height: height * 0.70),
+                                 fill: UIColor.lerp(color, GameUI.gold, 0.20).withAlphaComponent(0.70))
+        shell.strokeColor = UIColor.lerp(color, .black, 0.24).withAlphaComponent(0.46)
+        shell.lineWidth = 1
+        shell.zPosition = 4
+        node.addChild(shell)
+        for i in 0..<4 {
+            let y = -height * 0.24 + CGFloat(i) * height * 0.16
+            node.addChild(traitPath(points: [
+                CGPoint(x: -length * 0.26, y: y),
+                CGPoint(x: length * 0.24, y: y + height * 0.08)
+            ], color: UIColor.white.withAlphaComponent(0.26), width: 1.0))
+        }
+    }
+
+    private static func addPenguinTraits(to node: SKNode,
+                                         length: CGFloat,
+                                         height: CGFloat,
+                                         color: UIColor) {
+        let belly = traitEllipse(size: CGSize(width: length * 0.46, height: height * 0.72),
+                                 fill: UIColor.white.withAlphaComponent(0.86))
+        belly.position = CGPoint(x: length * 0.05, y: -height * 0.02)
+        belly.zPosition = 4
+        node.addChild(belly)
+        for side in [-1, 1] as [CGFloat] {
+            let wing = traitEllipse(size: CGSize(width: length * 0.18, height: height * 0.46),
+                                    fill: color.withAlphaComponent(0.66))
+            wing.position = CGPoint(x: -length * 0.04, y: side * height * 0.42)
+            wing.zRotation = side * 0.28
+            wing.zPosition = 2
+            node.addChild(wing)
+        }
+    }
+
+    private static func addDorsalFin(to node: SKNode,
+                                     length: CGFloat,
+                                     height: CGFloat,
+                                     color: UIColor) {
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: -length * 0.08, y: height * 0.36))
+        path.addLine(to: CGPoint(x: length * 0.08, y: height * 0.90))
+        path.addLine(to: CGPoint(x: length * 0.20, y: height * 0.32))
+        path.close()
+        let fin = SKShapeNode(path: path.cgPath)
+        fin.fillColor = color.withAlphaComponent(0.62)
+        fin.strokeColor = .clear
+        fin.zPosition = 5
+        node.addChild(fin)
+    }
+
+    private static func addGillMarks(to node: SKNode, length: CGFloat, height: CGFloat) {
+        for i in 0..<4 {
+            let x = length * 0.18 + CGFloat(i) * length * 0.035
+            node.addChild(traitPath(points: [
+                CGPoint(x: x, y: height * 0.23),
+                CGPoint(x: x - length * 0.03, y: -height * 0.22)
+            ], color: UIColor.white.withAlphaComponent(0.34), width: 1.1))
+        }
+    }
+
+    private static func addDorsalScutes(to node: SKNode,
+                                        length: CGFloat,
+                                        height: CGFloat,
+                                        color: UIColor) {
+        for i in 0..<6 {
+            let x = -length * 0.28 + CGFloat(i) * length * 0.11
+            let spike = traitPath(points: [
+                CGPoint(x: x, y: height * 0.34),
+                CGPoint(x: x + length * 0.04, y: height * 0.58),
+                CGPoint(x: x + length * 0.08, y: height * 0.34)
+            ], color: UIColor.lerp(color, .black, 0.2), width: 1.4)
+            spike.zPosition = 4
+            node.addChild(spike)
+        }
+    }
+
+    private static func addSegmentBands(to node: SKNode,
+                                        length: CGFloat,
+                                        height: CGFloat,
+                                        color: UIColor) {
+        for i in 0..<5 {
+            let x = -length * 0.24 + CGFloat(i) * length * 0.12
+            node.addChild(traitPath(points: [
+                CGPoint(x: x, y: height * 0.28),
+                CGPoint(x: x, y: -height * 0.28)
+            ], color: UIColor.lerp(color, .white, 0.28).withAlphaComponent(0.42), width: 1.0))
+        }
+    }
+
+    private static func addTeeth(to node: SKNode, length: CGFloat, height: CGFloat) {
+        for i in 0..<4 {
+            let tooth = traitPath(points: [
+                CGPoint(x: length * 0.31 + CGFloat(i) * length * 0.035, y: height * 0.10),
+                CGPoint(x: length * 0.34 + CGFloat(i) * length * 0.035, y: -height * 0.20)
+            ], color: UIColor.white.withAlphaComponent(0.82), width: 1.2)
+            tooth.zPosition = 6
+            node.addChild(tooth)
+        }
+    }
+
+    private static func addRayTailAccent(to node: SKNode,
+                                         length: CGFloat,
+                                         height: CGFloat,
+                                         color: UIColor) {
+        let barb = traitPath(points: [
+            CGPoint(x: -length * 0.76, y: -height * 0.14),
+            CGPoint(x: -length * 0.88, y: -height * 0.30)
+        ], color: UIColor.lerp(color, .black, 0.18).withAlphaComponent(0.72), width: 1.4)
+        barb.zPosition = 4
+        node.addChild(barb)
+    }
+
+    private static func addBodySpots(to node: SKNode,
+                                     length: CGFloat,
+                                     height: CGFloat,
+                                     color: UIColor,
+                                     count: Int) {
+        for i in 0..<count {
+            let spot = SKShapeNode(circleOfRadius: max(1.6, height * 0.055))
+            spot.fillColor = UIColor.lerp(color, .white, 0.58).withAlphaComponent(0.50)
+            spot.strokeColor = .clear
+            let t = CGFloat(i) / CGFloat(max(1, count - 1))
+            spot.position = CGPoint(x: -length * 0.22 + t * length * 0.48,
+                                    y: sin(t * .pi * 2.7) * height * 0.20)
+            spot.zPosition = 5
+            node.addChild(spot)
+        }
+    }
+
+    private static func traitEllipse(size: CGSize, fill: UIColor) -> SKShapeNode {
+        let node = SKShapeNode(ellipseOf: size)
+        node.fillColor = fill
+        node.strokeColor = .clear
+        return node
+    }
+
+    private static func traitPath(points: [CGPoint], color: UIColor, width: CGFloat) -> SKShapeNode {
+        let path = UIBezierPath()
+        guard let first = points.first else { return SKShapeNode() }
+        path.move(to: first)
+        for point in points.dropFirst() {
+            path.addLine(to: point)
+        }
+        return traitPath(path: path, color: color, width: width)
+    }
+
+    private static func traitPath(path: UIBezierPath, color: UIColor, width: CGFloat) -> SKShapeNode {
+        let node = SKShapeNode(path: path.cgPath)
+        node.fillColor = .clear
+        node.strokeColor = color
+        node.lineWidth = width
+        node.lineCap = .round
+        node.lineJoin = .round
+        return node
+    }
+
     /// Cópia visual estática deste peixe, para o cabeçalho do desafio.
     func makeGiverDisplayNode() -> SKNode {
-        FishNode.fishDrawing(length: bodyLength, height: bodyHeight,
-                             color: bodyColor,
-                             animateTail: true,
-                             silhouette: silhouette,
-                             pattern: pattern)
+        let displayPattern = species.map(FishNode.visualProfile).flatMap(\.pattern) ?? pattern
+        let drawing = FishNode.fishDrawing(length: bodyLength, height: bodyHeight,
+                                           color: bodyColor,
+                                           animateTail: true,
+                                           silhouette: silhouette,
+                                           pattern: displayPattern)
+        FishNode.addSpeciesTraits(to: drawing,
+                                  species: species,
+                                  length: bodyLength,
+                                  height: bodyHeight,
+                                  color: bodyColor,
+                                  silhouette: silhouette)
+        return drawing
+    }
+
+    static func makeSpeciesDisplayNode(species: AquaticSpecies,
+                                       discovered: Bool,
+                                       scale: CGFloat = 1) -> SKNode {
+        let zone = species.preferredZones.first ?? .shallow
+        let silhouette = FishSilhouette.random(for: zone, rare: false, species: species)
+        let profile = visualProfile(for: species)
+        let length = bodyLength(for: silhouette, rare: false, species: species) * profile.lengthMultiplier
+        let height = bodyHeight(for: silhouette, length: length)
+        let color = discovered
+            ? profile.color
+            : UIColor(red: 0.20, green: 0.28, blue: 0.34, alpha: 1)
+        let drawing = fishDrawing(length: length,
+                                  height: height,
+                                  color: color,
+                                  animateTail: false,
+                                  silhouette: silhouette,
+                                  pattern: discovered ? (profile.pattern ?? FishPattern.random(for: zone, rare: false, species: species)) : .plain)
+        if discovered {
+            addSpeciesTraits(to: drawing,
+                             species: species,
+                             length: length,
+                             height: height,
+                             color: color,
+                             silhouette: silhouette)
+        } else {
+            drawing.alpha = 0.72
+            let fog = SKShapeNode(ellipseOf: CGSize(width: length * 0.92, height: height * 1.16))
+            fog.fillColor = UIColor.white.withAlphaComponent(0.08)
+            fog.strokeColor = UIColor.white.withAlphaComponent(0.18)
+            fog.lineWidth = 1
+            fog.zPosition = 8
+            drawing.addChild(fog)
+        }
+        drawing.setScale(scale)
+        return drawing
     }
 
     func startGuiding(toward target: CGPoint, duration: TimeInterval) {

@@ -425,7 +425,7 @@ final class TideMemoryOverlay: SKNode {
                                      width: chipWidth,
                                      accent: GameUI.gold)
         scoreChip.node.position = CGPoint(x: gridOrigin.x + chipWidth / 2,
-                                           y: boardHeight / 2 + 48)
+                                           y: boardHeight / 2 + 38)
         addChild(scoreChip.node)
         scoreLabel = scoreChip.valueLabel
 
@@ -438,7 +438,7 @@ final class TideMemoryOverlay: SKNode {
                                          width: chipWidth,
                                          accent: GameUI.coral)
         objectiveChip.node.position = CGPoint(x: gridOrigin.x + chipWidth * 1.5 + 14,
-                                              y: boardHeight / 2 + 48)
+                                              y: boardHeight / 2 + 38)
         addChild(objectiveChip.node)
         objectiveLabel = objectiveChip.valueLabel
 
@@ -448,21 +448,21 @@ final class TideMemoryOverlay: SKNode {
 
         streakLabel = SKLabelNode(text: "Memória pronta")
         streakLabel.fontName = "AvenirNext-DemiBold"
-        streakLabel.fontSize = 13
+        streakLabel.fontSize = 10.8
         streakLabel.fontColor = GameUI.palePaper.withAlphaComponent(0.88)
         streakLabel.verticalAlignmentMode = .center
-        streakLabel.horizontalAlignmentMode = .center
-        streakLabel.position = CGPoint(x: 0, y: boardHeight / 2 + 80)
+        streakLabel.horizontalAlignmentMode = .right
+        streakLabel.position = CGPoint(x: -8, y: boardHeight / 2 + 4)
         streakLabel.zPosition = 35
         addChild(streakLabel)
 
         bestLabel = SKLabelNode(text: bestScore > 0 ? "Recorde \(bestScore)" : "Novo desafio")
         bestLabel.fontName = "AvenirNext-Regular"
-        bestLabel.fontSize = 11.5
+        bestLabel.fontSize = 10.8
         bestLabel.fontColor = GameUI.palePaper.withAlphaComponent(0.70)
         bestLabel.verticalAlignmentMode = .center
-        bestLabel.horizontalAlignmentMode = .center
-        bestLabel.position = CGPoint(x: 0, y: boardHeight / 2 + 104)
+        bestLabel.horizontalAlignmentMode = .left
+        bestLabel.position = CGPoint(x: 8, y: boardHeight / 2 + 4)
         bestLabel.zPosition = 35
         addChild(bestLabel)
 
@@ -1335,6 +1335,14 @@ final class TideMemoryOverlay: SKNode {
             streakLabel.text = "\(remaining) pares escondidos"
         }
         streakLabel.fontColor = streak >= 4 ? Visual.rose : GameUI.palePaper.withAlphaComponent(0.88)
+        ChallengeChrome.fitSingleLineLabel(streakLabel,
+                                           maxWidth: boardWidth / 2 - 18,
+                                           maxFontSize: 10.8,
+                                           minFontSize: 9.2)
+        ChallengeChrome.fitSingleLineLabel(bestLabel,
+                                           maxWidth: boardWidth / 2 - 18,
+                                           maxFontSize: 10.8,
+                                           minFontSize: 9.2)
         updateTimerUI()
     }
 

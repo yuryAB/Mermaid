@@ -939,8 +939,8 @@ final class AutonomySystem {
             // o menu de regiões é interface, não depende da disposição dela
             ctx.scene?.openRegionMenu()
             return
-        case .shop:
-            ctx.scene?.openRefugeStore()
+        case .registro:
+            ctx.scene?.openRegistro()
             return
         case .refuge:
             // portal mágico: ela sempre vai, mas agora dá para VER o caminho

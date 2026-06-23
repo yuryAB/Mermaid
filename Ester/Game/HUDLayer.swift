@@ -53,8 +53,13 @@ final class HUDLayer: SKNode {
     private var directionsMenuEnabled = true
     private let directionsMenuCommands: Set<PlayerCommand> = [.goUp, .goDown, .goLeft, .goRight, .rest]
     private var messageContainer: SKNode!
+    private var messageBubbleCard: SKNode?
+    private var messageIcon: SKNode!
     private var messageTitleLabel: SKLabelNode!
     private var messageLabel: SKLabelNode!
+    private var messageBubbleWidth: CGFloat = 0
+    private var messageTextWidth: CGFloat = 0
+    private var messageBubbleHeight: CGFloat = 0
     private var regionMapCue: SKNode?
     private var activeEffectsShelf: SKNode!
     private var activeEffectsSignature = ""
@@ -656,6 +661,76 @@ final class HUDLayer: SKNode {
         }
     }
 
+    private func fitMessageBody(_ body: String,
+                                maxWidth: CGFloat,
+                                maxLines: Int) -> (text: String, fontSize: CGFloat, lineCount: Int) {
+        let baseSize: CGFloat = 11.2
+        let minSize: CGFloat = 9.2
+        var fontSize = baseSize
+        while messageLineCount(for: body, maxWidth: maxWidth, fontSize: fontSize) > maxLines,
+              fontSize > minSize {
+            fontSize -= 0.4
+        }
+
+        let resolvedSize = max(fontSize, minSize)
+        let fittedText: String
+        if messageLineCount(for: body, maxWidth: maxWidth, fontSize: resolvedSize) > maxLines {
+            fittedText = truncatedMessageBody(body,
+                                              maxWidth: maxWidth,
+                                              fontSize: resolvedSize,
+                                              maxLines: maxLines)
+        } else {
+            fittedText = body
+        }
+
+        let measuredLines = messageLineCount(for: fittedText,
+                                             maxWidth: maxWidth,
+                                             fontSize: resolvedSize)
+        let lineCount = min(maxLines, max(1, measuredLines))
+        return (fittedText, resolvedSize, lineCount)
+    }
+
+    private func messageLineCount(for text: String,
+                                  maxWidth: CGFloat,
+                                  fontSize: CGFloat) -> Int {
+        guard !text.isEmpty else { return 1 }
+        let font = UIFont(name: HUDTypography.body, size: fontSize) ?? .systemFont(ofSize: fontSize)
+        let style = NSMutableParagraphStyle()
+        style.lineBreakMode = .byCharWrapping
+        let rect = (text as NSString).boundingRect(
+            with: CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            attributes: [.font: font, .paragraphStyle: style],
+            context: nil
+        )
+        return max(1, Int(ceil(rect.height / max(1, font.lineHeight))))
+    }
+
+    private func truncatedMessageBody(_ body: String,
+                                      maxWidth: CGFloat,
+                                      fontSize: CGFloat,
+                                      maxLines: Int) -> String {
+        let trimmed = body.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return "Nova observação registrada." }
+
+        var low = 0
+        var high = trimmed.count
+        var best = "..."
+        while low <= high {
+            let mid = (low + high) / 2
+            let prefix = String(trimmed.prefix(mid))
+                .trimmingCharacters(in: .whitespacesAndNewlines.union(CharacterSet(charactersIn: ".,;:-")))
+            let candidate = prefix.isEmpty ? "..." : "\(prefix)..."
+            if messageLineCount(for: candidate, maxWidth: maxWidth, fontSize: fontSize) <= maxLines {
+                best = candidate
+                low = mid + 1
+            } else {
+                high = mid - 1
+            }
+        }
+        return best
+    }
+
     private func addBiologyMeter(key: String,
                                  title: String,
                                  color: UIColor,
@@ -704,48 +779,44 @@ final class HUDLayer: SKNode {
 
     private func buildMessageBubble() {
         messageContainer = SKNode()
-        messageContainer.position = CGPoint(x: -8, y: topPanelBottomY - 64)
         messageContainer.alpha = 0
         messageContainer.zPosition = 6
         messageContainer.zRotation = -0.012
         addChild(messageContainer)
 
-        let bubbleSize = CGSize(width: sceneSize.width - 66, height: 48)
-        let bubble = HUDLayer.paperCard(size: bubbleSize,
-                                        cornerRadius: 8,
-                                        fill: HUDPalette.palePaper,
-                                        stroke: HUDPalette.teal.withAlphaComponent(0.58),
-                                        shadowAlpha: 0.11)
-        messageContainer.addChild(bubble)
+        messageBubbleWidth = sceneSize.width - 66
+        messageTextWidth = messageBubbleWidth - 58
 
-        let halfW = bubbleSize.width / 2
-        let wave = HUDLayer.iconNode(kind: .wave, color: HUDPalette.teal)
-        wave.setScale(0.82)
-        wave.position = CGPoint(x: -halfW + 22, y: -1)
-        wave.zPosition = 5
-        messageContainer.addChild(wave)
+        messageIcon = HUDLayer.iconNode(kind: .wave, color: HUDPalette.teal)
+        messageIcon.setScale(0.82)
+        messageIcon.zPosition = 5
+        messageContainer.addChild(messageIcon)
 
         messageTitleLabel = makeLabel(fontSize: 8.4, style: .bodyBold, color: HUDPalette.teal)
         messageTitleLabel.horizontalAlignmentMode = .left
-        messageTitleLabel.position = CGPoint(x: -halfW + 42, y: 12)
+        messageTitleLabel.verticalAlignmentMode = .center
+        messageTitleLabel.preferredMaxLayoutWidth = messageTextWidth
+        messageTitleLabel.numberOfLines = 1
+        messageTitleLabel.lineBreakMode = .byTruncatingTail
         messageTitleLabel.zPosition = 5
         messageContainer.addChild(messageTitleLabel)
 
         messageLabel = makeLabel(fontSize: 11.2, style: .body, color: HUDPalette.ink)
         messageLabel.horizontalAlignmentMode = .left
-        messageLabel.verticalAlignmentMode = .center
-        messageLabel.position = CGPoint(x: -halfW + 42, y: -8)
-        messageLabel.preferredMaxLayoutWidth = bubbleSize.width - 58
-        messageLabel.numberOfLines = 2
+        messageLabel.verticalAlignmentMode = .top
+        messageLabel.preferredMaxLayoutWidth = messageTextWidth
+        messageLabel.numberOfLines = 3
+        messageLabel.lineBreakMode = .byCharWrapping
         messageLabel.zPosition = 5
         messageContainer.addChild(messageLabel)
+
+        layoutMessageBubble(title: "Observação", body: "Nova observação registrada.")
     }
 
-    func showMessage(_ text: String, duration: TimeInterval = 0) {
-        let note = fieldNote(from: text)
-        let holdTime = duration > 0 ? duration : max(3.0, Double(note.body.count) * 0.07)
-        messageTitleLabel.text = note.title
-        messageLabel.text = note.body
+    func showMessage(_ text: String, phase: MermaidPhase? = nil, duration: TimeInterval = 0) {
+        let note = fieldNote(from: text, phase: phase)
+        let shownBody = layoutMessageBubble(title: note.title, body: note.body)
+        let holdTime = duration > 0 ? duration : max(3.0, Double(shownBody.count) * 0.07)
         messageContainer.removeAllActions()
         messageContainer.alpha = 0
         messageContainer.setScale(0.96)
@@ -757,6 +828,38 @@ final class HUDLayer: SKNode {
             .wait(forDuration: holdTime),
             .fadeOut(withDuration: 0.45)
         ]))
+    }
+
+    @discardableResult
+    private func layoutMessageBubble(title: String, body: String) -> String {
+        let maxLines = 3
+        let fitted = fitMessageBody(body,
+                                    maxWidth: messageTextWidth,
+                                    maxLines: maxLines)
+        let bubbleHeight = min(CGFloat(82), max(CGFloat(52), CGFloat(52 + (fitted.lineCount - 1) * 13)))
+        if abs(bubbleHeight - messageBubbleHeight) > 0.5 || messageBubbleCard == nil {
+            messageBubbleCard?.removeFromParent()
+            let card = HUDLayer.paperCard(size: CGSize(width: messageBubbleWidth, height: bubbleHeight),
+                                          cornerRadius: 8,
+                                          fill: HUDPalette.palePaper,
+                                          stroke: HUDPalette.teal.withAlphaComponent(0.58),
+                                          shadowAlpha: 0.11)
+            card.zPosition = 0
+            messageContainer.addChild(card)
+            messageBubbleCard = card
+            messageBubbleHeight = bubbleHeight
+        }
+
+        let halfW = messageBubbleWidth / 2
+        messageContainer.position = CGPoint(x: -8,
+                                            y: topPanelBottomY - 40 - bubbleHeight / 2)
+        messageIcon.position = CGPoint(x: -halfW + 22, y: -1)
+        messageTitleLabel.text = title
+        messageTitleLabel.position = CGPoint(x: -halfW + 42, y: bubbleHeight / 2 - 15)
+        messageLabel.text = fitted.text
+        messageLabel.fontSize = fitted.fontSize
+        messageLabel.position = CGPoint(x: -halfW + 42, y: bubbleHeight / 2 - 29)
+        return fitted.text
     }
 
     func showRegionMapCue(for region: Region, unlocked: Bool) {
@@ -1001,35 +1104,42 @@ final class HUDLayer: SKNode {
         return node
     }
 
-    private func fieldNote(from rawText: String) -> (title: String, body: String) {
-        let lower = rawText.lowercased()
+    private func fieldNote(from rawText: String, phase: MermaidPhase?) -> (title: String, body: String) {
+        let normalized = normalizedFieldText(rawText)
+        let words = fieldWords(in: normalized)
         var title = "Observação"
         var body = rawText
 
-        if lower.contains("ovo") || lower.contains("choco") || lower.contains("nasceu") || lower.contains("nascendo") {
+        let isIncubationNote = words.contains("ovo")
+            || words.contains("nasceu")
+            || words.contains("nascendo")
+            || words.contains("nascimento")
+            || words.contains { $0.hasPrefix("choc") }
+
+        if isIncubationNote && (phase.map { $0 == .egg } ?? true) {
             title = "Incubação"
             body = cleanFieldText(rawText)
-        } else if lower.contains("correnteza") {
+        } else if normalized.contains("correnteza") {
             title = "Ambiente"
             body = "Correnteza registrada na região."
-        } else if lower.contains("objetivo disponivel") || lower.contains("objetivo disponível") {
+        } else if normalized.contains("objetivo disponivel") {
             title = "Novo registro"
             body = cleanFieldText(rawText)
                 .replacingOccurrences(of: "(Objetivo disponivel)", with: "Objetivo disponível.")
                 .replacingOccurrences(of: "(Objetivo disponível)", with: "Objetivo disponível.")
-        } else if lower.contains("refugio") || lower.contains("refúgio") {
+        } else if normalized.contains("refugio") {
             title = "Refúgio"
             body = cleanFieldText(rawText)
-        } else if lower.contains("desafio") || lower.contains("trama") {
+        } else if normalized.contains("desafio") || normalized.contains("trama") {
             title = "Desafio"
             body = cleanFieldText(rawText)
-        } else if lower.contains("camada") || lower.contains("profund") {
+        } else if normalized.contains("camada") || normalized.contains("profund") {
             title = "Camada"
             body = cleanFieldText(rawText)
-        } else if lower.contains("efeito ativo") || lower.contains("efeito temporário") {
+        } else if normalized.contains("efeito ativo") || normalized.contains("efeito temporario") {
             title = "Efeito"
             body = cleanFieldText(rawText)
-        } else if lower.contains("fome") || lower.contains("faminta") || lower.contains("comer") {
+        } else if normalized.contains("fome") || normalized.contains("faminta") || normalized.contains("comer") {
             title = "Sinais"
             body = cleanFieldText(rawText)
         } else {
@@ -1048,11 +1158,24 @@ final class HUDLayer: SKNode {
         removals.forEach { result = result.replacingOccurrences(of: $0, with: "") }
         result = result.replacingOccurrences(of: "!", with: ".")
         result = result.replacingOccurrences(of: "...", with: ".")
-        while result.contains("  ") {
-            result = result.replacingOccurrences(of: "  ", with: " ")
-        }
+        result = result
+            .components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
         result = result.trimmingCharacters(in: .whitespacesAndNewlines)
         return result.isEmpty ? "Nova observação registrada." : result
+    }
+
+    private func normalizedFieldText(_ text: String) -> String {
+        text
+            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "pt_BR"))
+            .lowercased()
+    }
+
+    private func fieldWords(in text: String) -> Set<String> {
+        Set(text
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty })
     }
 
     // MARK: - Etiqueta de comportamento
@@ -1208,7 +1331,7 @@ final class HUDLayer: SKNode {
     }
 
     private func buildButtons() {
-        let bottomCommands: [PlayerCommand?] = [.refuge, .resources, nil, .challenge, .shop]
+        let bottomCommands: [PlayerCommand?] = [.refuge, .resources, nil, .challenge, .registro]
         let bottomWidth = min(CGFloat(68), (sceneSize.width - 36) / CGFloat(bottomCommands.count))
         let bottomSpacing = max(CGFloat(4), (sceneSize.width - bottomWidth * CGFloat(bottomCommands.count) - 24) / CGFloat(bottomCommands.count - 1))
         let bottomStartX = -sceneSize.width / 2 + 12 + bottomWidth / 2
@@ -2117,9 +2240,9 @@ final class HUDLayer: SKNode {
             node.addChild(assetIconNode(named: "sleep", color: color, size: 30))
         case .challenge:
             node.addChild(assetIconNode(named: "challenge", color: color, size: 24))
-        case .shop:
-            node.addChild(GameUI.symbolIconNode(named: "cart.fill",
-                                                fallback: "$",
+        case .registro:
+            node.addChild(GameUI.symbolIconNode(named: "book.closed.fill",
+                                                fallback: "R",
                                                 color: color,
                                                 size: 24))
         case .objective:

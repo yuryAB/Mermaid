@@ -45,6 +45,10 @@ final class MermaidStats: Codable {
     /// Regiões descobertas e progresso de exploração por região.
     var discoveredRegionIds: Set<String> = ["recife_tropical"]
     var regionProgress: [String: CGFloat] = [:]
+    /// Registro: especies oficialmente documentadas apos desafios vencidos.
+    var registeredSpeciesIds: Set<String> = []
+    /// Registro: observacoes liberadas da ficha cientifica da sereia.
+    var mermaidObservationIds: Set<String> = ["primeiro_olhar"]
     /// Fog of war do mapa de expedição: regionId -> "col,row" -> 0...1.
     var expeditionRevealByRegion: [String: [String: CGFloat]] = [:]
     var discoveredPOIKeys: Set<String> = []
@@ -87,7 +91,9 @@ final class MermaidStats: Codable {
         case phase, birthDate, phaseStartedAt, adaptationByZone, unlockedZoneKeys
         case maxDepthMeters
         case puzzlesSolved, challengeHighScores, mealsEaten, memories, lastSaved, hatchProgress
-        case posX, posY, discoveredRegionIds, regionProgress, expeditionRevealByRegion
+        case posX, posY, discoveredRegionIds, regionProgress
+        case registeredSpeciesIds, mermaidObservationIds
+        case expeditionRevealByRegion
         case discoveredPOIKeys, visitedPOIKeys, collectedPOIRewardKeys
         case repeatablePOIRewardAvailableAtByKey
         case inventoryItems, activeBuffs, currentRegionId
@@ -137,6 +143,9 @@ final class MermaidStats: Codable {
         posY = try c.decodeIfPresent(CGFloat.self, forKey: .posY) ?? World.startPosition.y
         discoveredRegionIds = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredRegionIds) ?? ["recife_tropical"]
         regionProgress = try c.decodeIfPresent([String: CGFloat].self, forKey: .regionProgress) ?? [:]
+        registeredSpeciesIds = try c.decodeIfPresent(Set<String>.self, forKey: .registeredSpeciesIds) ?? []
+        mermaidObservationIds = try c.decodeIfPresent(Set<String>.self, forKey: .mermaidObservationIds) ?? ["primeiro_olhar"]
+        mermaidObservationIds.insert("primeiro_olhar")
         expeditionRevealByRegion = try c.decodeIfPresent([String: [String: CGFloat]].self, forKey: .expeditionRevealByRegion) ?? [:]
         discoveredPOIKeys = try c.decodeIfPresent(Set<String>.self, forKey: .discoveredPOIKeys) ?? []
         visitedPOIKeys = try c.decodeIfPresent(Set<String>.self, forKey: .visitedPOIKeys) ?? []
@@ -734,6 +743,24 @@ final class MermaidStats: Codable {
     func addMemory(_ text: String) {
         memories.append(text)
         if memories.count > 60 { memories.removeFirst() }
+    }
+
+    @discardableResult
+    func registerSpecies(_ speciesId: String, memoryText: String? = nil) -> Bool {
+        guard registeredSpeciesIds.insert(speciesId).inserted else { return false }
+        if let memoryText {
+            addMemory(memoryText)
+        }
+        return true
+    }
+
+    func isSpeciesRegistered(_ speciesId: String) -> Bool {
+        registeredSpeciesIds.contains(speciesId)
+    }
+
+    @discardableResult
+    func unlockMermaidObservation(_ observationId: String) -> Bool {
+        mermaidObservationIds.insert(observationId).inserted
     }
 
     @discardableResult

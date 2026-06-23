@@ -646,7 +646,7 @@ final class BanquetOfTidesOverlay: SKNode {
                                      width: chipWidth,
                                      accent: Visual.feast)
         scoreChip.node.position = CGPoint(x: arenaOrigin.x + chipWidth / 2,
-                                           y: arenaWidth / 2 + 42)
+                                           y: arenaWidth / 2 + 34)
         addChild(scoreChip.node)
         scoreLabel = scoreChip.valueLabel
 
@@ -659,7 +659,7 @@ final class BanquetOfTidesOverlay: SKNode {
                                          width: chipWidth,
                                          accent: GameUI.coral)
         objectiveChip.node.position = CGPoint(x: arenaOrigin.x + chipWidth * 1.5 + 9,
-                                              y: arenaWidth / 2 + 42)
+                                              y: arenaWidth / 2 + 34)
         addChild(objectiveChip.node)
         objectiveLabel = objectiveChip.valueLabel
 
@@ -672,7 +672,7 @@ final class BanquetOfTidesOverlay: SKNode {
                                      width: chipWidth,
                                      accent: Visual.danger)
         livesChip.node.position = CGPoint(x: arenaOrigin.x + chipWidth * 2.5 + 18,
-                                          y: arenaWidth / 2 + 42)
+                                          y: arenaWidth / 2 + 34)
         addChild(livesChip.node)
         livesLabel = livesChip.valueLabel
 

@@ -262,9 +262,11 @@ class GameScene: SKScene {
     private var pendingPOIChallengeCompletion: ((ChallengeResult) -> Void)?
     private var challengeBackdrop: SKNode?
     private var poiChallengeOffer: POIChallengeOfferOverlay?
+    private var pendingRegistroChallengeSpeciesId: String?
     private var challengeChoiceMenu: ChallengeChoiceOverlay?
     private var resourceChoiceMenu: ResourceChoiceOverlay?
     private var refugeStoreOverlay: RefugeStoreOverlay?
+    private var registroOverlay: RegistroOverlay?
     private var regionMenu: RegionMenuOverlay?
     private var refugeOverlay: RefugeOverlay?
     private var refugePortal: RefugePortalNode?
@@ -481,8 +483,8 @@ class GameScene: SKScene {
         hud = HUDLayer(size: size, insets: insets, enableDebugRigToolButton: showRigDebugButton)
         hud.zPosition = 100
         hud.onCommand = { [weak self] command in
-            if command == .shop {
-                self?.openRefugeStore()
+            if command == .registro {
+                self?.openRegistro()
             } else if command == .resources {
                 self?.openResourceChoiceMenu()
             } else {
@@ -990,6 +992,7 @@ class GameScene: SKScene {
               challengeChoiceMenu == nil,
               resourceChoiceMenu == nil,
               refugeStoreOverlay == nil,
+              registroOverlay == nil,
               poiChallengeOffer == nil,
               !isChallengeOpen,
               refugeOverlay == nil else { return }
@@ -1047,6 +1050,7 @@ class GameScene: SKScene {
               resourceChoiceMenu == nil,
               regionMenu == nil,
               refugeStoreOverlay == nil,
+              registroOverlay == nil,
               !isChallengeOpen,
               poiChallengeOffer == nil,
               refugeOverlay == nil,
@@ -1092,6 +1096,7 @@ class GameScene: SKScene {
               challengeChoiceMenu == nil,
               regionMenu == nil,
               refugeStoreOverlay == nil,
+              registroOverlay == nil,
               !isChallengeOpen,
               poiChallengeOffer == nil,
               refugeOverlay == nil,
@@ -1136,6 +1141,7 @@ class GameScene: SKScene {
               resourceChoiceMenu == nil,
               challengeChoiceMenu == nil,
               regionMenu == nil,
+              registroOverlay == nil,
               !isChallengeOpen,
               poiChallengeOffer == nil,
               refugeOverlay == nil,
@@ -1169,6 +1175,38 @@ class GameScene: SKScene {
         }
         refugeStoreOverlay?.removeFromParent()
         refugeStoreOverlay = nil
+    }
+
+    func openRegistro(playSound: Bool = true) {
+        guard registroOverlay == nil,
+              refugeStoreOverlay == nil,
+              resourceChoiceMenu == nil,
+              challengeChoiceMenu == nil,
+              regionMenu == nil,
+              !isChallengeOpen,
+              poiChallengeOffer == nil,
+              refugeOverlay == nil,
+              rigDebugTool == nil else { return }
+        if playSound {
+            GameAudio.shared.play(.uiOpenPanel)
+        }
+        let overlay = RegistroOverlay(size: size,
+                                      insets: view?.safeAreaInsets ?? .zero,
+                                      stats: stats,
+                                      onClose: { [weak self] in
+                                          self?.closeRegistro()
+                                      })
+        overlay.zPosition = 190
+        cameraNode.addChild(overlay)
+        registroOverlay = overlay
+    }
+
+    private func closeRegistro(playSound: Bool = true) {
+        if playSound && registroOverlay != nil {
+            GameAudio.shared.play(.uiClosePanel)
+        }
+        registroOverlay?.removeFromParent()
+        registroOverlay = nil
     }
 
     private func purchaseRefugeStoreItem(_ item: RefugeShopItem) {
@@ -1326,6 +1364,7 @@ class GameScene: SKScene {
         guard refugeOverlay == nil,
               resourceChoiceMenu == nil,
               refugeStoreOverlay == nil,
+              registroOverlay == nil,
               poiChallengeOffer == nil,
               !isChallengeOpen,
               refugePortal == nil else { return }
@@ -1422,7 +1461,12 @@ class GameScene: SKScene {
 
     /// Abre o desafio oferecido por um NPC (hoje, um peixe).
     func openChallenge(giver: FishNode) {
-        guard !isChallengeOpen, challengeChoiceMenu == nil, resourceChoiceMenu == nil, poiChallengeOffer == nil, refugeOverlay == nil else { return }
+        guard !isChallengeOpen,
+              challengeChoiceMenu == nil,
+              resourceChoiceMenu == nil,
+              registroOverlay == nil,
+              poiChallengeOffer == nil,
+              refugeOverlay == nil else { return }
         guard let kind = giver.offeredChallenge else { return }
         guard kind.isAvailable else {
             ctx.challenges.consumeChallenge(of: giver)
@@ -1433,13 +1477,25 @@ class GameScene: SKScene {
         let challengeGoal = giver.offeredChallengeGoal
             ?? ctx.challenges.makeGoal(kind: kind, special: special, at: giver.position)
         let giverDisplay = giver.makeGiverDisplayNode()
+        pendingRegistroChallengeSpeciesId = RegistroCatalog.challengeUnlockCandidate(
+            preferredSpeciesId: giver.species?.id,
+            regionId: ctx.regions.currentRegion?.id,
+            zone: giver.zone,
+            stats: stats
+        )?.id
         ctx.challenges.consumeChallenge(of: giver)
         presentChallenge(kind: kind, special: special, challengeGoal: challengeGoal, giverDisplay: giverDisplay)
     }
 
     /// Durante o ovo: o Desafio: Trama abre direto (energia de nascimento).
     func openHatchingChallenge() {
-        guard !isChallengeOpen, challengeChoiceMenu == nil, resourceChoiceMenu == nil, poiChallengeOffer == nil, refugeOverlay == nil else { return }
+        guard !isChallengeOpen,
+              challengeChoiceMenu == nil,
+              resourceChoiceMenu == nil,
+              registroOverlay == nil,
+              poiChallengeOffer == nil,
+              refugeOverlay == nil else { return }
+        pendingRegistroChallengeSpeciesId = nil
         GameAudio.shared.play(.challengeOpen)
         presentChallenge(kind: .plot, special: false, challengeGoal: 35, giverDisplay: nil, hatching: true)
     }
@@ -1449,6 +1505,7 @@ class GameScene: SKScene {
             && challengeChoiceMenu == nil
             && resourceChoiceMenu == nil
             && regionMenu == nil
+            && registroOverlay == nil
             && poiChallengeOffer == nil
             && refugeOverlay == nil
             && rigDebugTool == nil
@@ -1500,8 +1557,15 @@ class GameScene: SKScene {
               challengeChoiceMenu == nil,
               resourceChoiceMenu == nil,
               regionMenu == nil,
+              registroOverlay == nil,
               refugeOverlay == nil else { return }
         pendingPOIChallengeCompletion = onCompletion
+        pendingRegistroChallengeSpeciesId = registroSpeciesId(for: poi).flatMap {
+            RegistroCatalog.challengeUnlockCandidate(preferredSpeciesId: $0,
+                                                     regionId: poi.regionId,
+                                                     zone: poi.zone,
+                                                     stats: stats)?.id
+        }
         GameAudio.shared.play(.challengeOpen)
         presentChallenge(kind: poiChallenge.kind,
                          special: poiChallenge.special,
@@ -1524,6 +1588,35 @@ class GameScene: SKScene {
         return node
     }
 
+    private func registroSpeciesId(for poi: WorldPOI) -> String? {
+        guard poi.visualConcept == .npc || poi.kind == .pet else { return nil }
+        guard let region = RegionDiscoverySystem.region(withId: poi.regionId) else { return nil }
+        let poiName = normalizedRegistroText(poi.name)
+        return RegistroCatalog.species(in: region).first { definition in
+            let common = normalizedRegistroText(definition.commonName)
+            let firstCommonToken = common.split(separator: " ").first.map(String.init) ?? common
+            return poiName.contains(common) || (!firstCommonToken.isEmpty && poiName.contains(firstCommonToken))
+        }?.id
+    }
+
+    private func normalizedRegistroText(_ text: String) -> String {
+        text.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+            .replacingOccurrences(of: "-", with: " ")
+            .lowercased()
+    }
+
+    private func consumePendingRegistroUnlock(result: ChallengeResult) -> RegistroSpeciesDefinition? {
+        defer { pendingRegistroChallengeSpeciesId = nil }
+        guard result.reachedTarget,
+              let speciesId = pendingRegistroChallengeSpeciesId,
+              let definition = RegistroCatalog.definition(for: speciesId) else { return nil }
+        let didRegister = stats.registerSpecies(
+            speciesId,
+            memoryText: "Registrou \(definition.commonName) no Registro de \(definition.biomeName)"
+        )
+        return didRegister ? definition : nil
+    }
+
     private func presentChallenge(kind: ChallengeKind,
                                   special: Bool,
                                   challengeGoal: Int,
@@ -1531,6 +1624,7 @@ class GameScene: SKScene {
                                   hatching: Bool = false) {
         guard hatching || kind.isAvailable else { return }
         closeRegionMenu()
+        closeRegistro(playSound: false)
         closeChallengeChoiceMenu(playSound: false)
         closeResourceChoiceMenu(playSound: false)
         closePOIChallengeOffer(playSound: false)
@@ -1748,6 +1842,7 @@ class GameScene: SKScene {
 
         // Durante o ovo, o desafio reúne energia de nascimento
         if result.isHatching || stats.phase == .egg {
+            pendingRegistroChallengeSpeciesId = nil
             ctx.growth.addHatchProgress(CGFloat(result.points) / 900)
             stats.save()
             GameAudio.shared.play(.eggTap, volumeMultiplier: 0.7)
@@ -1761,6 +1856,7 @@ class GameScene: SKScene {
         let adaptation = stats.adaptation(for: zone)
         stats.setAdaptation(adaptation + 3, for: zone)
         let madeHighScore = stats.recordHighScore(result.points, for: result.kind)
+        let registroUnlock = consumePendingRegistroUnlock(result: result)
         let resourceReward: SupportResourceKind?
         if result.reachedTarget {
             stats.puzzlesSolved += 1
@@ -1781,9 +1877,11 @@ class GameScene: SKScene {
             let recordText = madeHighScore ? " Novo recorde!" : ""
             let victoryText: String
             if result.reachedTarget && result.victoryReward.grantsShellBonus {
-                victoryText = " Vitória: +50% conchas."
+                victoryText = " Vitória: +50% conchas." + registroVictoryText(registroUnlock)
             } else if result.reachedTarget, let resourceReward {
-                victoryText = " Vitória: \(resourceReward.title) +1."
+                victoryText = " Vitória: \(resourceReward.title) +1." + registroVictoryText(registroUnlock)
+            } else if result.reachedTarget {
+                victoryText = registroVictoryText(registroUnlock)
             } else {
                 victoryText = ""
             }
@@ -1793,6 +1891,11 @@ class GameScene: SKScene {
         }
     }
 
+    private func registroVictoryText(_ definition: RegistroSpeciesDefinition?) -> String {
+        guard let definition else { return "" }
+        return " Registro: \(definition.commonName)."
+    }
+
     // MARK: - Toques no mundo
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -1800,6 +1903,7 @@ class GameScene: SKScene {
               challengeChoiceMenu == nil,
               resourceChoiceMenu == nil,
               refugeStoreOverlay == nil,
+              registroOverlay == nil,
               regionMenu == nil,
               poiChallengeOffer == nil,
               refugeOverlay == nil,

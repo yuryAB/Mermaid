@@ -669,7 +669,7 @@ final class ReefAsteroidsOverlay: SKNode {
                                      width: chipWidth,
                                      accent: Visual.gold)
         scoreChip.node.position = CGPoint(x: arenaOrigin.x + chipWidth / 2,
-                                           y: arenaWidth / 2 + 42)
+                                           y: arenaWidth / 2 + 34)
         addChild(scoreChip.node)
         scoreLabel = scoreChip.valueLabel
 
@@ -682,7 +682,7 @@ final class ReefAsteroidsOverlay: SKNode {
                                     width: chipWidth,
                                     accent: Visual.current)
         waveChip.node.position = CGPoint(x: arenaOrigin.x + chipWidth * 1.5 + 9,
-                                          y: arenaWidth / 2 + 42)
+                                          y: arenaWidth / 2 + 34)
         addChild(waveChip.node)
         waveLabel = waveChip.valueLabel
 
@@ -695,7 +695,7 @@ final class ReefAsteroidsOverlay: SKNode {
                                      width: chipWidth,
                                      accent: Visual.danger)
         livesChip.node.position = CGPoint(x: arenaOrigin.x + chipWidth * 2.5 + 18,
-                                          y: arenaWidth / 2 + 42)
+                                          y: arenaWidth / 2 + 34)
         addChild(livesChip.node)
         livesLabel = livesChip.valueLabel
 
@@ -705,7 +705,7 @@ final class ReefAsteroidsOverlay: SKNode {
         recordLabel.fontColor = GameUI.palePaper.withAlphaComponent(0.88)
         recordLabel.verticalAlignmentMode = .center
         recordLabel.horizontalAlignmentMode = .center
-        recordLabel.position = CGPoint(x: 0, y: arenaWidth / 2 + 6)
+        recordLabel.position = CGPoint(x: 0, y: arenaWidth / 2 - 6)
         recordLabel.zPosition = 36
         addChild(recordLabel)
 
