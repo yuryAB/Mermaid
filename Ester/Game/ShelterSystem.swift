@@ -1167,66 +1167,172 @@ private final class RefugeVillageController {
         let interiorLaneY = playableRect.minY + max(96, playableRect.height * 0.31)
         interiorDoorPoint = CGPoint(x: playableRect.maxX - playableRect.width * 0.17,
                                     y: interiorLaneY)
-        bedroomRestPoint = CGPoint(x: playableRect.minX + playableRect.width * 0.25,
-                                   y: interiorLaneY)
-        homeBedFrame = CGRect(x: bedroomRestPoint.x - 96, y: interiorLaneY - 84, width: 188, height: 142)
+        bedroomRestPoint = CGPoint(x: playableRect.minX + playableRect.width * 0.28,
+                                   y: interiorLaneY - 2)
+        homeBedFrame = CGRect(x: bedroomRestPoint.x - 104, y: bedroomRestPoint.y - 82, width: 208, height: 148)
         homeExitFrame = CGRect(x: interiorDoorPoint.x - 58, y: interiorLaneY - 76, width: 116, height: 132)
 
-        let shellRoom = UIBezierPath()
-        shellRoom.move(to: CGPoint(x: playableRect.minX + 18, y: playableRect.minY + 32))
-        shellRoom.addCurve(to: CGPoint(x: playableRect.midX, y: playableRect.maxY - 10),
-                           controlPoint1: CGPoint(x: playableRect.minX + 14, y: playableRect.midY),
-                           controlPoint2: CGPoint(x: playableRect.minX + playableRect.width * 0.24, y: playableRect.maxY + 18))
-        shellRoom.addCurve(to: CGPoint(x: playableRect.maxX - 18, y: playableRect.minY + 32),
-                           controlPoint1: CGPoint(x: playableRect.maxX - playableRect.width * 0.24, y: playableRect.maxY + 18),
-                           controlPoint2: CGPoint(x: playableRect.maxX - 14, y: playableRect.midY))
-        shellRoom.addCurve(to: CGPoint(x: playableRect.minX + 18, y: playableRect.minY + 32),
-                           controlPoint1: CGPoint(x: playableRect.maxX - playableRect.width * 0.28, y: playableRect.minY - 2),
-                           controlPoint2: CGPoint(x: playableRect.minX + playableRect.width * 0.28, y: playableRect.minY - 2))
-        shellRoom.close()
-
-        let walls = SKShapeNode(path: shellRoom.cgPath)
-        walls.fillColor = UIColor.lerp(art.shellPearl, art.shellBlush, 0.12).withAlphaComponent(0.70)
-        walls.strokeColor = art.shellBlush.withAlphaComponent(0.48)
-        walls.lineWidth = 1.6
+        let walls = SKShapeNode(rectOf: CGSize(width: playableRect.width - 34,
+                                               height: playableRect.height - 34),
+                                cornerRadius: 18)
+        walls.fillColor = UIColor.lerp(art.reefRock, art.waterMid, 0.22).withAlphaComponent(0.62)
+        walls.strokeColor = art.biolume.withAlphaComponent(0.22)
+        walls.lineWidth = 1.4
+        walls.position = CGPoint(x: playableRect.midX, y: playableRect.midY)
         walls.zPosition = 0.2
         room.addChild(walls)
 
+        buildHomeSeaWindow(room: room, laneY: interiorLaneY)
+
         let floor = SKShapeNode(rectOf: CGSize(width: playableRect.width - 72, height: 22), cornerRadius: 7)
-        floor.fillColor = art.shellPearl.withAlphaComponent(0.40)
-        floor.strokeColor = art.biolume.withAlphaComponent(0.18)
+        floor.fillColor = UIColor.lerp(art.shellPearl, art.waterMid, 0.20).withAlphaComponent(0.32)
+        floor.strokeColor = art.biolume.withAlphaComponent(0.16)
         floor.lineWidth = 1
-        floor.position = CGPoint(x: playableRect.midX, y: interiorLaneY - 54)
+        floor.position = CGPoint(x: playableRect.midX, y: interiorLaneY - 58)
         floor.zPosition = 1.4
         room.addChild(floor)
 
-        let floorCliff = SKShapeNode(rectOf: CGSize(width: playableRect.width - 86, height: 40), cornerRadius: 6)
-        floorCliff.fillColor = UIColor.lerp(art.reefRock, art.shellPearl, 0.18).withAlphaComponent(0.38)
+        let floorCliff = SKShapeNode(rectOf: CGSize(width: playableRect.width - 86, height: 36), cornerRadius: 6)
+        floorCliff.fillColor = art.shadow.withAlphaComponent(0.18)
         floorCliff.strokeColor = .clear
         floorCliff.position = CGPoint(x: playableRect.midX, y: interiorLaneY - 84)
         floorCliff.zPosition = 1.1
         room.addChild(floorCliff)
 
-        for i in 0..<11 {
-            let ridge = UIBezierPath()
-            let startX = playableRect.minX + playableRect.width * (0.12 + CGFloat(i) * 0.076)
-            ridge.move(to: CGPoint(x: startX, y: playableRect.minY + 44))
-            ridge.addCurve(to: CGPoint(x: playableRect.midX + (startX - playableRect.midX) * 0.18,
-                                       y: playableRect.maxY - 24),
-                           controlPoint1: CGPoint(x: startX - 18, y: playableRect.midY),
-                           controlPoint2: CGPoint(x: playableRect.midX + (startX - playableRect.midX) * 0.35,
-                                                  y: playableRect.maxY - 70))
-            let line = SKShapeNode(path: ridge.cgPath)
-            line.strokeColor = UIColor.white.withAlphaComponent(i.isMultiple(of: 2) ? 0.22 : 0.11)
-            line.lineWidth = i.isMultiple(of: 2) ? 1.4 : 0.8
-            line.lineCap = .round
-            line.zPosition = 0.4
-            room.addChild(line)
-        }
-
+        buildInteriorDetails(room: room)
         buildBedroomArea(room: room)
         buildHomeExit(room: room)
-        buildInteriorDetails(room: room)
+    }
+
+    private func buildHomeSeaWindow(room: SKNode, laneY: CGFloat) {
+        let windowSize = CGSize(width: min(playableRect.width * 0.62, 520),
+                                height: min(playableRect.height * 0.42, 260))
+        let windowCenter = CGPoint(x: playableRect.midX + playableRect.width * 0.04,
+                                   y: laneY + playableRect.height * 0.22)
+        let window = SKNode()
+        window.position = windowCenter
+        window.zPosition = 0.8
+        room.addChild(window)
+
+        let glow = SKShapeNode(rectOf: CGSize(width: windowSize.width + 26,
+                                              height: windowSize.height + 22),
+                               cornerRadius: 10)
+        glow.fillColor = art.biolume.withAlphaComponent(0.08)
+        glow.strokeColor = art.biolume.withAlphaComponent(0.18)
+        glow.lineWidth = 1
+        glow.glowWidth = 8
+        glow.zPosition = -0.2
+        window.addChild(glow)
+
+        let glass = SKShapeNode(rectOf: windowSize, cornerRadius: 6)
+        glass.fillColor = art.waterBottom.withAlphaComponent(0.72)
+        glass.strokeColor = art.shadow.withAlphaComponent(0.80)
+        glass.lineWidth = 6
+        glass.zPosition = 0
+        window.addChild(glass)
+
+        let waterBands: [(CGFloat, CGFloat, UIColor)] = [
+            (0.31, 0.38, art.waterTop.withAlphaComponent(0.26)),
+            (0.03, 0.30, art.waterMid.withAlphaComponent(0.30)),
+            (-0.24, 0.26, art.waterBottom.withAlphaComponent(0.34))
+        ]
+        for (centerYFactor, heightFactor, color) in waterBands {
+            let band = SKShapeNode(rectOf: CGSize(width: windowSize.width - 18,
+                                                  height: windowSize.height * heightFactor),
+                                   cornerRadius: 2)
+            band.fillColor = color
+            band.strokeColor = .clear
+            band.position = CGPoint(x: 0, y: windowSize.height * centerYFactor)
+            band.zPosition = 0.2
+            window.addChild(band)
+        }
+
+        for index in 0..<5 {
+            let wave = SKShapeNode(rectOf: CGSize(width: windowSize.width * (0.34 + CGFloat(index) * 0.08),
+                                                  height: 2),
+                                   cornerRadius: 1)
+            wave.fillColor = UIColor.white.withAlphaComponent(0.06 + CGFloat(index % 2) * 0.03)
+            wave.strokeColor = .clear
+            wave.position = CGPoint(x: -windowSize.width * 0.25 + CGFloat(index) * windowSize.width * 0.13,
+                                    y: windowSize.height * (0.16 - CGFloat(index) * 0.075))
+            wave.zPosition = 0.55
+            window.addChild(wave)
+        }
+
+        let reef = UIBezierPath()
+        reef.move(to: CGPoint(x: -windowSize.width * 0.48, y: -windowSize.height * 0.36))
+        reef.addLine(to: CGPoint(x: -windowSize.width * 0.36, y: -windowSize.height * 0.22))
+        reef.addLine(to: CGPoint(x: -windowSize.width * 0.20, y: -windowSize.height * 0.31))
+        reef.addLine(to: CGPoint(x: -windowSize.width * 0.04, y: -windowSize.height * 0.18))
+        reef.addLine(to: CGPoint(x: windowSize.width * 0.12, y: -windowSize.height * 0.30))
+        reef.addLine(to: CGPoint(x: windowSize.width * 0.31, y: -windowSize.height * 0.20))
+        reef.addLine(to: CGPoint(x: windowSize.width * 0.48, y: -windowSize.height * 0.34))
+        reef.addLine(to: CGPoint(x: windowSize.width * 0.48, y: -windowSize.height * 0.45))
+        reef.addLine(to: CGPoint(x: -windowSize.width * 0.48, y: -windowSize.height * 0.45))
+        reef.close()
+        let reefShape = SKShapeNode(path: reef.cgPath)
+        reefShape.fillColor = art.shadow.withAlphaComponent(0.42)
+        reefShape.strokeColor = art.biolume.withAlphaComponent(0.14)
+        reefShape.lineWidth = 1
+        reefShape.zPosition = 0.7
+        window.addChild(reefShape)
+
+        let coralStems: [(CGFloat, CGFloat, CGFloat)] = [
+            (-0.33, -0.26, 42),
+            (-0.25, -0.31, 28),
+            (0.23, -0.28, 38),
+            (0.34, -0.33, 30)
+        ]
+        for (xFactor, yFactor, height) in coralStems {
+            let coral = UIBezierPath()
+            let x = windowSize.width * xFactor
+            let y = windowSize.height * yFactor
+            coral.move(to: CGPoint(x: x, y: y))
+            coral.addLine(to: CGPoint(x: x + 2, y: y + height))
+            coral.move(to: CGPoint(x: x + 1, y: y + height * 0.58))
+            coral.addLine(to: CGPoint(x: x - 12, y: y + height * 0.78))
+            coral.move(to: CGPoint(x: x + 1, y: y + height * 0.42))
+            coral.addLine(to: CGPoint(x: x + 13, y: y + height * 0.62))
+            let stem = SKShapeNode(path: coral.cgPath)
+            stem.strokeColor = art.biolume.withAlphaComponent(0.24)
+            stem.lineWidth = 2
+            stem.lineCap = .round
+            stem.zPosition = 0.75
+            window.addChild(stem)
+        }
+
+        let bubbles: [(CGFloat, CGFloat, CGFloat, CGFloat)] = [
+            (-0.40, 0.20, 3, 0.18),
+            (-0.30, -0.02, 2, 0.14),
+            (-0.14, 0.31, 2.5, 0.16),
+            (0.04, 0.10, 2, 0.13),
+            (0.18, 0.28, 3.5, 0.17),
+            (0.31, -0.06, 2.5, 0.14),
+            (0.40, 0.16, 2, 0.15)
+        ]
+        for (xFactor, yFactor, radius, alpha) in bubbles {
+            let bubble = SKShapeNode(circleOfRadius: radius)
+            bubble.fillColor = UIColor.white.withAlphaComponent(alpha * 0.45)
+            bubble.strokeColor = UIColor.white.withAlphaComponent(alpha)
+            bubble.lineWidth = 0.8
+            bubble.position = CGPoint(x: windowSize.width * xFactor, y: windowSize.height * yFactor)
+            bubble.zPosition = 0.9
+            window.addChild(bubble)
+        }
+
+        for xFactor in [-0.17, 0.17] {
+            let mullion = SKShapeNode(rectOf: CGSize(width: 5, height: windowSize.height - 2), cornerRadius: 1)
+            mullion.fillColor = art.shadow.withAlphaComponent(0.88)
+            mullion.strokeColor = .clear
+            mullion.position = CGPoint(x: windowSize.width * CGFloat(xFactor), y: 0)
+            mullion.zPosition = 1.1
+            window.addChild(mullion)
+        }
+        let crossbar = SKShapeNode(rectOf: CGSize(width: windowSize.width - 2, height: 5), cornerRadius: 1)
+        crossbar.fillColor = art.shadow.withAlphaComponent(0.88)
+        crossbar.strokeColor = .clear
+        crossbar.zPosition = 1.1
+        window.addChild(crossbar)
     }
 
     private func buildItemShopInterior() {
@@ -1398,63 +1504,53 @@ private final class RefugeVillageController {
         area.zPosition = 3
         room.addChild(area)
 
-        let niche = SKShapeNode(ellipseOf: CGSize(width: 178, height: 116))
+        let niche = SKShapeNode(ellipseOf: CGSize(width: 210, height: 104))
         niche.name = "home_bed"
-        niche.fillColor = art.shadow.withAlphaComponent(0.14)
-        niche.strokeColor = art.shellBlush.withAlphaComponent(0.30)
-        niche.lineWidth = 1.1
-        niche.position = CGPoint(x: 0, y: 8)
+        niche.fillColor = art.shadow.withAlphaComponent(0.18)
+        niche.strokeColor = art.biolume.withAlphaComponent(0.20)
+        niche.lineWidth = 1
+        niche.position = CGPoint(x: 0, y: -10)
         area.addChild(niche)
 
-        let bedShell = UIBezierPath()
-        bedShell.move(to: CGPoint(x: -78, y: -8))
-        bedShell.addCurve(to: CGPoint(x: 0, y: 56),
-                          controlPoint1: CGPoint(x: -64, y: 36),
-                          controlPoint2: CGPoint(x: -34, y: 58))
-        bedShell.addCurve(to: CGPoint(x: 80, y: -8),
-                          controlPoint1: CGPoint(x: 38, y: 58),
-                          controlPoint2: CGPoint(x: 68, y: 36))
-        bedShell.addCurve(to: CGPoint(x: -78, y: -8),
-                          controlPoint1: CGPoint(x: 34, y: 15),
-                          controlPoint2: CGPoint(x: -32, y: 15))
-        bedShell.close()
-        let shell = SKShapeNode(path: bedShell.cgPath)
-        shell.name = "home_bed"
-        shell.fillColor = art.shellPearl.withAlphaComponent(0.74)
-        shell.strokeColor = art.shellBlush.withAlphaComponent(0.60)
-        shell.lineWidth = 1.5
-        area.addChild(shell)
+        let cushion = SKShapeNode(ellipseOf: CGSize(width: 166, height: 54))
+        cushion.name = "home_bed"
+        cushion.fillColor = art.biolume.withAlphaComponent(0.14)
+        cushion.strokeColor = art.biolume.withAlphaComponent(0.42)
+        cushion.lineWidth = 1.2
+        cushion.glowWidth = 5
+        cushion.position = CGPoint(x: 2, y: 0)
+        cushion.zPosition = 1
+        area.addChild(cushion)
 
-        let mattress = SKShapeNode(ellipseOf: CGSize(width: 128, height: 42))
-        mattress.name = "home_bed"
-        mattress.fillColor = art.biolume.withAlphaComponent(0.18)
-        mattress.strokeColor = art.biolume.withAlphaComponent(0.48)
-        mattress.lineWidth = 1.2
-        mattress.position = CGPoint(x: 3, y: -5)
-        mattress.zPosition = 2
-        area.addChild(mattress)
-
-        for i in 0..<18 {
-            let radius = CGFloat.random(in: 6...14)
+        let bubbleLayout: [(CGFloat, CGFloat, CGFloat, CGFloat)] = [
+            (-70, -6, 15, 0.18),
+            (-52, 12, 13, 0.20),
+            (-37, -14, 17, 0.16),
+            (-18, 8, 19, 0.22),
+            (0, -10, 16, 0.18),
+            (17, 13, 18, 0.22),
+            (38, -8, 15, 0.17),
+            (54, 10, 14, 0.20),
+            (72, -5, 13, 0.16),
+            (-58, -26, 10, 0.13),
+            (-25, -30, 12, 0.14),
+            (8, -30, 11, 0.13),
+            (42, -28, 10, 0.13),
+            (-44, 30, 9, 0.13),
+            (-4, 33, 10, 0.14),
+            (36, 31, 9, 0.13)
+        ]
+        for (x, y, radius, alpha) in bubbleLayout {
             let bubble = SKShapeNode(circleOfRadius: radius)
             bubble.name = "home_bed"
-            bubble.fillColor = UIColor.white.withAlphaComponent(0.12)
-            bubble.strokeColor = art.biolume.withAlphaComponent(0.42)
+            bubble.fillColor = UIColor.white.withAlphaComponent(alpha)
+            bubble.strokeColor = art.biolume.withAlphaComponent(0.40 + alpha)
             bubble.lineWidth = 1
             bubble.glowWidth = 3
-            bubble.position = CGPoint(x: CGFloat.random(in: -58...62),
-                                      y: CGFloat.random(in: -16...18))
+            bubble.position = CGPoint(x: x, y: y)
             bubble.zPosition = 3
             area.addChild(bubble)
         }
-
-        let pillow = SKShapeNode(ellipseOf: CGSize(width: 38, height: 23))
-        pillow.name = "home_bed"
-        pillow.fillColor = UIColor.white.withAlphaComponent(0.18)
-        pillow.strokeColor = UIColor.white.withAlphaComponent(0.24)
-        pillow.position = CGPoint(x: -40, y: 2)
-        pillow.zPosition = 4
-        area.addChild(pillow)
     }
 
     private func buildHomeExit(room: SKNode) {
@@ -1488,35 +1584,32 @@ private final class RefugeVillageController {
     }
 
     private func buildInteriorDetails(room: SKNode) {
-        for index in 0..<5 {
-            let lamp = SKShapeNode(circleOfRadius: CGFloat.random(in: 3.5...6.5))
-            lamp.fillColor = index.isMultiple(of: 2)
-                ? art.warmWindow.withAlphaComponent(0.38)
-                : art.biolume.withAlphaComponent(0.30)
-            lamp.strokeColor = UIColor.white.withAlphaComponent(0.12)
-            lamp.lineWidth = 0.6
-            lamp.glowWidth = 6
-            lamp.position = CGPoint(x: playableRect.minX + playableRect.width * CGFloat.random(in: 0.16...0.84),
-                                    y: playableRect.minY + playableRect.height * CGFloat.random(in: 0.42...0.84))
-            lamp.zPosition = 2
-            room.addChild(lamp)
-        }
+        let sideGlow = SKShapeNode(rectOf: CGSize(width: playableRect.width * 0.30,
+                                                  height: playableRect.height * 0.72),
+                                   cornerRadius: 18)
+        sideGlow.fillColor = art.biolume.withAlphaComponent(0.045)
+        sideGlow.strokeColor = .clear
+        sideGlow.position = CGPoint(x: playableRect.minX + playableRect.width * 0.18,
+                                    y: playableRect.midY)
+        sideGlow.zPosition = 0.35
+        room.addChild(sideGlow)
 
-        for index in 0..<9 {
-            let strand = UIBezierPath()
-            let x = playableRect.minX + playableRect.width * CGFloat.random(in: 0.09...0.91)
-            let baseY = playableRect.minY + 50
-            strand.move(to: CGPoint(x: x, y: baseY))
-            strand.addCurve(to: CGPoint(x: x + CGFloat.random(in: -24...24),
-                                        y: baseY + CGFloat.random(in: 44...86)),
-                            controlPoint1: CGPoint(x: x + CGFloat.random(in: -16...16), y: baseY + 20),
-                            controlPoint2: CGPoint(x: x + CGFloat.random(in: -22...22), y: baseY + 48))
-            let kelp = SKShapeNode(path: strand.cgPath)
-            kelp.strokeColor = GameUI.algae.withAlphaComponent(0.38)
-            kelp.lineWidth = CGFloat.random(in: 2.0...4.0)
-            kelp.lineCap = .round
-            kelp.zPosition = 2
-            room.addChild(kelp)
+        let pixelHighlights: [(CGFloat, CGFloat, CGFloat, CGFloat)] = [
+            (0.10, 0.70, 18, 0.08),
+            (0.18, 0.82, 10, 0.10),
+            (0.76, 0.68, 14, 0.08),
+            (0.84, 0.78, 8, 0.11),
+            (0.69, 0.42, 9, 0.07)
+        ]
+        for (xFactor, yFactor, size, alpha) in pixelHighlights {
+            let sparkle = SKShapeNode(rectOf: CGSize(width: size, height: size * 0.55), cornerRadius: 2)
+            sparkle.fillColor = art.biolume.withAlphaComponent(alpha)
+            sparkle.strokeColor = UIColor.white.withAlphaComponent(alpha * 0.55)
+            sparkle.lineWidth = 0.6
+            sparkle.position = CGPoint(x: playableRect.minX + playableRect.width * xFactor,
+                                       y: playableRect.minY + playableRect.height * yFactor)
+            sparkle.zPosition = 1.8
+            room.addChild(sparkle)
         }
     }
 
