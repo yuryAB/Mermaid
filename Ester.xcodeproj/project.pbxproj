@@ -15,14 +15,10 @@
 		7238142C2C56CA1D007B3836 /* MovementDirectionProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7238142B2C56CA1D007B3836 /* MovementDirectionProtocol.swift */; };
 		7238142E2C56CACA007B3836 /* MovementEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7238142D2C56CACA007B3836 /* MovementEnums.swift */; };
 		723814312C56E0D9007B3836 /* EntityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814302C56E0D9007B3836 /* EntityManager.swift */; };
-		723814332C56E18D007B3836 /* MovementComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814322C56E18D007B3836 /* MovementComponent.swift */; };
 		723814352C56E19A007B3836 /* BaseSpriteComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814342C56E19A007B3836 /* BaseSpriteComponent.swift */; };
-		723814382C56E419007B3836 /* MermaidMovementStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814372C56E419007B3836 /* MermaidMovementStates.swift */; };
-		7238143A2C56E84C007B3836 /* MermaidDirectionStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723814392C56E84C007B3836 /* MermaidDirectionStates.swift */; };
 		7238143C2C56EAA0007B3836 /* MermaidEmotionComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7238143B2C56EAA0007B3836 /* MermaidEmotionComponent.swift */; };
 		724C618F2C5546A900A5885C /* MermaidFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 724C618E2C5546A900A5885C /* MermaidFace.swift */; };
 		7271E5662C41BA89008CE3C8 /* MermaidEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */; };
-		7271E5682C41BBD6008CE3C8 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7271E5672C41BBD5008CE3C8 /* Model.swift */; };
 		728C9C592C51CB01001B919C /* MermaidBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 728C9C582C51CB01001B919C /* MermaidBody.swift */; };
 		72A119572C55DAF8003E827B /* MermaidEyebrows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A119562C55DAF8003E827B /* MermaidEyebrows.swift */; };
 		72A119592C55DB33003E827B /* MermaidEyes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A119582C55DB33003E827B /* MermaidEyes.swift */; };
@@ -104,6 +100,24 @@
 		FAD210110000000000000001 /* AudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAD210010000000000000001 /* AudioManager.swift */; };
 		FAD220110000000000000001 /* Audio in Resources */ = {isa = PBXBuildFile; fileRef = FAD220010000000000000001 /* Audio */; };
 		FAD230110000000000000001 /* WorldPOIs.json in Resources */ = {isa = PBXBuildFile; fileRef = FAD230010000000000000001 /* WorldPOIs.json */; };
+		E1B000010000000000000101 /* NodeComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000010000000000000101 /* NodeComponent.swift */; };
+		E1B000020000000000000201 /* TransformComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000020000000000000201 /* TransformComponent.swift */; };
+		E1B000030000000000000301 /* VelocityComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000030000000000000301 /* VelocityComponent.swift */; };
+		E1B000040000000000000401 /* LifetimeComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000040000000000000401 /* LifetimeComponent.swift */; };
+		E1B000050000000000000501 /* ZoneComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000050000000000000501 /* ZoneComponent.swift */; };
+		E1B000060000000000000601 /* FoodComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000060000000000000601 /* FoodComponent.swift */; };
+		E1B000070000000000000701 /* FishBehaviorComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000070000000000000701 /* FishBehaviorComponent.swift */; };
+		E1B000080000000000000801 /* ChallengeGiverComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000080000000000000801 /* ChallengeGiverComponent.swift */; };
+		E1B000090000000000000901 /* ObjectiveComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000090000000000000901 /* ObjectiveComponent.swift */; };
+		E1B000100000000000001001 /* POIComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000100000000000001001 /* POIComponent.swift */; };
+		E1B000110000000000001101 /* VisualEffectComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000110000000000001101 /* VisualEffectComponent.swift */; };
+		E1B000120000000000001201 /* HealthComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000120000000000001201 /* HealthComponent.swift */; };
+		E1B000130000000000001301 /* IntentComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000130000000000001301 /* IntentComponent.swift */; };
+		E1B000140000000000001401 /* ExpressionComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000140000000000001401 /* ExpressionComponent.swift */; };
+		E1B000150000000000001501 /* EntityFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000150000000000001501 /* EntityFactory.swift */; };
+		E1B000160000000000001601 /* EventBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000160000000000001601 /* EventBus.swift */; };
+		E1B000170000000000001701 /* ChallengeFlowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000170000000000001701 /* ChallengeFlowController.swift */; };
+		E1B000180000000000001801 /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A000180000000000001801 /* CameraController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -115,14 +129,10 @@
 		7238142B2C56CA1D007B3836 /* MovementDirectionProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementDirectionProtocol.swift; sourceTree = "<group>"; };
 		7238142D2C56CACA007B3836 /* MovementEnums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementEnums.swift; sourceTree = "<group>"; };
 		723814302C56E0D9007B3836 /* EntityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityManager.swift; sourceTree = "<group>"; };
-		723814322C56E18D007B3836 /* MovementComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementComponent.swift; sourceTree = "<group>"; };
 		723814342C56E19A007B3836 /* BaseSpriteComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseSpriteComponent.swift; sourceTree = "<group>"; };
-		723814372C56E419007B3836 /* MermaidMovementStates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidMovementStates.swift; sourceTree = "<group>"; };
-		723814392C56E84C007B3836 /* MermaidDirectionStates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidDirectionStates.swift; sourceTree = "<group>"; };
 		7238143B2C56EAA0007B3836 /* MermaidEmotionComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEmotionComponent.swift; sourceTree = "<group>"; };
 		724C618E2C5546A900A5885C /* MermaidFace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidFace.swift; sourceTree = "<group>"; };
 		7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEntity.swift; sourceTree = "<group>"; };
-		7271E5672C41BBD5008CE3C8 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		728C9C582C51CB01001B919C /* MermaidBody.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidBody.swift; sourceTree = "<group>"; };
 		72A119562C55DAF8003E827B /* MermaidEyebrows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEyebrows.swift; sourceTree = "<group>"; };
 		72A119582C55DB33003E827B /* MermaidEyes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidEyes.swift; sourceTree = "<group>"; };
@@ -205,6 +215,24 @@
 		FAD210010000000000000001 /* AudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioManager.swift; sourceTree = "<group>"; };
 		FAD220010000000000000001 /* Audio */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Audio; sourceTree = "<group>"; };
 		FAD230010000000000000001 /* WorldPOIs.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = GameData/WorldPOIs.json; sourceTree = "<group>"; };
+		E1A000010000000000000101 /* NodeComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeComponent.swift; sourceTree = "<group>"; };
+		E1A000020000000000000201 /* TransformComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformComponent.swift; sourceTree = "<group>"; };
+		E1A000030000000000000301 /* VelocityComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VelocityComponent.swift; sourceTree = "<group>"; };
+		E1A000040000000000000401 /* LifetimeComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifetimeComponent.swift; sourceTree = "<group>"; };
+		E1A000050000000000000501 /* ZoneComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoneComponent.swift; sourceTree = "<group>"; };
+		E1A000060000000000000601 /* FoodComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodComponent.swift; sourceTree = "<group>"; };
+		E1A000070000000000000701 /* FishBehaviorComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FishBehaviorComponent.swift; sourceTree = "<group>"; };
+		E1A000080000000000000801 /* ChallengeGiverComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeGiverComponent.swift; sourceTree = "<group>"; };
+		E1A000090000000000000901 /* ObjectiveComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectiveComponent.swift; sourceTree = "<group>"; };
+		E1A000100000000000001001 /* POIComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = POIComponent.swift; sourceTree = "<group>"; };
+		E1A000110000000000001101 /* VisualEffectComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectComponent.swift; sourceTree = "<group>"; };
+		E1A000120000000000001201 /* HealthComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthComponent.swift; sourceTree = "<group>"; };
+		E1A000130000000000001301 /* IntentComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentComponent.swift; sourceTree = "<group>"; };
+		E1A000140000000000001401 /* ExpressionComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpressionComponent.swift; sourceTree = "<group>"; };
+		E1A000150000000000001501 /* EntityFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityFactory.swift; sourceTree = "<group>"; };
+		E1A000160000000000001601 /* EventBus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventBus.swift; sourceTree = "<group>"; };
+		E1A000170000000000001701 /* ChallengeFlowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeFlowController.swift; sourceTree = "<group>"; };
+		E1A000180000000000001801 /* CameraController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -265,19 +293,23 @@
 			isa = PBXGroup;
 			children = (
 				723814342C56E19A007B3836 /* BaseSpriteComponent.swift */,
-				723814322C56E18D007B3836 /* MovementComponent.swift */,
+				E1A000010000000000000101 /* NodeComponent.swift */,
+				E1A000020000000000000201 /* TransformComponent.swift */,
+				E1A000030000000000000301 /* VelocityComponent.swift */,
+				E1A000040000000000000401 /* LifetimeComponent.swift */,
+				E1A000050000000000000501 /* ZoneComponent.swift */,
+				E1A000060000000000000601 /* FoodComponent.swift */,
+				E1A000070000000000000701 /* FishBehaviorComponent.swift */,
+				E1A000080000000000000801 /* ChallengeGiverComponent.swift */,
+				E1A000090000000000000901 /* ObjectiveComponent.swift */,
+				E1A000100000000000001001 /* POIComponent.swift */,
+				E1A000110000000000001101 /* VisualEffectComponent.swift */,
+				E1A000120000000000001201 /* HealthComponent.swift */,
+				E1A000130000000000001301 /* IntentComponent.swift */,
+				E1A000140000000000001401 /* ExpressionComponent.swift */,
 				7238143B2C56EAA0007B3836 /* MermaidEmotionComponent.swift */,
 			);
 			path = Components;
-			sourceTree = "<group>";
-		};
-		723814362C56E3FB007B3836 /* States */ = {
-			isa = PBXGroup;
-			children = (
-				723814392C56E84C007B3836 /* MermaidDirectionStates.swift */,
-				723814372C56E419007B3836 /* MermaidMovementStates.swift */,
-			);
-			path = States;
 			sourceTree = "<group>";
 		};
 		724C61902C555B3900A5885C /* Face */ = {
@@ -295,7 +327,6 @@
 			isa = PBXGroup;
 			children = (
 				7271E5652C41BA89008CE3C8 /* MermaidEntity.swift */,
-				7271E5672C41BBD5008CE3C8 /* Model.swift */,
 			);
 			path = Entitys;
 			sourceTree = "<group>";
@@ -341,7 +372,6 @@
 				72334A7C2C4EF12D00D24502 /* Managers */,
 				7271E5642C41BA6E008CE3C8 /* Entitys */,
 				7238142F2C56D6F7007B3836 /* Components */,
-				723814362C56E3FB007B3836 /* States */,
 				72D020792C1905F9002F11FC /* AppDelegate.swift */,
 				72D0207F2C1905F9002F11FC /* GameScene.swift */,
 				72D020812C1905F9002F11FC /* GameViewController.swift */,
@@ -411,6 +441,10 @@
 				FAB1E001000000000000001C /* DistantSurfaceGameScene.swift */,
 				FAB1E001000000000000001D /* WorldPOINode.swift */,
 				FAB1E001000000000000001E /* CheatSystem.swift */,
+				E1A000150000000000001501 /* EntityFactory.swift */,
+				E1A000160000000000001601 /* EventBus.swift */,
+				E1A000170000000000001701 /* ChallengeFlowController.swift */,
+				E1A000180000000000001801 /* CameraController.swift */,
 			);
 			path = Game;
 			sourceTree = "<group>";
@@ -508,20 +542,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				723814332C56E18D007B3836 /* MovementComponent.swift in Sources */,
 				7238143C2C56EAA0007B3836 /* MermaidEmotionComponent.swift in Sources */,
-				7271E5682C41BBD6008CE3C8 /* Model.swift in Sources */,
 				7238142E2C56CACA007B3836 /* MovementEnums.swift in Sources */,
 				72A119592C55DB33003E827B /* MermaidEyes.swift in Sources */,
 				72334A8A2C5068A600D24502 /* MermaidArms.swift in Sources */,
 				7238142A2C56CA11007B3836 /* MovementTypeProtocol.swift in Sources */,
 				724C618F2C5546A900A5885C /* MermaidFace.swift in Sources */,
-				7238143A2C56E84C007B3836 /* MermaidDirectionStates.swift in Sources */,
 				72A119572C55DAF8003E827B /* MermaidEyebrows.swift in Sources */,
 				723814312C56E0D9007B3836 /* EntityManager.swift in Sources */,
 				723814352C56E19A007B3836 /* BaseSpriteComponent.swift in Sources */,
 				72D020802C1905F9002F11FC /* GameScene.swift in Sources */,
-				723814382C56E419007B3836 /* MermaidMovementStates.swift in Sources */,
 				72334A882C5061B600D24502 /* Mermaid.swift in Sources */,
 				72D1A7AE2C1BD681005213A4 /* ColorManager.swift in Sources */,
 				FAD210110000000000000001 /* AudioManager.swift in Sources */,
@@ -595,6 +625,24 @@
 				FAB1E101000000000000001C /* DistantSurfaceGameScene.swift in Sources */,
 				FAB1E101000000000000001D /* WorldPOINode.swift in Sources */,
 				FAB1E101000000000000001E /* CheatSystem.swift in Sources */,
+				E1B000010000000000000101 /* NodeComponent.swift in Sources */,
+				E1B000020000000000000201 /* TransformComponent.swift in Sources */,
+				E1B000030000000000000301 /* VelocityComponent.swift in Sources */,
+				E1B000040000000000000401 /* LifetimeComponent.swift in Sources */,
+				E1B000050000000000000501 /* ZoneComponent.swift in Sources */,
+				E1B000060000000000000601 /* FoodComponent.swift in Sources */,
+				E1B000070000000000000701 /* FishBehaviorComponent.swift in Sources */,
+				E1B000080000000000000801 /* ChallengeGiverComponent.swift in Sources */,
+				E1B000090000000000000901 /* ObjectiveComponent.swift in Sources */,
+				E1B000100000000000001001 /* POIComponent.swift in Sources */,
+				E1B000110000000000001101 /* VisualEffectComponent.swift in Sources */,
+				E1B000120000000000001201 /* HealthComponent.swift in Sources */,
+				E1B000130000000000001301 /* IntentComponent.swift in Sources */,
+				E1B000140000000000001401 /* ExpressionComponent.swift in Sources */,
+				E1B000150000000000001501 /* EntityFactory.swift in Sources */,
+				E1B000160000000000001601 /* EventBus.swift in Sources */,
+				E1B000170000000000001701 /* ChallengeFlowController.swift in Sources */,
+				E1B000180000000000001801 /* CameraController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

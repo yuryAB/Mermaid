@@ -74,7 +74,6 @@ extension MermaidFigure {
 
 class Mermaid {
     var base: SKSpriteNode
-    var distanceToTravel: CGFloat = 200
     var currentDirection: Direction = .none
 
     private(set) var formKind: MermaidFormKind = .young
@@ -173,84 +172,12 @@ class Mermaid {
     func applyExpression(_ expression: MermaidExpressionName, animated: Bool) {
         figure.applyFacePose(MermaidExpressionLibrary.pose(named: expression), animated: animated)
     }
-
-    private var shouldTranslateWithBody: Bool {
-        return formKind == .young || formKind == .adult
-    }
-
-    private func updateMovement() {
-        base.removeAllActions()
-        switch currentDirection {
-        case .up:
-            let move = SKAction.moveBy(x: 0, y: distanceToTravel, duration: 1.0)
-            base.run(SKAction.repeatForever(move), withKey: "moving")
-        case .down:
-            let move = SKAction.moveBy(x: 0, y: -distanceToTravel, duration: 1.0)
-            base.run(SKAction.repeatForever(move), withKey: "moving")
-        case .right:
-            let move = SKAction.moveBy(x: distanceToTravel, y: 0, duration: 1.0)
-            base.run(SKAction.repeatForever(move), withKey: "moving")
-        case .left:
-            let move = SKAction.moveBy(x: -distanceToTravel, y: 0, duration: 1.0)
-            base.run(SKAction.repeatForever(move), withKey: "moving")
-        case .none:
-            break
-        }
-    }
 }
 
-extension Mermaid: MovementTypeProtocol {
+extension Mermaid {
     func applyIdleMoveMode() {
         base.removeAllActions()
         currentDirection = .none
         figure.applyAnimationMode(.idle)
-    }
-
-    func applySwingMoveMode() {
-        distanceToTravel = 200
-        figure.applyAnimationMode(.swing)
-
-        if shouldTranslateWithBody {
-            updateMovement()
-        }
-    }
-
-    func applyFastMoveMode() {
-        distanceToTravel = 500
-        figure.applyAnimationMode(.fast)
-
-        if shouldTranslateWithBody {
-            updateMovement()
-        }
-    }
-}
-
-extension Mermaid: MovementDirectionProtocol {
-    func setUpMoveMode() {
-        currentDirection = .up
-        figure.applyDirection(.up)
-        let move = SKAction.moveBy(x: 0, y: distanceToTravel, duration: 1.0)
-        base.run(SKAction.repeatForever(move), withKey: "moving")
-    }
-
-    func setDownMoveMode() {
-        currentDirection = .down
-        figure.applyDirection(.down)
-        let move = SKAction.moveBy(x: 0, y: -distanceToTravel, duration: 1.0)
-        base.run(SKAction.repeatForever(move), withKey: "moving")
-    }
-
-    func setRightMoveMode() {
-        currentDirection = .right
-        figure.applyDirection(.right)
-        let move = SKAction.moveBy(x: distanceToTravel, y: 0, duration: 1.0)
-        base.run(SKAction.repeatForever(move), withKey: "moving")
-    }
-
-    func setLeftMoveMode() {
-        currentDirection = .left
-        figure.applyDirection(.left)
-        let move = SKAction.moveBy(x: -distanceToTravel, y: 0, duration: 1.0)
-        base.run(SKAction.repeatForever(move), withKey: "moving")
     }
 }

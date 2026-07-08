@@ -1,0 +1,556 @@
+{
+  "node_count": 3024,
+  "raw_edge_count": 13209,
+  "non_object_edges": 0,
+  "missing_endpoint_edges": 0,
+  "dangling_endpoint_edges": 4309,
+  "self_loop_edges": 0,
+  "valid_candidate_edges": 8900,
+  "exact_duplicate_edges": 0,
+  "directed_unique_endpoint_pairs": 8301,
+  "directed_same_endpoint_collapsed_edges": 599,
+  "undirected_unique_endpoint_pairs": 8261,
+  "undirected_same_endpoint_collapsed_edges": 639,
+  "same_endpoint_group_count": 417,
+  "relation_variant_groups": 251,
+  "source_file_variant_groups": 0,
+  "source_location_variant_groups": 187,
+  "context_variant_groups": 6,
+  "post_build_graph_type": "Graph",
+  "post_build_node_count": 3024,
+  "post_build_edge_count": 8261,
+  "post_build_error": "",
+  "producer_suppression": {
+    "path": "/Users/yuryantony/.local/share/uv/tools/graphifyy/lib/python3.11/site-packages/graphify/extract.py",
+    "total_sites": 60,
+    "sites": [
+      {
+        "line": 1952,
+        "name": "seen_dyn_pairs",
+        "tuple_arity": 0,
+        "sample": "seen_dyn_pairs: set) -> bool:"
+      },
+      {
+        "line": 3528,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 3722,
+        "name": "seen_swift_base",
+        "tuple_arity": 0,
+        "sample": "seen_swift_base = False"
+      },
+      {
+        "line": 3757,
+        "name": "seen_swift_base",
+        "tuple_arity": 0,
+        "sample": "seen_swift_base = True"
+      },
+      {
+        "line": 4896,
+        "name": "seen_call_pairs",
+        "tuple_arity": 2,
+        "sample": "seen_call_pairs: set[tuple[str, str]] = set()"
+      },
+      {
+        "line": 4897,
+        "name": "seen_indirect_pairs",
+        "tuple_arity": 2,
+        "sample": "seen_indirect_pairs: set[tuple[str, str]] = set()  # Python indirect_call dedup"
+      },
+      {
+        "line": 4898,
+        "name": "seen_dyn_import_pairs",
+        "tuple_arity": 2,
+        "sample": "seen_dyn_import_pairs: set[tuple[str, str]] = set()"
+      },
+      {
+        "line": 4899,
+        "name": "seen_static_ref_pairs",
+        "tuple_arity": 3,
+        "sample": "seen_static_ref_pairs: set[tuple[str, str, str]] = set()"
+      },
+      {
+        "line": 4900,
+        "name": "seen_helper_ref_pairs",
+        "tuple_arity": 3,
+        "sample": "seen_helper_ref_pairs: set[tuple[str, str, str]] = set()"
+      },
+      {
+        "line": 4901,
+        "name": "seen_bind_pairs",
+        "tuple_arity": 3,
+        "sample": "seen_bind_pairs: set[tuple[str, str, str]] = set()"
+      },
+      {
+        "line": 5591,
+        "name": "seen_listen_pairs",
+        "tuple_arity": 2,
+        "sample": "seen_listen_pairs: set[tuple[str, str]] = set()"
+      },
+      {
+        "line": 5760,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 5909,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 5911,
+        "name": "seen_doc_refs",
+        "tuple_arity": 0,
+        "sample": "seen_doc_refs: set[str] = set()"
+      },
+      {
+        "line": 6368,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 6492,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 7331,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str],"
+      },
+      {
+        "line": 7450,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 7582,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = {file_nid}"
+      },
+      {
+        "line": 7622,
+        "name": "seen_refs",
+        "tuple_arity": 0,
+        "sample": "seen_refs: set[str] = set()"
+      },
+      {
+        "line": 7761,
+        "name": "seen_tbls",
+        "tuple_arity": 0,
+        "sample": "seen_tbls: set[str] = set()"
+      },
+      {
+        "line": 7856,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 8166,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 8435,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 8694,
+        "name": "seen_call_pairs",
+        "tuple_arity": 2,
+        "sample": "seen_call_pairs: set[tuple[str, str]] = set()"
+      },
+      {
+        "line": 8791,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 9054,
+        "name": "seen_call_pairs",
+        "tuple_arity": 2,
+        "sample": "seen_call_pairs: set[tuple[str, str]] = set()"
+      },
+      {
+        "line": 9149,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 9403,
+        "name": "seen_call_pairs",
+        "tuple_arity": 2,
+        "sample": "seen_call_pairs: set[tuple[str, str]] = set()"
+      },
+      {
+        "line": 9506,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 11471,
+        "name": "seen_keys",
+        "tuple_arity": 0,
+        "sample": "seen_keys: set[tuple] = set()"
+      },
+      {
+        "line": 11540,
+        "name": "seen_keys",
+        "tuple_arity": 0,
+        "sample": "seen_keys: set[tuple] = set()"
+      },
+      {
+        "line": 11592,
+        "name": "seen_pairs",
+        "tuple_arity": 2,
+        "sample": "seen_pairs: set[tuple[str, str]] = set()"
+      },
+      {
+        "line": 12481,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 12629,
+        "name": "seen_types",
+        "tuple_arity": 0,
+        "sample": "seen_types: set[str] = set()"
+      },
+      {
+        "line": 12725,
+        "name": "seen_calls",
+        "tuple_arity": 2,
+        "sample": "seen_calls: set[tuple[str, str]] = set()"
+      },
+      {
+        "line": 12930,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 13257,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 13258,
+        "name": "seen_call_pairs",
+        "tuple_arity": 2,
+        "sample": "seen_call_pairs: set[tuple[str, str]] = set()"
+      },
+      {
+        "line": 13435,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 13583,
+        "name": "seen_call_pairs",
+        "tuple_arity": 2,
+        "sample": "seen_call_pairs: set[tuple[str, str]] = set()"
+      },
+      {
+        "line": 13658,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 13659,
+        "name": "seen_edge_pairs",
+        "tuple_arity": 3,
+        "sample": "seen_edge_pairs: set[tuple[str, str, str]] = set()"
+      },
+      {
+        "line": 13758,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 13759,
+        "name": "seen_edge_pairs",
+        "tuple_arity": 3,
+        "sample": "seen_edge_pairs: set[tuple[str, str, str]] = set()"
+      },
+      {
+        "line": 13878,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 13972,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 14188,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 14282,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 14361,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 14856,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 14857,
+        "name": "seen_edges",
+        "tuple_arity": 4,
+        "sample": "seen_edges: set[tuple[str, str, str, str | None]] = set()"
+      },
+      {
+        "line": 15139,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 15287,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 15438,
+        "name": "seen_call_pairs",
+        "tuple_arity": 2,
+        "sample": "seen_call_pairs: set[tuple[str, str]] = set()"
+      },
+      {
+        "line": 15654,
+        "name": "seen_targets",
+        "tuple_arity": 0,
+        "sample": "seen_targets: set[str] = set()"
+      },
+      {
+        "line": 15812,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = {file_nid}"
+      },
+      {
+        "line": 15813,
+        "name": "seen_edges",
+        "tuple_arity": 3,
+        "sample": "seen_edges: set[tuple[str, str, str]] = set()"
+      },
+      {
+        "line": 15861,
+        "name": "seen_self",
+        "tuple_arity": 0,
+        "sample": "seen_self = False"
+      },
+      {
+        "line": 15864,
+        "name": "seen_self",
+        "tuple_arity": 0,
+        "sample": "seen_self = True"
+      }
+    ],
+    "error": ""
+  },
+  "examples": [
+    {
+      "source": "private_tmp_mer_game_mermaidstats_mermaidstats",
+      "target": "private_tmp_mer_game_mermaidfigures_mermaidrigdebugtool_string",
+      "edge_count": 26,
+      "relations": [
+        "references"
+      ],
+      "source_files": [
+        "Game/MermaidStats.swift"
+      ],
+      "source_locations": [
+        "L286",
+        "L35",
+        "L41",
+        "L55",
+        "L58",
+        "L62",
+        "L64",
+        "L72",
+        "L73",
+        "L75",
+        "L77",
+        "L79",
+        "L80",
+        "L81",
+        "L82",
+        "L83",
+        "L84",
+        "L86",
+        "L87",
+        "L88",
+        "L89",
+        "L90",
+        "L91",
+        "L92",
+        "L93",
+        "L95"
+      ],
+      "contexts": [
+        "field",
+        "generic_arg"
+      ]
+    },
+    {
+      "source": "private_tmp_mer_game_hudlayer_hudlayer",
+      "target": "private_tmp_mer_components_mermaidemotioncomponent_sknode",
+      "edge_count": 17,
+      "relations": [
+        "inherits",
+        "references"
+      ],
+      "source_files": [
+        "Game/HUDLayer.swift"
+      ],
+      "source_locations": [
+        "L14",
+        "L36",
+        "L39",
+        "L40",
+        "L45",
+        "L47",
+        "L51",
+        "L55",
+        "L56",
+        "L57",
+        "L63",
+        "L64",
+        "L66",
+        "L69",
+        "L72",
+        "L81",
+        "L82"
+      ],
+      "contexts": [
+        "",
+        "field"
+      ]
+    },
+    {
+      "source": "private_tmp_mer_game_registrosystem_registrospeciesdefinition",
+      "target": "private_tmp_mer_game_mermaidfigures_mermaidrigdebugtool_string",
+      "edge_count": 13,
+      "relations": [
+        "references"
+      ],
+      "source_files": [
+        "Game/RegistroSystem.swift"
+      ],
+      "source_locations": [
+        "L52",
+        "L53",
+        "L54",
+        "L55",
+        "L56",
+        "L57",
+        "L59",
+        "L60",
+        "L61",
+        "L63",
+        "L64",
+        "L66",
+        "L70"
+      ],
+      "contexts": [
+        "field"
+      ]
+    },
+    {
+      "source": "private_tmp_mer_game_registrosystem_registrooverlay",
+      "target": "private_tmp_mer_game_mermaidfigures_mermaidrigdebugtool_string",
+      "edge_count": 13,
+      "relations": [
+        "references"
+      ],
+      "source_files": [
+        "Game/RegistroSystem.swift"
+      ],
+      "source_locations": [
+        "L614",
+        "L615",
+        "L618",
+        "L619",
+        "L620",
+        "L621",
+        "L622",
+        "L623",
+        "L624",
+        "L625",
+        "L626",
+        "L627",
+        "L630"
+      ],
+      "contexts": [
+        "field"
+      ]
+    },
+    {
+      "source": "private_tmp_mer_game_mermaidstats_mermaidstats",
+      "target": "private_tmp_mer_game_registrosystem_int",
+      "edge_count": 12,
+      "relations": [
+        "references"
+      ],
+      "source_files": [
+        "Game/MermaidStats.swift"
+      ],
+      "source_locations": [
+        "L100",
+        "L105",
+        "L106",
+        "L51",
+        "L61",
+        "L62",
+        "L63",
+        "L84",
+        "L96",
+        "L97",
+        "L98",
+        "L99"
+      ],
+      "contexts": [
+        "field"
+      ]
+    }
+  ]
+}

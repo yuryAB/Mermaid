@@ -366,13 +366,13 @@ private final class RefugeVillageController {
         case enterUpgradeShop
         case restInBedroom
         case talkToItemShopNpc
-        case talkToUpgradeNpc
+        case talkToTeacherNpc
         case returnToVillage
     }
 
     private enum NpcKind {
         case itemShop
-        case upgradeWorkshop
+        case teacher
     }
 
     let node = SKNode()
@@ -401,6 +401,7 @@ private final class RefugeVillageController {
     private var routineIndex = 0
     private var restingBoostTimer: CGFloat = 0
     private var behaviorTextValue = "cruzando caminhos da vila"
+    private let homeCameraScale: CGFloat = 0.78
 
     private var displayMermaid: Mermaid?
     private var mermaidBaseScale: CGFloat = 1
@@ -409,9 +410,9 @@ private final class RefugeVillageController {
     private var homeDoorPoint = CGPoint.zero
     private var homeExteriorDoorPoint = CGPoint.zero
     private var shopNpcPoint = CGPoint.zero
-    private var workshopNpcPoint = CGPoint.zero
+    private var teacherNpcPoint = CGPoint.zero
     private var shopExteriorDoorPoint = CGPoint.zero
-    private var workshopExteriorDoorPoint = CGPoint.zero
+    private var teacherExteriorDoorPoint = CGPoint.zero
     private var interiorDoorPoint = CGPoint.zero
     private var bedroomRestPoint = CGPoint.zero
     private var itemShopDoorPoint = CGPoint.zero
@@ -428,7 +429,7 @@ private final class RefugeVillageController {
 
     private var homeHitFrame = CGRect.zero
     private var shopHitFrame = CGRect.zero
-    private var workshopHitFrame = CGRect.zero
+    private var teacherHitFrame = CGRect.zero
     private var homeBedFrame = CGRect.zero
     private var homeExitFrame = CGRect.zero
     private var itemShopExitFrame = CGRect.zero
@@ -526,10 +527,10 @@ private final class RefugeVillageController {
                 routeMermaid(to: shopExteriorDoorPoint, interaction: .enterItemShop, userCommand: true)
                 return true
             }
-            if matchesHit("village_workshop_door", at: point)
-                || matchesHit("village_workshop", at: point)
-                || workshopHitFrame.contains(worldPoint) {
-                routeMermaid(to: workshopExteriorDoorPoint, interaction: .enterUpgradeShop, userCommand: true)
+            if matchesHit("village_teacher_door", at: point)
+                || matchesHit("village_teacher_hall", at: point)
+                || teacherHitFrame.contains(worldPoint) {
+                routeMermaid(to: teacherExteriorDoorPoint, interaction: .enterUpgradeShop, userCommand: true)
                 return true
             }
             routeMermaid(to: exteriorPlatformTarget(for: point), interaction: nil, userCommand: true)
@@ -568,7 +569,7 @@ private final class RefugeVillageController {
             guard playableRect.contains(point) else { return false }
             isUserCommandActive = true
             if matchesHit("upgrade_shop_npc", at: point) || upgradeShopNpcFrame.contains(point) {
-                routeMermaid(to: upgradeShopNpcInteriorPoint, interaction: .talkToUpgradeNpc, userCommand: true)
+                routeMermaid(to: upgradeShopNpcInteriorPoint, interaction: .talkToTeacherNpc, userCommand: true)
                 return true
             }
             if matchesHit("upgrade_shop_exit", at: point) || upgradeShopExitFrame.contains(point) {
@@ -607,21 +608,21 @@ private final class RefugeVillageController {
         plazaPoint = CGPoint(x: worldMinX + min(82, worldWidth * 0.08), y: lowerLaneY)
         homeDoorPoint = CGPoint(x: worldMinX + worldWidth * 0.15, y: lowerLaneY)
         shopNpcPoint = CGPoint(x: worldMinX + worldWidth * 0.48, y: lowerLaneY)
-        workshopNpcPoint = CGPoint(x: worldMinX + worldWidth * 0.84, y: lowerLaneY)
+        teacherNpcPoint = CGPoint(x: worldMinX + worldWidth * 0.84, y: lowerLaneY)
         homeExteriorDoorPoint = homeDoorPoint + CGPoint(x: -16 * exteriorBuildingScale, y: 0)
         shopExteriorDoorPoint = shopNpcPoint + CGPoint(x: -38 * exteriorBuildingScale, y: 0)
-        workshopExteriorDoorPoint = workshopNpcPoint + CGPoint(x: -22 * exteriorBuildingScale, y: 0)
+        teacherExteriorDoorPoint = teacherNpcPoint + CGPoint(x: -22 * exteriorBuildingScale, y: 0)
 
         homeHitFrame = CGRect(x: homeExteriorDoorPoint.x - 58, y: lowerLaneY - 88, width: 116, height: 148)
         shopHitFrame = CGRect(x: shopExteriorDoorPoint.x - 60, y: lowerLaneY - 92, width: 120, height: 154)
-        workshopHitFrame = CGRect(x: workshopExteriorDoorPoint.x - 62, y: lowerLaneY - 92, width: 124, height: 154)
+        teacherHitFrame = CGRect(x: teacherExteriorDoorPoint.x - 62, y: lowerLaneY - 92, width: 124, height: 154)
 
         buildVillageSeafloor(stage: stage)
         buildVillagePaths(stage: stage)
         buildHorizontalVegetation(stage: stage)
         buildMermaidHouseExterior(stage: stage)
         buildItemShopExterior(stage: stage)
-        buildUpgradeWorkshopExterior(stage: stage)
+        buildTeacherHallExterior(stage: stage)
         buildExteriorLife(stage: stage)
     }
 
@@ -742,7 +743,7 @@ private final class RefugeVillageController {
             (homeDoorPoint.x + 300, 122, 42),
             (shopNpcPoint.x + 170, 154, 43),
             (shopNpcPoint.x + 318, 120, 44),
-            (workshopNpcPoint.x - 210, 142, 45)
+            (teacherNpcPoint.x - 210, 142, 45)
         ]
 
         for cluster in clusters {
@@ -1074,38 +1075,38 @@ private final class RefugeVillageController {
                       width: 58)
     }
 
-    private func buildUpgradeWorkshopExterior(stage: SKNode) {
-        let workshop = SKNode()
-        workshop.name = "village_workshop"
-        workshop.position = workshopNpcPoint
-        workshop.zPosition = 3
-        workshop.setScale(exteriorBuildingScale)
-        stage.addChild(workshop)
+    private func buildTeacherHallExterior(stage: SKNode) {
+        let teacherHall = SKNode()
+        teacherHall.name = "village_teacher_hall"
+        teacherHall.position = teacherNpcPoint
+        teacherHall.zPosition = 3
+        teacherHall.setScale(exteriorBuildingScale)
+        stage.addChild(teacherHall)
 
         let foundation = SKShapeNode(ellipseOf: CGSize(width: 172, height: 56))
-        foundation.name = "village_workshop"
+        foundation.name = "village_teacher_hall"
         foundation.fillColor = UIColor.lerp(art.reefRock, art.biolume, 0.18).withAlphaComponent(0.62)
         foundation.strokeColor = art.biolume.withAlphaComponent(0.33)
         foundation.lineWidth = 1.2
         foundation.position = CGPoint(x: 0, y: -36)
-        workshop.addChild(foundation)
+        teacherHall.addChild(foundation)
 
         let dome = SKShapeNode(ellipseOf: CGSize(width: 146, height: 92))
-        dome.name = "village_workshop"
+        dome.name = "village_teacher_hall"
         dome.fillColor = UIColor.lerp(art.reefRock, art.biolume, 0.16).withAlphaComponent(0.68)
         dome.strokeColor = art.biolume.withAlphaComponent(0.46)
         dome.lineWidth = 1.5
         dome.position = CGPoint(x: 8, y: 8)
-        workshop.addChild(dome)
+        teacherHall.addChild(dome)
 
         let hatch = SKShapeNode(rectOf: CGSize(width: 50, height: 44), cornerRadius: 14)
-        hatch.name = "village_workshop_door"
+        hatch.name = "village_teacher_door"
         hatch.fillColor = art.shadow.withAlphaComponent(0.36)
         hatch.strokeColor = art.biolume.withAlphaComponent(0.44)
         hatch.lineWidth = 1.2
         hatch.glowWidth = 3
         hatch.position = CGPoint(x: -22, y: -20)
-        workshop.addChild(hatch)
+        teacherHall.addChild(hatch)
 
         for i in 0..<5 {
             let crystal = UIBezierPath()
@@ -1117,41 +1118,41 @@ private final class RefugeVillageController {
             crystal.addLine(to: CGPoint(x: -10, y: 4))
             crystal.close()
             let shard = SKShapeNode(path: crystal.cgPath)
-            shard.name = "village_workshop"
+            shard.name = "village_teacher_hall"
             shard.fillColor = UIColor.lerp(art.biolume, UIColor.white, 0.18).withAlphaComponent(0.40)
             shard.strokeColor = art.biolume.withAlphaComponent(0.62)
             shard.lineWidth = 1
             shard.glowWidth = 4
             shard.position = CGPoint(x: 30 + CGFloat(i) * 12, y: -10 + CGFloat(i % 2) * 8)
-            workshop.addChild(shard)
+            teacherHall.addChild(shard)
         }
 
-        let workbench = SKShapeNode(rectOf: CGSize(width: 68, height: 15), cornerRadius: 5)
-        workbench.name = "village_workshop"
-        workbench.fillColor = GameUI.gold.withAlphaComponent(0.30)
-        workbench.strokeColor = art.biolume.withAlphaComponent(0.30)
-        workbench.lineWidth = 0.8
-        workbench.position = CGPoint(x: 18, y: -39)
-        workshop.addChild(workbench)
+        let desk = SKShapeNode(rectOf: CGSize(width: 68, height: 15), cornerRadius: 5)
+        desk.name = "village_teacher_hall"
+        desk.fillColor = GameUI.gold.withAlphaComponent(0.30)
+        desk.strokeColor = art.biolume.withAlphaComponent(0.30)
+        desk.lineWidth = 0.8
+        desk.position = CGPoint(x: 18, y: -39)
+        teacherHall.addChild(desk)
 
-        buildDoorPlaque(parent: workshop,
-                        hitName: "village_workshop_door",
-                        iconName: "gearshape.fill",
+        buildDoorPlaque(parent: teacherHall,
+                        hitName: "village_teacher_door",
+                        iconName: "graduationcap.fill",
                         fallback: "",
                         tint: art.biolume,
                         position: CGPoint(x: -22, y: 24))
 
         let doorway = SKShapeNode(rectOf: CGSize(width: 42, height: 50), cornerRadius: 12)
-        doorway.name = "village_workshop_door"
+        doorway.name = "village_teacher_door"
         doorway.fillColor = art.shadow.withAlphaComponent(0.36)
         doorway.strokeColor = art.biolume.withAlphaComponent(0.44)
         doorway.lineWidth = 1
         doorway.position = CGPoint(x: -22, y: -28)
         doorway.zPosition = 2
-        workshop.addChild(doorway)
+        teacherHall.addChild(doorway)
 
-        buildDoorStep(parent: workshop,
-                      hitName: "village_workshop_door",
+        buildDoorStep(parent: teacherHall,
+                      hitName: "village_teacher_door",
                       tint: art.biolume,
                       position: CGPoint(x: -22, y: -55),
                       width: 58)
@@ -1165,174 +1166,316 @@ private final class RefugeVillageController {
         interiorLayer.addChild(room)
 
         let interiorLaneY = playableRect.minY + max(96, playableRect.height * 0.31)
-        interiorDoorPoint = CGPoint(x: playableRect.maxX - playableRect.width * 0.17,
-                                    y: interiorLaneY)
-        bedroomRestPoint = CGPoint(x: playableRect.minX + playableRect.width * 0.28,
-                                   y: interiorLaneY - 2)
-        homeBedFrame = CGRect(x: bedroomRestPoint.x - 104, y: bedroomRestPoint.y - 82, width: 208, height: 148)
-        homeExitFrame = CGRect(x: interiorDoorPoint.x - 58, y: interiorLaneY - 76, width: 116, height: 132)
+        let cameraAnchor = CGPoint(x: playableRect.midX,
+                                   y: interiorLaneY + playableRect.height * 0.17)
+        let artDoorPoint = CGPoint(x: playableRect.minX + playableRect.width * 0.105,
+                                   y: interiorLaneY + 6)
+        let artBedPoint = CGPoint(x: playableRect.maxX - playableRect.width * 0.17,
+                                  y: interiorLaneY - 20)
 
-        let walls = SKShapeNode(rectOf: CGSize(width: playableRect.width - 34,
-                                               height: playableRect.height - 34),
+        interiorDoorPoint = artDoorPoint
+        bedroomRestPoint = artBedPoint
+
+        buildHomeStoneRoom(room: room, laneY: interiorLaneY)
+
+        let cameraLayer = SKNode()
+        cameraLayer.name = "home_camera_layer"
+        cameraLayer.position = CGPoint(x: cameraAnchor.x * (1 - homeCameraScale),
+                                       y: cameraAnchor.y * (1 - homeCameraScale))
+        cameraLayer.setScale(homeCameraScale)
+        cameraLayer.zPosition = 1
+        room.addChild(cameraLayer)
+
+        buildHomeSeaWindow(room: cameraLayer, laneY: interiorLaneY)
+        buildHomeCeiling(room: cameraLayer)
+        buildInteriorDetails(room: cameraLayer)
+        buildHomeExit(room: cameraLayer)
+        buildBedroomArea(room: cameraLayer)
+
+        interiorDoorPoint = homeCameraPoint(artDoorPoint, anchor: cameraAnchor)
+        bedroomRestPoint = homeCameraPoint(artBedPoint, anchor: cameraAnchor)
+        homeBedFrame = CGRect(x: bedroomRestPoint.x - 118,
+                              y: bedroomRestPoint.y - 70,
+                              width: 236,
+                              height: 132)
+        homeExitFrame = CGRect(x: interiorDoorPoint.x - 56,
+                               y: interiorDoorPoint.y - 58,
+                               width: 112,
+                               height: 120)
+    }
+
+    private func homeCameraPoint(_ point: CGPoint, anchor: CGPoint) -> CGPoint {
+        CGPoint(x: anchor.x + (point.x - anchor.x) * homeCameraScale,
+                y: anchor.y + (point.y - anchor.y) * homeCameraScale)
+    }
+
+    private func buildHomeStoneRoom(room: SKNode, laneY: CGFloat) {
+        let plaster = UIColor(red: 0.89, green: 0.79, blue: 0.62, alpha: 1)
+        let plasterLight = UIColor(red: 0.98, green: 0.90, blue: 0.72, alpha: 1)
+        let stoneLine = UIColor(red: 0.46, green: 0.32, blue: 0.18, alpha: 1)
+
+        let wallRect = CGRect(x: -overlaySize.width / 2 - 14,
+                              y: playableRect.minY - 48,
+                              width: overlaySize.width + 28,
+                              height: playableRect.height + 126)
+
+        let wall = SKShapeNode(rectOf: wallRect.size,
+                               cornerRadius: 24)
+        wall.fillColor = UIColor.lerp(plasterLight, plaster, 0.42).withAlphaComponent(0.78)
+        wall.strokeColor = stoneLine.withAlphaComponent(0.34)
+        wall.lineWidth = 1.4
+        wall.position = CGPoint(x: wallRect.midX, y: wallRect.midY)
+        wall.zPosition = 0.05
+        room.addChild(wall)
+
+        let floorHeight = max(118, playableRect.height * 0.30)
+        let floor = SKShapeNode(rectOf: CGSize(width: wallRect.width - 4,
+                                               height: floorHeight),
                                 cornerRadius: 18)
-        walls.fillColor = UIColor.lerp(art.reefRock, art.waterMid, 0.22).withAlphaComponent(0.62)
-        walls.strokeColor = art.biolume.withAlphaComponent(0.22)
-        walls.lineWidth = 1.4
-        walls.position = CGPoint(x: playableRect.midX, y: playableRect.midY)
-        walls.zPosition = 0.2
-        room.addChild(walls)
-
-        buildHomeSeaWindow(room: room, laneY: interiorLaneY)
-
-        let floor = SKShapeNode(rectOf: CGSize(width: playableRect.width - 72, height: 22), cornerRadius: 7)
-        floor.fillColor = UIColor.lerp(art.shellPearl, art.waterMid, 0.20).withAlphaComponent(0.32)
-        floor.strokeColor = art.biolume.withAlphaComponent(0.16)
-        floor.lineWidth = 1
-        floor.position = CGPoint(x: playableRect.midX, y: interiorLaneY - 58)
-        floor.zPosition = 1.4
+        floor.fillColor = UIColor(red: 0.95, green: 0.85, blue: 0.65, alpha: 0.72)
+        floor.strokeColor = .clear
+        floor.position = CGPoint(x: wallRect.midX,
+                                 y: playableRect.minY + floorHeight * 0.50 + 10)
+        floor.zPosition = 0.35
         room.addChild(floor)
 
-        let floorCliff = SKShapeNode(rectOf: CGSize(width: playableRect.width - 86, height: 36), cornerRadius: 6)
-        floorCliff.fillColor = art.shadow.withAlphaComponent(0.18)
-        floorCliff.strokeColor = .clear
-        floorCliff.position = CGPoint(x: playableRect.midX, y: interiorLaneY - 84)
-        floorCliff.zPosition = 1.1
-        room.addChild(floorCliff)
+        let floorWash = SKShapeNode(ellipseOf: CGSize(width: wallRect.width * 0.72,
+                                                      height: floorHeight * 0.52))
+        floorWash.fillColor = UIColor.white.withAlphaComponent(0.18)
+        floorWash.strokeColor = .clear
+        floorWash.position = CGPoint(x: wallRect.midX, y: laneY - 22)
+        floorWash.zPosition = 0.42
+        room.addChild(floorWash)
 
-        buildInteriorDetails(room: room)
-        buildBedroomArea(room: room)
-        buildHomeExit(room: room)
+        let tileCount = 14
+        for index in 0..<tileCount {
+            let x = wallRect.minX + wallRect.width * (0.14 + CGFloat(index) * 0.058)
+            let tile = SKShapeNode(rectOf: CGSize(width: wallRect.width * 0.046, height: 18), cornerRadius: 3)
+            tile.fillColor = UIColor.white.withAlphaComponent(0.08)
+            tile.strokeColor = stoneLine.withAlphaComponent(0.18)
+            tile.lineWidth = 0.6
+            tile.position = CGPoint(x: x, y: laneY - 48)
+            tile.zPosition = 0.55
+            room.addChild(tile)
+        }
+
+        for (xFactor, widthFactor) in [(0.045, 0.110), (0.955, 0.110), (0.185, 0.052), (0.815, 0.052)] {
+            buildHomeStoneColumn(room: room,
+                                 x: wallRect.minX + wallRect.width * CGFloat(xFactor),
+                                 width: wallRect.width * CGFloat(widthFactor),
+                                 laneY: laneY)
+        }
+
+        let wallScuffs: [(CGFloat, CGFloat, CGFloat, CGFloat)] = [
+            (0.05, 0.66, 30, 0.10),
+            (0.12, 0.42, 22, 0.08),
+            (0.74, 0.78, 28, 0.08),
+            (0.92, 0.60, 22, 0.10),
+            (0.86, 0.30, 34, 0.08)
+        ]
+        for (xFactor, yFactor, width, alpha) in wallScuffs {
+            let scuff = SKShapeNode(rectOf: CGSize(width: width, height: width * 0.28), cornerRadius: 3)
+            scuff.fillColor = stoneLine.withAlphaComponent(alpha)
+            scuff.strokeColor = .clear
+            scuff.position = CGPoint(x: wallRect.minX + wallRect.width * xFactor,
+                                     y: wallRect.minY + wallRect.height * yFactor)
+            scuff.zPosition = 0.45
+            room.addChild(scuff)
+        }
+    }
+
+    private func buildHomeStoneColumn(room: SKNode, x: CGFloat, width: CGFloat, laneY: CGFloat) {
+        let columnHeight = playableRect.height - 86
+        let stone = UIColor(red: 0.92, green: 0.84, blue: 0.68, alpha: 1)
+        let line = UIColor(red: 0.45, green: 0.31, blue: 0.17, alpha: 1)
+        let column = SKShapeNode(rectOf: CGSize(width: width, height: columnHeight), cornerRadius: 6)
+        column.fillColor = stone.withAlphaComponent(0.58)
+        column.strokeColor = line.withAlphaComponent(0.26)
+        column.lineWidth = 1.1
+        column.position = CGPoint(x: x, y: playableRect.midY - 8)
+        column.zPosition = 0.7
+        room.addChild(column)
+
+        let rows = 7
+        for index in 0..<rows {
+            let block = SKShapeNode(rectOf: CGSize(width: width - 8,
+                                                  height: columnHeight / CGFloat(rows) - 5),
+                                    cornerRadius: 3)
+            block.fillColor = UIColor.white.withAlphaComponent(index.isMultiple(of: 2) ? 0.08 : 0.03)
+            block.strokeColor = line.withAlphaComponent(0.20)
+            block.lineWidth = 0.6
+            block.position = CGPoint(x: x,
+                                     y: playableRect.midY - columnHeight * 0.47 + CGFloat(index) * columnHeight / CGFloat(rows))
+            block.zPosition = 0.75
+            room.addChild(block)
+        }
     }
 
     private func buildHomeSeaWindow(room: SKNode, laneY: CGFloat) {
-        let windowSize = CGSize(width: min(playableRect.width * 0.62, 520),
-                                height: min(playableRect.height * 0.42, 260))
-        let windowCenter = CGPoint(x: playableRect.midX + playableRect.width * 0.04,
-                                   y: laneY + playableRect.height * 0.22)
+        let windowSize = CGSize(width: min(playableRect.width * 0.68, 620),
+                                height: min(playableRect.height * 0.54, 350))
+        let windowCenter = CGPoint(x: playableRect.midX + playableRect.width * 0.05,
+                                   y: laneY + playableRect.height * 0.24)
         let window = SKNode()
         window.position = windowCenter
         window.zPosition = 0.8
         room.addChild(window)
 
-        let glow = SKShapeNode(rectOf: CGSize(width: windowSize.width + 26,
-                                              height: windowSize.height + 22),
-                               cornerRadius: 10)
-        glow.fillColor = art.biolume.withAlphaComponent(0.08)
-        glow.strokeColor = art.biolume.withAlphaComponent(0.18)
-        glow.lineWidth = 1
-        glow.glowWidth = 8
-        glow.zPosition = -0.2
-        window.addChild(glow)
-
-        let glass = SKShapeNode(rectOf: windowSize, cornerRadius: 6)
-        glass.fillColor = art.waterBottom.withAlphaComponent(0.72)
-        glass.strokeColor = art.shadow.withAlphaComponent(0.80)
-        glass.lineWidth = 6
+        let glass = SKShapeNode(rectOf: windowSize, cornerRadius: 4)
+        glass.fillColor = UIColor(red: 0.20, green: 0.68, blue: 0.74, alpha: 0.30)
+        glass.strokeColor = UIColor(red: 0.58, green: 0.43, blue: 0.25, alpha: 0.28)
+        glass.lineWidth = 2
         glass.zPosition = 0
         window.addChild(glass)
 
-        let waterBands: [(CGFloat, CGFloat, UIColor)] = [
-            (0.31, 0.38, art.waterTop.withAlphaComponent(0.26)),
-            (0.03, 0.30, art.waterMid.withAlphaComponent(0.30)),
-            (-0.24, 0.26, art.waterBottom.withAlphaComponent(0.34))
+        let seaBands: [(CGFloat, CGFloat, UIColor)] = [
+            (0.28, 0.34, art.waterTop.withAlphaComponent(0.24)),
+            (0.00, 0.36, art.waterMid.withAlphaComponent(0.30)),
+            (-0.30, 0.34, art.waterBottom.withAlphaComponent(0.22))
         ]
-        for (centerYFactor, heightFactor, color) in waterBands {
-            let band = SKShapeNode(rectOf: CGSize(width: windowSize.width - 18,
+        for (yFactor, heightFactor, color) in seaBands {
+            let band = SKShapeNode(rectOf: CGSize(width: windowSize.width - 6,
                                                   height: windowSize.height * heightFactor),
-                                   cornerRadius: 2)
+                                   cornerRadius: 3)
             band.fillColor = color
             band.strokeColor = .clear
-            band.position = CGPoint(x: 0, y: windowSize.height * centerYFactor)
-            band.zPosition = 0.2
+            band.position = CGPoint(x: 0, y: windowSize.height * yFactor)
+            band.zPosition = 0.05
             window.addChild(band)
         }
 
+        let glowBands: [(CGFloat, CGFloat, CGFloat, CGFloat)] = [
+            (-0.42, 0.78, 0.20, 0.22),
+            (-0.25, 0.58, 0.34, 0.16),
+            (0.28, 0.58, 0.34, 0.15),
+            (0.42, 0.78, 0.20, 0.20)
+        ]
+        for (xFactor, widthFactor, heightFactor, alpha) in glowBands {
+            let band = SKShapeNode(rectOf: CGSize(width: windowSize.width * widthFactor,
+                                                  height: windowSize.height * heightFactor),
+                                   cornerRadius: 10)
+            band.fillColor = art.biolume.withAlphaComponent(alpha)
+            band.strokeColor = .clear
+            band.position = CGPoint(x: windowSize.width * xFactor, y: 0)
+            band.zPosition = 0.15
+            window.addChild(band)
+        }
+
+        let centerShade = SKShapeNode(rectOf: CGSize(width: windowSize.width * 0.44,
+                                                     height: windowSize.height * 1.02),
+                                      cornerRadius: 2)
+        centerShade.fillColor = UIColor(red: 0.08, green: 0.14, blue: 0.11, alpha: 0.10)
+        centerShade.strokeColor = .clear
+        centerShade.zPosition = 0.25
+        window.addChild(centerShade)
+
+        buildHomeWindowFish(parent: window, windowSize: windowSize)
+
+        for index in 0..<12 {
+            let strip = SKShapeNode(rectOf: CGSize(width: 1.3, height: windowSize.height * 0.92),
+                                    cornerRadius: 0.5)
+            strip.fillColor = UIColor.white.withAlphaComponent(index.isMultiple(of: 2) ? 0.030 : 0.018)
+            strip.strokeColor = .clear
+            strip.position = CGPoint(x: -windowSize.width * 0.44 + CGFloat(index) * windowSize.width * 0.08,
+                                     y: 0)
+            strip.zPosition = 0.35
+            window.addChild(strip)
+        }
+
+        let sill = SKShapeNode(rectOf: CGSize(width: windowSize.width + 18, height: 22), cornerRadius: 4)
+        sill.fillColor = UIColor(red: 0.94, green: 0.84, blue: 0.65, alpha: 0.78)
+        sill.strokeColor = UIColor(red: 0.49, green: 0.34, blue: 0.19, alpha: 0.26)
+        sill.lineWidth = 1
+        sill.position = CGPoint(x: 0, y: -windowSize.height * 0.50 - 10)
+        sill.zPosition = 1.1
+        window.addChild(sill)
+
+        for index in 0..<9 {
+            let tile = SKShapeNode(rectOf: CGSize(width: windowSize.width / 9 - 5, height: 17), cornerRadius: 2)
+            tile.fillColor = UIColor.white.withAlphaComponent(0.08)
+            tile.strokeColor = UIColor(red: 0.42, green: 0.30, blue: 0.17, alpha: 0.18)
+            tile.lineWidth = 0.5
+            tile.position = CGPoint(x: -windowSize.width * 0.44 + CGFloat(index) * windowSize.width * 0.11,
+                                    y: -windowSize.height * 0.50 - 10)
+            tile.zPosition = 1.15
+            window.addChild(tile)
+        }
+
+        let plants: [(CGFloat, CGFloat, CGFloat)] = [
+            (-0.46, -0.48, 0.78),
+            (-0.36, -0.47, 0.58),
+            (0.43, -0.47, 0.62),
+            (0.50, -0.46, 0.76)
+        ]
+        for (xFactor, yFactor, scale) in plants {
+            buildHomeSeaPlant(parent: window,
+                              base: CGPoint(x: windowSize.width * xFactor, y: windowSize.height * yFactor),
+                              scale: scale,
+                              z: 1.0)
+        }
+    }
+
+    private func buildHomeWindowFish(parent: SKNode, windowSize: CGSize) {
+        let fishSpecs: [(CGFloat, CGFloat, CGFloat, CGFloat, UIColor)] = [
+            (-0.34, 0.20, 26, 9, UIColor.white.withAlphaComponent(0.34)),
+            (-0.12, -0.12, 18, 6, art.biolume.withAlphaComponent(0.32)),
+            (0.22, 0.06, 22, 7, UIColor(red: 0.90, green: 0.74, blue: 0.36, alpha: 0.28)),
+            (0.38, -0.24, 16, 5, UIColor.white.withAlphaComponent(0.26))
+        ]
+        for (index, spec) in fishSpecs.enumerated() {
+            let (xFactor, yFactor, length, height, color) = spec
+            let fish = FishDrawingFactory.fishDrawing(length: length,
+                                                      height: height,
+                                                      color: color,
+                                                      animateTail: true,
+                                                      silhouette: index.isMultiple(of: 2) ? .oval : .needle,
+                                                      pattern: .plain,
+                                                      patternSeed: "refuge-home-window-\(index)")
+            fish.position = CGPoint(x: windowSize.width * xFactor,
+                                    y: windowSize.height * yFactor)
+            fish.zPosition = 0.58
+            fish.alpha = 0.62
+            parent.addChild(fish)
+            fish.run(.repeatForever(.sequence([
+                .moveBy(x: windowSize.width * 0.22, y: CGFloat(index % 2 == 0 ? 4 : -3), duration: Double(6 + index)),
+                .moveBy(x: -windowSize.width * 0.22, y: CGFloat(index % 2 == 0 ? -4 : 3), duration: Double(6 + index))
+            ])))
+        }
+    }
+
+    private func buildHomeCeiling(room: SKNode) {
+        let wood = UIColor(red: 0.62, green: 0.38, blue: 0.18, alpha: 1)
+        let darkWood = UIColor(red: 0.32, green: 0.19, blue: 0.09, alpha: 1)
+        let ceilingY = playableRect.maxY - 32
+
+        let beam = SKShapeNode(rectOf: CGSize(width: playableRect.width - 20, height: 54), cornerRadius: 2)
+        beam.fillColor = wood.withAlphaComponent(0.82)
+        beam.strokeColor = darkWood.withAlphaComponent(0.38)
+        beam.lineWidth = 1
+        beam.position = CGPoint(x: playableRect.midX, y: ceilingY)
+        beam.zPosition = 2.4
+        room.addChild(beam)
+
         for index in 0..<5 {
-            let wave = SKShapeNode(rectOf: CGSize(width: windowSize.width * (0.34 + CGFloat(index) * 0.08),
-                                                  height: 2),
-                                   cornerRadius: 1)
-            wave.fillColor = UIColor.white.withAlphaComponent(0.06 + CGFloat(index % 2) * 0.03)
-            wave.strokeColor = .clear
-            wave.position = CGPoint(x: -windowSize.width * 0.25 + CGFloat(index) * windowSize.width * 0.13,
-                                    y: windowSize.height * (0.16 - CGFloat(index) * 0.075))
-            wave.zPosition = 0.55
-            window.addChild(wave)
+            let plank = SKShapeNode(rectOf: CGSize(width: playableRect.width - 28, height: 4), cornerRadius: 1)
+            plank.fillColor = darkWood.withAlphaComponent(0.22)
+            plank.strokeColor = .clear
+            plank.position = CGPoint(x: playableRect.midX, y: ceilingY - 22 + CGFloat(index) * 10)
+            plank.zPosition = 2.45
+            room.addChild(plank)
         }
 
-        let reef = UIBezierPath()
-        reef.move(to: CGPoint(x: -windowSize.width * 0.48, y: -windowSize.height * 0.36))
-        reef.addLine(to: CGPoint(x: -windowSize.width * 0.36, y: -windowSize.height * 0.22))
-        reef.addLine(to: CGPoint(x: -windowSize.width * 0.20, y: -windowSize.height * 0.31))
-        reef.addLine(to: CGPoint(x: -windowSize.width * 0.04, y: -windowSize.height * 0.18))
-        reef.addLine(to: CGPoint(x: windowSize.width * 0.12, y: -windowSize.height * 0.30))
-        reef.addLine(to: CGPoint(x: windowSize.width * 0.31, y: -windowSize.height * 0.20))
-        reef.addLine(to: CGPoint(x: windowSize.width * 0.48, y: -windowSize.height * 0.34))
-        reef.addLine(to: CGPoint(x: windowSize.width * 0.48, y: -windowSize.height * 0.45))
-        reef.addLine(to: CGPoint(x: -windowSize.width * 0.48, y: -windowSize.height * 0.45))
-        reef.close()
-        let reefShape = SKShapeNode(path: reef.cgPath)
-        reefShape.fillColor = art.shadow.withAlphaComponent(0.42)
-        reefShape.strokeColor = art.biolume.withAlphaComponent(0.14)
-        reefShape.lineWidth = 1
-        reefShape.zPosition = 0.7
-        window.addChild(reefShape)
-
-        let coralStems: [(CGFloat, CGFloat, CGFloat)] = [
-            (-0.33, -0.26, 42),
-            (-0.25, -0.31, 28),
-            (0.23, -0.28, 38),
-            (0.34, -0.33, 30)
-        ]
-        for (xFactor, yFactor, height) in coralStems {
-            let coral = UIBezierPath()
-            let x = windowSize.width * xFactor
-            let y = windowSize.height * yFactor
-            coral.move(to: CGPoint(x: x, y: y))
-            coral.addLine(to: CGPoint(x: x + 2, y: y + height))
-            coral.move(to: CGPoint(x: x + 1, y: y + height * 0.58))
-            coral.addLine(to: CGPoint(x: x - 12, y: y + height * 0.78))
-            coral.move(to: CGPoint(x: x + 1, y: y + height * 0.42))
-            coral.addLine(to: CGPoint(x: x + 13, y: y + height * 0.62))
-            let stem = SKShapeNode(path: coral.cgPath)
-            stem.strokeColor = art.biolume.withAlphaComponent(0.24)
-            stem.lineWidth = 2
-            stem.lineCap = .round
-            stem.zPosition = 0.75
-            window.addChild(stem)
+        let rafters: [(CGFloat, CGFloat)] = [(0.41, -0.16), (0.71, 0.16)]
+        for (xFactor, rotation) in rafters {
+            let rafter = SKShapeNode(rectOf: CGSize(width: 44, height: 124), cornerRadius: 4)
+            rafter.fillColor = UIColor(red: 0.73, green: 0.49, blue: 0.25, alpha: 0.86)
+            rafter.strokeColor = darkWood.withAlphaComponent(0.32)
+            rafter.lineWidth = 1
+            rafter.position = CGPoint(x: playableRect.minX + playableRect.width * xFactor, y: ceilingY + 3)
+            rafter.zRotation = rotation
+            rafter.zPosition = 2.55
+            room.addChild(rafter)
         }
-
-        let bubbles: [(CGFloat, CGFloat, CGFloat, CGFloat)] = [
-            (-0.40, 0.20, 3, 0.18),
-            (-0.30, -0.02, 2, 0.14),
-            (-0.14, 0.31, 2.5, 0.16),
-            (0.04, 0.10, 2, 0.13),
-            (0.18, 0.28, 3.5, 0.17),
-            (0.31, -0.06, 2.5, 0.14),
-            (0.40, 0.16, 2, 0.15)
-        ]
-        for (xFactor, yFactor, radius, alpha) in bubbles {
-            let bubble = SKShapeNode(circleOfRadius: radius)
-            bubble.fillColor = UIColor.white.withAlphaComponent(alpha * 0.45)
-            bubble.strokeColor = UIColor.white.withAlphaComponent(alpha)
-            bubble.lineWidth = 0.8
-            bubble.position = CGPoint(x: windowSize.width * xFactor, y: windowSize.height * yFactor)
-            bubble.zPosition = 0.9
-            window.addChild(bubble)
-        }
-
-        for xFactor in [-0.17, 0.17] {
-            let mullion = SKShapeNode(rectOf: CGSize(width: 5, height: windowSize.height - 2), cornerRadius: 1)
-            mullion.fillColor = art.shadow.withAlphaComponent(0.88)
-            mullion.strokeColor = .clear
-            mullion.position = CGPoint(x: windowSize.width * CGFloat(xFactor), y: 0)
-            mullion.zPosition = 1.1
-            window.addChild(mullion)
-        }
-        let crossbar = SKShapeNode(rectOf: CGSize(width: windowSize.width - 2, height: 5), cornerRadius: 1)
-        crossbar.fillColor = art.shadow.withAlphaComponent(0.88)
-        crossbar.strokeColor = .clear
-        crossbar.zPosition = 1.1
-        window.addChild(crossbar)
     }
 
     private func buildItemShopInterior() {
@@ -1450,7 +1593,7 @@ private final class RefugeVillageController {
         buildNpc(at: upgradeShopNpcInteriorPoint + CGPoint(x: 0, y: -20),
                  hitName: "upgrade_shop_npc",
                  tint: art.biolume,
-                 kind: .upgradeWorkshop,
+                 kind: .teacher,
                  stage: room)
     }
 
@@ -1484,7 +1627,7 @@ private final class RefugeVillageController {
         wallShelf.zPosition = 2.2
         room.addChild(wallShelf)
 
-        for index in 0..<7 {
+        for _ in 0..<7 {
             let lamp = SKShapeNode(circleOfRadius: CGFloat.random(in: 3.5...6.5))
             lamp.fillColor = tint.withAlphaComponent(0.28)
             lamp.strokeColor = UIColor.white.withAlphaComponent(0.14)
@@ -1501,55 +1644,95 @@ private final class RefugeVillageController {
         let area = SKNode()
         area.name = "home_bed"
         area.position = bedroomRestPoint
-        area.zPosition = 3
+        area.zPosition = 4.4
         room.addChild(area)
 
-        let niche = SKShapeNode(ellipseOf: CGSize(width: 210, height: 104))
-        niche.name = "home_bed"
-        niche.fillColor = art.shadow.withAlphaComponent(0.18)
-        niche.strokeColor = art.biolume.withAlphaComponent(0.20)
-        niche.lineWidth = 1
-        niche.position = CGPoint(x: 0, y: -10)
-        area.addChild(niche)
+        let rug = SKShapeNode(ellipseOf: CGSize(width: 306, height: 134))
+        rug.name = "home_bed"
+        rug.fillColor = UIColor(red: 0.85, green: 0.70, blue: 0.42, alpha: 0.16)
+        rug.strokeColor = UIColor(red: 0.31, green: 0.78, blue: 0.72, alpha: 0.46)
+        rug.lineWidth = 3
+        rug.position = CGPoint(x: 4, y: -26)
+        rug.zPosition = -0.8
+        area.addChild(rug)
 
-        let cushion = SKShapeNode(ellipseOf: CGSize(width: 166, height: 54))
-        cushion.name = "home_bed"
-        cushion.fillColor = art.biolume.withAlphaComponent(0.14)
-        cushion.strokeColor = art.biolume.withAlphaComponent(0.42)
-        cushion.lineWidth = 1.2
-        cushion.glowWidth = 5
-        cushion.position = CGPoint(x: 2, y: 0)
-        cushion.zPosition = 1
-        area.addChild(cushion)
+        let rugTrim = SKShapeNode(ellipseOf: CGSize(width: 332, height: 150))
+        rugTrim.name = "home_bed"
+        rugTrim.fillColor = .clear
+        rugTrim.strokeColor = UIColor(red: 0.62, green: 0.42, blue: 0.21, alpha: 0.42)
+        rugTrim.lineWidth = 2
+        rugTrim.position = CGPoint(x: 2, y: -27)
+        rugTrim.zPosition = -0.85
+        area.addChild(rugTrim)
 
-        let bubbleLayout: [(CGFloat, CGFloat, CGFloat, CGFloat)] = [
-            (-70, -6, 15, 0.18),
-            (-52, 12, 13, 0.20),
-            (-37, -14, 17, 0.16),
-            (-18, 8, 19, 0.22),
-            (0, -10, 16, 0.18),
-            (17, 13, 18, 0.22),
-            (38, -8, 15, 0.17),
-            (54, 10, 14, 0.20),
-            (72, -5, 13, 0.16),
-            (-58, -26, 10, 0.13),
-            (-25, -30, 12, 0.14),
-            (8, -30, 11, 0.13),
-            (42, -28, 10, 0.13),
-            (-44, 30, 9, 0.13),
-            (-4, 33, 10, 0.14),
-            (36, 31, 9, 0.13)
+        let basin = SKShapeNode(ellipseOf: CGSize(width: 236, height: 88))
+        basin.name = "home_bed"
+        basin.fillColor = UIColor(red: 0.74, green: 0.54, blue: 0.29, alpha: 0.14)
+        basin.strokeColor = UIColor(red: 0.41, green: 0.30, blue: 0.17, alpha: 0.20)
+        basin.lineWidth = 1
+        basin.position = CGPoint(x: 0, y: 0)
+        basin.zPosition = 0
+        area.addChild(basin)
+
+        let stoneLayout: [(CGFloat, CGFloat, CGFloat, CGFloat)] = [
+            (-116, -26, 26, 17), (-94, -39, 25, 16), (-66, -47, 28, 18),
+            (-36, -51, 27, 17), (-6, -52, 29, 18), (25, -50, 27, 17),
+            (55, -45, 28, 18), (84, -34, 27, 17), (110, -18, 26, 18),
+            (-112, 4, 24, 17), (-91, 22, 26, 18), (-62, 35, 29, 18),
+            (-30, 42, 28, 18), (3, 44, 30, 19), (36, 40, 28, 18),
+            (68, 31, 29, 18), (97, 16, 28, 18), (120, -4, 25, 17)
         ]
-        for (x, y, radius, alpha) in bubbleLayout {
-            let bubble = SKShapeNode(circleOfRadius: radius)
+        for (x, y, width, height) in stoneLayout {
+            let stone = SKShapeNode(ellipseOf: CGSize(width: width, height: height))
+            stone.name = "home_bed"
+            stone.fillColor = UIColor(red: 0.83, green: 0.73, blue: 0.57, alpha: 0.92)
+            stone.strokeColor = UIColor(red: 0.43, green: 0.31, blue: 0.18, alpha: 0.40)
+            stone.lineWidth = 0.8
+            stone.position = CGPoint(x: x, y: y)
+            stone.zPosition = 1.2
+            area.addChild(stone)
+        }
+
+        let bubbleLayout: [(CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = [
+            (-78, 9, 44, 33, 0.34),
+            (-43, 26, 42, 35, 0.38),
+            (-8, 15, 50, 39, 0.40),
+            (33, 31, 44, 35, 0.38),
+            (71, 16, 48, 37, 0.39),
+            (102, 29, 42, 34, 0.34),
+            (-58, -9, 54, 40, 0.42),
+            (-15, -17, 58, 44, 0.44),
+            (36, -11, 54, 41, 0.42),
+            (83, -15, 51, 39, 0.39),
+            (-92, -17, 35, 27, 0.30),
+            (121, -8, 38, 29, 0.31)
+        ]
+        for (x, y, width, height, alpha) in bubbleLayout {
+            let bubble = SKShapeNode(ellipseOf: CGSize(width: width, height: height))
             bubble.name = "home_bed"
-            bubble.fillColor = UIColor.white.withAlphaComponent(alpha)
-            bubble.strokeColor = art.biolume.withAlphaComponent(0.40 + alpha)
-            bubble.lineWidth = 1
-            bubble.glowWidth = 3
+            bubble.fillColor = UIColor(red: 0.35, green: 0.96, blue: 1.0, alpha: alpha)
+            bubble.strokeColor = UIColor(red: 0.06, green: 0.58, blue: 0.64, alpha: 0.70)
+            bubble.lineWidth = 1.4
+            bubble.glowWidth = 4
             bubble.position = CGPoint(x: x, y: y)
-            bubble.zPosition = 3
+            bubble.zPosition = 2.2 + y * 0.002
             area.addChild(bubble)
+
+            let shine = SKShapeNode(ellipseOf: CGSize(width: width * 0.26, height: height * 0.16))
+            shine.name = "home_bed"
+            shine.fillColor = UIColor.white.withAlphaComponent(0.40)
+            shine.strokeColor = .clear
+            shine.position = CGPoint(x: x - width * 0.16, y: y + height * 0.16)
+            shine.zPosition = bubble.zPosition + 0.1
+            area.addChild(shine)
+
+            let dot = SKShapeNode(circleOfRadius: max(2, min(width, height) * 0.055))
+            dot.name = "home_bed"
+            dot.fillColor = UIColor.white.withAlphaComponent(0.24)
+            dot.strokeColor = .clear
+            dot.position = CGPoint(x: x + width * 0.18, y: y + height * 0.10)
+            dot.zPosition = bubble.zPosition + 0.1
+            area.addChild(dot)
         }
     }
 
@@ -1557,60 +1740,287 @@ private final class RefugeVillageController {
         let door = SKNode()
         door.name = "home_exit"
         door.position = interiorDoorPoint
-        door.zPosition = 4
+        door.zPosition = 3.6
         room.addChild(door)
 
-        let opening = SKShapeNode(ellipseOf: CGSize(width: 64, height: 58))
+        let arch = SKShapeNode(rectOf: CGSize(width: 118, height: 112), cornerRadius: 18)
+        arch.name = "home_exit"
+        arch.fillColor = UIColor(red: 0.86, green: 0.77, blue: 0.60, alpha: 0.78)
+        arch.strokeColor = UIColor(red: 0.43, green: 0.30, blue: 0.17, alpha: 0.42)
+        arch.lineWidth = 1.2
+        arch.position = CGPoint(x: 0, y: 10)
+        door.addChild(arch)
+
+        let opening = SKShapeNode(rectOf: CGSize(width: 66, height: 76), cornerRadius: 16)
         opening.name = "home_exit"
-        opening.fillColor = art.shadow.withAlphaComponent(0.34)
-        opening.strokeColor = art.biolume.withAlphaComponent(0.45)
-        opening.lineWidth = 1.3
-        opening.glowWidth = 4
+        opening.fillColor = UIColor(red: 0.32, green: 0.25, blue: 0.17, alpha: 0.28)
+        opening.strokeColor = art.biolume.withAlphaComponent(0.26)
+        opening.lineWidth = 1
+        opening.glowWidth = 2
+        opening.position = CGPoint(x: 0, y: 3)
         door.addChild(opening)
 
-        let path = SKShapeNode(rectOf: CGSize(width: 86, height: 16), cornerRadius: 8)
-        path.name = "home_exit"
-        path.fillColor = art.shellPearl.withAlphaComponent(0.34)
-        path.strokeColor = .clear
-        path.position = CGPoint(x: 0, y: -38)
-        door.addChild(path)
+        let shelf = SKShapeNode(rectOf: CGSize(width: 150, height: 15), cornerRadius: 5)
+        shelf.name = "home_exit"
+        shelf.fillColor = UIColor(red: 0.68, green: 0.42, blue: 0.18, alpha: 0.82)
+        shelf.strokeColor = UIColor(red: 0.34, green: 0.20, blue: 0.09, alpha: 0.46)
+        shelf.lineWidth = 0.8
+        shelf.position = CGPoint(x: 4, y: -53)
+        shelf.zPosition = 1.6
+        door.addChild(shelf)
 
-        let arrowShell = SKShapeNode(ellipseOf: CGSize(width: 18, height: 10))
-        arrowShell.name = "home_exit"
-        arrowShell.fillColor = art.biolume.withAlphaComponent(0.38)
-        arrowShell.strokeColor = UIColor.white.withAlphaComponent(0.24)
-        arrowShell.position = CGPoint(x: 0, y: 26)
-        door.addChild(arrowShell)
+        buildHomeBottle(parent: door, position: CGPoint(x: -35, y: -31), size: CGSize(width: 15, height: 28), z: 2)
+        buildHomeBottle(parent: door, position: CGPoint(x: -13, y: -33), size: CGSize(width: 20, height: 20), z: 2)
+        buildHomeSeaPlant(parent: door, base: CGPoint(x: -48, y: 58), scale: 0.52, z: 2.1)
     }
 
     private func buildInteriorDetails(room: SKNode) {
-        let sideGlow = SKShapeNode(rectOf: CGSize(width: playableRect.width * 0.30,
-                                                  height: playableRect.height * 0.72),
-                                   cornerRadius: 18)
-        sideGlow.fillColor = art.biolume.withAlphaComponent(0.045)
-        sideGlow.strokeColor = .clear
-        sideGlow.position = CGPoint(x: playableRect.minX + playableRect.width * 0.18,
-                                    y: playableRect.midY)
-        sideGlow.zPosition = 0.35
-        room.addChild(sideGlow)
+        buildHomeKelpGarland(room: room)
+        buildHomeHangingLamp(room: room,
+                             anchor: CGPoint(x: playableRect.minX + playableRect.width * 0.075,
+                                             y: playableRect.maxY - 24),
+                             scale: 0.92)
+        buildHomeHangingLamp(room: room,
+                             anchor: CGPoint(x: playableRect.maxX - playableRect.width * 0.085,
+                                             y: playableRect.maxY - 38),
+                             scale: 0.76)
 
-        let pixelHighlights: [(CGFloat, CGFloat, CGFloat, CGFloat)] = [
-            (0.10, 0.70, 18, 0.08),
-            (0.18, 0.82, 10, 0.10),
-            (0.76, 0.68, 14, 0.08),
-            (0.84, 0.78, 8, 0.11),
-            (0.69, 0.42, 9, 0.07)
+        buildHomeLeftShelf(room: room)
+        buildHomeRightShelf(room: room)
+
+        let rockClusters: [(CGFloat, CGFloat, CGFloat)] = [
+            (0.08, 0.12, 0.72),
+            (0.22, 0.30, 0.62),
+            (0.88, 0.10, 0.76),
+            (0.78, 0.30, 0.58)
         ]
-        for (xFactor, yFactor, size, alpha) in pixelHighlights {
-            let sparkle = SKShapeNode(rectOf: CGSize(width: size, height: size * 0.55), cornerRadius: 2)
-            sparkle.fillColor = art.biolume.withAlphaComponent(alpha)
-            sparkle.strokeColor = UIColor.white.withAlphaComponent(alpha * 0.55)
-            sparkle.lineWidth = 0.6
-            sparkle.position = CGPoint(x: playableRect.minX + playableRect.width * xFactor,
-                                       y: playableRect.minY + playableRect.height * yFactor)
-            sparkle.zPosition = 1.8
-            room.addChild(sparkle)
+        for (xFactor, yFactor, scale) in rockClusters {
+            let base = CGPoint(x: playableRect.minX + playableRect.width * xFactor,
+                               y: playableRect.minY + playableRect.height * yFactor)
+            buildHomeRockCluster(parent: room, base: base, scale: scale, z: 3.1)
         }
+
+        buildHomeSeaPlant(parent: room,
+                          base: CGPoint(x: playableRect.minX + playableRect.width * 0.105,
+                                        y: playableRect.minY + playableRect.height * 0.36),
+                          scale: 0.86,
+                          z: 3.2)
+        buildHomeSeaPlant(parent: room,
+                          base: CGPoint(x: playableRect.maxX - playableRect.width * 0.10,
+                                        y: playableRect.minY + playableRect.height * 0.31),
+                          scale: 0.64,
+                          z: 3.2)
+    }
+
+    private func buildHomeKelpGarland(room: SKNode) {
+        let tint = UIColor(red: 0.04, green: 0.72, blue: 0.70, alpha: 1)
+        let paths: [(CGFloat, CGFloat, CGFloat, CGFloat)] = [
+            (0.12, 0.88, 0.34, 0.89),
+            (0.77, 0.90, 0.94, 0.88)
+        ]
+        for (startX, startY, endX, endY) in paths {
+            let curve = UIBezierPath()
+            curve.move(to: CGPoint(x: playableRect.minX + playableRect.width * startX,
+                                   y: playableRect.minY + playableRect.height * startY))
+            curve.addCurve(to: CGPoint(x: playableRect.minX + playableRect.width * endX,
+                                       y: playableRect.minY + playableRect.height * endY),
+                           controlPoint1: CGPoint(x: playableRect.minX + playableRect.width * ((startX + endX) * 0.5 - 0.04),
+                                                  y: playableRect.minY + playableRect.height * (startY - 0.07)),
+                           controlPoint2: CGPoint(x: playableRect.minX + playableRect.width * ((startX + endX) * 0.5 + 0.04),
+                                                  y: playableRect.minY + playableRect.height * (endY - 0.08)))
+            let rope = SKShapeNode(path: curve.cgPath)
+            rope.strokeColor = tint.withAlphaComponent(0.58)
+            rope.lineWidth = 3
+            rope.lineCap = .round
+            rope.zPosition = 3.2
+            room.addChild(rope)
+        }
+
+        let drops: [(CGFloat, CGFloat, CGFloat)] = [
+            (0.18, 0.86, 56), (0.22, 0.83, 92), (0.31, 0.85, 60),
+            (0.79, 0.86, 42), (0.86, 0.84, 62), (0.90, 0.82, 72)
+        ]
+        for (xFactor, yFactor, length) in drops {
+            let base = CGPoint(x: playableRect.minX + playableRect.width * xFactor,
+                               y: playableRect.minY + playableRect.height * yFactor)
+            buildHomeKelpDrop(parent: room, base: base, length: length, z: 3.25)
+        }
+    }
+
+    private func buildHomeKelpDrop(parent: SKNode, base: CGPoint, length: CGFloat, z: CGFloat) {
+        let tint = UIColor(red: 0.04, green: 0.73, blue: 0.70, alpha: 1)
+        let stem = UIBezierPath()
+        stem.move(to: base)
+        stem.addCurve(to: CGPoint(x: base.x + length * 0.12, y: base.y - length),
+                      controlPoint1: CGPoint(x: base.x - length * 0.10, y: base.y - length * 0.30),
+                      controlPoint2: CGPoint(x: base.x + length * 0.18, y: base.y - length * 0.72))
+        let stemNode = SKShapeNode(path: stem.cgPath)
+        stemNode.strokeColor = tint.withAlphaComponent(0.62)
+        stemNode.lineWidth = 2.4
+        stemNode.lineCap = .round
+        stemNode.zPosition = z
+        parent.addChild(stemNode)
+
+        for index in 0..<4 {
+            let leaf = SKShapeNode(ellipseOf: CGSize(width: 9 + CGFloat(index % 2) * 3,
+                                                    height: 19 + CGFloat(index) * 2))
+            leaf.fillColor = tint.withAlphaComponent(0.46)
+            leaf.strokeColor = tint.withAlphaComponent(0.30)
+            leaf.lineWidth = 0.5
+            leaf.position = CGPoint(x: base.x + CGFloat(index % 2 == 0 ? -5 : 7),
+                                    y: base.y - length * (0.20 + CGFloat(index) * 0.17))
+            leaf.zRotation = CGFloat(index % 2 == 0 ? -0.45 : 0.38)
+            leaf.zPosition = z + 0.02
+            parent.addChild(leaf)
+        }
+    }
+
+    private func buildHomeHangingLamp(room: SKNode, anchor: CGPoint, scale: CGFloat) {
+        let cord = SKShapeNode(rectOf: CGSize(width: 3 * scale, height: 92 * scale), cornerRadius: 1)
+        cord.fillColor = UIColor(red: 0.32, green: 0.20, blue: 0.10, alpha: 0.78)
+        cord.strokeColor = .clear
+        cord.position = CGPoint(x: anchor.x, y: anchor.y - 46 * scale)
+        cord.zPosition = 3.4
+        room.addChild(cord)
+
+        let glow = SKShapeNode(circleOfRadius: 33 * scale)
+        glow.fillColor = UIColor(red: 1.0, green: 0.79, blue: 0.38, alpha: 0.16)
+        glow.strokeColor = .clear
+        glow.glowWidth = 10 * scale
+        glow.position = CGPoint(x: anchor.x, y: anchor.y - 98 * scale)
+        glow.zPosition = 3.35
+        room.addChild(glow)
+
+        let shadePath = UIBezierPath()
+        shadePath.move(to: CGPoint(x: -30 * scale, y: -4 * scale))
+        shadePath.addCurve(to: CGPoint(x: 30 * scale, y: -4 * scale),
+                           controlPoint1: CGPoint(x: -23 * scale, y: 25 * scale),
+                           controlPoint2: CGPoint(x: 23 * scale, y: 25 * scale))
+        shadePath.addLine(to: CGPoint(x: 24 * scale, y: -18 * scale))
+        shadePath.addCurve(to: CGPoint(x: -24 * scale, y: -18 * scale),
+                           controlPoint1: CGPoint(x: 14 * scale, y: -26 * scale),
+                           controlPoint2: CGPoint(x: -14 * scale, y: -26 * scale))
+        shadePath.close()
+        let shade = SKShapeNode(path: shadePath.cgPath)
+        shade.fillColor = UIColor(red: 1.0, green: 0.87, blue: 0.56, alpha: 0.74)
+        shade.strokeColor = UIColor(red: 0.42, green: 0.25, blue: 0.10, alpha: 0.64)
+        shade.lineWidth = 1.2
+        shade.position = CGPoint(x: anchor.x, y: anchor.y - 96 * scale)
+        shade.zPosition = 3.5
+        room.addChild(shade)
+
+        let bulb = SKShapeNode(circleOfRadius: 13 * scale)
+        bulb.fillColor = UIColor(red: 1.0, green: 0.78, blue: 0.32, alpha: 0.68)
+        bulb.strokeColor = UIColor.white.withAlphaComponent(0.28)
+        bulb.lineWidth = 0.8
+        bulb.glowWidth = 5 * scale
+        bulb.position = CGPoint(x: anchor.x, y: anchor.y - 111 * scale)
+        bulb.zPosition = 3.55
+        room.addChild(bulb)
+
+        buildHomeKelpDrop(parent: room,
+                          base: CGPoint(x: anchor.x - 18 * scale, y: anchor.y - 110 * scale),
+                          length: 46 * scale,
+                          z: 3.56)
+    }
+
+    private func buildHomeLeftShelf(room: SKNode) {
+        let baseX = playableRect.minX + playableRect.width * 0.07
+        let baseY = playableRect.minY + playableRect.height * 0.22
+        let shelf = SKShapeNode(rectOf: CGSize(width: playableRect.width * 0.18, height: 18), cornerRadius: 5)
+        shelf.fillColor = UIColor(red: 0.66, green: 0.42, blue: 0.20, alpha: 0.84)
+        shelf.strokeColor = UIColor(red: 0.35, green: 0.22, blue: 0.11, alpha: 0.50)
+        shelf.lineWidth = 0.8
+        shelf.position = CGPoint(x: baseX, y: baseY)
+        shelf.zPosition = 3.5
+        room.addChild(shelf)
+
+        buildHomeBottle(parent: room, position: CGPoint(x: baseX - 46, y: baseY + 24), size: CGSize(width: 22, height: 38), z: 3.6)
+        buildHomeBottle(parent: room, position: CGPoint(x: baseX - 18, y: baseY + 20), size: CGSize(width: 18, height: 30), z: 3.6)
+        buildHomeBottle(parent: room, position: CGPoint(x: baseX + 38, y: baseY - 34), size: CGSize(width: 24, height: 28), z: 3.6)
+        buildHomeSeaPlant(parent: room, base: CGPoint(x: baseX + 56, y: baseY + 16), scale: 0.60, z: 3.65)
+    }
+
+    private func buildHomeRightShelf(room: SKNode) {
+        let baseX = playableRect.maxX - playableRect.width * 0.075
+        let baseY = playableRect.minY + playableRect.height * 0.55
+        let shelf = SKShapeNode(rectOf: CGSize(width: playableRect.width * 0.13, height: 14), cornerRadius: 5)
+        shelf.fillColor = UIColor(red: 0.68, green: 0.43, blue: 0.20, alpha: 0.84)
+        shelf.strokeColor = UIColor(red: 0.34, green: 0.21, blue: 0.10, alpha: 0.50)
+        shelf.lineWidth = 0.8
+        shelf.position = CGPoint(x: baseX, y: baseY)
+        shelf.zPosition = 3.2
+        room.addChild(shelf)
+
+        buildHomeBottle(parent: room, position: CGPoint(x: baseX - 18, y: baseY + 28), size: CGSize(width: 17, height: 34), z: 3.3)
+        buildHomeBottle(parent: room, position: CGPoint(x: baseX + 16, y: baseY + 22), size: CGSize(width: 19, height: 26), z: 3.3)
+        buildHomeSeaPlant(parent: room, base: CGPoint(x: baseX + 50, y: baseY + 10), scale: 0.48, z: 3.35)
+    }
+
+    private func buildHomeBottle(parent: SKNode, position: CGPoint, size: CGSize, z: CGFloat) {
+        let body = SKShapeNode(rectOf: CGSize(width: size.width, height: size.height), cornerRadius: 4)
+        body.fillColor = UIColor(red: 0.11, green: 0.85, blue: 0.93, alpha: 0.44)
+        body.strokeColor = UIColor(red: 0.02, green: 0.42, blue: 0.50, alpha: 0.58)
+        body.lineWidth = 0.8
+        body.position = position
+        body.zPosition = z
+        parent.addChild(body)
+
+        let neck = SKShapeNode(rectOf: CGSize(width: size.width * 0.42, height: size.height * 0.34), cornerRadius: 2)
+        neck.fillColor = UIColor(red: 0.78, green: 0.54, blue: 0.27, alpha: 0.55)
+        neck.strokeColor = UIColor(red: 0.35, green: 0.22, blue: 0.10, alpha: 0.45)
+        neck.lineWidth = 0.6
+        neck.position = CGPoint(x: position.x, y: position.y + size.height * 0.54)
+        neck.zPosition = z + 0.02
+        parent.addChild(neck)
+
+        let shine = SKShapeNode(rectOf: CGSize(width: size.width * 0.22, height: size.height * 0.66), cornerRadius: 2)
+        shine.fillColor = UIColor.white.withAlphaComponent(0.28)
+        shine.strokeColor = .clear
+        shine.position = CGPoint(x: position.x - size.width * 0.22, y: position.y + size.height * 0.02)
+        shine.zPosition = z + 0.04
+        parent.addChild(shine)
+    }
+
+    private func buildHomeSeaPlant(parent: SKNode, base: CGPoint, scale: CGFloat, z: CGFloat) {
+        let tint = UIColor(red: 0.03, green: 0.72, blue: 0.68, alpha: 1)
+        let leaves: [(CGFloat, CGFloat, CGFloat, CGFloat)] = [
+            (-24, 14, -0.72, 38),
+            (-13, 26, -0.38, 48),
+            (0, 30, 0.0, 55),
+            (14, 24, 0.38, 46),
+            (25, 13, 0.68, 36)
+        ]
+        for (dx, dy, rotation, height) in leaves {
+            let leaf = SKShapeNode(ellipseOf: CGSize(width: 13 * scale, height: height * scale))
+            leaf.fillColor = tint.withAlphaComponent(0.46)
+            leaf.strokeColor = tint.withAlphaComponent(0.34)
+            leaf.lineWidth = 0.6
+            leaf.position = CGPoint(x: base.x + dx * scale, y: base.y + dy * scale)
+            leaf.zRotation = rotation
+            leaf.zPosition = z
+            parent.addChild(leaf)
+        }
+    }
+
+    private func buildHomeRockCluster(parent: SKNode, base: CGPoint, scale: CGFloat, z: CGFloat) {
+        let stones: [(CGFloat, CGFloat, CGFloat, CGFloat)] = [
+            (-34, 0, 42, 22),
+            (-5, 7, 36, 24),
+            (24, 1, 48, 25),
+            (54, -5, 30, 17),
+            (-58, -4, 27, 15)
+        ]
+        for (dx, dy, width, height) in stones {
+            let stone = SKShapeNode(ellipseOf: CGSize(width: width * scale, height: height * scale))
+            stone.fillColor = UIColor(red: 0.80, green: 0.71, blue: 0.56, alpha: 0.80)
+            stone.strokeColor = UIColor(red: 0.43, green: 0.31, blue: 0.18, alpha: 0.34)
+            stone.lineWidth = 0.8
+            stone.position = CGPoint(x: base.x + dx * scale, y: base.y + dy * scale)
+            stone.zPosition = z
+            parent.addChild(stone)
+        }
+        buildHomeSeaPlant(parent: parent, base: CGPoint(x: base.x - 26 * scale, y: base.y + 8 * scale), scale: 0.38 * scale, z: z + 0.02)
     }
 
     // MARK: - Movimento e interação
@@ -1725,10 +2135,10 @@ private final class RefugeVillageController {
             behaviorTextValue = "conversando com o comerciante da loja"
             onOpenStore()
             isUserCommandActive = false
-        case .talkToUpgradeNpc:
+        case .talkToTeacherNpc:
             GameAudio.shared.play(.uiOpenPanel)
             settleMermaidIdle()
-            behaviorTextValue = "conversando com o inventor da oficina"
+            behaviorTextValue = "conversando com o professor"
             onOpenEnhancements()
             isUserCommandActive = false
         case .returnToVillage:
@@ -1751,8 +2161,9 @@ private final class RefugeVillageController {
         interiorLayer.alpha = 0
         interiorLayer.run(.fadeIn(withDuration: 0.22))
         charactersLayer.position = .zero
+        displayMermaid?.base.setScale(mermaidBaseScale * homeCameraScale)
         displayMermaid?.base.position = interiorDoorPoint
-        displayMermaid?.setVisualDirection(.left)
+        displayMermaid?.setVisualDirection(.right)
         settleMermaidIdle()
         behaviorTextValue = "dentro da casa, perto da entrada"
         isUserCommandActive = false
@@ -1771,6 +2182,7 @@ private final class RefugeVillageController {
         itemShopInteriorLayer.alpha = 0
         itemShopInteriorLayer.run(.fadeIn(withDuration: 0.22))
         charactersLayer.position = .zero
+        displayMermaid?.base.setScale(mermaidBaseScale)
         displayMermaid?.base.position = itemShopDoorPoint
         displayMermaid?.setVisualDirection(.right)
         settleMermaidIdle()
@@ -1780,7 +2192,7 @@ private final class RefugeVillageController {
 
     private func showUpgradeShopInterior() {
         sceneState = .upgradeShopInterior
-        villageReturnPoint = workshopExteriorDoorPoint
+        villageReturnPoint = teacherExteriorDoorPoint
         hideInteriorLayers(except: upgradeShopInteriorLayer)
         villageLayer.removeAllActions()
         villageLayer.run(.fadeOut(withDuration: 0.18)) { [weak self] in
@@ -1791,10 +2203,11 @@ private final class RefugeVillageController {
         upgradeShopInteriorLayer.alpha = 0
         upgradeShopInteriorLayer.run(.fadeIn(withDuration: 0.22))
         charactersLayer.position = .zero
+        displayMermaid?.base.setScale(mermaidBaseScale)
         displayMermaid?.base.position = upgradeShopDoorPoint
         displayMermaid?.setVisualDirection(.right)
         settleMermaidIdle()
-        behaviorTextValue = "dentro da oficina, perto das bancadas"
+        behaviorTextValue = "dentro da sala do professor, perto da mesa"
         isUserCommandActive = false
     }
 
@@ -1806,6 +2219,7 @@ private final class RefugeVillageController {
         villageLayer.isHidden = false
         villageLayer.alpha = 0
         villageLayer.run(.fadeIn(withDuration: 0.22))
+        displayMermaid?.base.setScale(mermaidBaseScale)
         displayMermaid?.base.position = villageReturnPoint == .zero ? homeExteriorDoorPoint : villageReturnPoint
         updateExteriorCamera(focusing: displayMermaid?.base.position.x ?? plazaPoint.x)
         displayMermaid?.setVisualDirection(.right)
@@ -1838,7 +2252,7 @@ private final class RefugeVillageController {
         case .village: return "nadando pelos caminhos da vila"
         case .homeInterior: return "descansando no quarto de bolhas"
         case .itemShopInterior: return "olhando as prateleiras da loja"
-        case .upgradeShopInterior: return "observando ferramentas da oficina"
+        case .upgradeShopInterior: return "observando materiais de estudo"
         }
     }
 
@@ -1849,8 +2263,8 @@ private final class RefugeVillageController {
                 (plazaPoint, nil),
                 (homeExteriorDoorPoint + CGPoint(x: 34, y: 0), nil),
                 (shopExteriorDoorPoint + CGPoint(x: 36, y: 0), nil),
-                (CGPoint(x: (shopExteriorDoorPoint.x + workshopExteriorDoorPoint.x) / 2, y: lowerLaneY), nil),
-                (workshopExteriorDoorPoint + CGPoint(x: 36, y: 0), nil),
+                (CGPoint(x: (shopExteriorDoorPoint.x + teacherExteriorDoorPoint.x) / 2, y: lowerLaneY), nil),
+                (teacherExteriorDoorPoint + CGPoint(x: 36, y: 0), nil),
                 (homeExteriorDoorPoint, .enterHome)
             ]
             let stop = stops[routineIndex % stops.count]
@@ -1884,10 +2298,10 @@ private final class RefugeVillageController {
         switch interaction {
         case .enterHome: return "nadando até a entrada da própria casa"
         case .enterItemShop: return "indo até a porta da loja"
-        case .enterUpgradeShop: return "indo até a porta da oficina"
+        case .enterUpgradeShop: return "indo até a porta da sala do professor"
         case .restInBedroom: return "indo para o ninho de descanso"
         case .talkToItemShopNpc: return "nadando até o comerciante dentro da loja"
-        case .talkToUpgradeNpc: return "nadando até o inventor dentro da oficina"
+        case .talkToTeacherNpc: return "nadando até o professor"
         case .returnToVillage: return "voltando para a vila"
         }
     }
@@ -1895,7 +2309,7 @@ private final class RefugeVillageController {
     private func expression(for interaction: Interaction?) -> MermaidExpressionName {
         switch interaction {
         case .restInBedroom: return .tired
-        case .talkToItemShopNpc, .talkToUpgradeNpc: return .curious
+        case .talkToItemShopNpc, .talkToTeacherNpc: return .curious
         case .enterHome, .enterItemShop, .enterUpgradeShop, .returnToVillage, nil: return .neutral
         }
     }
@@ -1957,54 +2371,53 @@ private final class RefugeVillageController {
         npc.zPosition = 5
         stage.addChild(npc)
 
-        let body = SKShapeNode(ellipseOf: kind == .itemShop
-                               ? CGSize(width: 42, height: 54)
-                               : CGSize(width: 38, height: 58))
-        body.name = hitName
-        body.fillColor = tint.withAlphaComponent(0.58)
-        body.strokeColor = UIColor.white.withAlphaComponent(0.18)
-        body.lineWidth = 1
-        body.position = CGPoint(x: 0, y: 12)
-        npc.addChild(body)
+        if kind == .teacher {
+            let professor = SKSpriteNode(imageNamed: "ProfessorOctopus")
+            professor.name = hitName
+            professor.size = CGSize(width: 98, height: 138)
+            professor.position = CGPoint(x: 0, y: 28)
+            professor.zPosition = 1
+            npc.addChild(professor)
 
-        let head = SKShapeNode(circleOfRadius: kind == .itemShop ? 18 : 16)
-        head.name = hitName
-        head.fillColor = UIColor.lerp(tint, art.shellPearl, 0.26).withAlphaComponent(0.78)
-        head.strokeColor = UIColor.white.withAlphaComponent(0.22)
-        head.lineWidth = 1
-        head.position = CGPoint(x: 0, y: 44)
-        npc.addChild(head)
-
-        for i in 0..<5 {
-            let appendage = UIBezierPath()
-            appendage.move(to: CGPoint(x: CGFloat(i - 2) * 7, y: -10))
-            appendage.addCurve(to: CGPoint(x: CGFloat(i - 2) * 12, y: -34),
-                               controlPoint1: CGPoint(x: CGFloat(i - 2) * 4, y: -18),
-                               controlPoint2: CGPoint(x: CGFloat(i - 2) * 15, y: -26))
-            let tentacle = SKShapeNode(path: appendage.cgPath)
-            tentacle.name = hitName
-            tentacle.strokeColor = tint.withAlphaComponent(0.58)
-            tentacle.lineWidth = 3.2
-            tentacle.lineCap = .round
-            npc.addChild(tentacle)
-        }
-
-        if kind == .upgradeWorkshop {
-            let goggles = SKShapeNode(rectOf: CGSize(width: 26, height: 10), cornerRadius: 5)
-            goggles.name = hitName
-            goggles.fillColor = art.shadow.withAlphaComponent(0.28)
-            goggles.strokeColor = art.biolume.withAlphaComponent(0.48)
-            goggles.lineWidth = 1
-            goggles.position = CGPoint(x: 0, y: 45)
-            npc.addChild(goggles)
+            professor.run(.repeatForever(.sequence([
+                .group([
+                    .scaleX(to: 1.025, duration: 1.15),
+                    .scaleY(to: 0.985, duration: 1.15)
+                ]),
+                .group([
+                    .scaleX(to: 0.985, duration: 1.15),
+                    .scaleY(to: 1.018, duration: 1.15)
+                ]),
+                .group([
+                    .scaleX(to: 1, duration: 0.65),
+                    .scaleY(to: 1, duration: 0.65)
+                ])
+            ])), withKey: "professor_octopus_idle_distort")
         } else {
-            let satchel = SKShapeNode(rectOf: CGSize(width: 25, height: 18), cornerRadius: 5)
-            satchel.name = hitName
-            satchel.fillColor = GameUI.gold.withAlphaComponent(0.40)
-            satchel.strokeColor = GameUI.coral.withAlphaComponent(0.32)
-            satchel.lineWidth = 1
-            satchel.position = CGPoint(x: 19, y: 11)
-            npc.addChild(satchel)
+            let seller = SKSpriteNode(imageNamed: "SellerSardines")
+            seller.name = hitName
+            seller.size = CGSize(width: 112, height: 178)
+            seller.position = CGPoint(x: 0, y: 34)
+            seller.zPosition = 1
+            npc.addChild(seller)
+
+            seller.run(.repeatForever(.sequence([
+                .group([
+                    .rotate(toAngle: 0.025, duration: 1.2),
+                    .scaleX(to: 1.012, duration: 1.2),
+                    .scaleY(to: 0.992, duration: 1.2)
+                ]),
+                .group([
+                    .rotate(toAngle: -0.025, duration: 1.2),
+                    .scaleX(to: 0.992, duration: 1.2),
+                    .scaleY(to: 1.012, duration: 1.2)
+                ]),
+                .group([
+                    .rotate(toAngle: 0, duration: 0.6),
+                    .scaleX(to: 1, duration: 0.6),
+                    .scaleY(to: 1, duration: 0.6)
+                ])
+            ])), withKey: "seller_sardines_idle")
         }
 
         npc.run(.repeatForever(.sequence([

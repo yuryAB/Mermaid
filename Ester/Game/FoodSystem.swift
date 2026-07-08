@@ -9,6 +9,7 @@
 import Foundation
 import SpriteKit
 import UIKit
+import GameplayKit
 
 // MARK: - Tipos de recurso
 
@@ -45,6 +46,7 @@ final class FoodNode: SKNode {
         super.init()
         buildShape()
         runBobbing()
+        registerEntity()
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -149,6 +151,19 @@ final class FoodNode: SKNode {
         }
         return SKTexture(image: image)
     }
+
+    private func registerEntity() {
+        let entity = GKEntity()
+        let nodeComp = NodeComponent(node: self)
+        let transform = TransformComponent(position: position)
+        let food = FoodComponent(kind: kind)
+        let lifetime = LifetimeComponent(timeToLive: 180)
+        entity.addComponent(nodeComp)
+        entity.addComponent(transform)
+        entity.addComponent(food)
+        entity.addComponent(lifetime)
+        self.entity = entity
+    }
 }
 
 // MARK: - Sistema
@@ -171,6 +186,9 @@ final class FoodSystem {
         foods.removeAll { food in
             if food.position.distance(to: ctx.mermaidPosition) > 4000 {
                 food.removeFromParent()
+                if let em = ctx.entityManager, let entity = food.entity {
+                    em.removeEntity(entity)
+                }
                 return true
             }
             return false
@@ -238,6 +256,9 @@ final class FoodSystem {
         node.run(.fadeIn(withDuration: 0.6))
         world.addChild(node)
         foods.append(node)
+        if let em = ctx.entityManager, let entity = node.entity {
+            em.addEntity(entity)
+        }
         return node
     }
 
@@ -300,6 +321,9 @@ final class FoodSystem {
 
     private func removeNode(_ food: FoodNode) {
         foods.removeAll { $0 === food }
+        if let em = ctx.entityManager, let entity = food.entity {
+            em.removeEntity(entity)
+        }
         food.run(.sequence([
             .group([.scale(to: 0.1, duration: 0.25), .fadeOut(withDuration: 0.25)]),
             .removeFromParent()

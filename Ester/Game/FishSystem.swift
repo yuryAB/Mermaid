@@ -9,6 +9,7 @@
 
 import Foundation
 import SpriteKit
+import GameplayKit
 
 // MARK: - Sistema
 
@@ -44,6 +45,9 @@ final class FishSystem {
         fishes.removeAll { fish in
             if fish.position.distance(to: mermaidPos) > 3600 {
                 fish.removeFromParent()
+                if let em = ctx.entityManager, let entity = fish.entity {
+                    em.removeEntity(entity)
+                }
                 return true
             }
             return false
@@ -84,6 +88,9 @@ final class FishSystem {
         fish.run(.fadeIn(withDuration: 0.8))
         world.addChild(fish)
         fishes.append(fish)
+        if let em = ctx.entityManager, let entity = fish.entity {
+            em.addEntity(entity)
+        }
         ctx.challenges?.decorateSpawn(fish)
         return fish
     }

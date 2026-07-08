@@ -421,10 +421,10 @@ enum MermaidPhase: Int, Codable, CaseIterable, Comparable {
         switch self {
         case .egg: return 0.12
         case .baby: return 0.12
-        case .child: return 0.18
-        case .teen: return 0.28
-        case .young: return 0.4
-        case .adult: return 0.52
+        case .child: return 0.13
+        case .teen: return 0.14
+        case .young: return 0.15
+        case .adult: return 0.17
         }
     }
 
@@ -900,6 +900,7 @@ final class GameContext {
     var stats: MermaidStats!
     weak var scene: GameScene?
     var activeRegion: Region!
+    var entityManager: EntityManager!
     var mermaidEntity: MermaidEntity!
     var depth: DepthSystem!
     var autonomy: AutonomySystem!

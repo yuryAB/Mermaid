@@ -154,14 +154,9 @@ final class BabyMermaidFigure: MermaidFigure {
                             handDegrees: 16, handDuration: 0.4)
         }
 
-        switch mode {
-        case .idle:
+        if mode == .idle {
             visualDirection = nil
             resetDirectionalPose(animated: true)
-        case .swing, .fast:
-            if let visualDirection {
-                applyDirectionalPose(visualDirection, animated: true)
-            }
         }
     }
 
@@ -388,39 +383,38 @@ final class BabyMermaidFigure: MermaidFigure {
                                 swingDegrees: 6,
                                 duration: tempo.hand)
         case .right:
-            applyLateralDirection(flipX: 1, duration: duration, tempo: tempo)
+            move(flip, to: .zero, duration: duration)
+            rotate(flip, toDegrees: 0, duration: duration)
+            runDirectionalTail(centerDegrees: 0, amplitude: 6, duration: tempo.tail)
+            applyCorePose(upperDegrees: 0, waistDegrees: 0, tailX: 0, tailY: 0,
+                          duration: duration)
+            applyPartOffsets(faceX: 12, faceY: 0, hairBackX: 0, hairBackY: 0,
+                             hairFrontX: 0, hairFrontY: 0, headX: 0, headY: 0,
+                             waistX: 0, waistY: 0, duration: duration)
+            keepHairBehindFace()
+            tail.zPosition = rig.tail.z + 1
+            runDirectionalHands(leftPosition: offset(handLeftRestPosition, dx: 4, dy: 0),
+                                rightPosition: offset(handRightRestPosition, dx: -4, dy: 0),
+                                leftZ: 3, rightZ: 3,
+                                leftRestDegrees: -8, rightRestDegrees: 8,
+                                swingDegrees: 8, duration: tempo.hand)
         case .left:
-            applyLateralDirection(flipX: -1, duration: duration, tempo: tempo)
+            move(flip, to: .zero, duration: duration)
+            rotate(flip, toDegrees: 0, duration: duration)
+            runDirectionalTail(centerDegrees: 0, amplitude: 6, duration: tempo.tail)
+            applyCorePose(upperDegrees: 0, waistDegrees: 0, tailX: 0, tailY: 0,
+                          duration: duration)
+            applyPartOffsets(faceX: -12, faceY: 0, hairBackX: 0, hairBackY: 0,
+                             hairFrontX: 0, hairFrontY: 0, headX: 0, headY: 0,
+                             waistX: 0, waistY: 0, duration: duration)
+            keepHairBehindFace()
+            tail.zPosition = rig.tail.z + 1
+            runDirectionalHands(leftPosition: offset(handLeftRestPosition, dx: -4, dy: 0),
+                                rightPosition: offset(handRightRestPosition, dx: 4, dy: 0),
+                                leftZ: 3, rightZ: 3,
+                                leftRestDegrees: 8, rightRestDegrees: -8,
+                                swingDegrees: 8, duration: tempo.hand)
         }
-    }
-
-    private func applyLateralDirection(
-        flipX: CGFloat,
-        duration: Double,
-        tempo: (tail: Double, hand: Double)
-    ) {
-        move(flip, to: .zero, duration: duration)
-        rotate(flip, toDegrees: 0, duration: duration)
-        scaleX(flip, to: flipX, duration: duration)
-        runDirectionalTail(centerDegrees: 0, amplitude: 6, duration: tempo.tail)
-        applyCorePose(upperDegrees: -90,
-                      waistDegrees: 0,
-                      tailX: 0,
-                      tailY: 0,
-                      duration: duration)
-        applyPartOffsets(faceX: 16, faceY: 0, hairBackX: -24, hairBackY: 20,
-                         hairFrontX: -4, hairFrontY: 0, headX: 0, headY: 0,
-                         waistX: 8, waistY: 0, duration: duration)
-        keepHairBehindFace()
-        tail.zPosition = rig.tail.z + 1
-        runDirectionalHands(leftPosition: offset(handLeftRestPosition, dx: 4, dy: 0),
-                            rightPosition: offset(handRightRestPosition, dx: -4, dy: 0),
-                            leftZ: 3,
-                            rightZ: 3,
-                            leftRestDegrees: -12,
-                            rightRestDegrees: 12,
-                            swingDegrees: 8,
-                            duration: tempo.hand)
     }
 
     private func resetDirectionalPose(animated: Bool) {

@@ -1,0 +1,437 @@
+{
+  "AppDelegate.swift": {
+    "mtime": 1780516506.0,
+    "ast_hash": "fa831dc2757269ab389a48af6e11ee90",
+    "semantic_hash": "fa831dc2757269ab389a48af6e11ee90"
+  },
+  "Components/BaseSpriteComponent.swift": {
+    "mtime": 1780516506.0,
+    "ast_hash": "aa35a650f9de97323a1933104510b9f4",
+    "semantic_hash": "aa35a650f9de97323a1933104510b9f4"
+  },
+  "Components/MermaidEmotionComponent.swift": {
+    "mtime": 1782252246.0,
+    "ast_hash": "4965e31a0fb82df3cb233002c6eb978c",
+    "semantic_hash": "4965e31a0fb82df3cb233002c6eb978c"
+  },
+  "Components/MovementComponent.swift": {
+    "mtime": 1780516506.0,
+    "ast_hash": "fd0010e12da28a098866785cdf87cc04",
+    "semantic_hash": "fd0010e12da28a098866785cdf87cc04"
+  },
+  "Entitys/MermaidEntity.swift": {
+    "mtime": 1781205451.0,
+    "ast_hash": "1184a84a4e17558473913580b5937fae",
+    "semantic_hash": "1184a84a4e17558473913580b5937fae"
+  },
+  "Entitys/Model.swift": {
+    "mtime": 1780516506.0,
+    "ast_hash": "b788c39f6b4092daa28c518756b0de76",
+    "semantic_hash": "b788c39f6b4092daa28c518756b0de76"
+  },
+  "Game/AncientRuinsGameScene.swift": {
+    "mtime": 1782177185.0,
+    "ast_hash": "b7488ff221bc3035dece653acd735958",
+    "semantic_hash": "b7488ff221bc3035dece653acd735958"
+  },
+  "Game/AutonomySystem.swift": {
+    "mtime": 1782251967.0,
+    "ast_hash": "368af5a1520b53a9fe87b5d9103924de",
+    "semantic_hash": "368af5a1520b53a9fe87b5d9103924de"
+  },
+  "Game/BanquetOfTidesSystem.swift": {
+    "mtime": 1782190848.0,
+    "ast_hash": "a3780f2c01db079d27be2b8541ce9f0d",
+    "semantic_hash": "a3780f2c01db079d27be2b8541ce9f0d"
+  },
+  "Game/BirthWatersGameScene.swift": {
+    "mtime": 1782177155.0,
+    "ast_hash": "4b72c7f8bb45c9701b98dc2281ff9c66",
+    "semantic_hash": "4b72c7f8bb45c9701b98dc2281ff9c66"
+  },
+  "Game/BubbleClimbOverlay.swift": {
+    "mtime": 1782139576.0,
+    "ast_hash": "dda9e14b9e0e5ef5f4a31c823afe5564",
+    "semantic_hash": "dda9e14b9e0e5ef5f4a31c823afe5564"
+  },
+  "Game/CalmGardenGameScene.swift": {
+    "mtime": 1782177158.0,
+    "ast_hash": "9dfbbac33064eff6d36791e02acd3575",
+    "semantic_hash": "9dfbbac33064eff6d36791e02acd3575"
+  },
+  "Game/CaveMouthGameScene.swift": {
+    "mtime": 1782177179.0,
+    "ast_hash": "442bfeffda0137992582acd30a4c9ffd",
+    "semantic_hash": "442bfeffda0137992582acd30a4c9ffd"
+  },
+  "Game/ChallengeSystem.swift": {
+    "mtime": 1782193120.0,
+    "ast_hash": "5031a88a22ce9c6a4967d931d26cbb20",
+    "semantic_hash": "5031a88a22ce9c6a4967d931d26cbb20"
+  },
+  "Game/CheatSystem.swift": {
+    "mtime": 1782177289.0,
+    "ast_hash": "563690a4e3460129756c73790a93c222",
+    "semantic_hash": "563690a4e3460129756c73790a93c222"
+  },
+  "Game/CrystalFieldsGameScene.swift": {
+    "mtime": 1782177182.0,
+    "ast_hash": "d11337497b129468a9bdd7797391c241",
+    "semantic_hash": "d11337497b129468a9bdd7797391c241"
+  },
+  "Game/DepthSystem.swift": {
+    "mtime": 1782141102.0,
+    "ast_hash": "f66aad7e6bec07bbf51a03f5882060b4",
+    "semantic_hash": "f66aad7e6bec07bbf51a03f5882060b4"
+  },
+  "Game/DistantSurfaceGameScene.swift": {
+    "mtime": 1782177191.0,
+    "ast_hash": "cc8eb20c71204bcf08f30ab478de5ba3",
+    "semantic_hash": "cc8eb20c71204bcf08f30ab478de5ba3"
+  },
+  "Game/EchoMelodySystem.swift": {
+    "mtime": 1782168695.0,
+    "ast_hash": "194ebadd1d02b5e3abfe854c21758201",
+    "semantic_hash": "194ebadd1d02b5e3abfe854c21758201"
+  },
+  "Game/EcosystemBiomeCatalog.swift": {
+    "mtime": 1782181483.0,
+    "ast_hash": "33456300328ea6379a8feff77a5ad264",
+    "semantic_hash": "33456300328ea6379a8feff77a5ad264"
+  },
+  "Game/EmeraldReefGameScene.swift": {
+    "mtime": 1782177161.0,
+    "ast_hash": "2009fe66ae19b66418d809938c65f87b",
+    "semantic_hash": "2009fe66ae19b66418d809938c65f87b"
+  },
+  "Game/EventSystem.swift": {
+    "mtime": 1782252273.0,
+    "ast_hash": "06e9c4019081b617c20c9f676def6777",
+    "semantic_hash": "06e9c4019081b617c20c9f676def6777"
+  },
+  "Game/FishDrawingFactory.swift": {
+    "mtime": 1782195155.0,
+    "ast_hash": "4b9e676ff835f6b2d3fcaf994cac572d",
+    "semantic_hash": "4b9e676ff835f6b2d3fcaf994cac572d"
+  },
+  "Game/FishNode.swift": {
+    "mtime": 1782251908.0,
+    "ast_hash": "562d6b8387bb019f097ebca32e820224",
+    "semantic_hash": "562d6b8387bb019f097ebca32e820224"
+  },
+  "Game/FishSystem.swift": {
+    "mtime": 1782251937.0,
+    "ast_hash": "611092246104673a2a98f4de398a402a",
+    "semantic_hash": "611092246104673a2a98f4de398a402a"
+  },
+  "Game/FishVisualModels.swift": {
+    "mtime": 1782195016.0,
+    "ast_hash": "da0e30a09107700c8abc719af96a99c8",
+    "semantic_hash": "da0e30a09107700c8abc719af96a99c8"
+  },
+  "Game/FoodSystem.swift": {
+    "mtime": 1782135781.0,
+    "ast_hash": "bbfdba27ff5e787fc768e64b979d7c89",
+    "semantic_hash": "bbfdba27ff5e787fc768e64b979d7c89"
+  },
+  "Game/GameplayModels.swift": {
+    "mtime": 1782248046.0,
+    "ast_hash": "5f4fe144fe080a029a6b62b9477d1b64",
+    "semantic_hash": "5f4fe144fe080a029a6b62b9477d1b64"
+  },
+  "Game/GreatDeltaGameScene.swift": {
+    "mtime": 1782177164.0,
+    "ast_hash": "652036850ed8deb1b9838ea3084b77cb",
+    "semantic_hash": "652036850ed8deb1b9838ea3084b77cb"
+  },
+  "Game/GrowthSystem.swift": {
+    "mtime": 1782170835.0,
+    "ast_hash": "0e36c7873829da54179fe152a679fd52",
+    "semantic_hash": "0e36c7873829da54179fe152a679fd52"
+  },
+  "Game/HUDLayer.swift": {
+    "mtime": 1782252261.0,
+    "ast_hash": "40071636f68be7fff54500da06a8c877",
+    "semantic_hash": "40071636f68be7fff54500da06a8c877"
+  },
+  "Game/LivingAbyssGameScene.swift": {
+    "mtime": 1782177188.0,
+    "ast_hash": "a164ed398f06bebf793c3c0ed9597824",
+    "semantic_hash": "a164ed398f06bebf793c3c0ed9597824"
+  },
+  "Game/MapSceneFactory.swift": {
+    "mtime": 1782177153.0,
+    "ast_hash": "3ab65c7fa0e4d70e7d1d7358477a9bfa",
+    "semantic_hash": "3ab65c7fa0e4d70e7d1d7358477a9bfa"
+  },
+  "Game/MermaidAppearance.swift": {
+    "mtime": 1782141083.0,
+    "ast_hash": "85f228a6ece3ddac2c36dd509bebf8a4",
+    "semantic_hash": "85f228a6ece3ddac2c36dd509bebf8a4"
+  },
+  "Game/MermaidFigures/AdultMermaidFigure.swift": {
+    "mtime": 1782250844.0,
+    "ast_hash": "72d70e0ff1ad58752554838083ec5d52",
+    "semantic_hash": "72d70e0ff1ad58752554838083ec5d52"
+  },
+  "Game/MermaidFigures/AdultMermaidRig.swift": {
+    "mtime": 1781124717.0,
+    "ast_hash": "02b46b3359bb9ee01ee361b7d055b429",
+    "semantic_hash": "02b46b3359bb9ee01ee361b7d055b429"
+  },
+  "Game/MermaidFigures/BabyMermaidFigure.swift": {
+    "mtime": 1782251729.0,
+    "ast_hash": "deb7894142323e88cf7d80726aa7fab5",
+    "semantic_hash": "deb7894142323e88cf7d80726aa7fab5"
+  },
+  "Game/MermaidFigures/BabyMermaidRig.swift": {
+    "mtime": 1781128307.0,
+    "ast_hash": "723612b2f7503f99421902c828904e64",
+    "semantic_hash": "723612b2f7503f99421902c828904e64"
+  },
+  "Game/MermaidFigures/ChildMermaidFigure.swift": {
+    "mtime": 1782251729.0,
+    "ast_hash": "3909f05db9ebf1fe2484c5fdceca644c",
+    "semantic_hash": "3909f05db9ebf1fe2484c5fdceca644c"
+  },
+  "Game/MermaidFigures/ChildMermaidRig.swift": {
+    "mtime": 1781129667.0,
+    "ast_hash": "ffe01ccf078e50459436d633e542e1ee",
+    "semantic_hash": "ffe01ccf078e50459436d633e542e1ee"
+  },
+  "Game/MermaidFigures/MermaidRigDebugTool.swift": {
+    "mtime": 1781206634.0,
+    "ast_hash": "a4b697661222ff65cbd138beb9a816f0",
+    "semantic_hash": "a4b697661222ff65cbd138beb9a816f0"
+  },
+  "Game/MermaidFigures/MermaidRigModels.swift": {
+    "mtime": 1781130638.0,
+    "ast_hash": "c7bed23447f75d96c83bd889bb4a1e19",
+    "semantic_hash": "c7bed23447f75d96c83bd889bb4a1e19"
+  },
+  "Game/MermaidFigures/YoungMermaidFigure.swift": {
+    "mtime": 1782250844.0,
+    "ast_hash": "2dfbb0e3910b45ec6eeb1b23236f9811",
+    "semantic_hash": "2dfbb0e3910b45ec6eeb1b23236f9811"
+  },
+  "Game/MermaidFigures/YoungMermaidRig.swift": {
+    "mtime": 1781124690.0,
+    "ast_hash": "2da093b4cb882b07e6f6c1b677218c66",
+    "semantic_hash": "2da093b4cb882b07e6f6c1b677218c66"
+  },
+  "Game/MermaidStats.swift": {
+    "mtime": 1782252346.0,
+    "ast_hash": "d534aa452f4bd6609b2bbe69fb7a1c06",
+    "semantic_hash": "d534aa452f4bd6609b2bbe69fb7a1c06"
+  },
+  "Game/OfflineProgressSystem.swift": {
+    "mtime": 1782177199.0,
+    "ast_hash": "1da1309befcc75f3bfd3acad56ee0ef7",
+    "semantic_hash": "1da1309befcc75f3bfd3acad56ee0ef7"
+  },
+  "Game/OpenBlueSeaGameScene.swift": {
+    "mtime": 1782177174.0,
+    "ast_hash": "25b88e0eff741f0babc052dd4ad12bbc",
+    "semantic_hash": "25b88e0eff741f0babc052dd4ad12bbc"
+  },
+  "Game/ReefAsteroidsSystem.swift": {
+    "mtime": 1782190859.0,
+    "ast_hash": "491cde9c36dfd34eec00a74fb13393cd",
+    "semantic_hash": "491cde9c36dfd34eec00a74fb13393cd"
+  },
+  "Game/RegionSystem.swift": {
+    "mtime": 1782179664.0,
+    "ast_hash": "8585cebd6bc60469421e654224bce16c",
+    "semantic_hash": "8585cebd6bc60469421e654224bce16c"
+  },
+  "Game/RegistroFlowController.swift": {
+    "mtime": 1782234261.0,
+    "ast_hash": "68696cad32b30fb380c5a5f973447783",
+    "semantic_hash": "68696cad32b30fb380c5a5f973447783"
+  },
+  "Game/RegistroSystem.swift": {
+    "mtime": 1782234471.0,
+    "ast_hash": "f96e3b14a592c50cb9d0ff6cc7b68c0c",
+    "semantic_hash": "f96e3b14a592c50cb9d0ff6cc7b68c0c"
+  },
+  "Game/ResourceSupportSystem.swift": {
+    "mtime": 1782181462.0,
+    "ast_hash": "7f816351811ae835eb453a12d22f5a01",
+    "semantic_hash": "7f816351811ae835eb453a12d22f5a01"
+  },
+  "Game/ShellSnapSystem.swift": {
+    "mtime": 1782190818.0,
+    "ast_hash": "865ccc8ff1aade9a3528a45c37141226",
+    "semantic_hash": "865ccc8ff1aade9a3528a45c37141226"
+  },
+  "Game/ShelterSystem.swift": {
+    "mtime": 1782263833.0,
+    "ast_hash": "7dffb0411b41779c7ba308913a4860c8",
+    "semantic_hash": "7dffb0411b41779c7ba308913a4860c8"
+  },
+  "Game/TideMemorySystem.swift": {
+    "mtime": 1782190840.0,
+    "ast_hash": "1d6dd38a34d7ecb8e2126c089c73cdf0",
+    "semantic_hash": "1d6dd38a34d7ecb8e2126c089c73cdf0"
+  },
+  "Game/TideWeavingSystem.swift": {
+    "mtime": 1782177264.0,
+    "ast_hash": "da53c4e84a546f502a966c81adb7d749",
+    "semantic_hash": "da53c4e84a546f502a966c81adb7d749"
+  },
+  "Game/WorldChunkFactory.swift": {
+    "mtime": 1782179717.0,
+    "ast_hash": "36447f1f434ab24873589bc44ca6359c",
+    "semantic_hash": "36447f1f434ab24873589bc44ca6359c"
+  },
+  "Game/WorldEnvironmentModels.swift": {
+    "mtime": 1781989044.0,
+    "ast_hash": "248c925b8a5d9fb845669ad631cc2dd4",
+    "semantic_hash": "248c925b8a5d9fb845669ad631cc2dd4"
+  },
+  "Game/WorldEnvironmentSystem.swift": {
+    "mtime": 1782179694.0,
+    "ast_hash": "8f047ff3a7c20f3cf2eb029b3da6c546",
+    "semantic_hash": "8f047ff3a7c20f3cf2eb029b3da6c546"
+  },
+  "Game/WorldPOINode.swift": {
+    "mtime": 1782177258.0,
+    "ast_hash": "835fec2c443ceeeb772eb70caeed20cb",
+    "semantic_hash": "835fec2c443ceeeb772eb70caeed20cb"
+  },
+  "Game/WorldStampRenderer+Drawing.swift": {
+    "mtime": 1781988797.0,
+    "ast_hash": "cf453f315cbefc29ad33cb460c06a462",
+    "semantic_hash": "cf453f315cbefc29ad33cb460c06a462"
+  },
+  "Game/WorldStampRenderer+GroundCover.swift": {
+    "mtime": 1781989044.0,
+    "ast_hash": "3ff487c8999dd309330294dd2619dbbb",
+    "semantic_hash": "3ff487c8999dd309330294dd2619dbbb"
+  },
+  "Game/WorldStampRenderer+Reef.swift": {
+    "mtime": 1781988797.0,
+    "ast_hash": "301ff1a3074f6386ff272711cf32b926",
+    "semantic_hash": "301ff1a3074f6386ff272711cf32b926"
+  },
+  "Game/WorldStampRenderer+Terrain.swift": {
+    "mtime": 1781996193.0,
+    "ast_hash": "44c91336686a4db03bf45a338cd1ec1c",
+    "semantic_hash": "44c91336686a4db03bf45a338cd1ec1c"
+  },
+  "Game/WorldStampRenderer+Water.swift": {
+    "mtime": 1781988797.0,
+    "ast_hash": "e83dcd61103c7dcf72c6d96c9bcd9a9c",
+    "semantic_hash": "e83dcd61103c7dcf72c6d96c9bcd9a9c"
+  },
+  "Game/WorldStampRenderer.swift": {
+    "mtime": 1781989044.0,
+    "ast_hash": "b89b746ccdd0f80f4f32fa6a8d86b718",
+    "semantic_hash": "b89b746ccdd0f80f4f32fa6a8d86b718"
+  },
+  "Game/WorldTextureCache.swift": {
+    "mtime": 1781998853.0,
+    "ast_hash": "48f11bae349bbf9101cf22ad42f7e55f",
+    "semantic_hash": "48f11bae349bbf9101cf22ad42f7e55f"
+  },
+  "Game/WorldVisualPalette.swift": {
+    "mtime": 1781989044.0,
+    "ast_hash": "2c1d7be30789c0fc70f4482ca4cd8a22",
+    "semantic_hash": "2c1d7be30789c0fc70f4482ca4cd8a22"
+  },
+  "GameScene.swift": {
+    "mtime": 1782234303.0,
+    "ast_hash": "6759fbd9508dba80257909fd079e4e71",
+    "semantic_hash": "6759fbd9508dba80257909fd079e4e71"
+  },
+  "GameViewController.swift": {
+    "mtime": 1781399204.0,
+    "ast_hash": "2ea938f8b865875b7c9e00773768f890",
+    "semantic_hash": "2ea938f8b865875b7c9e00773768f890"
+  },
+  "Managers/AudioManager.swift": {
+    "mtime": 1782167688.0,
+    "ast_hash": "e0a301177f974e8e0eb6bb3c813fef44",
+    "semantic_hash": "e0a301177f974e8e0eb6bb3c813fef44"
+  },
+  "Managers/ColorManager.swift": {
+    "mtime": 1780516506.0,
+    "ast_hash": "155e1f1d3e4f6af90857508ca2fe5018",
+    "semantic_hash": "155e1f1d3e4f6af90857508ca2fe5018"
+  },
+  "Managers/EntityManager.swift": {
+    "mtime": 1780516506.0,
+    "ast_hash": "3a16cb49db2207a4684420564ff81481",
+    "semantic_hash": "3a16cb49db2207a4684420564ff81481"
+  },
+  "Managers/Enums/MovementEnums.swift": {
+    "mtime": 1780516506.0,
+    "ast_hash": "8a297acbcfd88a1398001145359c990f",
+    "semantic_hash": "8a297acbcfd88a1398001145359c990f"
+  },
+  "Managers/Extensions.swift": {
+    "mtime": 1780516506.0,
+    "ast_hash": "50603580c83c67999805fe55b24bd3c6",
+    "semantic_hash": "50603580c83c67999805fe55b24bd3c6"
+  },
+  "Managers/MermaidClasses/Face/MermaidEyebrows.swift": {
+    "mtime": 1780516506.0,
+    "ast_hash": "13c4027120991b75c7b35c9c41d54002",
+    "semantic_hash": "13c4027120991b75c7b35c9c41d54002"
+  },
+  "Managers/MermaidClasses/Face/MermaidEyes.swift": {
+    "mtime": 1781207274.0,
+    "ast_hash": "aed763277504058548e043ddd49dbd85",
+    "semantic_hash": "aed763277504058548e043ddd49dbd85"
+  },
+  "Managers/MermaidClasses/Face/MermaidFace.swift": {
+    "mtime": 1782249037.0,
+    "ast_hash": "9fbdb7e9d9930eafc2ea266404d85968",
+    "semantic_hash": "9fbdb7e9d9930eafc2ea266404d85968"
+  },
+  "Managers/MermaidClasses/Face/MermaidMouth.swift": {
+    "mtime": 1781205445.0,
+    "ast_hash": "331236d0f42894e4fc2bb3b9a41e2266",
+    "semantic_hash": "331236d0f42894e4fc2bb3b9a41e2266"
+  },
+  "Managers/MermaidClasses/Mermaid.swift": {
+    "mtime": 1781208017.0,
+    "ast_hash": "04f1a02ab3dccafe5ceba0dd48f3f444",
+    "semantic_hash": "04f1a02ab3dccafe5ceba0dd48f3f444"
+  },
+  "Managers/MermaidClasses/MermaidArms.swift": {
+    "mtime": 1782251729.0,
+    "ast_hash": "7902a5045c1d89b95933756b1d1510ac",
+    "semantic_hash": "7902a5045c1d89b95933756b1d1510ac"
+  },
+  "Managers/MermaidClasses/MermaidBody.swift": {
+    "mtime": 1782250844.0,
+    "ast_hash": "05e1d0f462bf8cc147f6a0b71d818f04",
+    "semantic_hash": "05e1d0f462bf8cc147f6a0b71d818f04"
+  },
+  "Managers/MermaidClasses/MermaidHead.swift": {
+    "mtime": 1782249024.0,
+    "ast_hash": "883765861ae7f5e7f3422f754348ed8f",
+    "semantic_hash": "883765861ae7f5e7f3422f754348ed8f"
+  },
+  "Managers/Protocols/MovementDirectionProtocol.swift": {
+    "mtime": 1780516506.0,
+    "ast_hash": "665d3dfac3cb9c3ffd9e2626d2a62532",
+    "semantic_hash": "665d3dfac3cb9c3ffd9e2626d2a62532"
+  },
+  "Managers/Protocols/MovementTypeProtocol.swift": {
+    "mtime": 1780516506.0,
+    "ast_hash": "742bc821abbf4d1fd79f449b1eca736c",
+    "semantic_hash": "742bc821abbf4d1fd79f449b1eca736c"
+  },
+  "States/MermaidDirectionStates.swift": {
+    "mtime": 1780516506.0,
+    "ast_hash": "ea176c3386d6d8eca93a53fb092890b9",
+    "semantic_hash": "ea176c3386d6d8eca93a53fb092890b9"
+  },
+  "States/MermaidMovementStates.swift": {
+    "mtime": 1780516506.0,
+    "ast_hash": "4a01115ed222ca5c7752d0f28a23ed65",
+    "semantic_hash": "4a01115ed222ca5c7752d0f28a23ed65"
+  }
+}

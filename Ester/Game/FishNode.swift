@@ -7,6 +7,7 @@
 
 import Foundation
 import SpriteKit
+import GameplayKit
 
 fileprivate enum FishMotionMode {
     case normal
@@ -85,6 +86,31 @@ final class FishNode: SKNode, ChallengeGiver {
         buildShape()
         addChild(container)
         zPosition = CGFloat.random(in: 3...7)
+        registerEntity()
+    }
+
+    private func registerEntity() {
+        let entity = GKEntity()
+        let nodeComp = NodeComponent(node: self)
+        let transform = TransformComponent(position: position)
+        let behavior = FishBehaviorComponent(
+            species: FishSpecies(
+                name: species?.commonName ?? name ?? "peixe",
+                minSize: 30, maxSize: bodyLength, speed: baseSpeed,
+                turnRate: 0.5, colors: [bodyColor], finCount: 2,
+                glowIntensity: (zone == .deep || zone == .abyss || isRare) ? 0.6 : 0
+            ),
+            isRare: isRare
+        )
+        let zoneComp = ZoneComponent(zone: zone)
+        let lifetime = LifetimeComponent(timeToLive: 120)
+
+        entity.addComponent(nodeComp)
+        entity.addComponent(transform)
+        entity.addComponent(behavior)
+        entity.addComponent(zoneComp)
+        entity.addComponent(lifetime)
+        self.entity = entity
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -365,4 +391,3 @@ final class FishNode: SKNode, ChallengeGiver {
         position.y = position.y.clamped(to: (range.lowerBound + 60)...(range.upperBound - 60))
     }
 }
-

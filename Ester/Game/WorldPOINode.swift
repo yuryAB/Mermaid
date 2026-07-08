@@ -5,6 +5,7 @@
 
 import SpriteKit
 import UIKit
+import GameplayKit
 
 final class WorldPOINode: SKNode {
     private enum VisualStyle: Equatable {
@@ -22,6 +23,7 @@ final class WorldPOINode: SKNode {
     }
 
     let poiKey: String
+    private let poiData: WorldPOI
 
     private let artwork: SKNode
     private let title: SKLabelNode
@@ -33,6 +35,7 @@ final class WorldPOINode: SKNode {
     init(poi: WorldPOI, discovered: Bool, rewardCollected: Bool, focused: Bool) {
         let style = Self.visualStyle(for: poi)
         poiKey = poi.key
+        poiData = poi
         baseColor = poi.visual.color
         visualStyle = style
         normalScale = Self.normalScale(for: poi, style: style)
@@ -78,6 +81,18 @@ final class WorldPOINode: SKNode {
         }
 
         update(discovered: discovered, rewardCollected: rewardCollected, focused: focused)
+        registerEntity()
+    }
+
+    private func registerEntity() {
+        let entity = GKEntity()
+        let nodeComp = NodeComponent(node: self)
+        let transform = TransformComponent(position: position)
+        let poiComp = POIComponent(poi: poiData)
+        entity.addComponent(nodeComp)
+        entity.addComponent(transform)
+        entity.addComponent(poiComp)
+        self.entity = entity
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }

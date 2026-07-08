@@ -20,6 +20,24 @@
 - Modal overlays must be true modals: they block background input/update paths through their flow owner and must not rely on scattered guards across unrelated methods.
 - When touching an existing messy area, move responsibility toward the correct owner instead of adding another special case in `GameScene.swift`.
 
+## Knowledge Graph First
+
+- Before any broad code search (scanning directories, grepping blindly, reading files one-by-one to understand structure), consult the project knowledge graph first via `/graphify query "<question>"`.
+- Use the graph to locate the correct files, systems, components, or entities before touching code.
+- Treat `graphify-out/graph.json` as the primary codebase map. Prefer graph traversal over raw file exploration.
+- If no graph exists yet (`graphify-out/graph.json` is missing), the agent must create it immediately by running `/graphify` before doing any code exploration. Never start searching code blind when the graph can be built.
+- Rebuild the graph with `/graphify` after significant refactors, new systems, renamed files, or any session that changed the codebase structure. The agent must proactively rebuild the graph at the end of such sessions — do not wait for the maintainer to ask.
+- If only trivial or single-file edits were made (typo fix, small tweak), skip the rebuild.
+- If `/graphify` is not available in the current environment, install it globally via `uv tool install graphifyy` so it becomes available for all projects using this harness. Do not skip graph queries just because the CLI is missing — install it first.
+
+## Goal Mode Discipline
+
+- When working in goal mode, define a concrete finish condition before doing open-ended exploration.
+- Keep the work objective and bounded: identify the target outcome, make only the changes needed for that outcome, and stop when the condition is met.
+- Do not loop indefinitely through repeated inspections, speculative refinements, or broad cleanup that is not required by the goal.
+- If the goal becomes blocked, state the blocker clearly, explain what information or action is needed, and stop instead of continuing in circles.
+- When the goal is complete, mark it complete and summarize the result, touched files, and any checks that were intentionally not run.
+
 ## Icons And Assets
 
 - Before adding, exporting, renaming, resizing, replacing, or organizing icons/assets, read and follow `docs/ICON_EXPORT_INSTRUCTIONS.md`.

@@ -250,6 +250,7 @@ class GameScene: SKScene {
     private var cameraNode: SKCameraNode!
     private var worldNode: SKNode!
     private var entityManager: EntityManager!
+    private var challengeFlow: ChallengeFlowController!
     private var mermaidEntity: MermaidEntity!
     private var hud: HUDLayer!
     private var plotOverlay: TideWeavingOverlay?
@@ -267,10 +268,10 @@ class GameScene: SKScene {
     private var resourceChoiceMenu: ResourceChoiceOverlay?
     private var refugeStoreOverlay: RefugeStoreOverlay?
     private var registroFlow: RegistroFlowController!
-    private var regionMenu: RegionMenuOverlay?
-    private var refugeOverlay: RefugeOverlay?
+    var regionMenu: RegionMenuOverlay?
+    var refugeOverlay: RefugeOverlay?
     private var refugePortal: RefugePortalNode?
-    private var rigDebugTool: MermaidRigDebugTool?
+    var rigDebugTool: MermaidRigDebugTool?
     private var oceanBackdrop: OceanParallaxBackdrop?
     private var worldChunkManager: WorldChunkManager?
     private var oceanDebugPanel: OceanVisualDebugPanel?
@@ -290,14 +291,14 @@ class GameScene: SKScene {
 #endif
     }
     private let showRigDebugButton = false
-    private var isRegistroOpen: Bool {
+    var isRegistroOpen: Bool {
         registroFlow?.isOpen == true
     }
 
     private let ctx = GameContext()
     private var stats: MermaidStats!
     private var activeRegion: Region!
-    private var activeEcosystemProfile: EcosystemBiomeProfile {
+    var activeEcosystemProfile: EcosystemBiomeProfile {
         return (activeRegion ?? ctx.activeRegion).map { $0.ecosystemProfile } ??
         EcosystemBiomeCatalog.profile(for: "recife_tropical")
     }
@@ -347,6 +348,7 @@ class GameScene: SKScene {
         setupOceanBackdrop()
         setupHUD()
         setupRegistroFlow()
+        setupChallengeFlow()
         setupWarmCurrentOverlay()
         setupOceanDebugPanel()
         setupAmbientBubbles()
@@ -431,7 +433,10 @@ class GameScene: SKScene {
     }
 
     private func setupMermaid() {
-        entityManager = EntityManager()
+        entityManager = EntityManager(worldNode: worldNode)
+        ctx.entityManager = entityManager
+        setupComponentSystems()
+
         mermaidEntity = MermaidEntity()
         entityManager.addEntity(mermaidEntity, to: worldNode)
         ctx.mermaidEntity = mermaidEntity
@@ -445,6 +450,20 @@ class GameScene: SKScene {
         }
         mermaid.setAnimationMode(.idle)
         lastRipplePosition = mermaidEntity.mermaid.base.position
+    }
+
+    private func setupComponentSystems() {
+        let fishMigrationSystem = GKComponentSystem<FishBehaviorComponent>()
+        entityManager.registerComponentSystem(fishMigrationSystem)
+
+        let foodSpawnSystem = GKComponentSystem<FoodComponent>()
+        entityManager.registerComponentSystem(foodSpawnSystem)
+
+        let lifetimeSystem = GKComponentSystem<LifetimeComponent>()
+        entityManager.registerComponentSystem(lifetimeSystem)
+
+        let visualEffectSystem = GKComponentSystem<VisualEffectComponent>()
+        entityManager.registerComponentSystem(visualEffectSystem)
     }
 
     private func setupSystems() {
@@ -526,6 +545,10 @@ class GameScene: SKScene {
                                               setAutonomyPaused: { [weak self] paused in
                                                   self?.ctx.autonomy.paused = paused
                                               })
+    }
+
+    private func setupChallengeFlow() {
+        challengeFlow = ChallengeFlowController(scene: self, ctx: ctx, cameraNode: cameraNode)
     }
 
     private func setupWarmCurrentOverlay() {
@@ -788,6 +811,7 @@ class GameScene: SKScene {
             lastEntryTextZone = ctx.depth.currentZone
             showEntryTextIfNeeded(for: ctx.depth.currentZone)
         }
+        entityManager.update(deltaTime: TimeInterval(dt))
         ctx.food.update(dt: dt)
         ctx.fish.update(dt: dt)
         ctx.events.update(dt: dt)
@@ -796,14 +820,7 @@ class GameScene: SKScene {
         ctx.pois.update(dt: dt)
         updateTemporaryCompanion(dt: dt)
 
-        // desafios modais com tempo/física próprios
-        plotOverlay?.update(dt: dt)
-        climbOverlay?.update(dt: dt)
-        snapOverlay?.update(dt: dt)
-        banquetOverlay?.update(dt: dt)
-        memoryOverlay?.update(dt: dt)
-        echoMelodyOverlay?.update(dt: dt)
-        reefAsteroidsOverlay?.update(dt: dt)
+        challengeFlow.updateOverlays(dt: dt)
 
         // no Refúgio o tempo é gentil: descanso acelerado
         if let refuge = refugeOverlay {
@@ -1084,7 +1101,7 @@ class GameScene: SKScene {
         regionMenu = menu
     }
 
-    private func closeRegionMenu() {
+    func closeRegionMenu() {
         if regionMenu != nil {
             GameAudio.shared.play(.uiClosePanel)
         }
@@ -2349,7 +2366,7 @@ private final class OceanVisualDebugPanel: SKNode {
     }
 }
 
-private final class OceanParallaxBackdrop: SKNode {
+final class OceanParallaxBackdrop: SKNode {
     private let sceneSize: CGSize
     private let depthShaderWash: SKSpriteNode
     private let gradientWash: SKSpriteNode
