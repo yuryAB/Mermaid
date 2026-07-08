@@ -268,9 +268,9 @@ class GameScene: SKScene {
     private var resourceChoiceMenu: ResourceChoiceOverlay?
     private var refugeStoreOverlay: RefugeStoreOverlay?
     private var registroFlow: RegistroFlowController!
+    private var refugeFlow: RefugeFlowController!
     var regionMenu: RegionMenuOverlay?
     var refugeOverlay: RefugeOverlay?
-    private var refugePortal: RefugePortalNode?
     var rigDebugTool: MermaidRigDebugTool?
     private var oceanBackdrop: OceanParallaxBackdrop?
     private var worldChunkManager: WorldChunkManager?
@@ -349,6 +349,7 @@ class GameScene: SKScene {
         setupHUD()
         setupRegistroFlow()
         setupChallengeFlow()
+        setupRefugeFlow()
         setupWarmCurrentOverlay()
         setupOceanDebugPanel()
         setupAmbientBubbles()
@@ -551,6 +552,56 @@ class GameScene: SKScene {
         challengeFlow = ChallengeFlowController(scene: self, ctx: ctx, cameraNode: cameraNode)
     }
 
+    private func setupRefugeFlow() {
+        refugeFlow = RefugeFlowController(
+            ctx: ctx,
+            worldNode: worldNode,
+            cameraNode: cameraNode,
+            mermaidBase: { [weak self] in
+                self?.mermaidEntity.mermaid.base
+            },
+            mermaidScale: { [weak self] in
+                self?.stats.phase.scale ?? 1
+            },
+            restoreMermaidForOverlay: { [weak self] in
+                guard let self else { return }
+                let base = mermaidEntity.mermaid.base
+                base.removeAllActions()
+                base.alpha = 1
+                base.setScale(stats.phase.scale)
+                mermaidEntity.mermaid.applyIdleMoveMode()
+            },
+            canBegin: { [weak self] in
+                guard let self else { return false }
+                return refugeOverlay == nil
+                    && resourceChoiceMenu == nil
+                    && refugeStoreOverlay == nil
+                    && !isRegistroOpen
+                    && poiChallengeOffer == nil
+                    && !isChallengeOpen
+                    && refugeFlow?.isBusy != true
+            },
+            closeBlockingUI: { [weak self] in
+                self?.closeRegionMenu()
+            },
+            sceneSize: { [weak self] in
+                self?.size ?? .zero
+            },
+            safeAreaInsets: { [weak self] in
+                self?.view?.safeAreaInsets ?? .zero
+            },
+            getOverlay: { [weak self] in
+                self?.refugeOverlay
+            },
+            setOverlay: { [weak self] overlay in
+                self?.refugeOverlay = overlay
+            },
+            persistAndSave: { [weak self] in
+                self?.persistAndSave()
+            }
+        )
+    }
+
     private func setupWarmCurrentOverlay() {
         let overlay = SKNode()
         overlay.zPosition = 32
@@ -678,8 +729,6 @@ class GameScene: SKScene {
         closeRegionMenu()
         closeResourceChoiceMenu(playSound: false)
         closeRefuge(resume: false)
-        refugePortal?.close()
-        refugePortal = nil
         ctx.autonomy.cancelRefugeEntry()
         ctx.autonomy.paused = true
 
@@ -1417,90 +1466,16 @@ class GameScene: SKScene {
 
     /// Passo 1: um portal se abre perto da sereia e ela nada até ele.
     func beginRefugeEntry() {
-        guard refugeOverlay == nil,
-              resourceChoiceMenu == nil,
-              refugeStoreOverlay == nil,
-              !isRegistroOpen,
-              poiChallengeOffer == nil,
-              !isChallengeOpen,
-              refugePortal == nil else { return }
-        closeRegionMenu()
-        GameAudio.shared.play(.refugePortalOpen)
-
-        let mermaidPos = ctx.mermaidPosition
-        let angle = CGFloat.random(in: 0...(2 * .pi))
-        let distance = CGFloat.random(in: 260...340)
-        let yRange = ctx.depth.allowedYRange()
-        let portal = RefugePortalNode()
-        portal.position = CGPoint(
-            x: (mermaidPos.x + cos(angle) * distance).clamped(to: World.minX...World.maxX),
-            y: (mermaidPos.y + sin(angle) * distance).clamped(to: yRange)
-        )
-        worldNode.addChild(portal)
-        portal.open()
-        refugePortal = portal
-
-        ctx.autonomy.goToRefugePortal(at: portal.position)
-        ctx.say("Um portal para o Refúgio se abriu ali perto... 🌀")
+        refugeFlow.beginEntry()
     }
 
     /// Passo 2: ela chegou ao portal — entra devagar e some nele.
     func mermaidReachedRefugePortal() {
-        guard let portal = refugePortal else { return }
-        ctx.autonomy.paused = true
-        GameAudio.shared.play(.refugePortalEnter)
-
-        let base = mermaidEntity.mermaid.base
-        let enter = SKAction.group([
-            .move(to: portal.position, duration: 0.6),
-            .scale(to: 0.02, duration: 0.6),
-            .fadeOut(withDuration: 0.6)
-        ])
-        enter.eaeInEaseOut()
-        base.run(.sequence([
-            enter,
-            .wait(forDuration: 0.25),
-            .run { [weak self] in self?.presentRefuge() }
-        ]))
-        portal.close(after: 0.7)
-    }
-
-    /// Passo 3: só agora o Refúgio aparece.
-    private func presentRefuge() {
-        refugePortal = nil
-
-        // restaura o visual dela (fica escondida atrás do overlay)
-        let base = mermaidEntity.mermaid.base
-        base.removeAllActions()
-        base.alpha = 1
-        base.setScale(stats.phase.scale)
-        mermaidEntity.mermaid.applyIdleMoveMode()
-
-        let overlay = RefugeOverlay(size: size,
-                                    insets: view?.safeAreaInsets ?? .zero,
-                                    ctx: ctx,
-                                    onClose: { [weak self] in
-                                        self?.closeRefuge(resume: true)
-                                    })
-        overlay.zPosition = 195
-        cameraNode.addChild(overlay)
-        refugeOverlay = overlay
-        GameAudio.shared.startRefugeAmbience()
+        refugeFlow.mermaidReachedPortal()
     }
 
     private func closeRefuge(resume: Bool) {
-        guard refugeOverlay != nil else { return }
-        GameAudio.shared.play(.uiClosePanel)
-        refugeOverlay?.removeFromParent()
-        refugeOverlay = nil
-        GameAudio.shared.updateOceanAmbience(for: ctx.depth.currentZone)
-        if resume {
-            if stats.phase != .egg {
-                ctx.autonomy.paused = false
-            }
-            persistAndSave()
-            ctx.say("De volta ao oceano, do mesmo lugar de antes 🌊")
-        }
+        refugeFlow.close(resume: resume)
     }
 
     // MARK: - Desafios

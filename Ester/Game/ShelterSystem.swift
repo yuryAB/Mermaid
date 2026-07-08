@@ -391,6 +391,7 @@ private final class RefugeVillageController {
     private let onOpenStore: () -> Void
     private let onOpenEnhancements: () -> Void
     private let onNeedsRefresh: () -> Void
+    private let onStandaloneHomeExit: (() -> Void)?
 
     private var sceneState: SceneState = .village
     private var pendingInteraction: Interaction?
@@ -443,7 +444,8 @@ private final class RefugeVillageController {
          ctx: GameContext,
          onOpenStore: @escaping () -> Void,
          onOpenEnhancements: @escaping () -> Void,
-         onNeedsRefresh: @escaping () -> Void) {
+         onNeedsRefresh: @escaping () -> Void,
+         onStandaloneHomeExit: (() -> Void)? = nil) {
         self.overlaySize = overlaySize
         self.playableRect = playableRect
         self.art = art
@@ -451,6 +453,7 @@ private final class RefugeVillageController {
         self.onOpenStore = onOpenStore
         self.onOpenEnhancements = onOpenEnhancements
         self.onNeedsRefresh = onNeedsRefresh
+        self.onStandaloneHomeExit = onStandaloneHomeExit
         build()
     }
 
@@ -2143,8 +2146,20 @@ private final class RefugeVillageController {
             isUserCommandActive = false
         case .returnToVillage:
             GameAudio.shared.play(.uiConfirm)
-            showVillageExterior()
+            if sceneState == .homeInterior, let onStandaloneHomeExit {
+                isUserCommandActive = false
+                onStandaloneHomeExit()
+            } else {
+                showVillageExterior()
+            }
         }
+        onNeedsRefresh()
+    }
+
+    func openHomeImmediately() {
+        showHomeInterior()
+        suspendRoutineUntilExit = true
+        behaviorTextValue = "dormindo em casa"
         onNeedsRefresh()
     }
 
@@ -2552,13 +2567,257 @@ private final class RefugeVillageController {
     }
 }
 
+private enum RefugeHubLayout {
+    // Center-based screen coordinates: +x moves right, +y moves up.
+    struct LayoutPoint {
+        let x: CGFloat
+        let y: CGFloat
+
+        func point(in rect: CGRect) -> CGPoint {
+            CGPoint(x: rect.midX + rect.width * x,
+                    y: rect.midY + rect.height * y)
+        }
+    }
+
+    struct ScreenSize {
+        let width: CGFloat
+        let height: CGFloat
+
+        func size(in rect: CGRect) -> CGSize {
+            CGSize(width: rect.width * width,
+                   height: rect.height * height)
+        }
+    }
+
+    struct BadgePlacement {
+        let badgeCenter: LayoutPoint
+        let hitCenter: LayoutPoint
+        let hitSize: ScreenSize
+
+        func hitFrame(in rect: CGRect) -> CGRect {
+            let center = hitCenter.point(in: rect)
+            let size = hitSize.size(in: rect)
+            return CGRect(x: center.x - size.width / 2,
+                          y: center.y - size.height / 2,
+                          width: size.width,
+                          height: size.height)
+        }
+    }
+
+    static let house = BadgePlacement(
+        badgeCenter: LayoutPoint(x: -0.30, y: 0.15),
+        hitCenter: LayoutPoint(x: -0.25, y: 0.20),
+        hitSize: ScreenSize(width: 0.42, height: 0.24)
+    )
+
+    static let professor = BadgePlacement(
+        badgeCenter: LayoutPoint(x: -0.35, y: -0.08),
+        hitCenter: LayoutPoint(x: -0.23, y: -0.03),
+        hitSize: ScreenSize(width: 0.36, height: 0.25)
+    )
+
+    static let store = BadgePlacement(
+        badgeCenter: LayoutPoint(x: 0.35, y: 0.10),
+        hitCenter: LayoutPoint(x: 0.27, y: 0.20),
+        hitSize: ScreenSize(width: 0.36, height: 0.24)
+    )
+
+    static let clipboardCenter = LayoutPoint(x: 0.00, y: -0.28)
+    static let backButtonCenter = LayoutPoint(x: 0.00, y: -0.45)
+    static let clipboardHorizontalInset: CGFloat = 22
+
+    static func clipboardHeight(for size: CGSize) -> CGFloat {
+        min(206, max(176, size.height * 0.25))
+    }
+
+    static func clipboardWidth(for size: CGSize) -> CGFloat {
+        size.width - clipboardHorizontalInset * 2
+    }
+}
+
+private final class RefugeDioramaController {
+    enum Location {
+        case house
+        case store
+        case professor
+    }
+
+    let node = SKNode()
+    private let playableRect: CGRect
+    private let onSelect: (Location) -> Void
+    private var hitFrames: [Location: CGRect] = [:]
+    private var behaviorTextValue = "descansando no refúgio"
+
+    var behaviorText: String { behaviorTextValue }
+
+    init(playableRect: CGRect, onSelect: @escaping (Location) -> Void) {
+        self.playableRect = playableRect
+        self.onSelect = onSelect
+        build()
+    }
+
+    func update(dt: CGFloat) {
+    }
+
+    func handleTouch(at point: CGPoint) -> Bool {
+        guard playableRect.contains(point) else { return false }
+        var current: SKNode? = node.atPoint(point)
+        while let candidate = current {
+            if let name = candidate.name {
+                switch name {
+                case "refuge_diorama_house":
+                    select(.house)
+                    return true
+                case "refuge_diorama_store":
+                    select(.store)
+                    return true
+                case "refuge_diorama_professor":
+                    select(.professor)
+                    return true
+                default:
+                    break
+                }
+            }
+            current = candidate.parent
+        }
+
+        for (location, frame) in hitFrames where frame.contains(point) {
+            select(location)
+            return true
+        }
+        return false
+    }
+
+    private func select(_ location: Location) {
+        switch location {
+        case .house:
+            behaviorTextValue = "nadando para casa"
+        case .store:
+            behaviorTextValue = "comprando na loja"
+        case .professor:
+            behaviorTextValue = "visitando o professor"
+        }
+        GameAudio.shared.play(.uiConfirm)
+        onSelect(location)
+    }
+
+    private func build() {
+        node.name = "refuge_diorama_map"
+        let texture = SKTexture(imageNamed: "refuge-diorama")
+        let textureSize = texture.size()
+        let fit = max(playableRect.width / max(textureSize.width, 1),
+                      playableRect.height / max(textureSize.height, 1))
+        let spriteSize = CGSize(width: textureSize.width * fit, height: textureSize.height * fit)
+        let sprite = SKSpriteNode(texture: texture)
+        sprite.name = "refuge_diorama_map"
+        sprite.size = spriteSize
+        sprite.position = CGPoint(x: playableRect.midX, y: playableRect.midY)
+        sprite.zPosition = 1
+        node.addChild(sprite)
+
+        addHotspot(location: .house,
+                   name: "refuge_diorama_house",
+                   title: "Casa",
+                   icon: "house.fill",
+                   fallback: "C",
+                   placement: RefugeHubLayout.house,
+                   tint: GameUI.coral)
+        addHotspot(location: .professor,
+                   name: "refuge_diorama_professor",
+                   title: "Professor",
+                   icon: "graduationcap.fill",
+                   fallback: "P",
+                   placement: RefugeHubLayout.professor,
+                   tint: GameUI.accent)
+        addHotspot(location: .store,
+                   name: "refuge_diorama_store",
+                   title: "Loja",
+                   icon: "shippingbox.fill",
+                   fallback: "L",
+                   placement: RefugeHubLayout.store,
+                   tint: GameUI.gold)
+    }
+
+    private func addHotspot(location: Location,
+                            name: String,
+                            title: String,
+                            icon: String,
+                            fallback: String,
+                            placement: RefugeHubLayout.BadgePlacement,
+                            tint: UIColor) {
+        hitFrames[location] = placement.hitFrame(in: playableRect)
+
+        let tag = GameUI.pill(text: title,
+                              fontSize: 12,
+                              fill: [GameUI.palePaper.withAlphaComponent(0.88)],
+                              strokeColor: tint.withAlphaComponent(0.50),
+                              minWidth: max(74, title.count > 6 ? 106 : 76),
+                              height: 30)
+        tag.name = name
+        tag.position = placement.badgeCenter.point(in: playableRect)
+        tag.zPosition = 6
+        node.addChild(tag)
+
+        let iconNode = GameUI.symbolIconNode(named: icon,
+                                             fallback: fallback,
+                                             color: tint,
+                                             size: 17)
+        iconNode.name = name
+        iconNode.position = CGPoint(x: -tag.calculateAccumulatedFrame().width / 2 + 18, y: 0)
+        iconNode.zPosition = 8
+        tag.addChild(iconNode)
+    }
+}
+
+private final class RefugeHouseInteriorController {
+    let node = SKNode()
+    private let controller: RefugeVillageController
+
+    var behaviorText: String { controller.behaviorText }
+
+    init(overlaySize: CGSize,
+         playableRect: CGRect,
+         art: RefugeArtDirection,
+         ctx: GameContext,
+         onClose: @escaping () -> Void,
+         onNeedsRefresh: @escaping () -> Void) {
+        controller = RefugeVillageController(overlaySize: overlaySize,
+                                             playableRect: playableRect,
+                                             art: art,
+                                             ctx: ctx,
+                                             onOpenStore: {},
+                                             onOpenEnhancements: {},
+                                             onNeedsRefresh: onNeedsRefresh,
+                                             onStandaloneHomeExit: onClose)
+        node.addChild(controller.node)
+        controller.openHomeImmediately()
+    }
+
+    func update(dt: CGFloat) {
+        controller.update(dt: dt)
+    }
+
+    func handleTouch(at point: CGPoint) -> Bool {
+        controller.handleTouch(at: point)
+    }
+}
+
 final class RefugeOverlay: SKNode {
+    private enum Mode {
+        case map
+        case house
+        case store
+        case professor
+    }
+
     unowned let ctx: GameContext
     private let onClose: () -> Void
     private let overlaySize: CGSize
     private let art = RefugeArtDirection.pearlGrotto
     private let uiLayer = SKNode()
-    private var villageController: RefugeVillageController?
+    private var dioramaController: RefugeDioramaController?
+    private var houseController: RefugeHouseInteriorController?
+    private var mode: Mode = .map
 
     private var statusLabel: SKLabelNode!
     private var foodLabel: SKLabelNode!
@@ -2570,6 +2829,7 @@ final class RefugeOverlay: SKNode {
     private var enhancementsOverlay: RefugeEnhancementsOverlay?
     private var storeOverlay: RefugeStoreOverlay?
     private let safeAreaInsets: UIEdgeInsets
+    private var refugeRect = CGRect.zero
 
     init(size: CGSize,
          insets: UIEdgeInsets,
@@ -2590,9 +2850,11 @@ final class RefugeOverlay: SKNode {
 
     private func build(size: CGSize, insets: UIEdgeInsets) {
         let topEdge = size.height / 2 - insets.top
-        let bottomEdge = -size.height / 2 + insets.bottom
-        let sideInset: CGFloat = 22
-        let contentWidth = size.width - sideInset * 2
+        let screenRect = CGRect(x: -size.width / 2,
+                                y: -size.height / 2,
+                                width: size.width,
+                                height: size.height)
+        let contentWidth = RefugeHubLayout.clipboardWidth(for: size)
 
         let backdropSize = CGSize(width: size.width * 2, height: size.height * 2)
         let backdrop = SKShapeNode(rectOf: backdropSize)
@@ -2608,45 +2870,34 @@ final class RefugeOverlay: SKNode {
         buildWaterBands(size: size)
         buildAmbientBubbles(size: size)
 
-        let recordHeight = min(206, max(176, size.height * 0.25))
-        let recordCenterY = bottomEdge + 94 + recordHeight / 2
-        let environmentBottom = recordCenterY + recordHeight / 2 + 20
+        let recordHeight = RefugeHubLayout.clipboardHeight(for: size)
+        let recordCenter = RefugeHubLayout.clipboardCenter.point(in: screenRect)
+        let environmentBottom = recordCenter.y + recordHeight / 2 + 20
         let environmentTop = topEdge - 18
         let environmentHeight = max(220, environmentTop - environmentBottom)
-        let villageRect = CGRect(x: -contentWidth / 2,
-                                 y: environmentBottom,
-                                 width: contentWidth,
-                                 height: environmentHeight)
+        refugeRect = CGRect(x: -contentWidth / 2,
+                            y: environmentBottom,
+                            width: contentWidth,
+                            height: environmentHeight)
 
-        let controller = RefugeVillageController(overlaySize: size,
-                                                 playableRect: villageRect,
-                                                 art: art,
-                                                 ctx: ctx,
-                                                 onOpenStore: { [weak self] in
-                                                     self?.openStore()
-                                                     self?.refreshLabels()
-                                                 },
-                                                 onOpenEnhancements: { [weak self] in
-                                                     self?.openEnhancements()
-                                                     self?.refreshLabels()
-                                                 },
-                                                 onNeedsRefresh: { [weak self] in
-                                                     self?.refreshLabels()
+        let controller = RefugeDioramaController(playableRect: screenRect,
+                                                 onSelect: { [weak self] location in
+                                                     self?.open(location)
                                                  })
         controller.node.zPosition = 2
         addChild(controller.node)
-        villageController = controller
+        dioramaController = controller
 
         buildObservationRecord(width: contentWidth,
                                height: recordHeight,
-                               centerY: recordCenterY)
+                               center: recordCenter)
 
         let closeButton = makeActionButton(name: "refuge_close",
                                            text: "Voltar",
                                            width: min(220, contentWidth * 0.58),
                                            height: 44,
                                            tint: GameUI.accent)
-        closeButton.position = CGPoint(x: 0, y: bottomEdge + 38)
+        closeButton.position = RefugeHubLayout.backButtonCenter.point(in: screenRect)
         closeButton.zPosition = 8
         uiLayer.addChild(closeButton)
 
@@ -2720,25 +2971,26 @@ final class RefugeOverlay: SKNode {
         }
     }
 
-    private func buildObservationRecord(width: CGFloat, height: CGFloat, centerY: CGFloat) {
+    private func buildObservationRecord(width: CGFloat, height: CGFloat, center: CGPoint) {
         let card = GameUI.card(size: CGSize(width: width, height: height),
                                cornerRadius: 10,
                                tint: GameUI.accent.withAlphaComponent(0.72))
-        card.position = CGPoint(x: 0, y: centerY)
+        card.name = "refuge_biologist_record"
+        card.position = center
         card.zPosition = 6
         uiLayer.addChild(card)
 
         let clip = SKShapeNode(rectOf: CGSize(width: 74, height: 18), cornerRadius: 5)
         clip.fillColor = GameUI.gold.withAlphaComponent(0.36)
         clip.strokeColor = GameUI.gold.withAlphaComponent(0.72)
-        clip.position = CGPoint(x: 0, y: height / 2 + 2)
+        clip.position = CGPoint(x: 0, y: height / 2 - 10)
         clip.zPosition = 8
         card.addChild(clip)
 
         let clamp = SKShapeNode(rectOf: CGSize(width: 42, height: 7), cornerRadius: 3)
         clamp.fillColor = art.reefRock.withAlphaComponent(0.48)
         clamp.strokeColor = .clear
-        clamp.position = CGPoint(x: 0, y: height / 2 - 6)
+        clamp.position = CGPoint(x: 0, y: height / 2 - 18)
         clamp.zPosition = 9
         card.addChild(clamp)
 
@@ -2856,13 +3108,21 @@ final class RefugeOverlay: SKNode {
             refreshLabels()
         }
 
-        guard enhancementsOverlay == nil, storeOverlay == nil else { return }
-        villageController?.update(dt: dt)
+        applyRefugeRecovery(dt: dt)
+        switch mode {
+        case .map:
+            guard enhancementsOverlay == nil, storeOverlay == nil else { return }
+            dioramaController?.update(dt: dt)
+        case .house:
+            houseController?.update(dt: dt)
+        case .store, .professor:
+            break
+        }
     }
 
     private func refreshLabels() {
         let stats = ctx.stats!
-        statusLabel.text = "\(stats.phase.displayName) · \(stats.ageText) · repouso observado"
+        statusLabel.text = "\(stats.phase.displayName) · \(stats.ageText)"
         foodLabel.text = ctx.growth.evolutionNote()
         careLabel.text = "Energia \(Int(stats.energy))% · Alimentação \(Int(100 - stats.hunger))%"
         pearlsLabel.text = "Conchas \(GameUI.shellAmountText(stats.pearls))"
@@ -2870,13 +3130,79 @@ final class RefugeOverlay: SKNode {
         memoryLabel.text = memories.isEmpty
             ? "Nenhuma memória registrada. Explore o oceano."
             : memories.joined(separator: "  ·  ")
-        behaviorLabel.text = "Observação: \(villageController?.behaviorText ?? "explorando o refúgio")"
+        behaviorLabel.text = "Observação: \(activityText())"
+    }
+
+    private func applyRefugeRecovery(dt: CGFloat) {
+        let rate: CGFloat
+        switch mode {
+        case .house:
+            rate = 1.8
+        case .map:
+            rate = 0.75
+        case .store, .professor:
+            rate = 0.35
+        }
+        ctx.stats.energy = (ctx.stats.energy + dt * rate).clamped(to: 0...100)
+    }
+
+    private func activityText() -> String {
+        switch mode {
+        case .map:
+            return dioramaController?.behaviorText ?? "Descansando"
+        case .house:
+            return houseController?.behaviorText ?? "Dormindo em casa"
+        case .store:
+            return "Comprando na loja"
+        case .professor:
+            return "Visitando o professor"
+        }
+    }
+
+    private func open(_ location: RefugeDioramaController.Location) {
+        switch location {
+        case .house:
+            openHouse()
+        case .store:
+            openStore()
+        case .professor:
+            openEnhancements()
+        }
+        refreshLabels()
+    }
+
+    private func openHouse() {
+        storeOverlay?.removeFromParent()
+        storeOverlay = nil
+        enhancementsOverlay?.removeFromParent()
+        enhancementsOverlay = nil
+        houseController?.node.removeFromParent()
+        dioramaController?.node.isHidden = true
+        mode = .house
+
+        let house = RefugeHouseInteriorController(overlaySize: overlaySize,
+                                                  playableRect: refugeRect,
+                                                  art: art,
+                                                  ctx: ctx,
+                                                  onClose: { [weak self] in
+                                                      self?.returnToMap(playSound: false)
+                                                  },
+                                                  onNeedsRefresh: { [weak self] in
+                                                      self?.refreshLabels()
+                                                  })
+        house.node.zPosition = 2
+        addChild(house.node)
+        houseController = house
     }
 
     private func openEnhancements() {
         enhancementsOverlay?.removeFromParent()
         storeOverlay?.removeFromParent()
         storeOverlay = nil
+        houseController?.node.removeFromParent()
+        houseController = nil
+        dioramaController?.node.isHidden = false
+        mode = .professor
         let overlay = RefugeEnhancementsOverlay(size: overlaySize,
                                                 insets: safeAreaInsets,
                                                 stats: ctx.stats)
@@ -2889,6 +3215,10 @@ final class RefugeOverlay: SKNode {
         storeOverlay?.removeFromParent()
         enhancementsOverlay?.removeFromParent()
         enhancementsOverlay = nil
+        houseController?.node.removeFromParent()
+        houseController = nil
+        dioramaController?.node.isHidden = false
+        mode = .store
         let overlay = RefugeStoreOverlay(size: overlaySize,
                                          insets: safeAreaInsets,
                                          stats: ctx.stats)
@@ -2897,14 +3227,37 @@ final class RefugeOverlay: SKNode {
         storeOverlay = overlay
     }
 
+    private func returnToMap(playSound: Bool = true) {
+        if playSound {
+            GameAudio.shared.play(.uiClosePanel)
+        }
+        houseController?.node.removeFromParent()
+        houseController = nil
+        storeOverlay?.removeFromParent()
+        storeOverlay = nil
+        enhancementsOverlay?.removeFromParent()
+        enhancementsOverlay = nil
+        dioramaController?.node.isHidden = false
+        mode = .map
+        refreshLabels()
+    }
+
     // MARK: - Toques
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
-        if enhancementsOverlay == nil,
+
+        if mode == .house,
+           houseController?.handleTouch(at: location) == true {
+            refreshLabels()
+            return
+        }
+
+        if mode == .map,
+           enhancementsOverlay == nil,
            storeOverlay == nil,
-           villageController?.handleTouch(at: location) == true {
+           dioramaController?.handleTouch(at: location) == true {
             refreshLabels()
             return
         }
@@ -2913,16 +3266,10 @@ final class RefugeOverlay: SKNode {
         while let current = node {
             switch current.name {
             case "enhancements_close":
-                GameAudio.shared.play(.uiClosePanel)
-                enhancementsOverlay?.removeFromParent()
-                enhancementsOverlay = nil
-                refreshLabels()
+                returnToMap()
                 return
             case "store_close":
-                GameAudio.shared.play(.uiClosePanel)
-                storeOverlay?.removeFromParent()
-                storeOverlay = nil
-                refreshLabels()
+                returnToMap()
                 return
             case let name? where name.hasPrefix("store_item_"):
                 let itemId = String(name.dropFirst("store_item_".count))
@@ -2959,17 +3306,20 @@ final class RefugeOverlay: SKNode {
                 }
                 return
             case "refuge_close":
-                if villageController?.requestReturnToVillage() == true {
-                    GameAudio.shared.play(.uiConfirm)
-                    refreshLabels()
-                    return
+                switch mode {
+                case .map:
+                    onClose()
+                case .house, .store, .professor:
+                    returnToMap()
                 }
-                GameAudio.shared.play(.uiClosePanel)
-                onClose()
                 return
             default:
                 node = current.parent
             }
+        }
+
+        if mode != .map {
+            returnToMap()
         }
     }
 }
@@ -2996,26 +3346,39 @@ final class RefugeEnhancementsOverlay: SKNode {
         addChild(backdrop)
 
         let top = size.height / 2 - insets.top
-        let title = makeLabel(text: "Aprimoramentos", fontSize: 21, bold: true, color: GameUI.ink)
-        title.position = CGPoint(x: 0, y: top - 42)
+        let title = makeLabel(text: "Sala do professor", fontSize: 21, bold: true, color: GameUI.ink)
+        title.position = CGPoint(x: 0, y: top - 38)
         title.zPosition = 2
         addChild(title)
 
-        let subtitle = makeLabel(text: "aprimoramentos comprados com conchas", fontSize: 12, color: GameUI.mutedInk)
-        subtitle.position = CGPoint(x: 0, y: top - 66)
-        subtitle.zPosition = 2
-        addChild(subtitle)
+        let rowWidth = min(size.width - 28, 420)
+        let professor = SKSpriteNode(imageNamed: "ProfessorOctopus")
+        professor.size = CGSize(width: 58, height: 82)
+        professor.position = CGPoint(x: -rowWidth / 2 + 52, y: top - 92)
+        professor.zPosition = 2
+        addChild(professor)
+
+        let greeting = makeLabel(text: "Vamos cuidar dos seus avanços com calma.",
+                                 fontSize: 12,
+                                 color: GameUI.mutedInk)
+        greeting.horizontalAlignmentMode = .left
+        greeting.preferredMaxLayoutWidth = rowWidth - 118
+        greeting.numberOfLines = 2
+        greeting.lineBreakMode = .byWordWrapping
+        greeting.position = CGPoint(x: -rowWidth / 2 + 96, y: top - 72)
+        greeting.zPosition = 2
+        addChild(greeting)
 
         let pearlLine = makeLabel(text: "Conchas \(GameUI.shellAmountText(stats.pearls))", fontSize: 13, bold: true, color: GameUI.gold)
-        pearlLine.position = CGPoint(x: 0, y: top - 92)
+        pearlLine.horizontalAlignmentMode = .left
+        pearlLine.position = CGPoint(x: -rowWidth / 2 + 96, y: top - 112)
         pearlLine.zPosition = 2
         addChild(pearlLine)
 
-        let rowWidth = min(size.width - 28, 420)
         let rowCount = MermaidStats.UpgradeKind.allCases.count
-        let availableHeight = max(390, size.height - insets.top - insets.bottom - 228)
-        let rowHeight = min(90, max(74, availableHeight / CGFloat(rowCount)))
-        let firstY = top - 148
+        let availableHeight = max(330, size.height - insets.top - insets.bottom - 280)
+        let rowHeight = min(84, max(68, availableHeight / CGFloat(rowCount)))
+        let firstY = top - 170
 
         for (index, kind) in MermaidStats.UpgradeKind.allCases.enumerated() {
             addRow(kind: kind,
@@ -3040,7 +3403,6 @@ final class RefugeEnhancementsOverlay: SKNode {
         closeButton.addChild(closeLabel)
         addChild(closeButton)
     }
-
     private func addRow(kind: MermaidStats.UpgradeKind,
                         width: CGFloat,
                         height: CGFloat,

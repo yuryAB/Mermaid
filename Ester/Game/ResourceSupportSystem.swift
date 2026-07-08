@@ -826,26 +826,39 @@ final class RefugeStoreOverlay: SKNode {
         addChild(backdrop)
 
         let top = size.height / 2 - insets.top
+        let rowWidth = min(size.width - 28, 420)
         let title = makeLabel(text: "Loja", fontSize: 21, bold: true, color: GameUI.ink)
-        title.position = CGPoint(x: 0, y: top - 42)
+        title.position = CGPoint(x: 0, y: top - 38)
         title.zPosition = 2
         addChild(title)
 
-        let subtitle = makeLabel(text: "recursos comprados com conchas", fontSize: 12, color: GameUI.mutedInk)
-        subtitle.position = CGPoint(x: 0, y: top - 66)
-        subtitle.zPosition = 2
-        addChild(subtitle)
+        let seller = SKSpriteNode(imageNamed: "SellerSardines")
+        seller.size = CGSize(width: 58, height: 92)
+        seller.position = CGPoint(x: -rowWidth / 2 + 52, y: top - 94)
+        seller.zPosition = 2
+        addChild(seller)
+
+        let greeting = makeLabel(text: "Tenho recursos fresquinhos para ajudar a sereia.",
+                                 fontSize: 12,
+                                 color: GameUI.mutedInk)
+        greeting.horizontalAlignmentMode = .left
+        greeting.preferredMaxLayoutWidth = rowWidth - 118
+        greeting.numberOfLines = 2
+        greeting.lineBreakMode = .byWordWrapping
+        greeting.position = CGPoint(x: -rowWidth / 2 + 96, y: top - 72)
+        greeting.zPosition = 2
+        addChild(greeting)
 
         let pearlLine = makeLabel(text: "Conchas \(GameUI.shellAmountText(stats.pearls))", fontSize: 13, bold: true, color: GameUI.gold)
-        pearlLine.position = CGPoint(x: 0, y: top - 92)
+        pearlLine.horizontalAlignmentMode = .left
+        pearlLine.position = CGPoint(x: -rowWidth / 2 + 96, y: top - 114)
         pearlLine.zPosition = 2
         addChild(pearlLine)
 
-        let rowWidth = min(size.width - 28, 420)
         let items = RefugeShopCatalog.availableItems()
-        let availableHeight = max(390, size.height - insets.top - insets.bottom - 214)
-        let rowHeight = min(88, max(68, availableHeight / CGFloat(items.count)))
-        let firstY = top - 146
+        let availableHeight = max(330, size.height - insets.top - insets.bottom - 280)
+        let rowHeight = min(82, max(64, availableHeight / CGFloat(items.count)))
+        let firstY = top - 172
 
         for (index, item) in items.enumerated() {
             addRow(item: item,
