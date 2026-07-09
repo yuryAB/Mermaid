@@ -320,8 +320,43 @@ Fluxo recomendado:
 3. Remover o chroma-key localmente.
 4. Validar que o PNG final tem alpha real.
 5. Recortar o canvas transparente sobrando antes de colocar em `Assets.xcassets`.
+6. Conferir especialmente a base do movel: o limite inferior do PNG deve encostar
+   no ultimo pixel visivel da ilustracao, sem faixa transparente abaixo dos pes.
 
 O asset final deve ser PNG RGBA com fundo transparente.
+
+## Pos-processamento Do Asset
+
+A imagem final nao deve manter a area verde nem a sobra transparente do canvas
+original. Depois de remover o chroma-key, faca um recorte pelo limite real da
+ilustracao, usando o bounding box dos pixels com alpha visivel.
+
+Use sempre o helper local quando o asset vier de geracao com chroma-key:
+
+```bash
+node Tools/process-furniture-asset.cjs \
+  --input tmp/furniture-chroma.png \
+  --out Ester/Assets.xcassets/MermaidSideboard.imageset/mermaid-sideboard.png
+```
+
+Esse script faz os dois passos obrigatorios:
+
+- remove o chroma-key plano, com key automatica pelas bordas da imagem
+- recorta o PNG final pelo bounding box dos pixels com alpha visivel
+
+Regras:
+
+- corte esquerda, direita, topo e base ate os limites da ilustracao
+- nao deixe faixa transparente abaixo do movel
+- preserve a proporcao da arte; nao estique nem redesenhe para caber
+- valide que os cantos estao transparentes e que a base visual esta no limite
+  inferior do PNG
+- para moveis de chao, esse recorte e essencial porque o jogo usa o bottom do
+  asset como referencia de apoio no piso
+
+Se a imagem ficar com sombra, poeira de chroma-key ou pixels soltos longe do
+movel, limpe esses pixels antes de calcular o recorte. O objetivo e que o canvas
+descreva a ilustracao, nao o espaco vazio onde ela foi gerada.
 
 ## Integracao No Jogo
 
@@ -329,6 +364,7 @@ Quando o movel for para o jogo:
 
 - coloque em `Ester/Assets.xcassets/[NomeDoMovel].imageset/`
 - use nome de asset claro, exemplo: `MermaidSideboard`
-- recorte a area transparente sobrando antes de importar
+- recorte a area transparente sobrando antes de importar, principalmente abaixo
+  dos pes/base
 - preserve a paleta e o nivel de detalhe do restante dos assets
 - valide em escala pequena dentro da tela onde o movel aparece

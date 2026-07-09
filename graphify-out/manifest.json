@@ -1035,8 +1035,8 @@
     "semantic_hash": "f96e3b14a592c50cb9d0ff6cc7b68c0c"
   },
   "Ester/Game/ResourceSupportSystem.swift": {
-    "mtime": 1783566997.0216575,
-    "ast_hash": "2c1b3f51d8a1350d18b37c4c73bc3185",
+    "mtime": 1783569451.221361,
+    "ast_hash": "1311281683f9bfd233d1d0dc11be4d31",
     "semantic_hash": ""
   },
   "Ester/Game/ShellSnapSystem.swift": {
@@ -3040,8 +3040,8 @@
     "semantic_hash": "c2070a2a4df4250551dd974593011644"
   },
   "Ester/Game/MermaidHouseSystem.swift": {
-    "mtime": 1783566980.4574523,
-    "ast_hash": "7c9e2a0ce18f37c7d860d910185f0811",
+    "mtime": 1783569458.7907658,
+    "ast_hash": "691dc0dd92a12d48ea8353eb68538bca",
     "semantic_hash": ""
   },
   "Ester/Game/RefugeFlowController.swift": {
@@ -3155,18 +3155,18 @@
     "semantic_hash": ""
   },
   "Ester/Game/HouseObjectCatalog.swift": {
-    "mtime": 1783566868.9458082,
-    "ast_hash": "2bebbb88265e5f37098cf8988295f0f4",
+    "mtime": 1783569379.295171,
+    "ast_hash": "19d3c3f42a1ed30d5583e940e20cd662",
     "semantic_hash": ""
   },
   "docs/FURNITURE_ART_GUIDE.md": {
-    "mtime": 1783566245.3343887,
-    "ast_hash": "34ea706f54be2ab5cba2528973061228",
+    "mtime": 1783573117.284112,
+    "ast_hash": "df08288aaacb4b0fe964bd99388d45a2",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidSideboard.imageset/mermaid-sideboard.png": {
-    "mtime": 1783566844.745278,
-    "ast_hash": "548170c491c54362b82eebf278fde0a3",
+    "mtime": 1783572890.0227923,
+    "ast_hash": "346d710700e52ef28e4240ab453ec550",
     "semantic_hash": ""
   }
 }

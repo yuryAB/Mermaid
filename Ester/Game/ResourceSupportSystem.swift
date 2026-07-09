@@ -221,6 +221,20 @@ enum RefugeShopCatalog {
     static func item(withId id: String) -> RefugeShopItem? {
         items.first { $0.id == id }
     }
+
+    static func resources(on date: Date = Date()) -> [RefugeShopItem] {
+        availableItems(on: date).filter {
+            if case .resource = $0.purchase { return true }
+            return false
+        }
+    }
+
+    static func furniture(on date: Date = Date()) -> [RefugeShopItem] {
+        availableItems(on: date).filter {
+            if case .houseObject = $0.purchase { return true }
+            return false
+        }
+    }
 }
 
 final class ResourceSupportSystem {
@@ -882,16 +896,36 @@ final class RefugeStoreOverlay: SKNode {
         pearlLine.zPosition = 2
         addChild(pearlLine)
 
-        let items = RefugeShopCatalog.availableItems()
+        let resourceItems = RefugeShopCatalog.resources()
+        let furnitureItems = RefugeShopCatalog.furniture()
+        let sections: [(title: String, items: [RefugeShopItem])] = [
+            ("Recursos", resourceItems),
+            ("Móveis", furnitureItems)
+        ].filter { !$0.items.isEmpty }
+        let itemCount = max(1, sections.reduce(0) { $0 + $1.items.count })
         let availableHeight = max(330, size.height - insets.top - insets.bottom - 280)
-        let rowHeight = min(82, max(64, availableHeight / CGFloat(items.count)))
-        let firstY = top - 172
+        let sectionHeaderHeight: CGFloat = 22
+        let sectionGap: CGFloat = 10
+        let rowGap: CGFloat = 8
+        let reservedForSections = CGFloat(sections.count) * sectionHeaderHeight
+            + CGFloat(max(0, sections.count - 1)) * sectionGap
+            + CGFloat(max(0, itemCount - 1)) * rowGap
+        let rowHeight = min(72, max(54, (availableHeight - reservedForSections) / CGFloat(itemCount)))
+        var cursorY = top - 164
 
-        for (index, item) in items.enumerated() {
-            addRow(item: item,
-                   width: rowWidth,
-                   height: rowHeight - 8,
-                   centerY: firstY - CGFloat(index) * rowHeight)
+        for section in sections {
+            addSectionHeader(title: section.title,
+                             width: rowWidth,
+                             centerY: cursorY)
+            cursorY -= sectionHeaderHeight
+            for item in section.items {
+                addRow(item: item,
+                       width: rowWidth,
+                       height: rowHeight,
+                       centerY: cursorY - rowHeight / 2)
+                cursorY -= rowHeight + rowGap
+            }
+            cursorY -= sectionGap
         }
 
         let closeButton = SKNode()
@@ -937,13 +971,7 @@ final class RefugeStoreOverlay: SKNode {
         iconRing.name = actionName
         row.addChild(iconRing)
 
-        let icon = GameUI.symbolIconNode(named: item.symbolName,
-                                         fallback: item.fallbackGlyph,
-                                         color: item.tint,
-                                         size: 21)
-        icon.position = iconRing.position
-        icon.zPosition = 4
-        row.addChild(icon)
+        addStoreIcon(for: item, in: row, at: iconRing.position, tint: item.tint)
 
         let title = makeLabel(text: item.title, fontSize: 13, bold: true, color: GameUI.ink)
         title.horizontalAlignmentMode = .left
@@ -983,6 +1011,45 @@ final class RefugeStoreOverlay: SKNode {
         label.verticalAlignmentMode = .center
         label.zPosition = 5
         button.addChild(label)
+    }
+
+    private func addSectionHeader(title: String,
+                                  width: CGFloat,
+                                  centerY: CGFloat) {
+        let label = makeLabel(text: title, fontSize: 12, bold: true, color: GameUI.mutedInk)
+        label.horizontalAlignmentMode = .left
+        label.position = CGPoint(x: -width / 2 + 6, y: centerY)
+        label.zPosition = 2
+        addChild(label)
+    }
+
+    private func addStoreIcon(for item: RefugeShopItem,
+                              in row: SKNode,
+                              at position: CGPoint,
+                              tint: UIColor) {
+        if case .houseObject(let definitionID, _) = item.purchase,
+           let definition = HouseObjectCatalog.definition(id: definitionID),
+           let assetName = definition.assetName {
+            let thumbnail = SKSpriteNode(imageNamed: assetName)
+            thumbnail.position = position
+            thumbnail.zPosition = 4
+            let maxSize = CGSize(width: 42, height: 30)
+            let textureSize = thumbnail.texture?.size() ?? thumbnail.size
+            let scale = min(maxSize.width / max(1, textureSize.width),
+                            maxSize.height / max(1, textureSize.height))
+            thumbnail.size = CGSize(width: textureSize.width * scale,
+                                    height: textureSize.height * scale)
+            row.addChild(thumbnail)
+            return
+        }
+
+        let icon = GameUI.symbolIconNode(named: item.symbolName,
+                                         fallback: item.fallbackGlyph,
+                                         color: tint,
+                                         size: 21)
+        icon.position = position
+        icon.zPosition = 4
+        row.addChild(icon)
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

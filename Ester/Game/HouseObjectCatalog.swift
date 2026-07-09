@@ -52,7 +52,7 @@ enum HouseObjectCatalog {
     static func definition(_ definition: HouseObjectDefinition,
                            scaledFor roomSize: CGSize) -> HouseObjectDefinition {
         guard definition.id == mermaidSideboardID else { return definition }
-        let width = roomSize.width * 0.55
+        let width = roomSize.width * 0.28
         let height = width * (2.0 / 3.0)
         return HouseObjectDefinition(
             id: definition.id,

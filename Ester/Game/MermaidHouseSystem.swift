@@ -239,6 +239,11 @@ struct HouseLayoutData: Codable {
     mutating func addObject(_ object: PlacedHouseObject) {
         placedObjects.append(object)
     }
+
+    mutating func updateObject(id: UUID, with object: PlacedHouseObject) {
+        guard let index = placedObjects.firstIndex(where: { $0.id == id }) else { return }
+        placedObjects[index] = object
+    }
 }
 
 // MARK: - Grid <-> world geometry
@@ -1042,6 +1047,7 @@ final class MermaidHouseSceneController {
     private var selectedDemolitionRoom: HouseGridPosition?
     private let placementResolver = HouseObjectPlacementResolver()
     private var activePlacement: ActiveHouseObjectPlacement?
+    private var furnitureEditModeEnabled = false
 
     private let viewportRect: CGRect
     private let defaultZoom: CGFloat
@@ -1120,9 +1126,15 @@ final class MermaidHouseSceneController {
     }
 
     private struct ActiveHouseObjectPlacement {
+        enum Source {
+            case inventory
+            case existing(UUID)
+        }
+
         let definition: HouseObjectDefinition
         let roomPosition: HouseGridPosition
         let surface: HouseSurfaceKind
+        let source: Source
         let previewNode: SKSpriteNode
         var localPoint: CGPoint
         var lastResult: HouseObjectPlacementResult
@@ -1192,6 +1204,7 @@ final class MermaidHouseSceneController {
         // Fixed bottom panel (never moves with the camera).
         node.addChild(panel)
         refreshHouseObjectPanel()
+        refreshPrimaryButtonState()
 
         // Apply the default zoom (room fills the screen) and focus the
         // initial/root room.
@@ -1269,6 +1282,7 @@ final class MermaidHouseSceneController {
                   layout.isOccupied(object.roomPosition) else { continue }
             let definition = HouseObjectCatalog.definition(baseDefinition, scaledFor: metrics.roomSize)
             let node = makeObjectNode(definition: definition)
+            node.name = "placed_house_object_\(object.id.uuidString)"
             let roomCenter = metrics.worldCenter(for: object.roomPosition)
             let size = CGSize(width: definition.defaultSize.width * object.scale,
                               height: definition.defaultSize.height * object.scale)
@@ -1321,7 +1335,7 @@ final class MermaidHouseSceneController {
         let rootCenter = metrics.worldCenter(for: .root)
         mermaid.base.position = CGPoint(x: rootCenter.x,
                                         y: rootCenter.y - metrics.roomSize.height * 0.30)
-        mermaid.base.zPosition = 4
+        mermaid.base.zPosition = 9_000
 
         camera.worldNode.addChild(mermaid.base)
         mermaidAutonomy = HouseMermaidAutonomyController(mermaid: mermaid, metrics: metrics)
@@ -1465,8 +1479,10 @@ final class MermaidHouseSceneController {
             panel.flashBuildButton()
             if activePlacement != nil {
                 cancelActivePlacement(showFeedback: true)
-            } else {
+            } else if selectedDemolitionRoom != nil {
                 performDemolition()
+            } else {
+                toggleFurnitureEditMode()
             }
         } else if panel.backButtonFrame.contains(point) {
             GameAudio.shared.play(.uiClosePanel)
@@ -1483,6 +1499,12 @@ final class MermaidHouseSceneController {
         guard viewportRect.contains(housePoint) else { return }
 
         let worldPoint = camera.worldPoint(fromHousePoint: housePoint)
+        if furnitureEditModeEnabled,
+           let object = placedObject(at: worldPoint) {
+            beginEditingPlacedObject(object)
+            return
+        }
+
         guard let position = metrics.gridPosition(forWorldPoint: worldPoint) else {
             deselectSelection()
             return
@@ -1536,9 +1558,50 @@ final class MermaidHouseSceneController {
         for slot in slotNodes where slot.kind == .valid {
             slot.setSelected(false)
         }
-        panel.setPrimaryButtonText("Demolir cômodo")
-        panel.setPrimaryButtonVisible(false)
+        refreshPrimaryButtonState()
         panel.setSelectionText("Toque em um espaço livre para construir")
+    }
+
+    private func refreshPrimaryButtonState() {
+        guard activePlacement == nil, selectedDemolitionRoom == nil else { return }
+        if !layout.placedObjects.isEmpty {
+            panel.setPrimaryButtonText(furnitureEditModeEnabled ? "Sair da edição" : "Editar móveis")
+            panel.setPrimaryButtonVisible(true)
+        } else {
+            furnitureEditModeEnabled = false
+            panel.setPrimaryButtonText("Demolir cômodo")
+            panel.setPrimaryButtonVisible(false)
+        }
+    }
+
+    private func toggleFurnitureEditMode() {
+        guard activePlacement == nil,
+              selectedDemolitionRoom == nil,
+              !layout.placedObjects.isEmpty else { return }
+        furnitureEditModeEnabled.toggle()
+        panel.setSelectionText(furnitureEditModeEnabled
+            ? "Edição de móveis: toque em um móvel"
+            : "Toque em um espaço livre para construir")
+        refreshPrimaryButtonState()
+        GameAudio.shared.play(furnitureEditModeEnabled ? .uiOpenPanel : .uiClosePanel)
+    }
+
+    private func placedObject(at worldPoint: CGPoint) -> PlacedHouseObject? {
+        layout.placedObjects.reversed().first { object in
+            guard let baseDefinition = HouseObjectCatalog.definition(id: object.definitionID),
+                  layout.isOccupied(object.roomPosition) else { return false }
+            let definition = HouseObjectCatalog.definition(baseDefinition, scaledFor: metrics.roomSize)
+            let roomCenter = metrics.worldCenter(for: object.roomPosition)
+            let size = CGSize(width: definition.defaultSize.width * object.scale,
+                              height: definition.defaultSize.height * object.scale)
+            let center = CGPoint(x: roomCenter.x + object.localPosition.x,
+                                 y: roomCenter.y + object.localPosition.y)
+            let rect = CGRect(x: center.x - size.width / 2,
+                              y: center.y - size.height / 2,
+                              width: size.width,
+                              height: size.height)
+            return rect.contains(worldPoint)
+        }
     }
 
     private func currentVisibleRoomPosition() -> HouseGridPosition? {
@@ -1566,6 +1629,7 @@ final class MermaidHouseSceneController {
 
         selectedSlot = nil
         selectedDemolitionRoom = nil
+        furnitureEditModeEnabled = false
         let definition = HouseObjectCatalog.definition(baseDefinition, scaledFor: metrics.roomSize)
         let mapping = RoomSurfaceMapper.map(roomSize: metrics.roomSize)
         let floor = mapping.floor.localRect
@@ -1587,6 +1651,7 @@ final class MermaidHouseSceneController {
         var placement = ActiveHouseObjectPlacement(definition: definition,
                                                    roomPosition: roomPosition,
                                                    surface: .floor,
+                                                   source: .inventory,
                                                    previewNode: preview,
                                                    localPoint: startPoint,
                                                    lastResult: result)
@@ -1595,6 +1660,42 @@ final class MermaidHouseSceneController {
         panel.setPrimaryButtonText("Cancelar colocação")
         panel.setPrimaryButtonVisible(true)
         panel.setSelectionText("Arraste o móvel no chão e solte")
+        GameAudio.shared.play(.uiOpenPanel)
+    }
+
+    private func beginEditingPlacedObject(_ object: PlacedHouseObject) {
+        guard activePlacement == nil,
+              let baseDefinition = HouseObjectCatalog.definition(id: object.definitionID),
+              layout.isOccupied(object.roomPosition) else { return }
+        let definition = HouseObjectCatalog.definition(baseDefinition, scaledFor: metrics.roomSize)
+        let mapping = RoomSurfaceMapper.map(roomSize: metrics.roomSize)
+        let result = placementResolver.resolve(definition: definition,
+                                               mapping: mapping,
+                                               surface: object.surface,
+                                               point: object.localPosition)
+        guard result.isValid else {
+            panel.showFeedback(result.validationError ?? "Não foi possível editar", success: false)
+            return
+        }
+
+        objectsLayer.childNode(withName: "placed_house_object_\(object.id.uuidString)")?.removeFromParent()
+        let preview = makeObjectNode(definition: definition)
+        preview.alpha = 0.72
+        preview.zPosition = result.zLayer + 1
+        objectsLayer.addChild(preview)
+
+        var placement = ActiveHouseObjectPlacement(definition: definition,
+                                                   roomPosition: object.roomPosition,
+                                                   surface: object.surface,
+                                                   source: .existing(object.id),
+                                                   previewNode: preview,
+                                                   localPoint: object.localPosition,
+                                                   lastResult: result)
+        updatePreviewNode(for: &placement)
+        activePlacement = placement
+        panel.setPrimaryButtonText("Cancelar colocação")
+        panel.setPrimaryButtonVisible(true)
+        panel.setSelectionText("Arraste o móvel e solte")
         GameAudio.shared.play(.uiOpenPanel)
     }
 
@@ -1631,25 +1732,36 @@ final class MermaidHouseSceneController {
             panel.showFeedback(placement.lastResult.validationError ?? "Não foi possível colocar", success: false)
             return
         }
-        guard ctx.stats.spendInventoryItem(id: HouseObjectCatalog.inventoryItemID(placement.definition.id),
-                                           amount: 1,
-                                           autosave: false) else {
-            cancelActivePlacement(showFeedback: false)
-            panel.showFeedback("Móvel sem estoque", success: false)
-            return
+        switch placement.source {
+        case .inventory:
+            guard ctx.stats.spendInventoryItem(id: HouseObjectCatalog.inventoryItemID(placement.definition.id),
+                                               amount: 1,
+                                               autosave: false) else {
+                cancelActivePlacement(showFeedback: false)
+                panel.showFeedback("Móvel sem estoque", success: false)
+                return
+            }
+            let object = PlacedHouseObject(definitionID: placement.definition.id,
+                                           roomPosition: placement.roomPosition,
+                                           surface: placement.lastResult.surface,
+                                           localPosition: placement.lastResult.finalPosition,
+                                           zLayerOverride: placement.lastResult.zLayer)
+            layout.addObject(object)
+        case .existing(let id):
+            let object = PlacedHouseObject(id: id,
+                                           definitionID: placement.definition.id,
+                                           roomPosition: placement.roomPosition,
+                                           surface: placement.lastResult.surface,
+                                           localPosition: placement.lastResult.finalPosition,
+                                           zLayerOverride: placement.lastResult.zLayer)
+            layout.updateObject(id: id, with: object)
         }
-
-        let object = PlacedHouseObject(definitionID: placement.definition.id,
-                                       roomPosition: placement.roomPosition,
-                                       surface: placement.lastResult.surface,
-                                       localPosition: placement.lastResult.finalPosition,
-                                       zLayerOverride: placement.lastResult.zLayer)
-        layout.addObject(object)
         activePlacement = nil
         placement.previewNode.removeFromParent()
-        panel.setPrimaryButtonText("Demolir cômodo")
-        panel.setPrimaryButtonVisible(false)
-        panel.setSelectionText("Toque em um espaço livre para construir")
+        refreshPrimaryButtonState()
+        panel.setSelectionText(furnitureEditModeEnabled
+            ? "Edição de móveis: toque em um móvel"
+            : "Toque em um espaço livre para construir")
         panel.showFeedback("Móvel colocado", success: true)
         GameAudio.shared.play(.uiConfirm)
         ctx.stats.houseLayout = layout
@@ -1661,9 +1773,11 @@ final class MermaidHouseSceneController {
         guard let placement = activePlacement else { return }
         placement.previewNode.removeFromParent()
         activePlacement = nil
-        panel.setPrimaryButtonText("Demolir cômodo")
-        panel.setPrimaryButtonVisible(false)
-        panel.setSelectionText("Toque em um espaço livre para construir")
+        rebuildWorld()
+        refreshPrimaryButtonState()
+        panel.setSelectionText(furnitureEditModeEnabled
+            ? "Edição de móveis: toque em um móvel"
+            : "Toque em um espaço livre para construir")
         if showFeedback {
             panel.showFeedback("Colocação cancelada", success: false)
             GameAudio.shared.play(.uiClosePanel)
@@ -1686,10 +1800,12 @@ final class MermaidHouseSceneController {
         }
 
         selectedDemolitionRoom = nil
+        if layout.placedObjects.isEmpty {
+            furnitureEditModeEnabled = false
+        }
         rebuildWorld()
         panel.setSelectionText("Toque em um espaço livre para construir")
-        panel.setPrimaryButtonText("Demolir cômodo")
-        panel.setPrimaryButtonVisible(false)
+        refreshPrimaryButtonState()
         panel.showFeedback("Cômodo demolido", success: true)
         GameAudio.shared.play(.uiClosePanel)
 
