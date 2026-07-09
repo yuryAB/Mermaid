@@ -31,7 +31,7 @@ enum HousePhysicsCategory {
 
 // MARK: - Surface kinds
 
-enum HouseSurfaceKind: String, CaseIterable {
+enum HouseSurfaceKind: String, Codable, CaseIterable {
     case floor
     case backWall
     case ceiling

@@ -118,15 +118,35 @@ struct HouseRoom: Codable, Hashable {
 /// the UI and any future systems share one source of truth.
 struct HouseLayoutData: Codable {
     var rooms: [HouseRoom]
+    var placedObjects: [PlacedHouseObject]
+
+    private enum CodingKeys: String, CodingKey {
+        case rooms
+        case placedObjects
+    }
 
     /// Creates a fresh layout containing the entrance and the first room to
     /// the right. The third room is the only visible MVP expansion.
     init() {
         self.rooms = HouseMVPPolicy.initialRooms.map { HouseRoom(position: $0, type: .empty) }
+        self.placedObjects = []
     }
 
-    init(rooms: [HouseRoom]) {
+    init(rooms: [HouseRoom], placedObjects: [PlacedHouseObject] = []) {
         self.rooms = rooms
+        self.placedObjects = placedObjects
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        rooms = try c.decodeIfPresent([HouseRoom].self, forKey: .rooms) ?? []
+        placedObjects = try c.decodeIfPresent([PlacedHouseObject].self, forKey: .placedObjects) ?? []
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(rooms, forKey: .rooms)
+        try c.encode(placedObjects, forKey: .placedObjects)
     }
 
     /// Guarantees the invariant that the MVP starting rooms always exist
@@ -212,7 +232,12 @@ struct HouseLayoutData: Codable {
     @discardableResult
     mutating func removeRoom(at position: HouseGridPosition) -> HouseRoom? {
         guard let index = rooms.firstIndex(where: { $0.position == position }) else { return nil }
+        placedObjects.removeAll { $0.roomPosition == position }
         return rooms.remove(at: index)
+    }
+
+    mutating func addObject(_ object: PlacedHouseObject) {
+        placedObjects.append(object)
     }
 }
 
@@ -648,6 +673,7 @@ final class HouseCameraController {
 final class HouseBuildPanel: SKNode {
     let buildButtonName = "house_build_button"
     let backButtonName = "house_back_button"
+    let houseObjectButtonPrefix = "house_object_button_"
 
     private let panelSize: CGSize
     private var buildButtonBackground: SKShapeNode!
@@ -655,11 +681,13 @@ final class HouseBuildPanel: SKNode {
     private var backButtonBackground: SKShapeNode!
     private var feedbackLabel: SKLabelNode!
     private var selectionLabel: SKLabelNode!
+    private var objectRowNodes: [SKNode] = []
 
     /// Frames of the buttons in house-node space, for hit testing (the panel
     /// is added at the bottom of the house node).
     private(set) var buildButtonFrame: CGRect = .zero
     private(set) var backButtonFrame: CGRect = .zero
+    private(set) var houseObjectButtonFrames: [String: CGRect] = [:]
     private(set) var primaryButtonIsVisible = false
 
     init(panelSize: CGSize, bottomCenterY: CGFloat) {
@@ -704,10 +732,10 @@ final class HouseBuildPanel: SKNode {
         feedbackLabel.position = CGPoint(x: 0, y: topY - 34)
         addChild(feedbackLabel)
 
-        // Primary panel action = "Demolir cômodo" (shown only when a built
-        // room is selected). "Construir cômodo" lives on the build slot itself.
+        // Primary panel action = contextual ("Demolir cômodo" / "Cancelar
+        // colocação"). "Construir cômodo" lives on the build slot itself.
         let buildSize = CGSize(width: min(260, panelSize.width - 40), height: 42)
-        let buildCenter = CGPoint(x: 0, y: topY - 66)
+        let buildCenter = CGPoint(x: 0, y: topY - 118)
 
         let buildBg = SKShapeNode(rectOf: buildSize, cornerRadius: 11)
         buildBg.fillColor = UIColor(red: 0.16, green: 0.62, blue: 0.60, alpha: 1)
@@ -731,7 +759,7 @@ final class HouseBuildPanel: SKNode {
 
         // "Voltar" secondary action.
         let backSize = CGSize(width: min(180, panelSize.width - 80), height: 34)
-        let backCenter = CGPoint(x: 0, y: buildCenter.y - buildSize.height / 2 - backSize.height / 2 - 12)
+        let backCenter = CGPoint(x: 0, y: buildCenter.y - buildSize.height / 2 - backSize.height / 2 - 10)
 
         let backBg = SKShapeNode(rectOf: backSize, cornerRadius: 9)
         backBg.fillColor = UIColor(red: 0.10, green: 0.24, blue: 0.34, alpha: 1)
@@ -783,6 +811,82 @@ final class HouseBuildPanel: SKNode {
         primaryButtonIsVisible = visible
         buildButtonBackground.isHidden = !visible
         buildButtonLabel.isHidden = !visible
+    }
+
+    func configureHouseObjects(_ items: [(definition: HouseObjectDefinition, count: Int)]) {
+        for node in objectRowNodes {
+            node.removeFromParent()
+        }
+        objectRowNodes.removeAll()
+        houseObjectButtonFrames.removeAll()
+
+        let visibleItems = items.filter { $0.count > 0 || $0.definition.id == HouseObjectCatalog.mermaidSideboardID }
+        guard !visibleItems.isEmpty else { return }
+
+        let topY = panelSize.height / 2
+        let rowWidth = panelSize.width - 32
+        let rowHeight: CGFloat = 40
+        let rowSpacing: CGFloat = 6
+        let firstY = topY - 68
+
+        for (index, item) in visibleItems.enumerated() {
+            let center = CGPoint(x: 0, y: firstY - CGFloat(index) * (rowHeight + rowSpacing))
+            let name = houseObjectButtonPrefix + item.definition.id
+            let active = item.count > 0
+            let tint = active
+                ? UIColor(red: 0.95, green: 0.54, blue: 0.50, alpha: 1)
+                : UIColor.white.withAlphaComponent(0.34)
+
+            let row = SKNode()
+            row.name = name
+            row.position = center
+            row.zPosition = 6
+            row.alpha = active ? 1 : 0.58
+            addChild(row)
+            objectRowNodes.append(row)
+
+            let bg = SKShapeNode(rectOf: CGSize(width: rowWidth, height: rowHeight), cornerRadius: 10)
+            bg.fillColor = tint.withAlphaComponent(active ? 0.30 : 0.12)
+            bg.strokeColor = tint.withAlphaComponent(active ? 0.75 : 0.35)
+            bg.lineWidth = 1.2
+            bg.name = name
+            row.addChild(bg)
+
+            let icon = GameUI.symbolIconNode(named: "cabinet.fill",
+                                             fallback: "A",
+                                             color: active ? tint : UIColor.white.withAlphaComponent(0.42),
+                                             size: 17)
+            icon.position = CGPoint(x: -rowWidth / 2 + 25, y: 0)
+            icon.zPosition = 3
+            row.addChild(icon)
+
+            let label = SKLabelNode(text: item.definition.displayName)
+            label.fontName = "AvenirNext-DemiBold"
+            label.fontSize = 12
+            label.fontColor = UIColor.white.withAlphaComponent(active ? 0.92 : 0.46)
+            label.horizontalAlignmentMode = .left
+            label.verticalAlignmentMode = .center
+            label.position = CGPoint(x: -rowWidth / 2 + 48, y: 0)
+            label.preferredMaxLayoutWidth = rowWidth - 110
+            label.numberOfLines = 1
+            label.name = name
+            row.addChild(label)
+
+            let count = SKLabelNode(text: "x\(item.count)")
+            count.fontName = "AvenirNext-Bold"
+            count.fontSize = 12
+            count.fontColor = UIColor.white.withAlphaComponent(active ? 0.90 : 0.46)
+            count.horizontalAlignmentMode = .right
+            count.verticalAlignmentMode = .center
+            count.position = CGPoint(x: rowWidth / 2 - 18, y: 0)
+            count.name = name
+            row.addChild(count)
+
+            houseObjectButtonFrames[item.definition.id] = CGRect(x: center.x - rowWidth / 2 + position.x,
+                                                                  y: center.y - rowHeight / 2 + position.y,
+                                                                  width: rowWidth,
+                                                                  height: rowHeight)
+        }
     }
 
     /// Shows a transient pt-BR feedback message.
@@ -928,6 +1032,7 @@ final class MermaidHouseSceneController {
 
     private let cropNode = SKCropNode()
     private var roomBackLayer = SKNode()
+    private var objectsLayer = SKNode()
     private var roomFrontLayer = SKNode()
     private var slotsLayer = SKNode()
     private var mermaidAutonomy: HouseMermaidAutonomyController?
@@ -935,6 +1040,8 @@ final class MermaidHouseSceneController {
     private var slotNodes: [HouseBuildSlotNode] = []
     private var selectedSlot: HouseGridPosition?
     private var selectedDemolitionRoom: HouseGridPosition?
+    private let placementResolver = HouseObjectPlacementResolver()
+    private var activePlacement: ActiveHouseObjectPlacement?
 
     private let viewportRect: CGRect
     private let defaultZoom: CGFloat
@@ -1012,6 +1119,15 @@ final class MermaidHouseSceneController {
         buildScene()
     }
 
+    private struct ActiveHouseObjectPlacement {
+        let definition: HouseObjectDefinition
+        let roomPosition: HouseGridPosition
+        let surface: HouseSurfaceKind
+        let previewNode: SKSpriteNode
+        var localPoint: CGPoint
+        var lastResult: HouseObjectPlacementResult
+    }
+
     // MARK: Scene assembly
 
     private func buildScene() {
@@ -1058,6 +1174,7 @@ final class MermaidHouseSceneController {
         cropNode.addChild(backdrop)
 
         roomBackLayer.zPosition = 1
+        objectsLayer.zPosition = 3
         slotsLayer.zPosition = 2
         // The mermaid rig has child nodes with their own zPositions; keep the
         // front silhouettes far above the whole rig so no body part can draw
@@ -1065,6 +1182,7 @@ final class MermaidHouseSceneController {
         roomFrontLayer.zPosition = 10_000
         camera.worldNode.addChild(slotsLayer)
         camera.worldNode.addChild(roomBackLayer)
+        camera.worldNode.addChild(objectsLayer)
         camera.worldNode.addChild(roomFrontLayer)
         cropNode.addChild(camera.worldNode)
 
@@ -1073,6 +1191,7 @@ final class MermaidHouseSceneController {
 
         // Fixed bottom panel (never moves with the camera).
         node.addChild(panel)
+        refreshHouseObjectPanel()
 
         // Apply the default zoom (room fills the screen) and focus the
         // initial/root room.
@@ -1085,6 +1204,7 @@ final class MermaidHouseSceneController {
     /// rebuild keeps the code simple and correct.
     private func rebuildWorld() {
         roomBackLayer.removeAllChildren()
+        objectsLayer.removeAllChildren()
         roomFrontLayer.removeAllChildren()
         slotsLayer.removeAllChildren()
         slotNodes.removeAll()
@@ -1094,6 +1214,7 @@ final class MermaidHouseSceneController {
             roomBackLayer.addChild(HouseRoomNode(room: room, metrics: metrics))
             roomFrontLayer.addChild(HouseRoomFrontFrameNode(room: room, metrics: metrics))
         }
+        renderPlacedObjects()
 
         if mvpUnlockableSlotIsAvailable {
             let position = HouseMVPPolicy.unlockablePosition
@@ -1112,6 +1233,7 @@ final class MermaidHouseSceneController {
         }
 
         refreshContentBounds()
+        refreshHouseObjectPanel()
     }
 
     private func refreshContentBounds() {
@@ -1139,6 +1261,44 @@ final class MermaidHouseSceneController {
 
     private func availableRoomPositions() -> [HouseGridPosition] {
         visibleBuiltRooms().map(\.position)
+    }
+
+    private func renderPlacedObjects() {
+        for object in layout.placedObjects {
+            guard let baseDefinition = HouseObjectCatalog.definition(id: object.definitionID),
+                  layout.isOccupied(object.roomPosition) else { continue }
+            let definition = HouseObjectCatalog.definition(baseDefinition, scaledFor: metrics.roomSize)
+            let node = makeObjectNode(definition: definition)
+            let roomCenter = metrics.worldCenter(for: object.roomPosition)
+            let size = CGSize(width: definition.defaultSize.width * object.scale,
+                              height: definition.defaultSize.height * object.scale)
+            node.size = size
+            node.position = CGPoint(x: roomCenter.x + object.localPosition.x,
+                                    y: roomCenter.y + object.localPosition.y - size.height / 2)
+            node.zPosition = object.zLayerOverride ?? HouseObjectPlacementResolver.defaultZLayer(for: object.surface)
+            node.zRotation = object.rotation
+            objectsLayer.addChild(node)
+        }
+    }
+
+    private func makeObjectNode(definition: HouseObjectDefinition) -> SKSpriteNode {
+        let node: SKSpriteNode
+        if let assetName = definition.assetName {
+            node = SKSpriteNode(imageNamed: assetName)
+        } else {
+            node = SKSpriteNode(color: GameUI.coral, size: definition.defaultSize)
+        }
+        node.anchorPoint = CGPoint(x: 0.5, y: 0)
+        node.size = definition.defaultSize
+        node.name = "house_object_\(definition.id)"
+        return node
+    }
+
+    private func refreshHouseObjectPanel() {
+        let items = HouseObjectCatalog.shopDefinitions.map {
+            (definition: $0, count: HouseObjectCatalog.inventoryCount(for: $0.id, stats: ctx.stats))
+        }
+        panel.configureHouseObjects(items)
     }
 
     private func installMermaid() {
@@ -1195,6 +1355,9 @@ final class MermaidHouseSceneController {
             gestureDidPinch = false
             gestureStartedOnPanel = panel.panelFrame.contains(point)
             panLastPoint = point
+            if activePlacement != nil && viewportRect.contains(point) {
+                updateActivePlacement(toHousePoint: point)
+            }
         }
 
         if activeTouches.count >= 2 {
@@ -1223,7 +1386,9 @@ final class MermaidHouseSceneController {
             if let last = panLastPoint {
                 let delta = CGPoint(x: point.x - last.x, y: point.y - last.y)
                 gestureAccumulated += abs(delta.x) + abs(delta.y)
-                if !gestureStartedOnPanel {
+                if activePlacement != nil {
+                    updateActivePlacement(toHousePoint: point)
+                } else if !gestureStartedOnPanel {
                     camera.pan(by: delta)
                 }
             }
@@ -1241,9 +1406,15 @@ final class MermaidHouseSceneController {
             if wasTap, let point = gestureStartPoint {
                 if gestureStartedOnPanel {
                     handlePanelTap(at: point)
+                } else if activePlacement != nil {
+                    updateActivePlacement(toHousePoint: point)
+                    finalizeActivePlacement()
                 } else {
                     handleWorldTap(at: point)
                 }
+            } else if activePlacement != nil, let point = panLastPoint ?? gestureStartPoint {
+                updateActivePlacement(toHousePoint: point)
+                finalizeActivePlacement()
             }
             resetGesture()
         } else if activeTouches.count == 1 {
@@ -1292,10 +1463,16 @@ final class MermaidHouseSceneController {
         // "Construir cômodo" now lives on the build slot itself.
         if panel.primaryButtonIsVisible && panel.buildButtonFrame.contains(point) {
             panel.flashBuildButton()
-            performDemolition()
+            if activePlacement != nil {
+                cancelActivePlacement(showFeedback: true)
+            } else {
+                performDemolition()
+            }
         } else if panel.backButtonFrame.contains(point) {
             GameAudio.shared.play(.uiClosePanel)
             onExit()
+        } else if let definitionID = panel.houseObjectButtonFrames.first(where: { $0.value.contains(point) })?.key {
+            beginPlacement(definitionID: definitionID)
         }
     }
 
@@ -1353,6 +1530,7 @@ final class MermaidHouseSceneController {
     }
 
     private func deselectSelection() {
+        guard activePlacement == nil else { return }
         selectedSlot = nil
         selectedDemolitionRoom = nil
         for slot in slotNodes where slot.kind == .valid {
@@ -1361,6 +1539,135 @@ final class MermaidHouseSceneController {
         panel.setPrimaryButtonText("Demolir cômodo")
         panel.setPrimaryButtonVisible(false)
         panel.setSelectionText("Toque em um espaço livre para construir")
+    }
+
+    private func currentVisibleRoomPosition() -> HouseGridPosition? {
+        let visibleRooms = visibleBuiltRooms()
+        guard !visibleRooms.isEmpty else { return nil }
+        let center = camera.worldPoint(fromHousePoint: CGPoint(x: viewportRect.midX, y: viewportRect.midY))
+        return visibleRooms.min { lhs, rhs in
+            metrics.worldCenter(for: lhs.position).distance(to: center)
+                < metrics.worldCenter(for: rhs.position).distance(to: center)
+        }?.position
+    }
+
+    private func beginPlacement(definitionID: String) {
+        guard activePlacement == nil else { return }
+        guard HouseObjectCatalog.inventoryCount(for: definitionID, stats: ctx.stats) > 0 else {
+            panel.showFeedback("Móvel sem estoque", success: false)
+            return
+        }
+        guard let baseDefinition = HouseObjectCatalog.definition(id: definitionID),
+              let roomPosition = currentVisibleRoomPosition(),
+              layout.isOccupied(roomPosition) else {
+            panel.showFeedback("Abra um cômodo para colocar", success: false)
+            return
+        }
+
+        selectedSlot = nil
+        selectedDemolitionRoom = nil
+        let definition = HouseObjectCatalog.definition(baseDefinition, scaledFor: metrics.roomSize)
+        let mapping = RoomSurfaceMapper.map(roomSize: metrics.roomSize)
+        let floor = mapping.floor.localRect
+        let startPoint = CGPoint(x: floor.midX, y: floor.midY)
+        let result = placementResolver.resolve(definition: definition,
+                                               mapping: mapping,
+                                               surface: .floor,
+                                               point: startPoint)
+        guard result.isValid else {
+            panel.showFeedback(result.validationError ?? "Não foi possível colocar", success: false)
+            return
+        }
+
+        let preview = makeObjectNode(definition: definition)
+        preview.alpha = 0.72
+        preview.zPosition = result.zLayer + 1
+        objectsLayer.addChild(preview)
+
+        var placement = ActiveHouseObjectPlacement(definition: definition,
+                                                   roomPosition: roomPosition,
+                                                   surface: .floor,
+                                                   previewNode: preview,
+                                                   localPoint: startPoint,
+                                                   lastResult: result)
+        updatePreviewNode(for: &placement)
+        activePlacement = placement
+        panel.setPrimaryButtonText("Cancelar colocação")
+        panel.setPrimaryButtonVisible(true)
+        panel.setSelectionText("Arraste o móvel no chão e solte")
+        GameAudio.shared.play(.uiOpenPanel)
+    }
+
+    private func updateActivePlacement(toHousePoint housePoint: CGPoint) {
+        guard var placement = activePlacement else { return }
+        let worldPoint = camera.worldPoint(fromHousePoint: housePoint)
+        let roomCenter = metrics.worldCenter(for: placement.roomPosition)
+        let localPoint = CGPoint(x: worldPoint.x - roomCenter.x,
+                                 y: worldPoint.y - roomCenter.y)
+        let mapping = RoomSurfaceMapper.map(roomSize: metrics.roomSize)
+        let result = placementResolver.resolve(definition: placement.definition,
+                                               mapping: mapping,
+                                               surface: placement.surface,
+                                               point: localPoint)
+        placement.localPoint = localPoint
+        placement.lastResult = result
+        updatePreviewNode(for: &placement)
+        activePlacement = placement
+    }
+
+    private func updatePreviewNode(for placement: inout ActiveHouseObjectPlacement) {
+        let roomCenter = metrics.worldCenter(for: placement.roomPosition)
+        let position = placement.lastResult.isValid ? placement.lastResult.finalPosition : placement.localPoint
+        placement.previewNode.position = CGPoint(x: roomCenter.x + position.x,
+                                                 y: roomCenter.y + position.y - placement.definition.defaultSize.height / 2)
+        placement.previewNode.size = placement.definition.defaultSize
+        placement.previewNode.color = placement.lastResult.isValid ? .clear : UIColor.red
+        placement.previewNode.colorBlendFactor = placement.lastResult.isValid ? 0 : 0.35
+    }
+
+    private func finalizeActivePlacement() {
+        guard let placement = activePlacement else { return }
+        guard placement.lastResult.isValid else {
+            panel.showFeedback(placement.lastResult.validationError ?? "Não foi possível colocar", success: false)
+            return
+        }
+        guard ctx.stats.spendInventoryItem(id: HouseObjectCatalog.inventoryItemID(placement.definition.id),
+                                           amount: 1,
+                                           autosave: false) else {
+            cancelActivePlacement(showFeedback: false)
+            panel.showFeedback("Móvel sem estoque", success: false)
+            return
+        }
+
+        let object = PlacedHouseObject(definitionID: placement.definition.id,
+                                       roomPosition: placement.roomPosition,
+                                       surface: placement.lastResult.surface,
+                                       localPosition: placement.lastResult.finalPosition,
+                                       zLayerOverride: placement.lastResult.zLayer)
+        layout.addObject(object)
+        activePlacement = nil
+        placement.previewNode.removeFromParent()
+        panel.setPrimaryButtonText("Demolir cômodo")
+        panel.setPrimaryButtonVisible(false)
+        panel.setSelectionText("Toque em um espaço livre para construir")
+        panel.showFeedback("Móvel colocado", success: true)
+        GameAudio.shared.play(.uiConfirm)
+        ctx.stats.houseLayout = layout
+        persist()
+        rebuildWorld()
+    }
+
+    private func cancelActivePlacement(showFeedback: Bool) {
+        guard let placement = activePlacement else { return }
+        placement.previewNode.removeFromParent()
+        activePlacement = nil
+        panel.setPrimaryButtonText("Demolir cômodo")
+        panel.setPrimaryButtonVisible(false)
+        panel.setSelectionText("Toque em um espaço livre para construir")
+        if showFeedback {
+            panel.showFeedback("Colocação cancelada", success: false)
+            GameAudio.shared.play(.uiClosePanel)
+        }
     }
 
     private func performDemolition() {

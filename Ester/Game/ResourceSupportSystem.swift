@@ -131,6 +131,7 @@ enum SupportResourceKind: String, CaseIterable, Codable, Equatable {
 
 enum RefugeShopPurchase {
     case resource(SupportResourceKind, quantity: Int)
+    case houseObject(String, quantity: Int)
 }
 
 struct RefugeShopItem {
@@ -186,6 +187,14 @@ enum RefugeShopCatalog {
                        symbolName: SupportResourceKind.coralToy.symbolName,
                        fallbackGlyph: SupportResourceKind.coralToy.glyph,
                        purchase: .resource(.coralToy, quantity: 1)),
+        RefugeShopItem(id: "mermaid_sideboard",
+                       title: "Aparador sereia",
+                       blurb: "Móvel de chão para decorar a casa.",
+                       cost: 200,
+                       tint: UIColor(red: 0.95, green: 0.54, blue: 0.50, alpha: 1),
+                       symbolName: "cabinet.fill",
+                       fallbackGlyph: "A",
+                       purchase: .houseObject(HouseObjectCatalog.mermaidSideboardID, quantity: 1)),
         RefugeShopItem(id: "growth_potion",
                        title: "Porção acelerar",
                        blurb: "Adiantam 1 hora da espera de crescimento.",
@@ -321,6 +330,24 @@ final class ResourceSupportSystem {
             ctx.stats.addMemory("Comprou \(item.title) na Loja")
             ctx.stats.save(immediately: true)
             ctx.say("\(item.title) guardado no painel Recursos.")
+            GameAudio.shared.play(.uiUpgradeBuy)
+            return true
+        case .houseObject(let definitionID, let quantity):
+            guard let definition = HouseObjectCatalog.definition(id: definitionID) else {
+                ctx.say("Este móvel ainda não está disponível.")
+                return false
+            }
+            guard ctx.stats.spendPearls(item.cost, autosave: false) else {
+                ctx.say("\(item.title) custa \(GameUI.shellAmountText(item.cost)) conchas. Faltam \(GameUI.shellAmountText(item.cost - ctx.stats.pearls)) conchas.")
+                return false
+            }
+            ctx.stats.addInventoryItem(id: HouseObjectCatalog.inventoryItemID(definitionID),
+                                       amount: quantity,
+                                       memoryText: "Guardou \(definition.displayName)",
+                                       autosave: false)
+            ctx.stats.addMemory("Comprou \(item.title) na Loja")
+            ctx.stats.save(immediately: true)
+            ctx.say("\(definition.displayName) guardado no painel da casa.")
             GameAudio.shared.play(.uiUpgradeBuy)
             return true
         }

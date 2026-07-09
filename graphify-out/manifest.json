@@ -1035,9 +1035,9 @@
     "semantic_hash": "f96e3b14a592c50cb9d0ff6cc7b68c0c"
   },
   "Ester/Game/ResourceSupportSystem.swift": {
-    "mtime": 1783543665.7532089,
-    "ast_hash": "f4d83c91301192cfb18d6256ea1306b2",
-    "semantic_hash": "f4d83c91301192cfb18d6256ea1306b2"
+    "mtime": 1783566997.0216575,
+    "ast_hash": "2c1b3f51d8a1350d18b37c4c73bc3185",
+    "semantic_hash": ""
   },
   "Ester/Game/ShellSnapSystem.swift": {
     "mtime": 1782190818.899371,
@@ -3040,8 +3040,8 @@
     "semantic_hash": "c2070a2a4df4250551dd974593011644"
   },
   "Ester/Game/MermaidHouseSystem.swift": {
-    "mtime": 1783560345.6490755,
-    "ast_hash": "545a8840fbaa69c0ead42c20ef415a3d",
+    "mtime": 1783566980.4574523,
+    "ast_hash": "7c9e2a0ce18f37c7d860d910185f0811",
     "semantic_hash": ""
   },
   "Ester/Game/RefugeFlowController.swift": {
@@ -3140,13 +3140,33 @@
     "semantic_hash": "ffa1edb28e22d7c4b7146a6951b6821f"
   },
   "Ester/Game/RoomSurfaceMapper.swift": {
-    "mtime": 1783560581.9617147,
-    "ast_hash": "186b851b3ece141c9800ea088029abd9",
+    "mtime": 1783562741.8203745,
+    "ast_hash": "b63c6a19b9d7f38baba0b57035ea21f5",
     "semantic_hash": ""
   },
   "Ester/Game/HouseObjectPlacementSystem.swift": {
     "mtime": 1783561921.489889,
     "ast_hash": "b7222fd42821132625c53831a73255fb",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSideboard.imageset/Contents.json": {
+    "mtime": 1783566856.439004,
+    "ast_hash": "973e9339177d28730db3f7f684619eb5",
+    "semantic_hash": ""
+  },
+  "Ester/Game/HouseObjectCatalog.swift": {
+    "mtime": 1783566868.9458082,
+    "ast_hash": "2bebbb88265e5f37098cf8988295f0f4",
+    "semantic_hash": ""
+  },
+  "docs/FURNITURE_ART_GUIDE.md": {
+    "mtime": 1783566245.3343887,
+    "ast_hash": "34ea706f54be2ab5cba2528973061228",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSideboard.imageset/mermaid-sideboard.png": {
+    "mtime": 1783566844.745278,
+    "ast_hash": "548170c491c54362b82eebf278fde0a3",
     "semantic_hash": ""
   }
 }
