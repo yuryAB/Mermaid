@@ -1035,8 +1035,8 @@
     "semantic_hash": "f96e3b14a592c50cb9d0ff6cc7b68c0c"
   },
   "Ester/Game/ResourceSupportSystem.swift": {
-    "mtime": 1783569451.221361,
-    "ast_hash": "1311281683f9bfd233d1d0dc11be4d31",
+    "mtime": 1783573804.7076848,
+    "ast_hash": "9007f76b5672172726157a1feb011e48",
     "semantic_hash": ""
   },
   "Ester/Game/ShellSnapSystem.swift": {
@@ -1045,9 +1045,9 @@
     "semantic_hash": "865ccc8ff1aade9a3528a45c37141226"
   },
   "Ester/Game/ShelterSystem.swift": {
-    "mtime": 1783554528.3921268,
-    "ast_hash": "0059db99a3eb7a6fb6d75debbb7ca1b5",
-    "semantic_hash": "0059db99a3eb7a6fb6d75debbb7ca1b5"
+    "mtime": 1783573915.1294818,
+    "ast_hash": "651a86456b2bbc13f047f618e88183b7",
+    "semantic_hash": ""
   },
   "Ester/Game/TideMemorySystem.swift": {
     "mtime": 1782190840.1583693,
@@ -3167,6 +3167,201 @@
   "Ester/Assets.xcassets/MermaidSideboard.imageset/mermaid-sideboard.png": {
     "mtime": 1783572890.0227923,
     "ast_hash": "346d710700e52ef28e4240ab453ec550",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidAncientAmphora.imageset/Contents.json": {
+    "mtime": 1783573861.2032375,
+    "ast_hash": "3783568fa17225398e32c266efd0f826",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidBookStack.imageset/Contents.json": {
+    "mtime": 1783573862.1533365,
+    "ast_hash": "d36c277c360afd18c01c5ff983c03bd6",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoffeeTable.imageset/Contents.json": {
+    "mtime": 1783573855.962737,
+    "ast_hash": "f059598175f0ca350622053f31e9661f",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoralPouf.imageset/Contents.json": {
+    "mtime": 1783573849.6701577,
+    "ast_hash": "454032a6309c40e9347bda49e0abac1d",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoralVase.imageset/Contents.json": {
+    "mtime": 1783573858.620691,
+    "ast_hash": "fc07a0f4239ee0e9974a87f9094d05c8",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidDecorativeChest.imageset/Contents.json": {
+    "mtime": 1783573851.5989528,
+    "ast_hash": "9218190b1f260a2c182be34c4dd10caa",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidDresser.imageset/Contents.json": {
+    "mtime": 1783573841.2636237,
+    "ast_hash": "864d16e977dbfde8391a479a9fbca0cf",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidLargeSeaweedVase.imageset/Contents.json": {
+    "mtime": 1783573857.2104342,
+    "ast_hash": "8aae2f120146a6c88c2e24698c22fe8b",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidLowBookcase.imageset/Contents.json": {
+    "mtime": 1783573843.2328737,
+    "ast_hash": "0ea2571f220ed4affd2872effdd454f9",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidMarineGlobe.imageset/Contents.json": {
+    "mtime": 1783573863.4195623,
+    "ast_hash": "1b47430a828b792e62f33a8a787a8967",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidNightstand.imageset/Contents.json": {
+    "mtime": 1783573846.5798514,
+    "ast_hash": "502108a6f4154c7321d1011b35a214f5",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidOrnamentalAquarium.imageset/Contents.json": {
+    "mtime": 1783573868.8968008,
+    "ast_hash": "c78f275ac5ebdb5ab6d0965f828f5e1a",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidPearlStand.imageset/Contents.json": {
+    "mtime": 1783573866.8443224,
+    "ast_hash": "589f2bedfb65a78598de9d3fe91dc1ba",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSeaLyre.imageset/Contents.json": {
+    "mtime": 1783573867.9851267,
+    "ast_hash": "598381dd95a98f5cdddcd48075ddd69d",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidShellBasket.imageset/Contents.json": {
+    "mtime": 1783573865.3271616,
+    "ast_hash": "98e8c515ce3240e6d46cbeaf46a2d777",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidShellCoatRack.imageset/Contents.json": {
+    "mtime": 1783573853.8880458,
+    "ast_hash": "65204c63c70b94a9d9e7e1fb291f279f",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSmallStatue.imageset/Contents.json": {
+    "mtime": 1783573869.8091192,
+    "ast_hash": "4fe5c0fd50ad25cf041aa0cd7a44d221",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidStoneSculpture.imageset/Contents.json": {
+    "mtime": 1783573859.9040408,
+    "ast_hash": "189ef29edd2d1203bb44310bf7fe7304",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidWoodenBench.imageset/Contents.json": {
+    "mtime": 1783573848.650981,
+    "ast_hash": "d2b9c877c2812f51306a598bf78a82ee",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidAncientAmphora.imageset/mermaid-ancient-amphora.png": {
+    "mtime": 1783573861.1924307,
+    "ast_hash": "e58537ee01c7a25fc37f35f784f50e07",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidBookStack.imageset/mermaid-book-stack.png": {
+    "mtime": 1783573862.1523407,
+    "ast_hash": "0a99cc564e02756e907f9946528096d2",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoffeeTable.imageset/mermaid-coffee-table.png": {
+    "mtime": 1783573855.9616075,
+    "ast_hash": "e6d931600ddff6f129da3e42d7e7bf4d",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoralPouf.imageset/mermaid-coral-pouf.png": {
+    "mtime": 1783573849.668953,
+    "ast_hash": "9c3eedac8bcbb8849d5c9a3b4a735048",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoralVase.imageset/mermaid-coral-vase.png": {
+    "mtime": 1783573858.615733,
+    "ast_hash": "c4545d741870f9b3748da95344984776",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidDecorativeChest.imageset/mermaid-decorative-chest.png": {
+    "mtime": 1783573851.5886135,
+    "ast_hash": "d2e0df542f8abcfa5bcf8f924dfe1a4a",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidDresser.imageset/mermaid-dresser.png": {
+    "mtime": 1783573841.2614057,
+    "ast_hash": "e1b6eac2f9fc1c1241984dbeffc796ab",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidLargeSeaweedVase.imageset/mermaid-large-seaweed-vase.png": {
+    "mtime": 1783573857.20827,
+    "ast_hash": "93ee70ff16c1804d605e52af261a923e",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidLowBookcase.imageset/mermaid-low-bookcase.png": {
+    "mtime": 1783573843.2317142,
+    "ast_hash": "443b0fc22176588fe66b5f1f84849164",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidMarineGlobe.imageset/mermaid-marine-globe.png": {
+    "mtime": 1783573863.4184248,
+    "ast_hash": "d0ed368a35982d106ddbab266954e051",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidNightstand.imageset/mermaid-nightstand.png": {
+    "mtime": 1783573846.5782442,
+    "ast_hash": "dd69e29bb58facd0ea757b006810e4af",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidOrnamentalAquarium.imageset/mermaid-ornamental-aquarium.png": {
+    "mtime": 1783573868.8956451,
+    "ast_hash": "446c88e35ff2f53318834fd709f293ac",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidPearlStand.imageset/mermaid-pearl-stand.png": {
+    "mtime": 1783573866.8433998,
+    "ast_hash": "2653ce4d30aef26cd491a89c8deac668",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSeaLyre.imageset/mermaid-sea-lyre.png": {
+    "mtime": 1783573867.9841053,
+    "ast_hash": "5844e5b0dde1531fc65d67b72fa97cf0",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidShellBasket.imageset/mermaid-shell-basket.png": {
+    "mtime": 1783573865.3212066,
+    "ast_hash": "2fab6d636506cb12003a25504ae1ea4d",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidShellCoatRack.imageset/mermaid-shell-coat-rack.png": {
+    "mtime": 1783573853.8432572,
+    "ast_hash": "c298e4f1154c52bc3e47996e8b328cdf",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSmallStatue.imageset/mermaid-small-statue.png": {
+    "mtime": 1783573869.8031886,
+    "ast_hash": "647a54072a46dd686bebc896d5f6d566",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidStoneSculpture.imageset/mermaid-stone-sculpture.png": {
+    "mtime": 1783573859.9028656,
+    "ast_hash": "9094b8fb4ef0ca72293e2ff61015845a",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidWoodenBench.imageset/mermaid-wooden-bench.png": {
+    "mtime": 1783573848.6488104,
+    "ast_hash": "5743b78f78e2f07ebe01ee22cf51e331",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-floor-objects-contact-sheet.png": {
+    "mtime": 1783573871.2683766,
+    "ast_hash": "26b0ac0947b4909d0201346763378f54",
     "semantic_hash": ""
   }
 }

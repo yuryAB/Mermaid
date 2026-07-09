@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-coffee-table-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidCoffeeTable.imageset/mermaid-coffee-table.png",
+  "key": "#09e810",
+  "source_size": [
+    1448,
+    1086
+  ],
+  "crop_box": [
+    0,
+    0,
+    1331,
+    844
+  ],
+  "output_size": [
+    1331,
+    844
+  ],
+  "transparent_pixels": 1038977,
+  "partial_pixels": 4222,
+  "corner_alpha": [
+    8,
+    0,
+    0,
+    0
+  ]
+}

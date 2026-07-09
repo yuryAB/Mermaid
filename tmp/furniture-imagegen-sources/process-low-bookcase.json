@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-low-bookcase-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidLowBookcase.imageset/mermaid-low-bookcase.png",
+  "key": "#07e112",
+  "source_size": [
+    1392,
+    1130
+  ],
+  "crop_box": [
+    0,
+    0,
+    1279,
+    995
+  ],
+  "output_size": [
+    1279,
+    995
+  ],
+  "transparent_pixels": 861715,
+  "partial_pixels": 42644,
+  "corner_alpha": [
+    9,
+    0,
+    0,
+    0
+  ]
+}

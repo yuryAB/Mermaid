@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-ornamental-aquarium-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidOrnamentalAquarium.imageset/mermaid-ornamental-aquarium.png",
+  "key": "#0ee20f",
+  "source_size": [
+    1254,
+    1254
+  ],
+  "crop_box": [
+    0,
+    0,
+    1100,
+    1254
+  ],
+  "output_size": [
+    1100,
+    1254
+  ],
+  "transparent_pixels": 807473,
+  "partial_pixels": 45829,
+  "corner_alpha": [
+    12,
+    0,
+    9,
+    0
+  ]
+}

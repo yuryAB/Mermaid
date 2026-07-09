@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-coral-pouf-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidCoralPouf.imageset/mermaid-coral-pouf.png",
+  "key": "#09eb0f",
+  "source_size": [
+    1345,
+    1170
+  ],
+  "crop_box": [
+    0,
+    0,
+    1182,
+    1170
+  ],
+  "output_size": [
+    1182,
+    1170
+  ],
+  "transparent_pixels": 953093,
+  "partial_pixels": 4416,
+  "corner_alpha": [
+    10,
+    0,
+    6,
+    0
+  ]
+}

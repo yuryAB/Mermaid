@@ -154,6 +154,166 @@ struct RefugeShopItem {
 enum RefugeShopCatalog {
     private static let mondayWeekday = 2
 
+    private static func furnitureItem(id: String,
+                                      title: String,
+                                      blurb: String,
+                                      cost: Int,
+                                      tint: UIColor,
+                                      symbolName: String,
+                                      fallbackGlyph: String) -> RefugeShopItem {
+        RefugeShopItem(id: id,
+                       title: title,
+                       blurb: blurb,
+                       cost: cost,
+                       tint: tint,
+                       symbolName: symbolName,
+                       fallbackGlyph: fallbackGlyph,
+                       purchase: .houseObject(id, quantity: 1))
+    }
+
+    private static let furnitureItems: [RefugeShopItem] = [
+        furnitureItem(id: HouseObjectCatalog.mermaidSideboardID,
+                      title: "Aparador sereia",
+                      blurb: "Móvel de chão para decorar a casa.",
+                      cost: 500,
+                      tint: UIColor(red: 0.95, green: 0.54, blue: 0.50, alpha: 1),
+                      symbolName: "cabinet.fill",
+                      fallbackGlyph: "A"),
+        furnitureItem(id: "mermaid_dresser",
+                      title: "Cômoda sereia",
+                      blurb: "Gavetas grandes com conchas e pérolas.",
+                      cost: 900,
+                      tint: UIColor(red: 0.92, green: 0.48, blue: 0.55, alpha: 1),
+                      symbolName: "cabinet.fill",
+                      fallbackGlyph: "C"),
+        furnitureItem(id: "mermaid_low_bookcase",
+                      title: "Estante baixa",
+                      blurb: "Livros e prateleiras em estilo marinho.",
+                      cost: 850,
+                      tint: UIColor(red: 0.73, green: 0.58, blue: 0.86, alpha: 1),
+                      symbolName: "books.vertical.fill",
+                      fallbackGlyph: "E"),
+        furnitureItem(id: "mermaid_nightstand",
+                      title: "Criado-mudo sereia",
+                      blurb: "Pequeno apoio com gaveta e detalhe de concha.",
+                      cost: 650,
+                      tint: UIColor(red: 0.94, green: 0.55, blue: 0.48, alpha: 1),
+                      symbolName: "table.furniture.fill",
+                      fallbackGlyph: "M"),
+        furnitureItem(id: "mermaid_wooden_bench",
+                      title: "Banco de madeira",
+                      blurb: "Banco baixo com acabamento de onda.",
+                      cost: 700,
+                      tint: UIColor(red: 0.82, green: 0.55, blue: 0.34, alpha: 1),
+                      symbolName: "chair.fill",
+                      fallbackGlyph: "B"),
+        furnitureItem(id: "mermaid_coral_pouf",
+                      title: "Puff de coral",
+                      blurb: "Assento macio com forma coralina.",
+                      cost: 750,
+                      tint: UIColor(red: 0.97, green: 0.44, blue: 0.50, alpha: 1),
+                      symbolName: "circle.fill",
+                      fallbackGlyph: "P"),
+        furnitureItem(id: "mermaid_decorative_chest",
+                      title: "Baú decorativo",
+                      blurb: "Baú arredondado para tesouros de casa.",
+                      cost: 1_050,
+                      tint: UIColor(red: 0.93, green: 0.57, blue: 0.46, alpha: 1),
+                      symbolName: "shippingbox.fill",
+                      fallbackGlyph: "U"),
+        furnitureItem(id: "mermaid_shell_coat_rack",
+                      title: "Cabideiro de conchas",
+                      blurb: "Cabideiro alto com ganchos de concha.",
+                      cost: 800,
+                      tint: UIColor(red: 0.84, green: 0.47, blue: 0.55, alpha: 1),
+                      symbolName: "figure.stand",
+                      fallbackGlyph: "H"),
+        furnitureItem(id: "mermaid_coffee_table",
+                      title: "Mesa de centro",
+                      blurb: "Mesa baixa com tampo perolado.",
+                      cost: 950,
+                      tint: UIColor(red: 0.92, green: 0.62, blue: 0.47, alpha: 1),
+                      symbolName: "table.furniture.fill",
+                      fallbackGlyph: "T"),
+        furnitureItem(id: "mermaid_large_seaweed_vase",
+                      title: "Vaso grande com alga",
+                      blurb: "Vaso alto com algas decorativas.",
+                      cost: 1_000,
+                      tint: UIColor(red: 0.36, green: 0.72, blue: 0.67, alpha: 1),
+                      symbolName: "leaf.fill",
+                      fallbackGlyph: "V"),
+        furnitureItem(id: "mermaid_coral_vase",
+                      title: "Vaso com coral",
+                      blurb: "Vaso arredondado com coral vibrante.",
+                      cost: 1_100,
+                      tint: UIColor(red: 0.91, green: 0.42, blue: 0.47, alpha: 1),
+                      symbolName: "camera.macro",
+                      fallbackGlyph: "R"),
+        furnitureItem(id: "mermaid_stone_sculpture",
+                      title: "Escultura de pedra",
+                      blurb: "Peça de pedra com silhueta marinha.",
+                      cost: 1_250,
+                      tint: UIColor(red: 0.62, green: 0.56, blue: 0.66, alpha: 1),
+                      symbolName: "seal.fill",
+                      fallbackGlyph: "S"),
+        furnitureItem(id: "mermaid_ancient_amphora",
+                      title: "Ânfora antiga",
+                      blurb: "Vaso antigo com pintura de ondas.",
+                      cost: 1_150,
+                      tint: UIColor(red: 0.87, green: 0.62, blue: 0.37, alpha: 1),
+                      symbolName: "vase.fill",
+                      fallbackGlyph: "Â"),
+        furnitureItem(id: "mermaid_book_stack",
+                      title: "Pilha de livros",
+                      blurb: "Livros coloridos para um canto de leitura.",
+                      cost: 600,
+                      tint: UIColor(red: 0.55, green: 0.72, blue: 0.78, alpha: 1),
+                      symbolName: "books.vertical.fill",
+                      fallbackGlyph: "L"),
+        furnitureItem(id: "mermaid_marine_globe",
+                      title: "Globo marinho",
+                      blurb: "Globo decorativo dos mares conhecidos.",
+                      cost: 1_400,
+                      tint: UIColor(red: 0.38, green: 0.74, blue: 0.80, alpha: 1),
+                      symbolName: "globe.americas.fill",
+                      fallbackGlyph: "G"),
+        furnitureItem(id: "mermaid_shell_basket",
+                      title: "Cesta de conchas",
+                      blurb: "Cesta baixa cheia de conchas grandes.",
+                      cost: 700,
+                      tint: UIColor(red: 0.92, green: 0.66, blue: 0.42, alpha: 1),
+                      symbolName: "basket.fill",
+                      fallbackGlyph: "K"),
+        furnitureItem(id: "mermaid_pearl_stand",
+                      title: "Suporte com pérolas",
+                      blurb: "Expositor pequeno com pérolas grandes.",
+                      cost: 1_300,
+                      tint: UIColor(red: 0.89, green: 0.74, blue: 0.42, alpha: 1),
+                      symbolName: "circle.hexagongrid.fill",
+                      fallbackGlyph: "O"),
+        furnitureItem(id: "mermaid_sea_lyre",
+                      title: "Lira marinha",
+                      blurb: "Instrumento decorativo com cordas peroladas.",
+                      cost: 1_800,
+                      tint: UIColor(red: 0.90, green: 0.66, blue: 0.28, alpha: 1),
+                      symbolName: "music.note",
+                      fallbackGlyph: "Y"),
+        furnitureItem(id: "mermaid_ornamental_aquarium",
+                      title: "Aquário ornamental",
+                      blurb: "Aquário decorativo com peixes e coral.",
+                      cost: 2_000,
+                      tint: UIColor(red: 0.37, green: 0.76, blue: 0.78, alpha: 1),
+                      symbolName: "fish.fill",
+                      fallbackGlyph: "Q"),
+        furnitureItem(id: "mermaid_small_statue",
+                      title: "Estátua pequena",
+                      blurb: "Pequena estátua com cauda e pérolas.",
+                      cost: 1_000,
+                      tint: UIColor(red: 0.70, green: 0.58, blue: 0.78, alpha: 1),
+                      symbolName: "person.crop.artframe",
+                      fallbackGlyph: "N")
+    ]
+
     static let items: [RefugeShopItem] = [
         RefugeShopItem(id: "food_bag",
                        title: "Saco de comida",
@@ -187,14 +347,7 @@ enum RefugeShopCatalog {
                        symbolName: SupportResourceKind.coralToy.symbolName,
                        fallbackGlyph: SupportResourceKind.coralToy.glyph,
                        purchase: .resource(.coralToy, quantity: 1)),
-        RefugeShopItem(id: "mermaid_sideboard",
-                       title: "Aparador sereia",
-                       blurb: "Móvel de chão para decorar a casa.",
-                       cost: 200,
-                       tint: UIColor(red: 0.95, green: 0.54, blue: 0.50, alpha: 1),
-                       symbolName: "cabinet.fill",
-                       fallbackGlyph: "A",
-                       purchase: .houseObject(HouseObjectCatalog.mermaidSideboardID, quantity: 1)),
+    ] + furnitureItems + [
         RefugeShopItem(id: "growth_potion",
                        title: "Porção acelerar",
                        blurb: "Adiantam 1 hora da espera de crescimento.",
@@ -832,12 +985,39 @@ enum SupportResourceVisualFactory {
 }
 
 final class RefugeStoreOverlay: SKNode {
+    private enum StoreSection {
+        case resources
+        case furniture
+
+        var title: String {
+            switch self {
+            case .resources: return "Recursos"
+            case .furniture: return "Móveis"
+            }
+        }
+
+        var actionName: String {
+            switch self {
+            case .resources: return "store_section_resources"
+            case .furniture: return "store_section_furniture"
+            }
+        }
+    }
+
     private let size: CGSize
     private let insets: UIEdgeInsets
     private let stats: MermaidStats
     private let closeTitle: String
     private let onClose: (() -> Void)?
     private let onPurchase: ((RefugeShopItem) -> Void)?
+    private var selectedSection: StoreSection = .resources
+    private let sectionSwitchLayer = SKNode()
+    private let itemLayer = SKNode()
+    private var sectionSwitchWidth: CGFloat = 0
+    private var sectionSwitchCenterY: CGFloat = 0
+    private var itemRowWidth: CGFloat = 0
+    private var itemListTopY: CGFloat = 0
+    private var itemListAvailableHeight: CGFloat = 0
 
     init(size: CGSize,
          insets: UIEdgeInsets,
@@ -896,37 +1076,18 @@ final class RefugeStoreOverlay: SKNode {
         pearlLine.zPosition = 2
         addChild(pearlLine)
 
-        let resourceItems = RefugeShopCatalog.resources()
-        let furnitureItems = RefugeShopCatalog.furniture()
-        let sections: [(title: String, items: [RefugeShopItem])] = [
-            ("Recursos", resourceItems),
-            ("Móveis", furnitureItems)
-        ].filter { !$0.items.isEmpty }
-        let itemCount = max(1, sections.reduce(0) { $0 + $1.items.count })
-        let availableHeight = max(330, size.height - insets.top - insets.bottom - 280)
-        let sectionHeaderHeight: CGFloat = 22
-        let sectionGap: CGFloat = 10
-        let rowGap: CGFloat = 8
-        let reservedForSections = CGFloat(sections.count) * sectionHeaderHeight
-            + CGFloat(max(0, sections.count - 1)) * sectionGap
-            + CGFloat(max(0, itemCount - 1)) * rowGap
-        let rowHeight = min(72, max(54, (availableHeight - reservedForSections) / CGFloat(itemCount)))
-        var cursorY = top - 164
+        sectionSwitchWidth = rowWidth
+        sectionSwitchCenterY = top - 152
+        sectionSwitchLayer.zPosition = 3
+        addChild(sectionSwitchLayer)
+        renderSectionSwitch()
 
-        for section in sections {
-            addSectionHeader(title: section.title,
-                             width: rowWidth,
-                             centerY: cursorY)
-            cursorY -= sectionHeaderHeight
-            for item in section.items {
-                addRow(item: item,
-                       width: rowWidth,
-                       height: rowHeight,
-                       centerY: cursorY - rowHeight / 2)
-                cursorY -= rowHeight + rowGap
-            }
-            cursorY -= sectionGap
-        }
+        itemRowWidth = rowWidth
+        itemListTopY = top - 198
+        itemListAvailableHeight = max(330, size.height - insets.top - insets.bottom - 280)
+        itemLayer.zPosition = 2
+        addChild(itemLayer)
+        renderSelectedItems()
 
         let closeButton = SKNode()
         closeButton.name = "store_close"
@@ -945,6 +1106,91 @@ final class RefugeStoreOverlay: SKNode {
         addChild(closeButton)
     }
 
+    private func selectedItems() -> [RefugeShopItem] {
+        switch selectedSection {
+        case .resources:
+            return RefugeShopCatalog.resources()
+        case .furniture:
+            return RefugeShopCatalog.furniture()
+        }
+    }
+
+    private func selectStoreSection(_ section: StoreSection) {
+        guard selectedSection != section else { return }
+        selectedSection = section
+        renderSectionSwitch()
+        renderSelectedItems()
+        GameAudio.shared.play(.uiOpenPanel)
+    }
+
+    private func renderSectionSwitch() {
+        sectionSwitchLayer.removeAllChildren()
+
+        let width = sectionSwitchWidth
+        let centerY = sectionSwitchCenterY
+        guard width > 0 else { return }
+
+        let height: CGFloat = 34
+        let gap: CGFloat = 8
+        let segmentWidth = (width - gap) / 2
+        let sections: [StoreSection] = [.resources, .furniture]
+
+        for (index, section) in sections.enumerated() {
+            let active = section == selectedSection
+            let centerX = -width / 2 + segmentWidth / 2 + CGFloat(index) * (segmentWidth + gap)
+            let name = section.actionName
+
+            let node = SKNode()
+            node.name = name
+            node.position = CGPoint(x: centerX, y: centerY)
+            node.zPosition = 3
+            sectionSwitchLayer.addChild(node)
+
+            let bg = GameUI.card(size: CGSize(width: segmentWidth, height: height),
+                                 cornerRadius: 9,
+                                 tint: active ? GameUI.accent : GameUI.mutedInk.withAlphaComponent(0.34),
+                                 baseColors: active ? GameUI.tintedColors(GameUI.accent) : [UIColor.white.withAlphaComponent(0.24)])
+            bg.name = name
+            node.addChild(bg)
+
+            let label = makeLabel(text: section.title,
+                                  fontSize: 12.5,
+                                  bold: true,
+                                  color: active ? GameUI.ink : GameUI.mutedInk)
+            label.name = name
+            label.verticalAlignmentMode = .center
+            label.zPosition = 4
+            node.addChild(label)
+        }
+    }
+
+    private func renderSelectedItems() {
+        itemLayer.removeAllChildren()
+
+        let items = selectedItems()
+        let itemCount = max(1, items.count)
+        let rowGap: CGFloat = 8
+        let reservedForRows = CGFloat(max(0, itemCount - 1)) * rowGap
+        let rowHeight = min(76, max(56, (itemListAvailableHeight - reservedForRows) / CGFloat(itemCount)))
+
+        if items.isEmpty {
+            let empty = makeLabel(text: selectedSection == .furniture ? "Nenhum móvel disponível." : "Nenhum recurso disponível.",
+                                  fontSize: 13,
+                                  color: GameUI.mutedInk)
+            empty.position = CGPoint(x: 0, y: itemListTopY - 18)
+            empty.zPosition = 2
+            itemLayer.addChild(empty)
+            return
+        }
+
+        for (index, item) in items.enumerated() {
+            addRow(item: item,
+                   width: itemRowWidth,
+                   height: rowHeight,
+                   centerY: itemListTopY - CGFloat(index) * (rowHeight + rowGap))
+        }
+    }
+
     private func addRow(item: RefugeShopItem,
                         width: CGFloat,
                         height: CGFloat,
@@ -954,7 +1200,7 @@ final class RefugeStoreOverlay: SKNode {
         row.name = actionName
         row.position = CGPoint(x: 0, y: centerY)
         row.zPosition = 2
-        addChild(row)
+        itemLayer.addChild(row)
 
         let bg = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 10)
         bg.fillColor = UIColor.white.withAlphaComponent(0.36)
@@ -1013,16 +1259,6 @@ final class RefugeStoreOverlay: SKNode {
         button.addChild(label)
     }
 
-    private func addSectionHeader(title: String,
-                                  width: CGFloat,
-                                  centerY: CGFloat) {
-        let label = makeLabel(text: title, fontSize: 12, bold: true, color: GameUI.mutedInk)
-        label.horizontalAlignmentMode = .left
-        label.position = CGPoint(x: -width / 2 + 6, y: centerY)
-        label.zPosition = 2
-        addChild(label)
-    }
-
     private func addStoreIcon(for item: RefugeShopItem,
                               in row: SKNode,
                               at position: CGPoint,
@@ -1059,6 +1295,12 @@ final class RefugeStoreOverlay: SKNode {
             switch current.name {
             case "store_close":
                 onClose?()
+                return
+            case StoreSection.resources.actionName:
+                selectStoreSection(.resources)
+                return
+            case StoreSection.furniture.actionName:
+                selectStoreSection(.furniture)
                 return
             case let name? where name.hasPrefix("store_item_"):
                 let itemId = String(name.dropFirst("store_item_".count))

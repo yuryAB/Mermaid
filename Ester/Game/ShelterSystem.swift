@@ -3244,10 +3244,28 @@ final class RefugeOverlay: SKNode {
         syncObservationRecordVisibility()
         let overlay = RefugeStoreOverlay(size: overlaySize,
                                          insets: safeAreaInsets,
-                                         stats: ctx.stats)
+                                         stats: ctx.stats,
+                                         handlesTouches: true,
+                                         onClose: { [weak self] in
+                                             self?.returnToMap()
+                                         },
+                                         onPurchase: { [weak self] item in
+                                             self?.purchaseStoreItem(item)
+                                         })
         overlay.zPosition = 50
         addChild(overlay)
         storeOverlay = overlay
+    }
+
+    private func purchaseStoreItem(_ item: RefugeShopItem) {
+        if ctx.supportResources.purchase(item) {
+            storeOverlay?.removeFromParent()
+            storeOverlay = nil
+            openStore()
+        } else {
+            GameAudio.shared.play(.uiUpgradeFail)
+        }
+        refreshLabels()
     }
 
     private func returnToMap(playSound: Bool = true) {
@@ -3302,14 +3320,7 @@ final class RefugeOverlay: SKNode {
             case let name? where name.hasPrefix("store_item_"):
                 let itemId = String(name.dropFirst("store_item_".count))
                 guard let item = RefugeShopCatalog.item(withId: itemId) else { return }
-                if ctx.supportResources.purchase(item) {
-                    storeOverlay?.removeFromParent()
-                    storeOverlay = nil
-                    openStore()
-                } else {
-                    GameAudio.shared.play(.uiUpgradeFail)
-                }
-                refreshLabels()
+                purchaseStoreItem(item)
                 return
             case let name? where name.hasPrefix("upgrade_"):
                 guard let raw = name.split(separator: "_").last,

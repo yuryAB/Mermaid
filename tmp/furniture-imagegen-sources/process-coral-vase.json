@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-coral-vase-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidCoralVase.imageset/mermaid-coral-vase.png",
+  "key": "#09df09",
+  "source_size": [
+    1254,
+    1254
+  ],
+  "crop_box": [
+    0,
+    0,
+    1044,
+    1207
+  ],
+  "output_size": [
+    1044,
+    1207
+  ],
+  "transparent_pixels": 995905,
+  "partial_pixels": 7739,
+  "corner_alpha": [
+    7,
+    0,
+    0,
+    0
+  ]
+}

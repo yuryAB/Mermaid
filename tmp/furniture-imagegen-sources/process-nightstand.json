@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-nightstand-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidNightstand.imageset/mermaid-nightstand.png",
+  "key": "#09e60e",
+  "source_size": [
+    1254,
+    1254
+  ],
+  "crop_box": [
+    0,
+    0,
+    1040,
+    1164
+  ],
+  "output_size": [
+    1040,
+    1164
+  ],
+  "transparent_pixels": 969708,
+  "partial_pixels": 4952,
+  "corner_alpha": [
+    8,
+    0,
+    0,
+    0
+  ]
+}

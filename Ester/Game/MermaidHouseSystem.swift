@@ -825,7 +825,7 @@ final class HouseBuildPanel: SKNode {
         objectRowNodes.removeAll()
         houseObjectButtonFrames.removeAll()
 
-        let visibleItems = items.filter { $0.count > 0 || $0.definition.id == HouseObjectCatalog.mermaidSideboardID }
+        let visibleItems = items.filter { $0.count > 0 }
         guard !visibleItems.isEmpty else { return }
 
         let topY = panelSize.height / 2

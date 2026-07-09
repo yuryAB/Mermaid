@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-dresser-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidDresser.imageset/mermaid-dresser.png",
+  "key": "#07ef08",
+  "source_size": [
+    1343,
+    1171
+  ],
+  "crop_box": [
+    0,
+    0,
+    1229,
+    1062
+  ],
+  "output_size": [
+    1229,
+    1062
+  ],
+  "transparent_pixels": 804577,
+  "partial_pixels": 5090,
+  "corner_alpha": [
+    8,
+    0,
+    0,
+    0
+  ]
+}
