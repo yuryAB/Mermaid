@@ -261,12 +261,18 @@ struct HouseGridMetrics {
 /// node that will later be replaced by real room artwork.
 final class HouseRoomNode: SKNode {
     let gridPosition: HouseGridPosition
+    private(set) var surfaceMapping: RoomSurfaceMapping?
+    private var floorSurfaceNode: SKShapeNode?
 
     init(room: HouseRoom, metrics: HouseGridMetrics) {
         self.gridPosition = room.position
         super.init()
         position = metrics.worldCenter(for: room.position)
         build(room: room, size: metrics.roomSize)
+
+        let mapping = RoomSurfaceMapper.map(roomSize: metrics.roomSize)
+        surfaceMapping = mapping
+        applySurfaceMapping(mapping)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -282,17 +288,16 @@ final class HouseRoomNode: SKNode {
         body.zPosition = 0
         addChild(body)
 
-        // Simple floor band so the cutaway reads as a room, not a plain box.
         let floor = SKShapeNode(rectOf: CGSize(width: size.width - 8,
-                                               height: max(10, size.height * 0.10)),
+                                                height: max(10, size.height * 0.10)),
                                 cornerRadius: 4)
         floor.fillColor = UIColor.lerp(baseColor, .black, 0.28).withAlphaComponent(0.9)
         floor.strokeColor = .clear
         floor.position = CGPoint(x: 0, y: -size.height / 2 + max(10, size.height * 0.10) / 2 + 4)
         floor.zPosition = 1
         addChild(floor)
+        floorSurfaceNode = floor
 
-        // Inner outline to emphasize the compartment edges.
         let inner = SKShapeNode(rectOf: CGSize(width: size.width - 10, height: size.height - 10),
                                 cornerRadius: 7)
         inner.fillColor = .clear
@@ -311,6 +316,26 @@ final class HouseRoomNode: SKNode {
         label.zPosition = 3
         addChild(label)
     }
+
+    // MARK: Surface mapping
+
+    private func applySurfaceMapping(_ mapping: RoomSurfaceMapping) {
+        addDebugOverlays(for: mapping)
+        installFloorPhysics(for: mapping)
+    }
+
+    private func addDebugOverlays(for mapping: RoomSurfaceMapping) {
+        let debugNodes = RoomSurfaceMapper.makeInteriorDebugNodes(for: mapping)
+        for node in debugNodes {
+            node.zPosition = 500
+            addChild(node)
+        }
+    }
+
+    private func installFloorPhysics(for mapping: RoomSurfaceMapping) {
+        guard let floor = floorSurfaceNode else { return }
+        floor.physicsBody = mapping.makeFloorPhysicsBody()
+    }
 }
 
 /// Front trim drawn above the mermaid so she visually passes behind the room
@@ -323,6 +348,9 @@ final class HouseRoomFrontFrameNode: SKNode {
         super.init()
         position = metrics.worldCenter(for: room.position)
         build(size: metrics.roomSize)
+
+        let mapping = RoomSurfaceMapper.map(roomSize: metrics.roomSize)
+        addFrameDebugOverlays(for: mapping)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -360,6 +388,14 @@ final class HouseRoomFrontFrameNode: SKNode {
         bar.position = position
         addChild(bar)
     }
+
+    private func addFrameDebugOverlays(for mapping: RoomSurfaceMapping) {
+        let debugNodes = RoomSurfaceMapper.makeFrameDebugNodes(for: mapping)
+        for node in debugNodes {
+            node.zPosition = 500
+            addChild(node)
+        }
+    }
 }
 
 // MARK: - Build slot node (empty position marker)
@@ -378,7 +414,19 @@ final class HouseBuildSlotNode: SKNode {
     private let size: CGSize
     private var outline: SKShapeNode!
     private var glyph: SKLabelNode!
+    private var buildButtonBg: SKShapeNode?
+    private var buildButtonLabel: SKLabelNode?
     private(set) var isSelected = false
+
+    /// Local-space rect of the on-slot "Construir cômodo" button, sitting just
+    /// below the "+" glyph. Shared by the node's drawing and the controller's
+    /// hit-testing so both stay in sync.
+    static func buildButtonLocalRect(roomSize: CGSize) -> CGRect {
+        let width = roomSize.width * 0.82
+        let height = max(30, roomSize.height * 0.075)
+        let centerY = -roomSize.height * 0.05
+        return CGRect(x: -width / 2, y: centerY - height / 2, width: width, height: height)
+    }
 
     init(gridPosition: HouseGridPosition, kind: Kind, metrics: HouseGridMetrics) {
         self.gridPosition = gridPosition
@@ -403,13 +451,48 @@ final class HouseBuildSlotNode: SKNode {
 
         glyph = SKLabelNode()
         glyph.fontName = "AvenirNext-Bold"
-        glyph.fontSize = 30
+        glyph.fontSize = size.width * 0.16
         glyph.verticalAlignmentMode = .center
         glyph.horizontalAlignmentMode = .center
-        glyph.position = .zero
+        // "+" sits above center so the build button fits just below it.
+        glyph.position = CGPoint(x: 0, y: size.height * 0.14)
         addChild(glyph)
 
+        if kind == .valid {
+            buildBuildButton()
+        }
+
         applyStyle()
+    }
+
+    /// The "Construir cômodo" button now lives on the slot itself (below "+"),
+    /// not in the bottom panel.
+    private func buildBuildButton() {
+        let buttonRect = Self.buildButtonLocalRect(roomSize: size)
+        let bg = SKShapeNode(rect: buttonRect, cornerRadius: min(12, buttonRect.height * 0.4))
+        bg.fillColor = UIColor(red: 0.16, green: 0.62, blue: 0.60, alpha: 1)
+        bg.strokeColor = UIColor.white.withAlphaComponent(0.55)
+        bg.lineWidth = 1.5
+        addChild(bg)
+        buildButtonBg = bg
+
+        let label = SKLabelNode(text: "Construir cômodo")
+        label.fontName = "AvenirNext-Bold"
+        label.fontSize = buttonRect.height * 0.5
+        label.fontColor = .white
+        label.verticalAlignmentMode = .center
+        label.horizontalAlignmentMode = .center
+        label.preferredMaxLayoutWidth = buttonRect.width - 12
+        label.position = CGPoint(x: 0, y: buttonRect.midY)
+        addChild(label)
+        buildButtonLabel = label
+    }
+
+    /// Quick press feedback for the on-slot build button.
+    func flashBuildButton() {
+        guard let bg = buildButtonBg else { return }
+        bg.removeAllActions()
+        bg.run(.sequence([.scale(to: 0.94, duration: 0.06), .scale(to: 1.0, duration: 0.10)]))
     }
 
     private func applyStyle() {
@@ -429,7 +512,8 @@ final class HouseBuildSlotNode: SKNode {
             outline.fillColor = tint.withAlphaComponent(0.06)
             outline.lineWidth = 2
             glyph.text = "✕"
-            glyph.fontSize = 22
+            glyph.fontSize = size.width * 0.12
+            glyph.position = .zero
             glyph.fontColor = tint.withAlphaComponent(0.6)
         }
     }
@@ -559,7 +643,8 @@ final class HouseCameraController {
 
 /// The fixed bottom house-management panel. It never moves with the camera and
 /// is structured to grow later into a full decoration/expansion/inventory UI.
-/// For now it exposes the "Construir cômodo" action and a feedback line.
+/// It exposes the "Demolir cômodo" action (shown when a built room is
+/// selected) and a feedback line. "Construir cômodo" lives on the build slot.
 final class HouseBuildPanel: SKNode {
     let buildButtonName = "house_build_button"
     let backButtonName = "house_back_button"
@@ -619,7 +704,8 @@ final class HouseBuildPanel: SKNode {
         feedbackLabel.position = CGPoint(x: 0, y: topY - 34)
         addChild(feedbackLabel)
 
-        // "Construir cômodo" primary action.
+        // Primary panel action = "Demolir cômodo" (shown only when a built
+        // room is selected). "Construir cômodo" lives on the build slot itself.
         let buildSize = CGSize(width: min(260, panelSize.width - 40), height: 42)
         let buildCenter = CGPoint(x: 0, y: topY - 66)
 
@@ -632,7 +718,7 @@ final class HouseBuildPanel: SKNode {
         addChild(buildBg)
         buildButtonBackground = buildBg
 
-        let buildLabel = SKLabelNode(text: "Construir cômodo")
+        let buildLabel = SKLabelNode(text: "Demolir cômodo")
         buildLabel.fontName = "AvenirNext-Bold"
         buildLabel.fontSize = 16
         buildLabel.fontColor = .white
@@ -1021,7 +1107,7 @@ final class MermaidHouseSceneController {
         if let selectedDemolitionRoom,
            !layout.isOccupied(selectedDemolitionRoom) {
             self.selectedDemolitionRoom = nil
-            panel.setPrimaryButtonText("Construir cômodo")
+            panel.setPrimaryButtonText("Demolir cômodo")
             panel.setPrimaryButtonVisible(false)
         }
 
@@ -1202,8 +1288,11 @@ final class MermaidHouseSceneController {
     }
 
     private func handlePanelTap(at point: CGPoint) {
+        // The bottom panel's primary button is the "Demolir cômodo" action.
+        // "Construir cômodo" now lives on the build slot itself.
         if panel.primaryButtonIsVisible && panel.buildButtonFrame.contains(point) {
-            performPrimaryAction()
+            panel.flashBuildButton()
+            performDemolition()
         } else if panel.backButtonFrame.contains(point) {
             GameAudio.shared.play(.uiClosePanel)
             onExit()
@@ -1236,22 +1325,20 @@ final class MermaidHouseSceneController {
             return
         }
 
+        // Empty buildable slot: the "Construir cômodo" button now lives on the
+        // slot itself (below the "+"). Building only happens when that button
+        // is tapped; tapping elsewhere on the frame does nothing.
         if position == HouseMVPPolicy.unlockablePosition && mvpUnlockableSlotIsAvailable {
-            selectSlot(position)
+            let slotCenter = metrics.worldCenter(for: position)
+            let buttonRect = HouseBuildSlotNode.buildButtonLocalRect(roomSize: metrics.roomSize)
+                .offsetBy(dx: slotCenter.x, dy: slotCenter.y)
+            if buttonRect.contains(worldPoint) {
+                deselectSelection()
+                performBuild(at: position)
+            }
         } else {
             deselectSelection()
         }
-    }
-
-    private func selectSlot(_ position: HouseGridPosition) {
-        selectedDemolitionRoom = nil
-        selectedSlot = position
-        for slot in slotNodes where slot.kind == .valid {
-            slot.setSelected(slot.gridPosition == position)
-        }
-        panel.setPrimaryButtonText("Construir cômodo")
-        panel.setPrimaryButtonVisible(true)
-        panel.setSelectionText("Espaço selecionado. Toque em “Construir cômodo”.")
     }
 
     private func selectRoomForDemolition(_ position: HouseGridPosition) {
@@ -1271,19 +1358,9 @@ final class MermaidHouseSceneController {
         for slot in slotNodes where slot.kind == .valid {
             slot.setSelected(false)
         }
-        panel.setPrimaryButtonText("Construir cômodo")
+        panel.setPrimaryButtonText("Demolir cômodo")
         panel.setPrimaryButtonVisible(false)
         panel.setSelectionText("Toque em um espaço livre para construir")
-    }
-
-    private func performPrimaryAction() {
-        panel.flashBuildButton()
-
-        if selectedDemolitionRoom != nil {
-            performDemolition()
-            return
-        }
-        performBuild()
     }
 
     private func performDemolition() {
@@ -1304,7 +1381,7 @@ final class MermaidHouseSceneController {
         selectedDemolitionRoom = nil
         rebuildWorld()
         panel.setSelectionText("Toque em um espaço livre para construir")
-        panel.setPrimaryButtonText("Construir cômodo")
+        panel.setPrimaryButtonText("Demolir cômodo")
         panel.setPrimaryButtonVisible(false)
         panel.showFeedback("Cômodo demolido", success: true)
         GameAudio.shared.play(.uiClosePanel)
@@ -1313,17 +1390,12 @@ final class MermaidHouseSceneController {
         persist()
     }
 
-    private func performBuild() {
-
-        guard let target = selectedSlot else {
-            panel.showFeedback("Selecione um espaço vazio", success: false)
-            return
-        }
-
+    /// Builds the room at `target` (triggered by the on-slot "Construir cômodo"
+    /// button).
+    private func performBuild(at target: HouseGridPosition) {
         guard target == HouseMVPPolicy.unlockablePosition,
               mvpUnlockableSlotIsAvailable else {
             panel.showFeedback("Selecione o espaço livre à direita", success: false)
-            deselectSelection()
             return
         }
 
@@ -1331,11 +1403,9 @@ final class MermaidHouseSceneController {
         switch layout.buildRejection(at: target) {
         case .leftOfEntrance:
             panel.showFeedback("Não é possível construir deste lado", success: false)
-            deselectSelection()
             return
         case .some:
             panel.showFeedback("Selecione um espaço vazio", success: false)
-            deselectSelection()
             return
         case .none:
             break
@@ -1343,15 +1413,12 @@ final class MermaidHouseSceneController {
 
         guard layout.addRoom(at: target, type: .empty) != nil else {
             panel.showFeedback("Selecione um espaço vazio", success: false)
-            deselectSelection()
             return
         }
 
         selectedSlot = nil
         rebuildWorld()
         panel.setSelectionText("Toque em um espaço livre para construir")
-        panel.setPrimaryButtonText("Construir cômodo")
-        panel.setPrimaryButtonVisible(false)
         panel.showFeedback("Cômodo criado", success: true)
         GameAudio.shared.play(.uiConfirm)
 
