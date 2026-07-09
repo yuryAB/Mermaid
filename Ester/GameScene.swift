@@ -274,8 +274,6 @@ class GameScene: SKScene {
     var rigDebugTool: MermaidRigDebugTool?
     private var oceanBackdrop: OceanParallaxBackdrop?
     private var worldChunkManager: WorldChunkManager?
-    private var oceanDebugPanel: OceanVisualDebugPanel?
-    private var regionMenuHiddenOceanDebugPanel = false
     private var warmCurrentOverlay: SKNode?
     private var warmCurrentOverlayPhase: CGFloat = 0
     private var lastRipplePosition: CGPoint?
@@ -351,7 +349,6 @@ class GameScene: SKScene {
         setupChallengeFlow()
         setupRefugeFlow()
         setupWarmCurrentOverlay()
-        setupOceanDebugPanel()
         setupAmbientBubbles()
         lastEntryTextZone = DepthZone.zone(atY: stats.posY)
 
@@ -556,20 +553,8 @@ class GameScene: SKScene {
         refugeFlow = RefugeFlowController(
             ctx: ctx,
             worldNode: worldNode,
-            cameraNode: cameraNode,
             mermaidBase: { [weak self] in
                 self?.mermaidEntity.mermaid.base
-            },
-            mermaidScale: { [weak self] in
-                self?.stats.phase.scale ?? 1
-            },
-            restoreMermaidForOverlay: { [weak self] in
-                guard let self else { return }
-                let base = mermaidEntity.mermaid.base
-                base.removeAllActions()
-                base.alpha = 1
-                base.setScale(stats.phase.scale)
-                mermaidEntity.mermaid.applyIdleMoveMode()
             },
             canBegin: { [weak self] in
                 guard let self else { return false }
@@ -583,18 +568,6 @@ class GameScene: SKScene {
             },
             closeBlockingUI: { [weak self] in
                 self?.closeRegionMenu()
-            },
-            sceneSize: { [weak self] in
-                self?.size ?? .zero
-            },
-            safeAreaInsets: { [weak self] in
-                self?.view?.safeAreaInsets ?? .zero
-            },
-            getOverlay: { [weak self] in
-                self?.refugeOverlay
-            },
-            setOverlay: { [weak self] overlay in
-                self?.refugeOverlay = overlay
             },
             persistAndSave: { [weak self] in
                 self?.persistAndSave()
@@ -685,20 +658,6 @@ class GameScene: SKScene {
         overlay.position.y = cos(warmCurrentOverlayPhase * 0.42) * 6
     }
 
-    private func setupOceanDebugPanel() {
-        guard showDebugControls else { return }
-        let panel = OceanVisualDebugPanel(size: size,
-                                          insets: view?.safeAreaInsets ?? .zero,
-                                          onChange: { [weak self] in
-                                              self?.ctx.say("FX visual ajustado.")
-                                          },
-                                          onClose: { [weak self] in
-                                              self?.oceanDebugPanel?.removeFromParent()
-                                              self?.oceanDebugPanel = nil
-                                          })
-        cameraNode.addChild(panel)
-        oceanDebugPanel = panel
-    }
 
     private func openMermaidNameEditor() {
         guard let presenter = view?.window?.rootViewController else { return }
@@ -871,11 +830,8 @@ class GameScene: SKScene {
 
         challengeFlow.updateOverlays(dt: dt)
 
-        // no Refúgio o tempo é gentil: descanso acelerado
-        if let refuge = refugeOverlay {
-            refuge.update(dt: dt)
-            stats.tick(dt: dt, energyDelta: 2.2)
-        }
+        // The Refúgio is now its own scene (RefugeScene); the ocean scene no
+        // longer runs any refuge logic in parallel.
 
         let mermaidPosition = ctx.mermaidPosition
         let environment = ctx.depth.environment(atY: mermaidPosition.y)
@@ -1121,13 +1077,6 @@ class GameScene: SKScene {
             stats.revealExpeditionMap(in: activeRegion, near: ctx.mermaidPosition)
             stats.rememberMapPosition(ctx.mermaidPosition, in: activeRegion)
         }
-        if let oceanDebugPanel, !oceanDebugPanel.isHidden {
-            regionMenuHiddenOceanDebugPanel = true
-            oceanDebugPanel.isHidden = true
-            oceanDebugPanel.isUserInteractionEnabled = false
-        } else {
-            regionMenuHiddenOceanDebugPanel = false
-        }
         let menu = RegionMenuOverlay(size: size,
                                      stats: stats,
                                      currentRegionId: activeRegion?.id,
@@ -1156,11 +1105,6 @@ class GameScene: SKScene {
         }
         regionMenu?.removeFromParent()
         regionMenu = nil
-        if regionMenuHiddenOceanDebugPanel {
-            oceanDebugPanel?.isHidden = false
-            oceanDebugPanel?.isUserInteractionEnabled = true
-            regionMenuHiddenOceanDebugPanel = false
-        }
     }
 
     // MARK: - Menu de desafios
@@ -1475,7 +1419,9 @@ class GameScene: SKScene {
     }
 
     private func closeRefuge(resume: Bool) {
-        refugeFlow.close(resume: resume)
+        // The refuge is now a separate scene; here we only cancel any in-flight
+        // ocean-side entry transition (open portal / swim animation).
+        refugeFlow.cancelEntry()
     }
 
     // MARK: - Desafios
@@ -2166,181 +2112,6 @@ private final class WaterRippleNode: SKNode {
         }
     }
 }
-
-private final class OceanVisualDebugPanel: SKNode {
-    private let onChange: () -> Void
-    private let onClose: () -> Void
-    private var valueLabels: [OceanVisualTuning.Channel: SKLabelNode] = [:]
-    private var isExpanded = false
-
-    init(size: CGSize,
-         insets: UIEdgeInsets,
-         onChange: @escaping () -> Void,
-         onClose: @escaping () -> Void) {
-        self.onChange = onChange
-        self.onClose = onClose
-        super.init()
-        isUserInteractionEnabled = true
-        zPosition = 245
-        position = CGPoint(x: -size.width / 2 + insets.left + 94,
-                           y: size.height / 2 - insets.top - 58)
-        rebuild()
-    }
-
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-
-    private func rebuild() {
-        removeAllChildren()
-        valueLabels.removeAll()
-        if isExpanded {
-            buildExpanded()
-        } else {
-            buildCollapsed()
-        }
-        refresh()
-    }
-
-    private func buildCollapsed() {
-        addChild(makeButton(name: "ocean_fx_expand",
-                            title: "fx",
-                            position: .zero,
-                            size: CGSize(width: 42, height: 28),
-                            tint: UIColor(red: 0.72, green: 1.0, blue: 0.92, alpha: 0.86)))
-    }
-
-    private func buildExpanded() {
-        let width: CGFloat = 162
-        let height: CGFloat = 142
-        let bg = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 8)
-        bg.fillColor = UIColor(red: 0.03, green: 0.12, blue: 0.15, alpha: 0.62)
-        bg.strokeColor = UIColor(red: 0.58, green: 0.92, blue: 0.88, alpha: 0.28)
-        bg.lineWidth = 1
-        addChild(bg)
-
-        let title = makeLabel("fx", size: 10, color: UIColor(red: 0.72, green: 1.0, blue: 0.92, alpha: 0.86))
-        title.position = CGPoint(x: -width / 2 + 18, y: height / 2 - 18)
-        title.horizontalAlignmentMode = .left
-        addChild(title)
-
-        let reset = makeButton(name: "ocean_fx_reset",
-                               title: "0",
-                               position: CGPoint(x: width / 2 - 46, y: height / 2 - 18),
-                               tint: UIColor(red: 0.86, green: 0.96, blue: 0.92, alpha: 0.85))
-        addChild(reset)
-        let close = makeButton(name: "ocean_fx_close",
-                               title: "x",
-                               position: CGPoint(x: width / 2 - 18, y: height / 2 - 18),
-                               tint: UIColor(red: 1.0, green: 0.84, blue: 0.78, alpha: 0.88))
-        addChild(close)
-
-        for (index, channel) in OceanVisualTuning.Channel.allCases.enumerated() {
-            let y = height / 2 - 44 - CGFloat(index) * 26
-            let label = makeLabel(channel.title, size: 9, color: UIColor.white.withAlphaComponent(0.78))
-            label.horizontalAlignmentMode = .left
-            label.position = CGPoint(x: -width / 2 + 12, y: y - 4)
-            addChild(label)
-
-            let minus = makeButton(name: buttonName(channel: channel, delta: -1),
-                                   title: "-",
-                                   position: CGPoint(x: 48, y: y),
-                                   tint: UIColor(red: 0.60, green: 0.80, blue: 0.82, alpha: 0.8))
-            addChild(minus)
-
-            let value = makeLabel("", size: 8, color: UIColor(red: 0.76, green: 1.0, blue: 0.92, alpha: 0.88))
-            value.horizontalAlignmentMode = .center
-            value.position = CGPoint(x: 72, y: y - 4)
-            addChild(value)
-            valueLabels[channel] = value
-
-            let plus = makeButton(name: buttonName(channel: channel, delta: 1),
-                                  title: "+",
-                                  position: CGPoint(x: 96, y: y),
-                                  tint: UIColor(red: 0.78, green: 0.96, blue: 0.86, alpha: 0.86))
-            addChild(plus)
-        }
-    }
-
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else { return }
-        var node: SKNode? = atPoint(touch.location(in: self))
-        while let current = node {
-            if let name = current.name {
-                if name == "ocean_fx_expand" {
-                    isExpanded = true
-                    rebuild()
-                    return
-                }
-                if name == "ocean_fx_close" {
-                    onClose()
-                    return
-                }
-                if name == "ocean_fx_reset" {
-                    OceanVisualTuning.reset()
-                    refresh()
-                    onChange()
-                    return
-                }
-                for channel in OceanVisualTuning.Channel.allCases {
-                    if name == buttonName(channel: channel, delta: -1) {
-                        OceanVisualTuning.adjust(channel, delta: -0.08)
-                        refresh()
-                        onChange()
-                        return
-                    }
-                    if name == buttonName(channel: channel, delta: 1) {
-                        OceanVisualTuning.adjust(channel, delta: 0.08)
-                        refresh()
-                        onChange()
-                        return
-                    }
-                }
-            }
-            node = current.parent
-        }
-    }
-
-    private func refresh() {
-        for channel in OceanVisualTuning.Channel.allCases {
-            valueLabels[channel]?.text = String(format: "%.2f", channel.value)
-        }
-    }
-
-    private func buttonName(channel: OceanVisualTuning.Channel, delta: Int) -> String {
-        "ocean_fx_\(channel.title)_\(delta < 0 ? "minus" : "plus")"
-    }
-
-    private func makeButton(name: String,
-                            title: String,
-                            position: CGPoint,
-                            size: CGSize = CGSize(width: 20, height: 18),
-                            tint: UIColor) -> SKNode {
-        let node = SKNode()
-        node.name = name
-        node.position = position
-        let bg = SKShapeNode(rectOf: size, cornerRadius: 5)
-        bg.name = name
-        bg.fillColor = tint.withAlphaComponent(0.18)
-        bg.strokeColor = tint.withAlphaComponent(0.60)
-        bg.lineWidth = 0.8
-        node.addChild(bg)
-        let label = makeLabel(title, size: 11, color: tint)
-        label.name = name
-        label.verticalAlignmentMode = .center
-        label.position = CGPoint(x: 0, y: 0)
-        node.addChild(label)
-        return node
-    }
-
-    private func makeLabel(_ text: String, size: CGFloat, color: UIColor) -> SKLabelNode {
-        let label = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        label.text = text
-        label.fontSize = size
-        label.fontColor = color
-        label.verticalAlignmentMode = .center
-        return label
-    }
-}
-
 final class OceanParallaxBackdrop: SKNode {
     private let sceneSize: CGSize
     private let depthShaderWash: SKSpriteNode

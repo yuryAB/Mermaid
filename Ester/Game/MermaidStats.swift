@@ -104,6 +104,8 @@ final class MermaidStats: Codable {
     var cheatDepthAccessEnabled: Bool = false
     var babyGuaranteedRequestsUsed: Int = 0
     var balanceVersion: Int = GameBalance.currentVersion
+    // Expandable Mermaid House layout (room grid). Persisted with the save.
+    var houseLayout: HouseLayoutData = HouseLayoutData()
 
     // Estado transitório, não persiste
     var moodBoost: CGFloat = 0
@@ -132,6 +134,7 @@ final class MermaidStats: Codable {
         case energyUpgradeLevel, dispositionUpgradeLevel
         case babyGuaranteedRequestsUsed
         case balanceVersion
+        case houseLayout
     }
 
     init() {}
@@ -199,6 +202,8 @@ final class MermaidStats: Codable {
         dispositionUpgradeLevel = try c.decodeIfPresent(Int.self, forKey: .dispositionUpgradeLevel) ?? 0
         babyGuaranteedRequestsUsed = try c.decodeIfPresent(Int.self, forKey: .babyGuaranteedRequestsUsed) ?? 0
         balanceVersion = try c.decodeIfPresent(Int.self, forKey: .balanceVersion) ?? 1
+        houseLayout = try c.decodeIfPresent(HouseLayoutData.self, forKey: .houseLayout) ?? HouseLayoutData()
+        houseLayout.ensureRootRoom()
     }
 
     private static func estimatedPhaseStartedAt(for phase: MermaidPhase, birthDate: Date) -> Date {

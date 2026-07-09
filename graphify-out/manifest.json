@@ -710,14 +710,14 @@
     "semantic_hash": "b4305f201c9756a1c9e924e8858d5633"
   },
   "Ester/Components/ExpressionComponent.swift": {
-    "mtime": 1783526905.9032981,
-    "ast_hash": "3ab9c94c4c66ef95aed36406c88dc76c",
-    "semantic_hash": "3ab9c94c4c66ef95aed36406c88dc76c"
+    "mtime": 1783530585.2942336,
+    "ast_hash": "a91aace23459f509e13c1614a93d21f7",
+    "semantic_hash": "a91aace23459f509e13c1614a93d21f7"
   },
   "Ester/Components/FishBehaviorComponent.swift": {
-    "mtime": 1783526884.0826936,
-    "ast_hash": "57a643d8d4a29b24ad31d5a3ddecdacb",
-    "semantic_hash": "57a643d8d4a29b24ad31d5a3ddecdacb"
+    "mtime": 1783530612.419285,
+    "ast_hash": "0fe837d8b543b0cc56e0e0026fba903a",
+    "semantic_hash": "0fe837d8b543b0cc56e0e0026fba903a"
   },
   "Ester/Components/FoodComponent.swift": {
     "mtime": 1783526880.6606748,
@@ -743,11 +743,6 @@
     "mtime": 1782252246.2031188,
     "ast_hash": "4965e31a0fb82df3cb233002c6eb978c",
     "semantic_hash": "4965e31a0fb82df3cb233002c6eb978c"
-  },
-  "Ester/Components/MovementComponent.swift": {
-    "mtime": 1780516506.1410367,
-    "ast_hash": "fd0010e12da28a098866785cdf87cc04",
-    "semantic_hash": "fd0010e12da28a098866785cdf87cc04"
   },
   "Ester/Components/NodeComponent.swift": {
     "mtime": 1783526874.288461,
@@ -785,9 +780,9 @@
     "semantic_hash": "e113d526b3c593df25813418d4c5e1a8"
   },
   "Ester/Entitys/MermaidEntity.swift": {
-    "mtime": 1783527281.3459046,
-    "ast_hash": "2d4fa2669761b7717bec5550622e95f8",
-    "semantic_hash": "2d4fa2669761b7717bec5550622e95f8"
+    "mtime": 1783536192.052137,
+    "ast_hash": "c72f4c813a1f18121a0c4442d1a8a9b4",
+    "semantic_hash": "c72f4c813a1f18121a0c4442d1a8a9b4"
   },
   "Ester/Game/AncientRuinsGameScene.swift": {
     "mtime": 1782177185.3240144,
@@ -820,9 +815,9 @@
     "semantic_hash": "9dfbbac33064eff6d36791e02acd3575"
   },
   "Ester/Game/CameraController.swift": {
-    "mtime": 1783527531.4205525,
-    "ast_hash": "b9aa6affdfb718ce1f82fe52cfd8f6ab",
-    "semantic_hash": "b9aa6affdfb718ce1f82fe52cfd8f6ab"
+    "mtime": 1783530575.3403757,
+    "ast_hash": "8b3d1de61628ec0f9ed0859382445ec8",
+    "semantic_hash": "8b3d1de61628ec0f9ed0859382445ec8"
   },
   "Ester/Game/CaveMouthGameScene.swift": {
     "mtime": 1782177179.2879379,
@@ -830,9 +825,9 @@
     "semantic_hash": "442bfeffda0137992582acd30a4c9ffd"
   },
   "Ester/Game/ChallengeFlowController.swift": {
-    "mtime": 1783527484.3800564,
-    "ast_hash": "15a10ea9147ab307850827c4ce18bdc1",
-    "semantic_hash": "15a10ea9147ab307850827c4ce18bdc1"
+    "mtime": 1783530572.0719798,
+    "ast_hash": "5236753673f5630b0e745b4214b8d796",
+    "semantic_hash": "5236753673f5630b0e745b4214b8d796"
   },
   "Ester/Game/ChallengeSystem.swift": {
     "mtime": 1782193120.6821756,
@@ -875,14 +870,14 @@
     "semantic_hash": "2009fe66ae19b66418d809938c65f87b"
   },
   "Ester/Game/EntityFactory.swift": {
-    "mtime": 1783526917.1654832,
-    "ast_hash": "64da1ad03ad1e8acaa0e187eb8741e8b",
-    "semantic_hash": "64da1ad03ad1e8acaa0e187eb8741e8b"
+    "mtime": 1783530564.3750944,
+    "ast_hash": "75602f31cc7db38f25b3ad60fa6cb27e",
+    "semantic_hash": "75602f31cc7db38f25b3ad60fa6cb27e"
   },
   "Ester/Game/EventBus.swift": {
-    "mtime": 1783526921.6692064,
-    "ast_hash": "a2b9174cd9051d1f7e92ce9459577206",
-    "semantic_hash": "a2b9174cd9051d1f7e92ce9459577206"
+    "mtime": 1783530568.074734,
+    "ast_hash": "82de5dd94cdc30f9076c1cfb2e9b1f43",
+    "semantic_hash": "82de5dd94cdc30f9076c1cfb2e9b1f43"
   },
   "Ester/Game/EventSystem.swift": {
     "mtime": 1782252273.164479,
@@ -895,9 +890,9 @@
     "semantic_hash": "4b9e676ff835f6b2d3fcaf994cac572d"
   },
   "Ester/Game/FishNode.swift": {
-    "mtime": 1783527008.1113179,
-    "ast_hash": "dd4197e7203127beee821d45cb8be5f7",
-    "semantic_hash": "dd4197e7203127beee821d45cb8be5f7"
+    "mtime": 1783530589.0694065,
+    "ast_hash": "2ddc28d7fa0dda6234318a5b9f0edb5d",
+    "semantic_hash": "2ddc28d7fa0dda6234318a5b9f0edb5d"
   },
   "Ester/Game/FishSystem.swift": {
     "mtime": 1783527117.9432228,
@@ -915,9 +910,9 @@
     "semantic_hash": "0ccd2c4dd78903f874d4f9d6050aef99"
   },
   "Ester/Game/GameplayModels.swift": {
-    "mtime": 1783527062.6756384,
-    "ast_hash": "e2b113f8b0f97f3cba4ecb1b7b417428",
-    "semantic_hash": "e2b113f8b0f97f3cba4ecb1b7b417428"
+    "mtime": 1783535117.1577067,
+    "ast_hash": "78a4c8f1635a845d2aff3493b4e15686",
+    "semantic_hash": "78a4c8f1635a845d2aff3493b4e15686"
   },
   "Ester/Game/GreatDeltaGameScene.swift": {
     "mtime": 1782177164.7467399,
@@ -960,9 +955,9 @@
     "semantic_hash": "02b46b3359bb9ee01ee361b7d055b429"
   },
   "Ester/Game/MermaidFigures/BabyMermaidFigure.swift": {
-    "mtime": 1782251729.4835482,
-    "ast_hash": "deb7894142323e88cf7d80726aa7fab5",
-    "semantic_hash": "deb7894142323e88cf7d80726aa7fab5"
+    "mtime": 1783536686.137502,
+    "ast_hash": "fa369d06ca4aaeabaa40d8a6710be32a",
+    "semantic_hash": "fa369d06ca4aaeabaa40d8a6710be32a"
   },
   "Ester/Game/MermaidFigures/BabyMermaidRig.swift": {
     "mtime": 1781128307.7639108,
@@ -970,9 +965,9 @@
     "semantic_hash": "723612b2f7503f99421902c828904e64"
   },
   "Ester/Game/MermaidFigures/ChildMermaidFigure.swift": {
-    "mtime": 1782251729.4848847,
-    "ast_hash": "3909f05db9ebf1fe2484c5fdceca644c",
-    "semantic_hash": "3909f05db9ebf1fe2484c5fdceca644c"
+    "mtime": 1783536447.5777233,
+    "ast_hash": "e57a06e9969e165d7ac7a3c4013f3292",
+    "semantic_hash": "e57a06e9969e165d7ac7a3c4013f3292"
   },
   "Ester/Game/MermaidFigures/ChildMermaidRig.swift": {
     "mtime": 1781129667.3847008,
@@ -1005,9 +1000,9 @@
     "semantic_hash": "2da093b4cb882b07e6f6c1b677218c66"
   },
   "Ester/Game/MermaidStats.swift": {
-    "mtime": 1782252346.034392,
-    "ast_hash": "d534aa452f4bd6609b2bbe69fb7a1c06",
-    "semantic_hash": "d534aa452f4bd6609b2bbe69fb7a1c06"
+    "mtime": 1783553319.443211,
+    "ast_hash": "b9e29b4306377a3acadee9e05e08638f",
+    "semantic_hash": "b9e29b4306377a3acadee9e05e08638f"
   },
   "Ester/Game/OfflineProgressSystem.swift": {
     "mtime": 1782177199.5785768,
@@ -1040,9 +1035,9 @@
     "semantic_hash": "f96e3b14a592c50cb9d0ff6cc7b68c0c"
   },
   "Ester/Game/ResourceSupportSystem.swift": {
-    "mtime": 1782181462.2722006,
-    "ast_hash": "7f816351811ae835eb453a12d22f5a01",
-    "semantic_hash": "7f816351811ae835eb453a12d22f5a01"
+    "mtime": 1783543665.7532089,
+    "ast_hash": "f4d83c91301192cfb18d6256ea1306b2",
+    "semantic_hash": "f4d83c91301192cfb18d6256ea1306b2"
   },
   "Ester/Game/ShellSnapSystem.swift": {
     "mtime": 1782190818.899371,
@@ -1050,9 +1045,9 @@
     "semantic_hash": "865ccc8ff1aade9a3528a45c37141226"
   },
   "Ester/Game/ShelterSystem.swift": {
-    "mtime": 1782263833.6196184,
-    "ast_hash": "7dffb0411b41779c7ba308913a4860c8",
-    "semantic_hash": "7dffb0411b41779c7ba308913a4860c8"
+    "mtime": 1783554528.3921268,
+    "ast_hash": "0059db99a3eb7a6fb6d75debbb7ca1b5",
+    "semantic_hash": "0059db99a3eb7a6fb6d75debbb7ca1b5"
   },
   "Ester/Game/TideMemorySystem.swift": {
     "mtime": 1782190840.1583693,
@@ -1130,9 +1125,9 @@
     "semantic_hash": "b49e97b6789bcaa9e10c0021ead39653"
   },
   "Ester/GameScene.swift": {
-    "mtime": 1783527540.1771436,
-    "ast_hash": "db2a5ab8616c249e1b766bd8ad946b59",
-    "semantic_hash": "db2a5ab8616c249e1b766bd8ad946b59"
+    "mtime": 1783555692.762499,
+    "ast_hash": "072d7c8951c8f5de0b553e439900e1b9",
+    "semantic_hash": "072d7c8951c8f5de0b553e439900e1b9"
   },
   "Ester/GameViewController.swift": {
     "mtime": 1781399204.5123413,
@@ -1185,9 +1180,9 @@
     "semantic_hash": "331236d0f42894e4fc2bb3b9a41e2266"
   },
   "Ester/Managers/MermaidClasses/Mermaid.swift": {
-    "mtime": 1781208017.5704515,
-    "ast_hash": "04f1a02ab3dccafe5ceba0dd48f3f444",
-    "semantic_hash": "04f1a02ab3dccafe5ceba0dd48f3f444"
+    "mtime": 1783536219.2434304,
+    "ast_hash": "3d9640ca95792b61faa68eb84d315311",
+    "semantic_hash": "3d9640ca95792b61faa68eb84d315311"
   },
   "Ester/Managers/MermaidClasses/MermaidArms.swift": {
     "mtime": 1782251729.4864004,
@@ -1213,16 +1208,6 @@
     "mtime": 1780516506.1432889,
     "ast_hash": "742bc821abbf4d1fd79f449b1eca736c",
     "semantic_hash": "742bc821abbf4d1fd79f449b1eca736c"
-  },
-  "Ester/States/MermaidDirectionStates.swift": {
-    "mtime": 1780516506.1434362,
-    "ast_hash": "ea176c3386d6d8eca93a53fb092890b9",
-    "semantic_hash": "ea176c3386d6d8eca93a53fb092890b9"
-  },
-  "Ester/States/MermaidMovementStates.swift": {
-    "mtime": 1780516506.1435277,
-    "ast_hash": "4a01115ed222ca5c7752d0f28a23ed65",
-    "semantic_hash": "4a01115ed222ca5c7752d0f28a23ed65"
   },
   "MapEditor/MapEditor/Assets.xcassets/Contents.json": {
     "mtime": 1781973201.828968,
@@ -3038,5 +3023,120 @@
     "mtime": 1781276079.985516,
     "ast_hash": "d637d4179103dc8b841992f00c902006",
     "semantic_hash": "d637d4179103dc8b841992f00c902006"
+  },
+  "Ester/Assets.xcassets/ProfessorOctopus.imageset/Contents.json": {
+    "mtime": 1783538642.908355,
+    "ast_hash": "271f5e306fdcb02ab34e2642fc3a8c5b",
+    "semantic_hash": "271f5e306fdcb02ab34e2642fc3a8c5b"
+  },
+  "Ester/Assets.xcassets/SellerSardines.imageset/Contents.json": {
+    "mtime": 1783540714.033418,
+    "ast_hash": "bf428bd89959679032a1dce505ec0c9f",
+    "semantic_hash": "bf428bd89959679032a1dce505ec0c9f"
+  },
+  "Ester/Assets.xcassets/refuge-diorama.imageset/Contents.json": {
+    "mtime": 1783543714.7232654,
+    "ast_hash": "c2070a2a4df4250551dd974593011644",
+    "semantic_hash": "c2070a2a4df4250551dd974593011644"
+  },
+  "Ester/Game/MermaidHouseSystem.swift": {
+    "mtime": 1783557506.7282119,
+    "ast_hash": "9bf55515389943d6dfbb4d303ee9f115",
+    "semantic_hash": "9bf55515389943d6dfbb4d303ee9f115"
+  },
+  "Ester/Game/RefugeFlowController.swift": {
+    "mtime": 1783555530.83968,
+    "ast_hash": "78f3496d15f4fc4809457858af104eda",
+    "semantic_hash": "78f3496d15f4fc4809457858af104eda"
+  },
+  "Ester/Game/RefugeScene.swift": {
+    "mtime": 1783555462.424255,
+    "ast_hash": "5ee45b041f6268da81e43e321ae5e94c",
+    "semantic_hash": "5ee45b041f6268da81e43e321ae5e94c"
+  },
+  "docs/CHARACTER_ART_GUIDE.md": {
+    "mtime": 1783538943.1560318,
+    "ast_hash": "b28098346eb57b8ea224f443a4d43b27",
+    "semantic_hash": "b28098346eb57b8ea224f443a4d43b27"
+  },
+  "Ester/Assets.xcassets/ProfessorOctopus.imageset/professor-octopus.png": {
+    "mtime": 1783538633.1940095,
+    "ast_hash": "916fbc7dfa6167e5ea485e63a3d98ba5",
+    "semantic_hash": "916fbc7dfa6167e5ea485e63a3d98ba5"
+  },
+  "Ester/Assets.xcassets/SellerSardines.imageset/seller-sardines.png": {
+    "mtime": 1783540686.1919289,
+    "ast_hash": "883640eb365baf14f4fef195e5ac729c",
+    "semantic_hash": "883640eb365baf14f4fef195e5ac729c"
+  },
+  "Ester/Assets.xcassets/refuge-diorama.imageset/refuge-diorama.png": {
+    "mtime": 1783544844.2395961,
+    "ast_hash": "6c355a54812b5685ae5ec2e46f7b1062",
+    "semantic_hash": "6c355a54812b5685ae5ec2e46f7b1062"
+  },
+  "docs/storyboard/ref-seller/Mermay 01 _ PERSONAL WORK.jpeg": {
+    "mtime": 1783539918.5692194,
+    "ast_hash": "c2f8a2f9a562101b3d6e9a683076b646",
+    "semantic_hash": "c2f8a2f9a562101b3d6e9a683076b646"
+  },
+  "docs/storyboard/ref-seller/_ (12).jpeg": {
+    "mtime": 1783539528.69471,
+    "ast_hash": "a0ce09e0eeb3490ae20e72b17de99623",
+    "semantic_hash": "a0ce09e0eeb3490ae20e72b17de99623"
+  },
+  "docs/storyboard/ref-seller/_ (13).jpeg": {
+    "mtime": 1783539555.4701574,
+    "ast_hash": "31c379c0d7cda6f556e21beda62f28b9",
+    "semantic_hash": "31c379c0d7cda6f556e21beda62f28b9"
+  },
+  "docs/storyboard/ref-seller/generated/seller-sardines.png": {
+    "mtime": 1783540654.3183362,
+    "ast_hash": "50acd16e5e19ecf65be3a76e8a6b10f8",
+    "semantic_hash": "50acd16e5e19ecf65be3a76e8a6b10f8"
+  },
+  "docs/storyboard/ref-teacher/Octo Sheriff.jpeg": {
+    "mtime": 1783537144.9667716,
+    "ast_hash": "375c51620f109aa808f082f5d19389a0",
+    "semantic_hash": "375c51620f109aa808f082f5d19389a0"
+  },
+  "docs/storyboard/ref-teacher/Postcard designs - Barbara Dziadosz.jpeg": {
+    "mtime": 1783537149.820005,
+    "ast_hash": "8e72514d787717cac294cf235e125fc3",
+    "semantic_hash": "8e72514d787717cac294cf235e125fc3"
+  },
+  "docs/storyboard/ref-teacher/_ (12).jpeg": {
+    "mtime": 1783536917.0859115,
+    "ast_hash": "b93068604b0400c5586a717ced16424a",
+    "semantic_hash": "b93068604b0400c5586a717ced16424a"
+  },
+  "docs/storyboard/ref-teacher/_ (13).jpeg": {
+    "mtime": 1783537139.056308,
+    "ast_hash": "1b6cefe093e31f5db2ad44f67d567f36",
+    "semantic_hash": "1b6cefe093e31f5db2ad44f67d567f36"
+  },
+  "docs/storyboard/ref-teacher/adult-siren.png": {
+    "mtime": 1783537423.1181772,
+    "ast_hash": "bcf57415559bcae65e7c6894bb54923b",
+    "semantic_hash": "bcf57415559bcae65e7c6894bb54923b"
+  },
+  "docs/storyboard/ref-teacher/baby-siren.png": {
+    "mtime": 1783537423.1190617,
+    "ast_hash": "2fcfc5d59789193f3ba457facbdb0283",
+    "semantic_hash": "2fcfc5d59789193f3ba457facbdb0283"
+  },
+  "docs/storyboard/ref-teacher/child-siren.png": {
+    "mtime": 1783537423.1186488,
+    "ast_hash": "21779a7ac8dfa2c361a8df8de2302cfe",
+    "semantic_hash": "21779a7ac8dfa2c361a8df8de2302cfe"
+  },
+  "docs/storyboard/ref-teacher/generated/professor-octopus.png": {
+    "mtime": 1783537768.0930257,
+    "ast_hash": "229778660a1032f3097333467e1a3b3a",
+    "semantic_hash": "229778660a1032f3097333467e1a3b3a"
+  },
+  "docs/storyboard/ref-teacher/young-siren.png": {
+    "mtime": 1783537423.1193671,
+    "ast_hash": "ffa1edb28e22d7c4b7146a6951b6821f",
+    "semantic_hash": "ffa1edb28e22d7c4b7146a6951b6821f"
   }
 }

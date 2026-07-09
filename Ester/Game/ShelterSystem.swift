@@ -2769,36 +2769,46 @@ private final class RefugeDioramaController {
     }
 }
 
+/// Wraps the new expandable shelter-style Mermaid House MVP
+/// (`MermaidHouseSceneController`). The old village-based home interior
+/// (`RefugeVillageController`) is no longer used for the house and is kept only
+/// as dormant legacy code. This controller exposes the began/moved/ended touch
+/// entry points needed for free camera panning.
 private final class RefugeHouseInteriorController {
     let node = SKNode()
-    private let controller: RefugeVillageController
+    private let controller: MermaidHouseSceneController
 
     var behaviorText: String { controller.behaviorText }
 
     init(overlaySize: CGSize,
-         playableRect: CGRect,
-         art: RefugeArtDirection,
+         insets: UIEdgeInsets,
          ctx: GameContext,
          onClose: @escaping () -> Void,
          onNeedsRefresh: @escaping () -> Void) {
-        controller = RefugeVillageController(overlaySize: overlaySize,
-                                             playableRect: playableRect,
-                                             art: art,
-                                             ctx: ctx,
-                                             onOpenStore: {},
-                                             onOpenEnhancements: {},
-                                             onNeedsRefresh: onNeedsRefresh,
-                                             onStandaloneHomeExit: onClose)
+        controller = MermaidHouseSceneController(overlaySize: overlaySize,
+                                                 insets: insets,
+                                                 ctx: ctx,
+                                                 persist: onNeedsRefresh,
+                                                 onExit: onClose)
         node.addChild(controller.node)
-        controller.openHomeImmediately()
     }
 
     func update(dt: CGFloat) {
         controller.update(dt: dt)
     }
 
-    func handleTouch(at point: CGPoint) -> Bool {
-        controller.handleTouch(at: point)
+    /// Returns true when the house consumes the gesture (so the overlay does
+    /// not also process it).
+    func touchesBegan(_ touches: Set<UITouch>, in ref: SKNode) -> Bool {
+        controller.touchesBegan(touches, in: ref)
+    }
+
+    func touchesMoved(_ touches: Set<UITouch>, in ref: SKNode) {
+        controller.touchesMoved(touches, in: ref)
+    }
+
+    func touchesEnded(_ touches: Set<UITouch>, in ref: SKNode) {
+        controller.touchesEnded(touches, in: ref)
     }
 }
 
@@ -2817,6 +2827,7 @@ final class RefugeOverlay: SKNode {
     private let uiLayer = SKNode()
     private var dioramaController: RefugeDioramaController?
     private var houseController: RefugeHouseInteriorController?
+    private var closeButtonNode: SKNode?
     private var mode: Mode = .map
 
     private var statusLabel: SKLabelNode!
@@ -2830,6 +2841,7 @@ final class RefugeOverlay: SKNode {
     private var storeOverlay: RefugeStoreOverlay?
     private let safeAreaInsets: UIEdgeInsets
     private var refugeRect = CGRect.zero
+    private var observationRecordNode: SKNode?
 
     init(size: CGSize,
          insets: UIEdgeInsets,
@@ -2900,6 +2912,7 @@ final class RefugeOverlay: SKNode {
         closeButton.position = RefugeHubLayout.backButtonCenter.point(in: screenRect)
         closeButton.zPosition = 8
         uiLayer.addChild(closeButton)
+        closeButtonNode = closeButton
 
         refreshLabels()
     }
@@ -2979,6 +2992,7 @@ final class RefugeOverlay: SKNode {
         card.position = center
         card.zPosition = 6
         uiLayer.addChild(card)
+        observationRecordNode = card
 
         let clip = SKShapeNode(rectOf: CGSize(width: 74, height: 18), cornerRadius: 5)
         clip.fillColor = GameUI.gold.withAlphaComponent(0.36)
@@ -3179,15 +3193,22 @@ final class RefugeOverlay: SKNode {
         houseController?.node.removeFromParent()
         dioramaController?.node.isHidden = true
         mode = .house
+        syncObservationRecordVisibility()
+
+        // The house has its own "Voltar" button in its bottom panel, so hide
+        // the overlay's map-level close button while inside the house.
+        closeButtonNode?.isHidden = true
 
         let house = RefugeHouseInteriorController(overlaySize: overlaySize,
-                                                  playableRect: refugeRect,
-                                                  art: art,
+                                                  insets: safeAreaInsets,
                                                   ctx: ctx,
                                                   onClose: { [weak self] in
                                                       self?.returnToMap(playSound: false)
                                                   },
                                                   onNeedsRefresh: { [weak self] in
+                                                      // House layout is written into ctx.stats by the
+                                                      // controller; persist it and refresh the overlay.
+                                                      self?.ctx.stats.save()
                                                       self?.refreshLabels()
                                                   })
         house.node.zPosition = 2
@@ -3203,6 +3224,7 @@ final class RefugeOverlay: SKNode {
         houseController = nil
         dioramaController?.node.isHidden = false
         mode = .professor
+        syncObservationRecordVisibility()
         let overlay = RefugeEnhancementsOverlay(size: overlaySize,
                                                 insets: safeAreaInsets,
                                                 stats: ctx.stats)
@@ -3219,6 +3241,7 @@ final class RefugeOverlay: SKNode {
         houseController = nil
         dioramaController?.node.isHidden = false
         mode = .store
+        syncObservationRecordVisibility()
         let overlay = RefugeStoreOverlay(size: overlaySize,
                                          insets: safeAreaInsets,
                                          stats: ctx.stats)
@@ -3238,8 +3261,14 @@ final class RefugeOverlay: SKNode {
         enhancementsOverlay?.removeFromParent()
         enhancementsOverlay = nil
         dioramaController?.node.isHidden = false
+        closeButtonNode?.isHidden = false
         mode = .map
+        syncObservationRecordVisibility()
         refreshLabels()
+    }
+
+    private func syncObservationRecordVisibility() {
+        observationRecordNode?.isHidden = (mode == .house)
     }
 
     // MARK: - Toques
@@ -3249,8 +3278,7 @@ final class RefugeOverlay: SKNode {
         let location = touch.location(in: self)
 
         if mode == .house,
-           houseController?.handleTouch(at: location) == true {
-            refreshLabels()
+           houseController?.touchesBegan(touches, in: self) == true {
             return
         }
 
@@ -3321,6 +3349,21 @@ final class RefugeOverlay: SKNode {
         if mode != .map {
             returnToMap()
         }
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard mode == .house else { return }
+        houseController?.touchesMoved(touches, in: self)
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard mode == .house else { return }
+        houseController?.touchesEnded(touches, in: self)
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard mode == .house else { return }
+        houseController?.touchesEnded(touches, in: self)
     }
 }
 
