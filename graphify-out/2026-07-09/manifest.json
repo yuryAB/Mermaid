@@ -1,0 +1,3977 @@
+{
+  ".claude/settings.local.json": {
+    "mtime": 1781118854.7979395,
+    "ast_hash": "fb2a6db6da464ddd9190136014feba2b",
+    "semantic_hash": "fb2a6db6da464ddd9190136014feba2b"
+  },
+  "Ester/AppDelegate.swift": {
+    "mtime": 1780516506.128088,
+    "ast_hash": "fa831dc2757269ab389a48af6e11ee90",
+    "semantic_hash": "fa831dc2757269ab389a48af6e11ee90"
+  },
+  "Ester/Assets.xcassets/AccentColor.colorset/Contents.json": {
+    "mtime": 1780516506.1282961,
+    "ast_hash": "55019f7265dde0a78318b0807f98e847",
+    "semantic_hash": "55019f7265dde0a78318b0807f98e847"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/Contents.json": {
+    "mtime": 1781113404.989785,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermArms/Contents.json": {
+    "mtime": 1781113404.990272,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermArms/hand1.imageset/Contents.json": {
+    "mtime": 1781113404.989883,
+    "ast_hash": "72b400c7332522df840bfd4b36d328f7",
+    "semantic_hash": "72b400c7332522df840bfd4b36d328f7"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermArms/hand2.imageset/Contents.json": {
+    "mtime": 1781113404.990516,
+    "ast_hash": "7d92a18688f8951e12522d047a9a2d8c",
+    "semantic_hash": "7d92a18688f8951e12522d047a9a2d8c"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermArms/hand3.imageset/Contents.json": {
+    "mtime": 1781113404.98946,
+    "ast_hash": "22e42a1eddfbe1911b344fd996559b3d",
+    "semantic_hash": "22e42a1eddfbe1911b344fd996559b3d"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermArms/hand4.imageset/Contents.json": {
+    "mtime": 1781113404.990066,
+    "ast_hash": "37c93ad192d8083f4b15e11530400f64",
+    "semantic_hash": "37c93ad192d8083f4b15e11530400f64"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermHead/Contents.json": {
+    "mtime": 1781113404.98922,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermHead/MermHairBack.imageset/Contents.json": {
+    "mtime": 1781113404.989072,
+    "ast_hash": "cfc60620dcc3db29c4ef385c3d1fbe3a",
+    "semantic_hash": "cfc60620dcc3db29c4ef385c3d1fbe3a"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermHead/MermHairFront.imageset/Contents.json": {
+    "mtime": 1781113404.989581,
+    "ast_hash": "7739080fadf5e51fe0895b550593e1cc",
+    "semantic_hash": "7739080fadf5e51fe0895b550593e1cc"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermHead/MermHead.imageset/Contents.json": {
+    "mtime": 1781113404.989971,
+    "ast_hash": "4e19ccc8d11367792061365761bffc10",
+    "semantic_hash": "4e19ccc8d11367792061365761bffc10"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/finBack.imageset/Contents.json": {
+    "mtime": 1781113404.990309,
+    "ast_hash": "f586a75b0d45b5565dee75cd3dcf1e24",
+    "semantic_hash": "f586a75b0d45b5565dee75cd3dcf1e24"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/finFront.imageset/Contents.json": {
+    "mtime": 1781113404.988506,
+    "ast_hash": "ab2f8dbb66896f0db8950e01ac23c403",
+    "semantic_hash": "ab2f8dbb66896f0db8950e01ac23c403"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/leftArm.imageset/Contents.json": {
+    "mtime": 1781113404.989748,
+    "ast_hash": "73a00e6976022f095223716c2969603e",
+    "semantic_hash": "73a00e6976022f095223716c2969603e"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/rightArm.imageset/Contents.json": {
+    "mtime": 1781113404.990436,
+    "ast_hash": "315d40f7a765361ad26ff2db57393b74",
+    "semantic_hash": "315d40f7a765361ad26ff2db57393b74"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/roundPiece.imageset/Contents.json": {
+    "mtime": 1781113404.989417,
+    "ast_hash": "a7b72b1ae44ebdde656291c1a0e601d9",
+    "semantic_hash": "a7b72b1ae44ebdde656291c1a0e601d9"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/waist.imageset/Contents.json": {
+    "mtime": 1781113404.988315,
+    "ast_hash": "ad03890b694980bb652a3398cae138f8",
+    "semantic_hash": "ad03890b694980bb652a3398cae138f8"
+  },
+  "Ester/Assets.xcassets/AppIcon.appiconset/Contents.json": {
+    "mtime": 1781282992.2550557,
+    "ast_hash": "a69f3044ab89bde360da510cc5bfb775",
+    "semantic_hash": "a69f3044ab89bde360da510cc5bfb775"
+  },
+  "Ester/Assets.xcassets/BabyMermaid/Contents.json": {
+    "mtime": 1781119931.118223,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/BabyMermaid/baby-fin.imageset/Contents.json": {
+    "mtime": 1781119931.11819,
+    "ast_hash": "6b39d82e4192c7378c8136bece15e8ec",
+    "semantic_hash": "6b39d82e4192c7378c8136bece15e8ec"
+  },
+  "Ester/Assets.xcassets/BabyMermaid/baby-hairBack.imageset/Contents.json": {
+    "mtime": 1781116804.705392,
+    "ast_hash": "e900c8b23ab508cd7ee7bb92586af401",
+    "semantic_hash": "e900c8b23ab508cd7ee7bb92586af401"
+  },
+  "Ester/Assets.xcassets/BabyMermaid/baby-hairFront.imageset/Contents.json": {
+    "mtime": 1781116804.70633,
+    "ast_hash": "2d99f35fbd3ccb32c9cde55b21c11c32",
+    "semantic_hash": "2d99f35fbd3ccb32c9cde55b21c11c32"
+  },
+  "Ester/Assets.xcassets/BabyMermaid/baby-hand1-1.imageset/Contents.json": {
+    "mtime": 1781116804.704673,
+    "ast_hash": "256cd45176ba7709c7899366b6b9d89e",
+    "semantic_hash": "256cd45176ba7709c7899366b6b9d89e"
+  },
+  "Ester/Assets.xcassets/BabyMermaid/baby-hand1.imageset/Contents.json": {
+    "mtime": 1781116804.7057,
+    "ast_hash": "6436af1aba77c42f9e139a0aac826e37",
+    "semantic_hash": "6436af1aba77c42f9e139a0aac826e37"
+  },
+  "Ester/Assets.xcassets/BabyMermaid/baby-waistBack.imageset/Contents.json": {
+    "mtime": 1781116804.70657,
+    "ast_hash": "29dfb91232a53f8a98f4708a08f9315e",
+    "semantic_hash": "29dfb91232a53f8a98f4708a08f9315e"
+  },
+  "Ester/Assets.xcassets/BabyMermaid/baby-waistFront.imageset/Contents.json": {
+    "mtime": 1781116804.704454,
+    "ast_hash": "1fa31abec3ef1444cb82f27bdb7b8a57",
+    "semantic_hash": "1fa31abec3ef1444cb82f27bdb7b8a57"
+  },
+  "Ester/Assets.xcassets/ChildMermaid/Contents.json": {
+    "mtime": 1781128190.879749,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/ChildMermaid/chest.imageset/Contents.json": {
+    "mtime": 1781116909.888631,
+    "ast_hash": "bbc134dfa08e90f62b960b045a444e10",
+    "semantic_hash": "bbc134dfa08e90f62b960b045a444e10"
+  },
+  "Ester/Assets.xcassets/ChildMermaid/child-fin.imageset/Contents.json": {
+    "mtime": 1781128190.879936,
+    "ast_hash": "fa6a5ed1306429b6715324dcca325701",
+    "semantic_hash": "fa6a5ed1306429b6715324dcca325701"
+  },
+  "Ester/Assets.xcassets/ChildMermaid/child-hairBack.imageset/Contents.json": {
+    "mtime": 1781116909.887875,
+    "ast_hash": "c96be231c0d7517187c8d25ce018fc5a",
+    "semantic_hash": "c96be231c0d7517187c8d25ce018fc5a"
+  },
+  "Ester/Assets.xcassets/ChildMermaid/child-hairFront.imageset/Contents.json": {
+    "mtime": 1781116909.888378,
+    "ast_hash": "e381077ed4fd94ab17e077f3ec6c0f3c",
+    "semantic_hash": "e381077ed4fd94ab17e077f3ec6c0f3c"
+  },
+  "Ester/Assets.xcassets/ChildMermaid/child-waistBack.imageset/Contents.json": {
+    "mtime": 1781116916.329495,
+    "ast_hash": "b21e94783315ef86fa10638f63475d61",
+    "semantic_hash": "b21e94783315ef86fa10638f63475d61"
+  },
+  "Ester/Assets.xcassets/ChildMermaid/child-waistFront.imageset/Contents.json": {
+    "mtime": 1781116909.888486,
+    "ast_hash": "66422199689e47520c57262dfba86cec",
+    "semantic_hash": "66422199689e47520c57262dfba86cec"
+  },
+  "Ester/Assets.xcassets/Colors/Abyss/AbyssHair.colorset/Contents.json": {
+    "mtime": 1780516506.128745,
+    "ast_hash": "0ba92367f3d869a94016213e1cda9ad0",
+    "semantic_hash": "0ba92367f3d869a94016213e1cda9ad0"
+  },
+  "Ester/Assets.xcassets/Colors/Abyss/AbyssSkin.colorset/Contents.json": {
+    "mtime": 1780516506.1288908,
+    "ast_hash": "b403c9fcc8fba883df4a7bcb21f47b3d",
+    "semantic_hash": "b403c9fcc8fba883df4a7bcb21f47b3d"
+  },
+  "Ester/Assets.xcassets/Colors/Abyss/AbyssVibrance1.colorset/Contents.json": {
+    "mtime": 1780516506.1290352,
+    "ast_hash": "6ceb033ce1c64933ee95c717acdb51c5",
+    "semantic_hash": "6ceb033ce1c64933ee95c717acdb51c5"
+  },
+  "Ester/Assets.xcassets/Colors/Abyss/AbyssVibrance2.colorset/Contents.json": {
+    "mtime": 1780516506.1293023,
+    "ast_hash": "409d58008c824674b49257e02d2a0fef",
+    "semantic_hash": "409d58008c824674b49257e02d2a0fef"
+  },
+  "Ester/Assets.xcassets/Colors/Abyss/Contents.json": {
+    "mtime": 1780516506.12955,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/Colors/Contents.json": {
+    "mtime": 1780516506.1296415,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/Colors/Main/Contents.json": {
+    "mtime": 1780516506.129799,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/Colors/Main/MainHair.colorset/Contents.json": {
+    "mtime": 1780516506.1307733,
+    "ast_hash": "b683c0f22a57d8d8e92c5d9c4f8c972e",
+    "semantic_hash": "b683c0f22a57d8d8e92c5d9c4f8c972e"
+  },
+  "Ester/Assets.xcassets/Colors/Main/MainSkin.colorset/Contents.json": {
+    "mtime": 1780516506.1309528,
+    "ast_hash": "af1af149540c1c97a763783936dc5ed1",
+    "semantic_hash": "af1af149540c1c97a763783936dc5ed1"
+  },
+  "Ester/Assets.xcassets/Colors/Main/MainVibrance1.colorset/Contents.json": {
+    "mtime": 1780516506.1312017,
+    "ast_hash": "749d6b58bde3cf266d35f4efa02a257c",
+    "semantic_hash": "749d6b58bde3cf266d35f4efa02a257c"
+  },
+  "Ester/Assets.xcassets/Colors/Main/MainVibrance2.colorset/Contents.json": {
+    "mtime": 1780516506.1313372,
+    "ast_hash": "38fe6c1eef74aaa4a1f00e9050d20afe",
+    "semantic_hash": "38fe6c1eef74aaa4a1f00e9050d20afe"
+  },
+  "Ester/Assets.xcassets/Colors/Upper/Contents.json": {
+    "mtime": 1780516506.13148,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/Colors/Upper/UpperHair.colorset/Contents.json": {
+    "mtime": 1780516506.131632,
+    "ast_hash": "b829ccd53838101b263d1a80580bbef9",
+    "semantic_hash": "b829ccd53838101b263d1a80580bbef9"
+  },
+  "Ester/Assets.xcassets/Colors/Upper/UpperSkin.colorset/Contents.json": {
+    "mtime": 1780516506.131784,
+    "ast_hash": "aa9ef8670d6541aa88c62ec7cd883ec9",
+    "semantic_hash": "aa9ef8670d6541aa88c62ec7cd883ec9"
+  },
+  "Ester/Assets.xcassets/Colors/Upper/UpperVibrance1.colorset/Contents.json": {
+    "mtime": 1780516506.1319323,
+    "ast_hash": "9998bed4985484fb81cfc5999cf76f3c",
+    "semantic_hash": "9998bed4985484fb81cfc5999cf76f3c"
+  },
+  "Ester/Assets.xcassets/Colors/Upper/UpperVibrance2.colorset/Contents.json": {
+    "mtime": 1780516506.1324027,
+    "ast_hash": "ed151d8164a508a803974b0322132356",
+    "semantic_hash": "ed151d8164a508a803974b0322132356"
+  },
+  "Ester/Assets.xcassets/Colors/Waters/Abyssal.colorset/Contents.json": {
+    "mtime": 1780516506.1325982,
+    "ast_hash": "17e6c46425f090d23bdc810d7ac1afda",
+    "semantic_hash": "17e6c46425f090d23bdc810d7ac1afda"
+  },
+  "Ester/Assets.xcassets/Colors/Waters/Contents.json": {
+    "mtime": 1780516506.1326768,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/Colors/Waters/Deep.colorset/Contents.json": {
+    "mtime": 1780516506.1328192,
+    "ast_hash": "6d11f11b31a2ae9e458535634d9e99d3",
+    "semantic_hash": "6d11f11b31a2ae9e458535634d9e99d3"
+  },
+  "Ester/Assets.xcassets/Colors/Waters/Mid.colorset/Contents.json": {
+    "mtime": 1780516506.1329598,
+    "ast_hash": "81ed1f87ef6d2114b2ba209a6bfe44c8",
+    "semantic_hash": "81ed1f87ef6d2114b2ba209a6bfe44c8"
+  },
+  "Ester/Assets.xcassets/Colors/Waters/Shallow.colorset/Contents.json": {
+    "mtime": 1780516506.1330957,
+    "ast_hash": "ac7181a63e91fc65fa7138936df126a9",
+    "semantic_hash": "ac7181a63e91fc65fa7138936df126a9"
+  },
+  "Ester/Assets.xcassets/Colors/Waters/Surface.colorset/Contents.json": {
+    "mtime": 1780516506.1332395,
+    "ast_hash": "18a2164347e89e5781cda93558665ea9",
+    "semantic_hash": "18a2164347e89e5781cda93558665ea9"
+  },
+  "Ester/Assets.xcassets/Contents.json": {
+    "mtime": 1781116909.889411,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/Icons/Contents.json": {
+    "mtime": 1781208664.1785872,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/Contents.json": {
+    "mtime": 1781208664.1795306,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/challenge.imageset/Contents.json": {
+    "mtime": 1781208782.6484354,
+    "ast_hash": "1168621fb7c2a3586f2218d7b99a70f6",
+    "semantic_hash": "1168621fb7c2a3586f2218d7b99a70f6"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/compass.imageset/Contents.json": {
+    "mtime": 1781208782.6491823,
+    "ast_hash": "78bb2a07f4d5ccbe5a038f5a9552f1af",
+    "semantic_hash": "78bb2a07f4d5ccbe5a038f5a9552f1af"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/conch.imageset/Contents.json": {
+    "mtime": 1781208782.6498003,
+    "ast_hash": "6ffc2bdcc6c5a2d302aec59a87294334",
+    "semantic_hash": "6ffc2bdcc6c5a2d302aec59a87294334"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/eat.imageset/Contents.json": {
+    "mtime": 1781208782.6503441,
+    "ast_hash": "43d5cebdb10cd2c7647d9a996ac2eeef",
+    "semantic_hash": "43d5cebdb10cd2c7647d9a996ac2eeef"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/objective.imageset/Contents.json": {
+    "mtime": 1781208782.6509314,
+    "ast_hash": "312df549686476adc1e4ecf16bd87531",
+    "semantic_hash": "312df549686476adc1e4ecf16bd87531"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/refuge.imageset/Contents.json": {
+    "mtime": 1781208782.6512833,
+    "ast_hash": "5c2fe51bf248f9c496ea26b0e9d23328",
+    "semantic_hash": "5c2fe51bf248f9c496ea26b0e9d23328"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/roadmap.imageset/Contents.json": {
+    "mtime": 1781208782.6515977,
+    "ast_hash": "fb617a1fd7c7c038490ffc4fca0c45f7",
+    "semantic_hash": "fb617a1fd7c7c038490ffc4fca0c45f7"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/sleep.imageset/Contents.json": {
+    "mtime": 1781208782.6518528,
+    "ast_hash": "8d6cd6138a31492849ab807f6c052912",
+    "semantic_hash": "8d6cd6138a31492849ab807f6c052912"
+  },
+  "Ester/Assets.xcassets/MermaidFace/Contents.json": {
+    "mtime": 1781204866.414254,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/MermaidFace/eyeBrow.imageset/Contents.json": {
+    "mtime": 1781113404.988915,
+    "ast_hash": "3bbc50abf07f07e64dc930b02739545a",
+    "semantic_hash": "3bbc50abf07f07e64dc930b02739545a"
+  },
+  "Ester/Assets.xcassets/MermaidFace/eye_closed.imageset/Contents.json": {
+    "mtime": 1781204866.413871,
+    "ast_hash": "42435913459ccd5a8a8549d4883850c8",
+    "semantic_hash": "42435913459ccd5a8a8549d4883850c8"
+  },
+  "Ester/Assets.xcassets/MermaidFace/eye_half.imageset/Contents.json": {
+    "mtime": 1781204866.414628,
+    "ast_hash": "26e1ff719908937469756495438762d5",
+    "semantic_hash": "26e1ff719908937469756495438762d5"
+  },
+  "Ester/Assets.xcassets/MermaidFace/eye_open.imageset/Contents.json": {
+    "mtime": 1781204866.414506,
+    "ast_hash": "23d34eb435c6a9babc152ee5f0290ec0",
+    "semantic_hash": "23d34eb435c6a9babc152ee5f0290ec0"
+  },
+  "Ester/Assets.xcassets/MermaidFace/eye_wide.imageset/Contents.json": {
+    "mtime": 1781204866.414317,
+    "ast_hash": "aa43dcca735712c486a6baa5f1e34db8",
+    "semantic_hash": "aa43dcca735712c486a6baa5f1e34db8"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_chew.imageset/Contents.json": {
+    "mtime": 1781204866.414598,
+    "ast_hash": "0192028b39e2339682d9a68ecd38830b",
+    "semantic_hash": "0192028b39e2339682d9a68ecd38830b"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_frown.imageset/Contents.json": {
+    "mtime": 1781204866.414418,
+    "ast_hash": "cc1cf9663f750fe97411d7de0d3909fc",
+    "semantic_hash": "cc1cf9663f750fe97411d7de0d3909fc"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_neutral.imageset/Contents.json": {
+    "mtime": 1781204866.414845,
+    "ast_hash": "c11db22835865590413714ede9b82a35",
+    "semantic_hash": "c11db22835865590413714ede9b82a35"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_o.imageset/Contents.json": {
+    "mtime": 1781204866.414361,
+    "ast_hash": "70e693f69716fb452ea61ca9b494963b",
+    "semantic_hash": "70e693f69716fb452ea61ca9b494963b"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_open.imageset/Contents.json": {
+    "mtime": 1781204866.414943,
+    "ast_hash": "f9c3dfbc77abe1cb2a24705106c0e7eb",
+    "semantic_hash": "f9c3dfbc77abe1cb2a24705106c0e7eb"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_pout.imageset/Contents.json": {
+    "mtime": 1781204866.414666,
+    "ast_hash": "d6f914543d44fd6510bd69de65847629",
+    "semantic_hash": "d6f914543d44fd6510bd69de65847629"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_sleepy.imageset/Contents.json": {
+    "mtime": 1781204866.414913,
+    "ast_hash": "f103af5b10168da24521baa31755e593",
+    "semantic_hash": "f103af5b10168da24521baa31755e593"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_smile.imageset/Contents.json": {
+    "mtime": 1781204866.414225,
+    "ast_hash": "54eb4f572adee59882c96576d9ed6d43",
+    "semantic_hash": "54eb4f572adee59882c96576d9ed6d43"
+  },
+  "Ester/Assets.xcassets/Particle Sprite Atlas.spriteatlas/Contents.json": {
+    "mtime": 1780516506.1375813,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "Ester/Assets.xcassets/Particle Sprite Atlas.spriteatlas/bokeh.imageset/Contents.json": {
+    "mtime": 1780516506.1377141,
+    "ast_hash": "dc7c81e715841924e2b57a1e4c2194b4",
+    "semantic_hash": "dc7c81e715841924e2b57a1e4c2194b4"
+  },
+  "Ester/Assets.xcassets/Particle Sprite Atlas.spriteatlas/spark.imageset/Contents.json": {
+    "mtime": 1780516506.1380088,
+    "ast_hash": "9bcba625c5b56b71f5ce2e10a1cca116",
+    "semantic_hash": "9bcba625c5b56b71f5ce2e10a1cca116"
+  },
+  "Ester/Assets.xcassets/bubble.imageset/Contents.json": {
+    "mtime": 1780516506.138231,
+    "ast_hash": "52931b7e668705948d6dedba6c496a7a",
+    "semantic_hash": "52931b7e668705948d6dedba6c496a7a"
+  },
+  "Ester/Assets.xcassets/settingsIcon.imageset/Contents.json": {
+    "mtime": 1780516506.1399992,
+    "ast_hash": "3d2ddcfcda7fab453b0ea1b0a56c4330",
+    "semantic_hash": "3d2ddcfcda7fab453b0ea1b0a56c4330"
+  },
+  "Ester/Audio/Ambience/ambient_abyss_hum.freesound.json": {
+    "mtime": 1781276374.1004436,
+    "ast_hash": "53346cddb9a5ede553e09fde7111196f",
+    "semantic_hash": "53346cddb9a5ede553e09fde7111196f"
+  },
+  "Ester/Audio/Ambience/ambient_clear_water.freesound.json": {
+    "mtime": 1781276332.6911502,
+    "ast_hash": "45774d2ff5302b4d8240e9b115e9535d",
+    "semantic_hash": "45774d2ff5302b4d8240e9b115e9535d"
+  },
+  "Ester/Audio/Ambience/ambient_deep_sea.freesound.json": {
+    "mtime": 1781276366.3762963,
+    "ast_hash": "8c119f678bc1876353a3b74d6474a70b",
+    "semantic_hash": "8c119f678bc1876353a3b74d6474a70b"
+  },
+  "Ester/Audio/Ambience/ambient_mid_water.freesound.json": {
+    "mtime": 1781276357.596924,
+    "ast_hash": "c4101e84d73640b50c3feaf6042a7a59",
+    "semantic_hash": "c4101e84d73640b50c3feaf6042a7a59"
+  },
+  "Ester/Audio/Ambience/ambient_refuge_soft.freesound.json": {
+    "mtime": 1781276377.7958074,
+    "ast_hash": "3e77bba50e67546642f54853c9692d80",
+    "semantic_hash": "3e77bba50e67546642f54853c9692d80"
+  },
+  "Ester/Audio/Ambience/ambient_shallow_reef.freesound.json": {
+    "mtime": 1781276348.369698,
+    "ast_hash": "361cc4a7058742c8ae7b266b8d38814d",
+    "semantic_hash": "361cc4a7058742c8ae7b266b8d38814d"
+  },
+  "Ester/Audio/Mermaid/mermaid_eat_soft.freesound.json": {
+    "mtime": 1781276001.1408582,
+    "ast_hash": "181e2f753fe7396dd9e6fa405e73746a",
+    "semantic_hash": "181e2f753fe7396dd9e6fa405e73746a"
+  },
+  "Ester/Audio/Mermaid/mermaid_fish_play.freesound.json": {
+    "mtime": 1781276019.9696167,
+    "ast_hash": "afbf04a2b5f3be40a0980ed66df0f596",
+    "semantic_hash": "afbf04a2b5f3be40a0980ed66df0f596"
+  },
+  "Ester/Audio/Mermaid/mermaid_rest_sigh.freesound.json": {
+    "mtime": 1781276022.23295,
+    "ast_hash": "02064f8000036e5e811a35cf259ed6d4",
+    "semantic_hash": "02064f8000036e5e811a35cf259ed6d4"
+  },
+  "Ester/Audio/Mermaid/mermaid_scared_swish.freesound.json": {
+    "mtime": 1781276020.971537,
+    "ast_hash": "fc06ecb8f062605068bf1f0977079e5b",
+    "semantic_hash": "fc06ecb8f062605068bf1f0977079e5b"
+  },
+  "Ester/Audio/Minigames/challenge_fail_soft.freesound.json": {
+    "mtime": 1781276199.3300753,
+    "ast_hash": "1fc8ec39f960be9a4b8b818e0faaf407",
+    "semantic_hash": "1fc8ec39f960be9a4b8b818e0faaf407"
+  },
+  "Ester/Audio/Minigames/challenge_open.freesound.json": {
+    "mtime": 1781276196.9789765,
+    "ast_hash": "702d1764e65329fe176c91adea595431",
+    "semantic_hash": "702d1764e65329fe176c91adea595431"
+  },
+  "Ester/Audio/Minigames/challenge_success.freesound.json": {
+    "mtime": 1781283748.7231967,
+    "ast_hash": "eb5ddd57137a058559a93d9967a53a53",
+    "semantic_hash": "eb5ddd57137a058559a93d9967a53a53"
+  },
+  "Ester/Audio/Minigames/climb_bounce_pop.freesound.json": {
+    "mtime": 1781276202.8193755,
+    "ast_hash": "0e60b0f7734152d592ebe24f21d44765",
+    "semantic_hash": "0e60b0f7734152d592ebe24f21d44765"
+  },
+  "Ester/Audio/Minigames/climb_goal_complete.freesound.json": {
+    "mtime": 1781283748.811387,
+    "ast_hash": "d7356d178289a3a513f2c10755559a09",
+    "semantic_hash": "d7356d178289a3a513f2c10755559a09"
+  },
+  "Ester/Audio/Minigames/climb_land_bubble.freesound.json": {
+    "mtime": 1781276201.7571068,
+    "ast_hash": "2ccae9502838ea968080ad18fd75eb9c",
+    "semantic_hash": "2ccae9502838ea968080ad18fd75eb9c"
+  },
+  "Ester/Audio/Minigames/climb_platform_pop.freesound.json": {
+    "mtime": 1781276203.9426315,
+    "ast_hash": "37e3545ebbcab96a2f39a824b03edb4b",
+    "semantic_hash": "37e3545ebbcab96a2f39a824b03edb4b"
+  },
+  "Ester/Audio/Minigames/climb_start_bubble.freesound.json": {
+    "mtime": 1781276200.7658951,
+    "ast_hash": "f8049ad0239916b5aae86f1badd9ea4f",
+    "semantic_hash": "f8049ad0239916b5aae86f1badd9ea4f"
+  },
+  "Ester/Audio/Minigames/tide_cascade_chime.freesound.json": {
+    "mtime": 1781283748.7231946,
+    "ast_hash": "a0c5dc475be697e2f7e17ae3da75e8b2",
+    "semantic_hash": "a0c5dc475be697e2f7e17ae3da75e8b2"
+  },
+  "Ester/Audio/Minigames/tide_goal_complete.freesound.json": {
+    "mtime": 1781283748.7993884,
+    "ast_hash": "f9ecdbafa4ba9ee6b7d21b57a86754ac",
+    "semantic_hash": "f9ecdbafa4ba9ee6b7d21b57a86754ac"
+  },
+  "Ester/Audio/Minigames/tide_invalid_soft.freesound.json": {
+    "mtime": 1781276192.5696948,
+    "ast_hash": "98e2b352f69f4f402ddfa09b1cba82a1",
+    "semantic_hash": "98e2b352f69f4f402ddfa09b1cba82a1"
+  },
+  "Ester/Audio/Minigames/tide_match_pop.freesound.json": {
+    "mtime": 1781276193.560284,
+    "ast_hash": "7ffd144d70a6abdb81dfff1d77c6e21f",
+    "semantic_hash": "7ffd144d70a6abdb81dfff1d77c6e21f"
+  },
+  "Ester/Audio/Minigames/tide_select_shell.freesound.json": {
+    "mtime": 1781276189.932557,
+    "ast_hash": "08cb8ebd12f63e7ac172162628701eee",
+    "semantic_hash": "08cb8ebd12f63e7ac172162628701eee"
+  },
+  "Ester/Audio/Minigames/tide_swap_water.freesound.json": {
+    "mtime": 1781276191.59681,
+    "ast_hash": "3f7852eefab8967d6248b7964d708c67",
+    "semantic_hash": "3f7852eefab8967d6248b7964d708c67"
+  },
+  "Ester/Audio/Progression/egg_crack_soft.freesound.json": {
+    "mtime": 1781276050.2408438,
+    "ast_hash": "4413d3bf427677809a1e76d4fd570fa5",
+    "semantic_hash": "4413d3bf427677809a1e76d4fd570fa5"
+  },
+  "Ester/Audio/Progression/egg_tap_warm.freesound.json": {
+    "mtime": 1781276049.203176,
+    "ast_hash": "77a2d588d2460cb98f530dd172e185b7",
+    "semantic_hash": "77a2d588d2460cb98f530dd172e185b7"
+  },
+  "Ester/Audio/Progression/evolution_shimmer.freesound.json": {
+    "mtime": 1781276053.2089226,
+    "ast_hash": "b0e4597f2ebe27704ab8d68f70d23275",
+    "semantic_hash": "b0e4597f2ebe27704ab8d68f70d23275"
+  },
+  "Ester/Audio/Progression/hatch_birth_shimmer.freesound.json": {
+    "mtime": 1781276051.7273152,
+    "ast_hash": "c2833b8deed5ba92606246e8439a7488",
+    "semantic_hash": "c2833b8deed5ba92606246e8439a7488"
+  },
+  "Ester/Audio/Refuge/refuge_portal_enter.freesound.json": {
+    "mtime": 1781276148.7759366,
+    "ast_hash": "a64247d4fec9e8ed3ecfa408e359740c",
+    "semantic_hash": "a64247d4fec9e8ed3ecfa408e359740c"
+  },
+  "Ester/Audio/Refuge/refuge_portal_open.freesound.json": {
+    "mtime": 1781276147.7708454,
+    "ast_hash": "1d1e19e49b07823462f4540d7037ab2c",
+    "semantic_hash": "1d1e19e49b07823462f4540d7037ab2c"
+  },
+  "Ester/Audio/UI/ui_confirm_chime.freesound.json": {
+    "mtime": 1781275878.3784356,
+    "ast_hash": "53c160ed8c313bdd53af1972111fe119",
+    "semantic_hash": "53c160ed8c313bdd53af1972111fe119"
+  },
+  "Ester/Audio/UI/ui_panel_close.freesound.json": {
+    "mtime": 1781275931.7159493,
+    "ast_hash": "8608c3946a864648c900ff60fec7359a",
+    "semantic_hash": "8608c3946a864648c900ff60fec7359a"
+  },
+  "Ester/Audio/UI/ui_panel_open.freesound.json": {
+    "mtime": 1781275930.4097867,
+    "ast_hash": "f36252f93c9a0f8cc31a6ed11f7cfd2c",
+    "semantic_hash": "f36252f93c9a0f8cc31a6ed11f7cfd2c"
+  },
+  "Ester/Audio/UI/ui_reject_soft.freesound.json": {
+    "mtime": 1781275906.2198148,
+    "ast_hash": "751efc723a4095a15ae6d3ca22d052d0",
+    "semantic_hash": "751efc723a4095a15ae6d3ca22d052d0"
+  },
+  "Ester/Audio/UI/ui_tap_soft.freesound.json": {
+    "mtime": 1781275866.14719,
+    "ast_hash": "9a804038412b8edcf9b9620d5bab734f",
+    "semantic_hash": "9a804038412b8edcf9b9620d5bab734f"
+  },
+  "Ester/Audio/UI/ui_upgrade_buy.freesound.json": {
+    "mtime": 1781275944.8378057,
+    "ast_hash": "acb83f7dc1e05fdfce63298585257e8e",
+    "semantic_hash": "acb83f7dc1e05fdfce63298585257e8e"
+  },
+  "Ester/Audio/UI/ui_upgrade_fail.freesound.json": {
+    "mtime": 1781275945.828861,
+    "ast_hash": "657d3cefb0f15c88a25f71ad0edf6270",
+    "semantic_hash": "657d3cefb0f15c88a25f71ad0edf6270"
+  },
+  "Ester/Audio/UI/world_tap_accept.freesound.json": {
+    "mtime": 1781275972.7237654,
+    "ast_hash": "196d0609d02da5c0fa6e8ba1213dd35f",
+    "semantic_hash": "196d0609d02da5c0fa6e8ba1213dd35f"
+  },
+  "Ester/Audio/UI/world_tap_reject.freesound.json": {
+    "mtime": 1781275973.6975055,
+    "ast_hash": "74124b5f7f15341b2e88878dc3bcb20f",
+    "semantic_hash": "74124b5f7f15341b2e88878dc3bcb20f"
+  },
+  "Ester/Audio/World/big_shadow_rumble.freesound.json": {
+    "mtime": 1781276144.075437,
+    "ast_hash": "72ed58fca609ddc5109d9f780bf0e3a6",
+    "semantic_hash": "72ed58fca609ddc5109d9f780bf0e3a6"
+  },
+  "Ester/Audio/World/boat_muffled_pass.freesound.json": {
+    "mtime": 1781276145.706257,
+    "ast_hash": "1382c8bf737712cddb0b4fff4e40fe06",
+    "semantic_hash": "1382c8bf737712cddb0b4fff4e40fe06"
+  },
+  "Ester/Audio/World/bubble_burst_cluster.freesound.json": {
+    "mtime": 1781276140.6516175,
+    "ast_hash": "345cc55465eb52f9da8bcc0b65aab56f",
+    "semantic_hash": "345cc55465eb52f9da8bcc0b65aab56f"
+  },
+  "Ester/Audio/World/current_rush_short.freesound.json": {
+    "mtime": 1781276142.0343912,
+    "ast_hash": "31412280585fa5ddd20c7d1eb655561a",
+    "semantic_hash": "31412280585fa5ddd20c7d1eb655561a"
+  },
+  "Ester/Audio/World/depth_record_low_chime.freesound.json": {
+    "mtime": 1781276078.4223654,
+    "ast_hash": "7488a74240354b0ac8aa3d23e6a59b51",
+    "semantic_hash": "7488a74240354b0ac8aa3d23e6a59b51"
+  },
+  "Ester/Audio/World/falling_object_splash.freesound.json": {
+    "mtime": 1781276146.746735,
+    "ast_hash": "bc1c37091628aa9ee035ffd612451e3d",
+    "semantic_hash": "bc1c37091628aa9ee035ffd612451e3d"
+  },
+  "Ester/Audio/World/food_rare_shimmer.freesound.json": {
+    "mtime": 1781276076.2125993,
+    "ast_hash": "1e3b2fd879769f92978f181ec891628a",
+    "semantic_hash": "1e3b2fd879769f92978f181ec891628a"
+  },
+  "Ester/Audio/World/pearl_reward_chime.freesound.json": {
+    "mtime": 1781276077.1788878,
+    "ast_hash": "adf4f5e7e05c6842cc475fc0c8c763c3",
+    "semantic_hash": "adf4f5e7e05c6842cc475fc0c8c763c3"
+  },
+  "Ester/Audio/World/rare_fish_pass.freesound.json": {
+    "mtime": 1781276143.0145168,
+    "ast_hash": "28dfc960d3c973ed45017d67e4dd2acb",
+    "semantic_hash": "28dfc960d3c973ed45017d67e4dd2acb"
+  },
+  "Ester/Audio/World/region_discover_chime.freesound.json": {
+    "mtime": 1781276080.9754667,
+    "ast_hash": "c5375001ad23b95102e48597571a6e11",
+    "semantic_hash": "c5375001ad23b95102e48597571a6e11"
+  },
+  "Ester/Audio/World/travel_arrive_chime.freesound.json": {
+    "mtime": 1781276083.234957,
+    "ast_hash": "76d4f44376982144e514daa90144f4bf",
+    "semantic_hash": "76d4f44376982144e514daa90144f4bf"
+  },
+  "Ester/Audio/World/travel_start_current.freesound.json": {
+    "mtime": 1781276082.2548604,
+    "ast_hash": "4e72683a28873666f3d1351f816899ca",
+    "semantic_hash": "4e72683a28873666f3d1351f816899ca"
+  },
+  "Ester/Audio/World/zone_unlock_wave.freesound.json": {
+    "mtime": 1781276079.9859219,
+    "ast_hash": "d934c4f19c84efee3ac62ee181e24715",
+    "semantic_hash": "d934c4f19c84efee3ac62ee181e24715"
+  },
+  "Ester/Audio/freesound-plan.json": {
+    "mtime": 1781283765.3287246,
+    "ast_hash": "6c1453b55d96cfa592f18ca08258c451",
+    "semantic_hash": "6c1453b55d96cfa592f18ca08258c451"
+  },
+  "Ester/Components/BaseSpriteComponent.swift": {
+    "mtime": 1783527293.587845,
+    "ast_hash": "5b34e477e29894a243a7ac8a3f42d222",
+    "semantic_hash": "5b34e477e29894a243a7ac8a3f42d222"
+  },
+  "Ester/Components/ChallengeGiverComponent.swift": {
+    "mtime": 1783526885.566595,
+    "ast_hash": "b4305f201c9756a1c9e924e8858d5633",
+    "semantic_hash": "b4305f201c9756a1c9e924e8858d5633"
+  },
+  "Ester/Components/ExpressionComponent.swift": {
+    "mtime": 1783530585.2942336,
+    "ast_hash": "a91aace23459f509e13c1614a93d21f7",
+    "semantic_hash": "a91aace23459f509e13c1614a93d21f7"
+  },
+  "Ester/Components/FishBehaviorComponent.swift": {
+    "mtime": 1783530612.419285,
+    "ast_hash": "0fe837d8b543b0cc56e0e0026fba903a",
+    "semantic_hash": "0fe837d8b543b0cc56e0e0026fba903a"
+  },
+  "Ester/Components/FoodComponent.swift": {
+    "mtime": 1783526880.6606748,
+    "ast_hash": "dbd580566ca813696ff8195612b6b3ae",
+    "semantic_hash": "dbd580566ca813696ff8195612b6b3ae"
+  },
+  "Ester/Components/HealthComponent.swift": {
+    "mtime": 1783526900.6361866,
+    "ast_hash": "53def7798346c06a23073e93bf3745e8",
+    "semantic_hash": "53def7798346c06a23073e93bf3745e8"
+  },
+  "Ester/Components/IntentComponent.swift": {
+    "mtime": 1783526902.8891428,
+    "ast_hash": "e20e18459a510ab68d256ddd1b02a125",
+    "semantic_hash": "e20e18459a510ab68d256ddd1b02a125"
+  },
+  "Ester/Components/LifetimeComponent.swift": {
+    "mtime": 1783526878.4761891,
+    "ast_hash": "c57887514be32b031c5c08ce7f2546c0",
+    "semantic_hash": "c57887514be32b031c5c08ce7f2546c0"
+  },
+  "Ester/Components/MermaidEmotionComponent.swift": {
+    "mtime": 1782252246.2031188,
+    "ast_hash": "4965e31a0fb82df3cb233002c6eb978c",
+    "semantic_hash": "4965e31a0fb82df3cb233002c6eb978c"
+  },
+  "Ester/Components/NodeComponent.swift": {
+    "mtime": 1783526874.288461,
+    "ast_hash": "3fd7c03db567fb0fc292913c091d3e2f",
+    "semantic_hash": "3fd7c03db567fb0fc292913c091d3e2f"
+  },
+  "Ester/Components/ObjectiveComponent.swift": {
+    "mtime": 1783526887.7981763,
+    "ast_hash": "042b8a6adbc95c26f8e0144e02f8536b",
+    "semantic_hash": "042b8a6adbc95c26f8e0144e02f8536b"
+  },
+  "Ester/Components/POIComponent.swift": {
+    "mtime": 1783526889.3797126,
+    "ast_hash": "0d2efe0e553590e69ba1448842d1e933",
+    "semantic_hash": "0d2efe0e553590e69ba1448842d1e933"
+  },
+  "Ester/Components/TransformComponent.swift": {
+    "mtime": 1783526875.7105687,
+    "ast_hash": "07edb55a47bd2c37ecb0276e44b35212",
+    "semantic_hash": "07edb55a47bd2c37ecb0276e44b35212"
+  },
+  "Ester/Components/VelocityComponent.swift": {
+    "mtime": 1783526876.9534073,
+    "ast_hash": "7b50eacf3f9952d943cd0cdfd13075bb",
+    "semantic_hash": "7b50eacf3f9952d943cd0cdfd13075bb"
+  },
+  "Ester/Components/VisualEffectComponent.swift": {
+    "mtime": 1783526894.5484335,
+    "ast_hash": "3475c485e15d0acc0c54e290647906af",
+    "semantic_hash": "3475c485e15d0acc0c54e290647906af"
+  },
+  "Ester/Components/ZoneComponent.swift": {
+    "mtime": 1783526879.5100975,
+    "ast_hash": "e113d526b3c593df25813418d4c5e1a8",
+    "semantic_hash": "e113d526b3c593df25813418d4c5e1a8"
+  },
+  "Ester/Entitys/MermaidEntity.swift": {
+    "mtime": 1783536192.052137,
+    "ast_hash": "c72f4c813a1f18121a0c4442d1a8a9b4",
+    "semantic_hash": "c72f4c813a1f18121a0c4442d1a8a9b4"
+  },
+  "Ester/Game/AncientRuinsGameScene.swift": {
+    "mtime": 1782177185.3240144,
+    "ast_hash": "b7488ff221bc3035dece653acd735958",
+    "semantic_hash": "b7488ff221bc3035dece653acd735958"
+  },
+  "Ester/Game/AutonomySystem.swift": {
+    "mtime": 1782251967.557388,
+    "ast_hash": "368af5a1520b53a9fe87b5d9103924de",
+    "semantic_hash": "368af5a1520b53a9fe87b5d9103924de"
+  },
+  "Ester/Game/BanquetOfTidesSystem.swift": {
+    "mtime": 1782190848.5551515,
+    "ast_hash": "a3780f2c01db079d27be2b8541ce9f0d",
+    "semantic_hash": "a3780f2c01db079d27be2b8541ce9f0d"
+  },
+  "Ester/Game/BirthWatersGameScene.swift": {
+    "mtime": 1782177155.9432263,
+    "ast_hash": "4b72c7f8bb45c9701b98dc2281ff9c66",
+    "semantic_hash": "4b72c7f8bb45c9701b98dc2281ff9c66"
+  },
+  "Ester/Game/BubbleClimbOverlay.swift": {
+    "mtime": 1782139576.2258797,
+    "ast_hash": "dda9e14b9e0e5ef5f4a31c823afe5564",
+    "semantic_hash": "dda9e14b9e0e5ef5f4a31c823afe5564"
+  },
+  "Ester/Game/CalmGardenGameScene.swift": {
+    "mtime": 1782177158.6494422,
+    "ast_hash": "9dfbbac33064eff6d36791e02acd3575",
+    "semantic_hash": "9dfbbac33064eff6d36791e02acd3575"
+  },
+  "Ester/Game/CameraController.swift": {
+    "mtime": 1783530575.3403757,
+    "ast_hash": "8b3d1de61628ec0f9ed0859382445ec8",
+    "semantic_hash": "8b3d1de61628ec0f9ed0859382445ec8"
+  },
+  "Ester/Game/CaveMouthGameScene.swift": {
+    "mtime": 1782177179.2879379,
+    "ast_hash": "442bfeffda0137992582acd30a4c9ffd",
+    "semantic_hash": "442bfeffda0137992582acd30a4c9ffd"
+  },
+  "Ester/Game/ChallengeFlowController.swift": {
+    "mtime": 1783530572.0719798,
+    "ast_hash": "5236753673f5630b0e745b4214b8d796",
+    "semantic_hash": "5236753673f5630b0e745b4214b8d796"
+  },
+  "Ester/Game/ChallengeSystem.swift": {
+    "mtime": 1782193120.6821756,
+    "ast_hash": "5031a88a22ce9c6a4967d931d26cbb20",
+    "semantic_hash": "5031a88a22ce9c6a4967d931d26cbb20"
+  },
+  "Ester/Game/CheatSystem.swift": {
+    "mtime": 1783624527.2522109,
+    "ast_hash": "389951734844c1332bf56c53d916555d",
+    "semantic_hash": ""
+  },
+  "Ester/Game/CrystalFieldsGameScene.swift": {
+    "mtime": 1782177182.1521733,
+    "ast_hash": "d11337497b129468a9bdd7797391c241",
+    "semantic_hash": "d11337497b129468a9bdd7797391c241"
+  },
+  "Ester/Game/DepthSystem.swift": {
+    "mtime": 1782141102.6907597,
+    "ast_hash": "f66aad7e6bec07bbf51a03f5882060b4",
+    "semantic_hash": "f66aad7e6bec07bbf51a03f5882060b4"
+  },
+  "Ester/Game/DistantSurfaceGameScene.swift": {
+    "mtime": 1782177191.1234381,
+    "ast_hash": "cc8eb20c71204bcf08f30ab478de5ba3",
+    "semantic_hash": "cc8eb20c71204bcf08f30ab478de5ba3"
+  },
+  "Ester/Game/EchoMelodySystem.swift": {
+    "mtime": 1782168695.5084655,
+    "ast_hash": "194ebadd1d02b5e3abfe854c21758201",
+    "semantic_hash": "194ebadd1d02b5e3abfe854c21758201"
+  },
+  "Ester/Game/EcosystemBiomeCatalog.swift": {
+    "mtime": 1782181483.7961278,
+    "ast_hash": "33456300328ea6379a8feff77a5ad264",
+    "semantic_hash": "33456300328ea6379a8feff77a5ad264"
+  },
+  "Ester/Game/EmeraldReefGameScene.swift": {
+    "mtime": 1782177161.8026164,
+    "ast_hash": "2009fe66ae19b66418d809938c65f87b",
+    "semantic_hash": "2009fe66ae19b66418d809938c65f87b"
+  },
+  "Ester/Game/EntityFactory.swift": {
+    "mtime": 1783530564.3750944,
+    "ast_hash": "75602f31cc7db38f25b3ad60fa6cb27e",
+    "semantic_hash": "75602f31cc7db38f25b3ad60fa6cb27e"
+  },
+  "Ester/Game/EventBus.swift": {
+    "mtime": 1783530568.074734,
+    "ast_hash": "82de5dd94cdc30f9076c1cfb2e9b1f43",
+    "semantic_hash": "82de5dd94cdc30f9076c1cfb2e9b1f43"
+  },
+  "Ester/Game/EventSystem.swift": {
+    "mtime": 1782252273.164479,
+    "ast_hash": "06e9c4019081b617c20c9f676def6777",
+    "semantic_hash": "06e9c4019081b617c20c9f676def6777"
+  },
+  "Ester/Game/FishDrawingFactory.swift": {
+    "mtime": 1782195155.093161,
+    "ast_hash": "4b9e676ff835f6b2d3fcaf994cac572d",
+    "semantic_hash": "4b9e676ff835f6b2d3fcaf994cac572d"
+  },
+  "Ester/Game/FishNode.swift": {
+    "mtime": 1783530589.0694065,
+    "ast_hash": "2ddc28d7fa0dda6234318a5b9f0edb5d",
+    "semantic_hash": "2ddc28d7fa0dda6234318a5b9f0edb5d"
+  },
+  "Ester/Game/FishSystem.swift": {
+    "mtime": 1783527117.9432228,
+    "ast_hash": "179299775455fafee7bad63b3562144d",
+    "semantic_hash": "179299775455fafee7bad63b3562144d"
+  },
+  "Ester/Game/FishVisualModels.swift": {
+    "mtime": 1782195016.6286511,
+    "ast_hash": "da0e30a09107700c8abc719af96a99c8",
+    "semantic_hash": "da0e30a09107700c8abc719af96a99c8"
+  },
+  "Ester/Game/FoodSystem.swift": {
+    "mtime": 1783527126.530807,
+    "ast_hash": "0ccd2c4dd78903f874d4f9d6050aef99",
+    "semantic_hash": "0ccd2c4dd78903f874d4f9d6050aef99"
+  },
+  "Ester/Game/GameplayModels.swift": {
+    "mtime": 1783535117.1577067,
+    "ast_hash": "78a4c8f1635a845d2aff3493b4e15686",
+    "semantic_hash": "78a4c8f1635a845d2aff3493b4e15686"
+  },
+  "Ester/Game/GreatDeltaGameScene.swift": {
+    "mtime": 1782177164.7467399,
+    "ast_hash": "652036850ed8deb1b9838ea3084b77cb",
+    "semantic_hash": "652036850ed8deb1b9838ea3084b77cb"
+  },
+  "Ester/Game/GrowthSystem.swift": {
+    "mtime": 1782170835.8022897,
+    "ast_hash": "0e36c7873829da54179fe152a679fd52",
+    "semantic_hash": "0e36c7873829da54179fe152a679fd52"
+  },
+  "Ester/Game/HUDLayer.swift": {
+    "mtime": 1782252261.5608296,
+    "ast_hash": "40071636f68be7fff54500da06a8c877",
+    "semantic_hash": "40071636f68be7fff54500da06a8c877"
+  },
+  "Ester/Game/LivingAbyssGameScene.swift": {
+    "mtime": 1782177188.3321733,
+    "ast_hash": "a164ed398f06bebf793c3c0ed9597824",
+    "semantic_hash": "a164ed398f06bebf793c3c0ed9597824"
+  },
+  "Ester/Game/MapSceneFactory.swift": {
+    "mtime": 1782177153.1820917,
+    "ast_hash": "3ab65c7fa0e4d70e7d1d7358477a9bfa",
+    "semantic_hash": "3ab65c7fa0e4d70e7d1d7358477a9bfa"
+  },
+  "Ester/Game/MermaidAppearance.swift": {
+    "mtime": 1782141083.7895763,
+    "ast_hash": "85f228a6ece3ddac2c36dd509bebf8a4",
+    "semantic_hash": "85f228a6ece3ddac2c36dd509bebf8a4"
+  },
+  "Ester/Game/MermaidFigures/AdultMermaidFigure.swift": {
+    "mtime": 1782250844.9141827,
+    "ast_hash": "72d70e0ff1ad58752554838083ec5d52",
+    "semantic_hash": "72d70e0ff1ad58752554838083ec5d52"
+  },
+  "Ester/Game/MermaidFigures/AdultMermaidRig.swift": {
+    "mtime": 1781124717.0909386,
+    "ast_hash": "02b46b3359bb9ee01ee361b7d055b429",
+    "semantic_hash": "02b46b3359bb9ee01ee361b7d055b429"
+  },
+  "Ester/Game/MermaidFigures/BabyMermaidFigure.swift": {
+    "mtime": 1783536686.137502,
+    "ast_hash": "fa369d06ca4aaeabaa40d8a6710be32a",
+    "semantic_hash": "fa369d06ca4aaeabaa40d8a6710be32a"
+  },
+  "Ester/Game/MermaidFigures/BabyMermaidRig.swift": {
+    "mtime": 1781128307.7639108,
+    "ast_hash": "723612b2f7503f99421902c828904e64",
+    "semantic_hash": "723612b2f7503f99421902c828904e64"
+  },
+  "Ester/Game/MermaidFigures/ChildMermaidFigure.swift": {
+    "mtime": 1783536447.5777233,
+    "ast_hash": "e57a06e9969e165d7ac7a3c4013f3292",
+    "semantic_hash": "e57a06e9969e165d7ac7a3c4013f3292"
+  },
+  "Ester/Game/MermaidFigures/ChildMermaidRig.swift": {
+    "mtime": 1781129667.3847008,
+    "ast_hash": "ffe01ccf078e50459436d633e542e1ee",
+    "semantic_hash": "ffe01ccf078e50459436d633e542e1ee"
+  },
+  "Ester/Game/MermaidFigures/MermaidRigDebugTool.swift": {
+    "mtime": 1781206634.6796227,
+    "ast_hash": "a4b697661222ff65cbd138beb9a816f0",
+    "semantic_hash": "a4b697661222ff65cbd138beb9a816f0"
+  },
+  "Ester/Game/MermaidFigures/MermaidRigModels.swift": {
+    "mtime": 1781130638.399784,
+    "ast_hash": "c7bed23447f75d96c83bd889bb4a1e19",
+    "semantic_hash": "c7bed23447f75d96c83bd889bb4a1e19"
+  },
+  "Ester/Game/MermaidFigures/MermaidRigs.json": {
+    "mtime": 1781202173.063973,
+    "ast_hash": "76ff950507b2903377a1d65528e6a7f9",
+    "semantic_hash": "76ff950507b2903377a1d65528e6a7f9"
+  },
+  "Ester/Game/MermaidFigures/YoungMermaidFigure.swift": {
+    "mtime": 1782250844.9148312,
+    "ast_hash": "2dfbb0e3910b45ec6eeb1b23236f9811",
+    "semantic_hash": "2dfbb0e3910b45ec6eeb1b23236f9811"
+  },
+  "Ester/Game/MermaidFigures/YoungMermaidRig.swift": {
+    "mtime": 1781124690.5078068,
+    "ast_hash": "2da093b4cb882b07e6f6c1b677218c66",
+    "semantic_hash": "2da093b4cb882b07e6f6c1b677218c66"
+  },
+  "Ester/Game/MermaidStats.swift": {
+    "mtime": 1783624420.9399493,
+    "ast_hash": "687432ab740229ae091803fda430a497",
+    "semantic_hash": ""
+  },
+  "Ester/Game/OfflineProgressSystem.swift": {
+    "mtime": 1782177199.5785768,
+    "ast_hash": "1da1309befcc75f3bfd3acad56ee0ef7",
+    "semantic_hash": "1da1309befcc75f3bfd3acad56ee0ef7"
+  },
+  "Ester/Game/OpenBlueSeaGameScene.swift": {
+    "mtime": 1782177174.5646813,
+    "ast_hash": "25b88e0eff741f0babc052dd4ad12bbc",
+    "semantic_hash": "25b88e0eff741f0babc052dd4ad12bbc"
+  },
+  "Ester/Game/ReefAsteroidsSystem.swift": {
+    "mtime": 1782190859.7432005,
+    "ast_hash": "491cde9c36dfd34eec00a74fb13393cd",
+    "semantic_hash": "491cde9c36dfd34eec00a74fb13393cd"
+  },
+  "Ester/Game/RegionSystem.swift": {
+    "mtime": 1782179664.1228614,
+    "ast_hash": "8585cebd6bc60469421e654224bce16c",
+    "semantic_hash": "8585cebd6bc60469421e654224bce16c"
+  },
+  "Ester/Game/RegistroFlowController.swift": {
+    "mtime": 1782234261.7172668,
+    "ast_hash": "68696cad32b30fb380c5a5f973447783",
+    "semantic_hash": "68696cad32b30fb380c5a5f973447783"
+  },
+  "Ester/Game/RegistroSystem.swift": {
+    "mtime": 1782234471.7997105,
+    "ast_hash": "f96e3b14a592c50cb9d0ff6cc7b68c0c",
+    "semantic_hash": "f96e3b14a592c50cb9d0ff6cc7b68c0c"
+  },
+  "Ester/Game/ResourceSupportSystem.swift": {
+    "mtime": 1783630266.0660992,
+    "ast_hash": "0a9c6409f17213f1f25d57acea3cd592",
+    "semantic_hash": ""
+  },
+  "Ester/Game/ShellSnapSystem.swift": {
+    "mtime": 1782190818.899371,
+    "ast_hash": "865ccc8ff1aade9a3528a45c37141226",
+    "semantic_hash": "865ccc8ff1aade9a3528a45c37141226"
+  },
+  "Ester/Game/ShelterSystem.swift": {
+    "mtime": 1783610304.6089754,
+    "ast_hash": "2184a382acf4e193b9d438cccaccd6cd",
+    "semantic_hash": ""
+  },
+  "Ester/Game/TideMemorySystem.swift": {
+    "mtime": 1782190840.1583693,
+    "ast_hash": "1d6dd38a34d7ecb8e2126c089c73cdf0",
+    "semantic_hash": "1d6dd38a34d7ecb8e2126c089c73cdf0"
+  },
+  "Ester/Game/TideWeavingSystem.swift": {
+    "mtime": 1782177264.5410101,
+    "ast_hash": "da53c4e84a546f502a966c81adb7d749",
+    "semantic_hash": "da53c4e84a546f502a966c81adb7d749"
+  },
+  "Ester/Game/WorldChunkFactory.swift": {
+    "mtime": 1782179717.54288,
+    "ast_hash": "36447f1f434ab24873589bc44ca6359c",
+    "semantic_hash": "36447f1f434ab24873589bc44ca6359c"
+  },
+  "Ester/Game/WorldEnvironmentModels.swift": {
+    "mtime": 1781989044.619413,
+    "ast_hash": "248c925b8a5d9fb845669ad631cc2dd4",
+    "semantic_hash": "248c925b8a5d9fb845669ad631cc2dd4"
+  },
+  "Ester/Game/WorldEnvironmentSystem.swift": {
+    "mtime": 1782179694.9788814,
+    "ast_hash": "8f047ff3a7c20f3cf2eb029b3da6c546",
+    "semantic_hash": "8f047ff3a7c20f3cf2eb029b3da6c546"
+  },
+  "Ester/Game/WorldPOINode.swift": {
+    "mtime": 1783527045.8306358,
+    "ast_hash": "1a91b355877f4c0f1052e699a25df556",
+    "semantic_hash": "1a91b355877f4c0f1052e699a25df556"
+  },
+  "Ester/Game/WorldStampRenderer+Drawing.swift": {
+    "mtime": 1781988797.2655754,
+    "ast_hash": "cf453f315cbefc29ad33cb460c06a462",
+    "semantic_hash": "cf453f315cbefc29ad33cb460c06a462"
+  },
+  "Ester/Game/WorldStampRenderer+GroundCover.swift": {
+    "mtime": 1781989044.6223137,
+    "ast_hash": "3ff487c8999dd309330294dd2619dbbb",
+    "semantic_hash": "3ff487c8999dd309330294dd2619dbbb"
+  },
+  "Ester/Game/WorldStampRenderer+Reef.swift": {
+    "mtime": 1781988797.2657733,
+    "ast_hash": "301ff1a3074f6386ff272711cf32b926",
+    "semantic_hash": "301ff1a3074f6386ff272711cf32b926"
+  },
+  "Ester/Game/WorldStampRenderer+Terrain.swift": {
+    "mtime": 1781996193.432772,
+    "ast_hash": "44c91336686a4db03bf45a338cd1ec1c",
+    "semantic_hash": "44c91336686a4db03bf45a338cd1ec1c"
+  },
+  "Ester/Game/WorldStampRenderer+Water.swift": {
+    "mtime": 1781988797.2663183,
+    "ast_hash": "e83dcd61103c7dcf72c6d96c9bcd9a9c",
+    "semantic_hash": "e83dcd61103c7dcf72c6d96c9bcd9a9c"
+  },
+  "Ester/Game/WorldStampRenderer.swift": {
+    "mtime": 1781989044.621106,
+    "ast_hash": "b89b746ccdd0f80f4f32fa6a8d86b718",
+    "semantic_hash": "b89b746ccdd0f80f4f32fa6a8d86b718"
+  },
+  "Ester/Game/WorldTextureCache.swift": {
+    "mtime": 1781998853.9137764,
+    "ast_hash": "48f11bae349bbf9101cf22ad42f7e55f",
+    "semantic_hash": "48f11bae349bbf9101cf22ad42f7e55f"
+  },
+  "Ester/Game/WorldVisualPalette.swift": {
+    "mtime": 1781989044.6206226,
+    "ast_hash": "2c1d7be30789c0fc70f4482ca4cd8a22",
+    "semantic_hash": "2c1d7be30789c0fc70f4482ca4cd8a22"
+  },
+  "Ester/GameData/WorldPOIs.json": {
+    "mtime": 1782177238.8340635,
+    "ast_hash": "b49e97b6789bcaa9e10c0021ead39653",
+    "semantic_hash": "b49e97b6789bcaa9e10c0021ead39653"
+  },
+  "Ester/GameScene.swift": {
+    "mtime": 1783609669.8133457,
+    "ast_hash": "a192ebd718303b9c7aa62762e8fb261b",
+    "semantic_hash": ""
+  },
+  "Ester/GameViewController.swift": {
+    "mtime": 1781399204.5123413,
+    "ast_hash": "2ea938f8b865875b7c9e00773768f890",
+    "semantic_hash": "2ea938f8b865875b7c9e00773768f890"
+  },
+  "Ester/Managers/AudioManager.swift": {
+    "mtime": 1782167688.323493,
+    "ast_hash": "e0a301177f974e8e0eb6bb3c813fef44",
+    "semantic_hash": "e0a301177f974e8e0eb6bb3c813fef44"
+  },
+  "Ester/Managers/ColorManager.swift": {
+    "mtime": 1780516506.1415665,
+    "ast_hash": "155e1f1d3e4f6af90857508ca2fe5018",
+    "semantic_hash": "155e1f1d3e4f6af90857508ca2fe5018"
+  },
+  "Ester/Managers/EntityManager.swift": {
+    "mtime": 1783526988.2161329,
+    "ast_hash": "3223d8f0cd09c8aa289c47f47720db5b",
+    "semantic_hash": "3223d8f0cd09c8aa289c47f47720db5b"
+  },
+  "Ester/Managers/Enums/MovementEnums.swift": {
+    "mtime": 1780516506.1417763,
+    "ast_hash": "8a297acbcfd88a1398001145359c990f",
+    "semantic_hash": "8a297acbcfd88a1398001145359c990f"
+  },
+  "Ester/Managers/Extensions.swift": {
+    "mtime": 1780516506.1418574,
+    "ast_hash": "50603580c83c67999805fe55b24bd3c6",
+    "semantic_hash": "50603580c83c67999805fe55b24bd3c6"
+  },
+  "Ester/Managers/MermaidClasses/Face/MermaidEyebrows.swift": {
+    "mtime": 1780516506.1421692,
+    "ast_hash": "13c4027120991b75c7b35c9c41d54002",
+    "semantic_hash": "13c4027120991b75c7b35c9c41d54002"
+  },
+  "Ester/Managers/MermaidClasses/Face/MermaidEyes.swift": {
+    "mtime": 1781207274.7365556,
+    "ast_hash": "aed763277504058548e043ddd49dbd85",
+    "semantic_hash": "aed763277504058548e043ddd49dbd85"
+  },
+  "Ester/Managers/MermaidClasses/Face/MermaidFace.swift": {
+    "mtime": 1782249037.0977116,
+    "ast_hash": "9fbdb7e9d9930eafc2ea266404d85968",
+    "semantic_hash": "9fbdb7e9d9930eafc2ea266404d85968"
+  },
+  "Ester/Managers/MermaidClasses/Face/MermaidMouth.swift": {
+    "mtime": 1781205445.4521658,
+    "ast_hash": "331236d0f42894e4fc2bb3b9a41e2266",
+    "semantic_hash": "331236d0f42894e4fc2bb3b9a41e2266"
+  },
+  "Ester/Managers/MermaidClasses/Mermaid.swift": {
+    "mtime": 1783536219.2434304,
+    "ast_hash": "3d9640ca95792b61faa68eb84d315311",
+    "semantic_hash": "3d9640ca95792b61faa68eb84d315311"
+  },
+  "Ester/Managers/MermaidClasses/MermaidArms.swift": {
+    "mtime": 1782251729.4864004,
+    "ast_hash": "7902a5045c1d89b95933756b1d1510ac",
+    "semantic_hash": "7902a5045c1d89b95933756b1d1510ac"
+  },
+  "Ester/Managers/MermaidClasses/MermaidBody.swift": {
+    "mtime": 1782250844.9166317,
+    "ast_hash": "05e1d0f462bf8cc147f6a0b71d818f04",
+    "semantic_hash": "05e1d0f462bf8cc147f6a0b71d818f04"
+  },
+  "Ester/Managers/MermaidClasses/MermaidHead.swift": {
+    "mtime": 1782249024.6043217,
+    "ast_hash": "883765861ae7f5e7f3422f754348ed8f",
+    "semantic_hash": "883765861ae7f5e7f3422f754348ed8f"
+  },
+  "Ester/Managers/Protocols/MovementDirectionProtocol.swift": {
+    "mtime": 1780516506.1432004,
+    "ast_hash": "665d3dfac3cb9c3ffd9e2626d2a62532",
+    "semantic_hash": "665d3dfac3cb9c3ffd9e2626d2a62532"
+  },
+  "Ester/Managers/Protocols/MovementTypeProtocol.swift": {
+    "mtime": 1780516506.1432889,
+    "ast_hash": "742bc821abbf4d1fd79f449b1eca736c",
+    "semantic_hash": "742bc821abbf4d1fd79f449b1eca736c"
+  },
+  "MapEditor/MapEditor/Assets.xcassets/Contents.json": {
+    "mtime": 1781973201.828968,
+    "ast_hash": "9deb2ada1cc834bbebf8bbad9c8978a1",
+    "semantic_hash": "9deb2ada1cc834bbebf8bbad9c8978a1"
+  },
+  "MapEditor/MapEditor/ContentView.swift": {
+    "mtime": 1781998911.5558794,
+    "ast_hash": "8cf92874de0a41806c63eb43ac73288c",
+    "semantic_hash": "8cf92874de0a41806c63eb43ac73288c"
+  },
+  "MapEditor/MapEditor/EditorModels.swift": {
+    "mtime": 1782177296.043649,
+    "ast_hash": "7dc34dfe59b5a370b92df84739d47aa8",
+    "semantic_hash": "7dc34dfe59b5a370b92df84739d47aa8"
+  },
+  "MapEditor/MapEditor/MapEditorApp.swift": {
+    "mtime": 1781973255.3728983,
+    "ast_hash": "81bb9d0e0edbff31f65a4238e7d54907",
+    "semantic_hash": "81bb9d0e0edbff31f65a4238e7d54907"
+  },
+  "SharedGameData/Maps/recife_tropical.json": {
+    "mtime": 1782177305.7192647,
+    "ast_hash": "84fc9470cccdd869853d11648ed6d09e",
+    "semantic_hash": "84fc9470cccdd869853d11648ed6d09e"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/manifest.json": {
+    "mtime": 1781976564.8326967,
+    "ast_hash": "c6c4f7aadcc069e230acf0af23ee431b",
+    "semantic_hash": "c6c4f7aadcc069e230acf0af23ee431b"
+  },
+  "Tools/verify_mossy_autotile.py": {
+    "mtime": 1781977322.7389984,
+    "ast_hash": "810ae590d09a05679db80189a625190c",
+    "semantic_hash": "810ae590d09a05679db80189a625190c"
+  },
+  "AGENTS.md": {
+    "mtime": 1783524308.5427978,
+    "ast_hash": "a681c3ec4eae139459dc825cdf82b66b",
+    "semantic_hash": "a681c3ec4eae139459dc825cdf82b66b"
+  },
+  "Ester/Audio/AUDIO_ASSET_REPORT.md": {
+    "mtime": 1781283785.2096045,
+    "ast_hash": "8a1aa8ffb91c02fe99cc280da91b7ace",
+    "semantic_hash": "8a1aa8ffb91c02fe99cc280da91b7ace"
+  },
+  "Ester/Audio/SOUND_MAP.md": {
+    "mtime": 1781283774.545136,
+    "ast_hash": "4254fe004cf143b9435203177e1c583b",
+    "semantic_hash": "4254fe004cf143b9435203177e1c583b"
+  },
+  "Ester/Fonts/OFL-Kalam.txt": {
+    "mtime": 1781141099.2223995,
+    "ast_hash": "5cd80f7708fef4b16854c4af0bbd3f16",
+    "semantic_hash": "5cd80f7708fef4b16854c4af0bbd3f16"
+  },
+  "Ester/Fonts/OFL-Nunito.txt": {
+    "mtime": 1781141099.2035773,
+    "ast_hash": "1be2e7edc99bc4a3d9d56d68c48b5f39",
+    "semantic_hash": "1be2e7edc99bc4a3d9d56d68c48b5f39"
+  },
+  "MapEditor/README.md": {
+    "mtime": 1782177310.9296708,
+    "ast_hash": "bce0ace1d27f49109d917c3598247698",
+    "semantic_hash": "bce0ace1d27f49109d917c3598247698"
+  },
+  "SharedGameData/README.md": {
+    "mtime": 1782177308.3992922,
+    "ast_hash": "a6912209243b7ba2e3b1b4993387f510",
+    "semantic_hash": "a6912209243b7ba2e3b1b4993387f510"
+  },
+  "docs/BALANCEAMENTO_MINIGAMES.md": {
+    "mtime": 1782192407.680245,
+    "ast_hash": "9666f99aba108a8abe647845f3976487",
+    "semantic_hash": "9666f99aba108a8abe647845f3976487"
+  },
+  "docs/ICON_EXPORT_INSTRUCTIONS.md": {
+    "mtime": 1781208420.1741612,
+    "ast_hash": "9b9d5241ae7dcc4926724198c2bcbcb4",
+    "semantic_hash": "9b9d5241ae7dcc4926724198c2bcbcb4"
+  },
+  "docs/REGRAS_MUNDO.md": {
+    "mtime": 1782177338.418845,
+    "ast_hash": "37816b2641b20fb6f84776e7a04e6a2a",
+    "semantic_hash": "37816b2641b20fb6f84776e7a04e6a2a"
+  },
+  "docs/RESOURCE_SUPPORT_SYSTEM.md": {
+    "mtime": 1782141110.3670013,
+    "ast_hash": "3f18d2e1565fd3eba7b16eb7fa333e6b",
+    "semantic_hash": "3f18d2e1565fd3eba7b16eb7fa333e6b"
+  },
+  "docs/TEMP_POI_VISUAL_TODO.md": {
+    "mtime": 1782166084.2469032,
+    "ast_hash": "4642a2c9e2a806d10c5b268e1f2a0a12",
+    "semantic_hash": "4642a2c9e2a806d10c5b268e1f2a0a12"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermArms/hand1.imageset/hand1.png": {
+    "mtime": 1781113404.988393,
+    "ast_hash": "c05b994fd81810ea2c5d346d365d3afa",
+    "semantic_hash": "c05b994fd81810ea2c5d346d365d3afa"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermArms/hand2.imageset/hand2.png": {
+    "mtime": 1781113404.990156,
+    "ast_hash": "6bdc5e097220cfb7325c637caed889ca",
+    "semantic_hash": "6bdc5e097220cfb7325c637caed889ca"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermArms/hand3.imageset/hand3.png": {
+    "mtime": 1781113404.989664,
+    "ast_hash": "6a3aec6c7a229510119eda8ffd136c32",
+    "semantic_hash": "6a3aec6c7a229510119eda8ffd136c32"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermArms/hand4.imageset/hand4.png": {
+    "mtime": 1781113404.989333,
+    "ast_hash": "5194576f79ae1f7ff703dfe17f2c91a6",
+    "semantic_hash": "5194576f79ae1f7ff703dfe17f2c91a6"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermHead/MermHairBack.imageset/MermHairBack.png": {
+    "mtime": 1781113404.989623,
+    "ast_hash": "ff1b8f98512eede5601f494b476c6f74",
+    "semantic_hash": "ff1b8f98512eede5601f494b476c6f74"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermHead/MermHairFront.imageset/MermHairFront.png": {
+    "mtime": 1781113404.990224,
+    "ast_hash": "8a1d5c82d43bf6c2d77550abd08f1ba0",
+    "semantic_hash": "8a1d5c82d43bf6c2d77550abd08f1ba0"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/MermHead/MermHead.imageset/MermHead.png": {
+    "mtime": 1781113404.990113,
+    "ast_hash": "e6e3c5d1b7e8e82e51dd2966cdbcb5b7",
+    "semantic_hash": "e6e3c5d1b7e8e82e51dd2966cdbcb5b7"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/finBack.imageset/finBack.png": {
+    "mtime": 1781113404.988813,
+    "ast_hash": "fd5e2e329f903fc88e26c61b4aaae7f5",
+    "semantic_hash": "fd5e2e329f903fc88e26c61b4aaae7f5"
+  },
+  "Ester/Assets.xcassets/AdultMermaid/finFront.imageset/finFront.png": {
+    "mtime": 1781113404.989707,
+    "ast_hash": "f4a32cefcadd74840ce9d6b13decd8c4",
+    "semantic_hash": "f4a32cefcadd74840ce9d6b13decd8c4"
+  },
+  "Ester/Assets.xcassets/AppIcon.appiconset/app-icon.png": {
+    "mtime": 1781282983.2771592,
+    "ast_hash": "e17eef545bc3b661dfa10cf4af4608a1",
+    "semantic_hash": "e17eef545bc3b661dfa10cf4af4608a1"
+  },
+  "Ester/Assets.xcassets/BabyMermaid/baby-fin.imageset/baby-fin.png": {
+    "mtime": 1781119931.118114,
+    "ast_hash": "bfe0a511e9a3c8da65714b615e5ab996",
+    "semantic_hash": "bfe0a511e9a3c8da65714b615e5ab996"
+  },
+  "Ester/Assets.xcassets/BabyMermaid/baby-hairBack.imageset/baby-hairBack.png": {
+    "mtime": 1781116804.704892,
+    "ast_hash": "50dcbd2e8966552d329f42f75f1b7cea",
+    "semantic_hash": "50dcbd2e8966552d329f42f75f1b7cea"
+  },
+  "Ester/Assets.xcassets/BabyMermaid/baby-hairFront.imageset/baby-hairFront.png": {
+    "mtime": 1781116804.706035,
+    "ast_hash": "52bf8605b4a23d1c12a302f8aa77008e",
+    "semantic_hash": "52bf8605b4a23d1c12a302f8aa77008e"
+  },
+  "Ester/Assets.xcassets/BabyMermaid/baby-hand1-1.imageset/baby-hand1-1.png": {
+    "mtime": 1781116804.70529,
+    "ast_hash": "c22424293e572fefb82c9b9fb53191df",
+    "semantic_hash": "c22424293e572fefb82c9b9fb53191df"
+  },
+  "Ester/Assets.xcassets/BabyMermaid/baby-hand1.imageset/baby-hand1.png": {
+    "mtime": 1781116804.70624,
+    "ast_hash": "93fc2b5a2e5e6753c444a46f844f9869",
+    "semantic_hash": "93fc2b5a2e5e6753c444a46f844f9869"
+  },
+  "Ester/Assets.xcassets/BabyMermaid/baby-waistFront.imageset/baby-waistFront.png": {
+    "mtime": 1781116804.706407,
+    "ast_hash": "ac5ad7733c57b5ce6cd44796aa790b6a",
+    "semantic_hash": "ac5ad7733c57b5ce6cd44796aa790b6a"
+  },
+  "Ester/Assets.xcassets/ChildMermaid/child-fin.imageset/child-fin.png": {
+    "mtime": 1781128190.879898,
+    "ast_hash": "3d9bbea5b13b83d980e3db15eae975ab",
+    "semantic_hash": "3d9bbea5b13b83d980e3db15eae975ab"
+  },
+  "Ester/Assets.xcassets/ChildMermaid/child-hairBack.imageset/child-hairBack.png": {
+    "mtime": 1781116909.887576,
+    "ast_hash": "660286c38f6f2d06e6c5928a45bcde2d",
+    "semantic_hash": "660286c38f6f2d06e6c5928a45bcde2d"
+  },
+  "Ester/Assets.xcassets/ChildMermaid/child-hairFront.imageset/child-hairFront.png": {
+    "mtime": 1781116909.887971,
+    "ast_hash": "c9cc77cf61e351ffe3e71640e3a562d6",
+    "semantic_hash": "c9cc77cf61e351ffe3e71640e3a562d6"
+  },
+  "Ester/Assets.xcassets/ChildMermaid/child-waistFront.imageset/child-waistFront.png": {
+    "mtime": 1781116909.889333,
+    "ast_hash": "d22528f9f2f06d548501f9b06f3a0bba",
+    "semantic_hash": "d22528f9f2f06d548501f9b06f3a0bba"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/challenge.imageset/challenge.png": {
+    "mtime": 1781209671.1791718,
+    "ast_hash": "6aebeb14d076394cf69c566e1eb009c7",
+    "semantic_hash": "6aebeb14d076394cf69c566e1eb009c7"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/challenge.imageset/challenge@2x.png": {
+    "mtime": 1781209671.1944644,
+    "ast_hash": "5bf43979efc35d26a044e6b55911ed79",
+    "semantic_hash": "5bf43979efc35d26a044e6b55911ed79"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/challenge.imageset/challenge@3x.png": {
+    "mtime": 1781209671.2071002,
+    "ast_hash": "71200924ad258427407ebb42efe4059a",
+    "semantic_hash": "71200924ad258427407ebb42efe4059a"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/compass.imageset/compass.png": {
+    "mtime": 1781209671.2212377,
+    "ast_hash": "ccd216e7b720880379fb52cc6deecec9",
+    "semantic_hash": "ccd216e7b720880379fb52cc6deecec9"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/compass.imageset/compass@2x.png": {
+    "mtime": 1781209671.2346516,
+    "ast_hash": "05b278277d4a009068582b906611ecbd",
+    "semantic_hash": "05b278277d4a009068582b906611ecbd"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/compass.imageset/compass@3x.png": {
+    "mtime": 1781209671.2490504,
+    "ast_hash": "958ad12b2b0b9b672b66fff1d1d9a3f7",
+    "semantic_hash": "958ad12b2b0b9b672b66fff1d1d9a3f7"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/conch.imageset/conch.png": {
+    "mtime": 1781209671.2641194,
+    "ast_hash": "6bceb96c470e2a4de62eaf53ca71be7b",
+    "semantic_hash": "6bceb96c470e2a4de62eaf53ca71be7b"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/conch.imageset/conch@2x.png": {
+    "mtime": 1781209671.2943902,
+    "ast_hash": "e30afef191390cb7850320999afe03a0",
+    "semantic_hash": "e30afef191390cb7850320999afe03a0"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/conch.imageset/conch@3x.png": {
+    "mtime": 1781209671.3161888,
+    "ast_hash": "e4e5e2b861b60a4d39449f3bb26e306a",
+    "semantic_hash": "e4e5e2b861b60a4d39449f3bb26e306a"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/eat.imageset/eat.png": {
+    "mtime": 1781209671.3309667,
+    "ast_hash": "6a11acb97d35543434a3c3f14fd2cf99",
+    "semantic_hash": "6a11acb97d35543434a3c3f14fd2cf99"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/eat.imageset/eat@2x.png": {
+    "mtime": 1781209671.3445396,
+    "ast_hash": "903c83276f9c0c6141c5174b2dcd0e48",
+    "semantic_hash": "903c83276f9c0c6141c5174b2dcd0e48"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/eat.imageset/eat@3x.png": {
+    "mtime": 1781209671.3580253,
+    "ast_hash": "dfd96bd9e309a993f28d7739a25b428e",
+    "semantic_hash": "dfd96bd9e309a993f28d7739a25b428e"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/objective.imageset/objective.png": {
+    "mtime": 1781209671.3729863,
+    "ast_hash": "e22639503c396725612b3d421cf42148",
+    "semantic_hash": "e22639503c396725612b3d421cf42148"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/objective.imageset/objective@2x.png": {
+    "mtime": 1781209671.3889103,
+    "ast_hash": "954ce64c9038e38222604312c8fd2127",
+    "semantic_hash": "954ce64c9038e38222604312c8fd2127"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/objective.imageset/objective@3x.png": {
+    "mtime": 1781209671.405482,
+    "ast_hash": "0742dd70834475c196dd293b223e63db",
+    "semantic_hash": "0742dd70834475c196dd293b223e63db"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/refuge.imageset/refuge.png": {
+    "mtime": 1781209671.4195812,
+    "ast_hash": "13700c4e3883f9edbfc384754c54783e",
+    "semantic_hash": "13700c4e3883f9edbfc384754c54783e"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/refuge.imageset/refuge@2x.png": {
+    "mtime": 1781209671.433477,
+    "ast_hash": "dd1d81a9128f5d6b1f1bfb217c3f3228",
+    "semantic_hash": "dd1d81a9128f5d6b1f1bfb217c3f3228"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/refuge.imageset/refuge@3x.png": {
+    "mtime": 1781209671.4500356,
+    "ast_hash": "a1bcfd44be124814f1455f0aaff87c31",
+    "semantic_hash": "a1bcfd44be124814f1455f0aaff87c31"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/roadmap.imageset/roadmap.png": {
+    "mtime": 1781209671.4643836,
+    "ast_hash": "5d1f68279afbf0125d8b31b30e0a4523",
+    "semantic_hash": "5d1f68279afbf0125d8b31b30e0a4523"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/roadmap.imageset/roadmap@2x.png": {
+    "mtime": 1781209671.4808724,
+    "ast_hash": "5a236b8bfdc7cc2ba631432fc1d530df",
+    "semantic_hash": "5a236b8bfdc7cc2ba631432fc1d530df"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/roadmap.imageset/roadmap@3x.png": {
+    "mtime": 1781209671.4960601,
+    "ast_hash": "35512981af8f3f1649d8952444085000",
+    "semantic_hash": "35512981af8f3f1649d8952444085000"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/sleep.imageset/sleep.png": {
+    "mtime": 1781209671.5116947,
+    "ast_hash": "9d808b03c3b6989a20e96ffdfba8c857",
+    "semantic_hash": "9d808b03c3b6989a20e96ffdfba8c857"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/sleep.imageset/sleep@2x.png": {
+    "mtime": 1781209671.5255718,
+    "ast_hash": "2b4bb692e89305685ac3da1f1ff955ed",
+    "semantic_hash": "2b4bb692e89305685ac3da1f1ff955ed"
+  },
+  "Ester/Assets.xcassets/Icons/customIcons/sleep.imageset/sleep@3x.png": {
+    "mtime": 1781209671.5401266,
+    "ast_hash": "17eaa65661008f0ba5ebf9946f0a938d",
+    "semantic_hash": "17eaa65661008f0ba5ebf9946f0a938d"
+  },
+  "Ester/Assets.xcassets/MermaidFace/eyeBrow.imageset/eyeBrow.png": {
+    "mtime": 1781113404.990358,
+    "ast_hash": "34b089c0e40c05b81de33813c67a3000",
+    "semantic_hash": "34b089c0e40c05b81de33813c67a3000"
+  },
+  "Ester/Assets.xcassets/MermaidFace/eye_closed.imageset/eye_closed.png": {
+    "mtime": 1781204866.414976,
+    "ast_hash": "17077ab2a422defe2ae959b9ce1e161c",
+    "semantic_hash": "17077ab2a422defe2ae959b9ce1e161c"
+  },
+  "Ester/Assets.xcassets/MermaidFace/eye_half.imageset/eye_half.png": {
+    "mtime": 1781204866.414009,
+    "ast_hash": "86fb9197dd8f8c27217048e7e01c4bb2",
+    "semantic_hash": "86fb9197dd8f8c27217048e7e01c4bb2"
+  },
+  "Ester/Assets.xcassets/MermaidFace/eye_open.imageset/eye_open.png": {
+    "mtime": 1781204866.415012,
+    "ast_hash": "d5dfa164fd69238e47cfa86df624842e",
+    "semantic_hash": "d5dfa164fd69238e47cfa86df624842e"
+  },
+  "Ester/Assets.xcassets/MermaidFace/eye_wide.imageset/eye_wide.png": {
+    "mtime": 1781204866.414775,
+    "ast_hash": "436db180b0cc2e3f212872dbdea33138",
+    "semantic_hash": "436db180b0cc2e3f212872dbdea33138"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_chew.imageset/mouth_chew.png": {
+    "mtime": 1781204866.4137,
+    "ast_hash": "5596b814ba3ecfb0eac6e267b9fe4d75",
+    "semantic_hash": "5596b814ba3ecfb0eac6e267b9fe4d75"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_frown.imageset/mouth_frown.png": {
+    "mtime": 1781204866.414473,
+    "ast_hash": "7e9be49b96c9dddad0f7e4b24e7f16ba",
+    "semantic_hash": "7e9be49b96c9dddad0f7e4b24e7f16ba"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_neutral.imageset/mouth_neutral.png": {
+    "mtime": 1781204866.414136,
+    "ast_hash": "bce6bfd8257f461064fe4f6b0795c9fc",
+    "semantic_hash": "bce6bfd8257f461064fe4f6b0795c9fc"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_o.imageset/mouth_o.png": {
+    "mtime": 1781204866.414567,
+    "ast_hash": "d9390bae6fa22af41f5dbc2759cf5c58",
+    "semantic_hash": "d9390bae6fa22af41f5dbc2759cf5c58"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_open.imageset/mouth_open.png": {
+    "mtime": 1781204866.414741,
+    "ast_hash": "4a0c765815365375dd97695963bbfb11",
+    "semantic_hash": "4a0c765815365375dd97695963bbfb11"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_pout.imageset/mouth_pout.png": {
+    "mtime": 1781204866.414884,
+    "ast_hash": "5435c14f394d8b9a4d7a7c58fe0f1cbd",
+    "semantic_hash": "5435c14f394d8b9a4d7a7c58fe0f1cbd"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_sleepy.imageset/mouth_sleepy.png": {
+    "mtime": 1781204866.413938,
+    "ast_hash": "734dd965127501e373a8879f67817e93",
+    "semantic_hash": "734dd965127501e373a8879f67817e93"
+  },
+  "Ester/Assets.xcassets/MermaidFace/mouth_smile.imageset/mouth_smile.png": {
+    "mtime": 1781204866.414071,
+    "ast_hash": "e29beb45c9a9979943ab38ba9a3a3802",
+    "semantic_hash": "e29beb45c9a9979943ab38ba9a3a3802"
+  },
+  "Ester/Assets.xcassets/Particle Sprite Atlas.spriteatlas/bokeh.imageset/bokeh.png": {
+    "mtime": 1780516506.1378706,
+    "ast_hash": "cd506bc9070c2f5b90da543c178fe987",
+    "semantic_hash": "cd506bc9070c2f5b90da543c178fe987"
+  },
+  "Ester/Assets.xcassets/Particle Sprite Atlas.spriteatlas/spark.imageset/spark.png": {
+    "mtime": 1780516506.1381028,
+    "ast_hash": "a77ef4032e894232e779b5082b4b099b",
+    "semantic_hash": "a77ef4032e894232e779b5082b4b099b"
+  },
+  "Ester/Assets.xcassets/bubble.imageset/bubble.png": {
+    "mtime": 1780516506.1383245,
+    "ast_hash": "d32a655ffe863f49af44537597fb8bfb",
+    "semantic_hash": "d32a655ffe863f49af44537597fb8bfb"
+  },
+  "Ester/Assets.xcassets/settingsIcon.imageset/settingsIcon.png": {
+    "mtime": 1780516506.1401048,
+    "ast_hash": "4bad6cb1b450b6f2959394c315d2223b",
+    "semantic_hash": "4bad6cb1b450b6f2959394c315d2223b"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/autotile-preview.png": {
+    "mtime": 1781976600.0210285,
+    "ast_hash": "515f6daa8a8a896a87492ae82ab13372",
+    "semantic_hash": "515f6daa8a8a896a87492ae82ab13372"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/contact-sheet.png": {
+    "mtime": 1781976599.7263563,
+    "ast_hash": "086543bace2505f7b6716847d4393926",
+    "semantic_hash": "086543bace2505f7b6716847d4393926"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-e-01.png": {
+    "mtime": 1781976333.0242372,
+    "ast_hash": "b787d4ba54cbbd00ba4269b37102e45a",
+    "semantic_hash": "b787d4ba54cbbd00ba4269b37102e45a"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-e-02.png": {
+    "mtime": 1781976333.1119907,
+    "ast_hash": "30f790203eb88d2f76e1d776974eaf8d",
+    "semantic_hash": "30f790203eb88d2f76e1d776974eaf8d"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-e-03.png": {
+    "mtime": 1781976333.2128568,
+    "ast_hash": "4733e8458e6375ac9e297a8e8c717063",
+    "semantic_hash": "4733e8458e6375ac9e297a8e8c717063"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-e-04.png": {
+    "mtime": 1781976333.315762,
+    "ast_hash": "366333fc73060ef82d7c88d9c907ba7d",
+    "semantic_hash": "366333fc73060ef82d7c88d9c907ba7d"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-ew-01.png": {
+    "mtime": 1781976332.679052,
+    "ast_hash": "943b9cb537e19156386c5ac0c2de33cb",
+    "semantic_hash": "943b9cb537e19156386c5ac0c2de33cb"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-ew-02.png": {
+    "mtime": 1781976332.7430248,
+    "ast_hash": "01c5087d2038a441a59b2b7870b58496",
+    "semantic_hash": "01c5087d2038a441a59b2b7870b58496"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-ew-03.png": {
+    "mtime": 1781976332.800965,
+    "ast_hash": "fa9f09c5114078b7063e49811cfd029d",
+    "semantic_hash": "fa9f09c5114078b7063e49811cfd029d"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-ew-04.png": {
+    "mtime": 1781976332.8616045,
+    "ast_hash": "5ef0e34baac6949e04b565684d6f0883",
+    "semantic_hash": "5ef0e34baac6949e04b565684d6f0883"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-ew-05.png": {
+    "mtime": 1781976332.92249,
+    "ast_hash": "dbc1893bc7d334ce019fa7760f45a64e",
+    "semantic_hash": "dbc1893bc7d334ce019fa7760f45a64e"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-ew-06.png": {
+    "mtime": 1781976332.975612,
+    "ast_hash": "0fa862d6aad69fa1030cc7060b1bc759",
+    "semantic_hash": "0fa862d6aad69fa1030cc7060b1bc759"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-n-01.png": {
+    "mtime": 1781976333.0493228,
+    "ast_hash": "917dca567ea3b3f4e1b661bebebcdf0a",
+    "semantic_hash": "917dca567ea3b3f4e1b661bebebcdf0a"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-n-02.png": {
+    "mtime": 1781976333.1481893,
+    "ast_hash": "cd3e306a02d500960e81711fdb75bf27",
+    "semantic_hash": "cd3e306a02d500960e81711fdb75bf27"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-n-03.png": {
+    "mtime": 1781976333.2464864,
+    "ast_hash": "6128309ad06ab90ff3b174ff73cccd94",
+    "semantic_hash": "6128309ad06ab90ff3b174ff73cccd94"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-n-04.png": {
+    "mtime": 1781976333.3603227,
+    "ast_hash": "bc319b8e82074767c47394568b9e1e51",
+    "semantic_hash": "bc319b8e82074767c47394568b9e1e51"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-none-01.png": {
+    "mtime": 1781976563.2390456,
+    "ast_hash": "c91c9e46ba78220eff7618daed2150bb",
+    "semantic_hash": "c91c9e46ba78220eff7618daed2150bb"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-none-02.png": {
+    "mtime": 1781976563.2838802,
+    "ast_hash": "ff9b711935c3dda51b7ff28f91bc685d",
+    "semantic_hash": "ff9b711935c3dda51b7ff28f91bc685d"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-none-03.png": {
+    "mtime": 1781976563.3260288,
+    "ast_hash": "6971b609d298a9cdb5d638767d1875f7",
+    "semantic_hash": "6971b609d298a9cdb5d638767d1875f7"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-none-04.png": {
+    "mtime": 1781976563.3487139,
+    "ast_hash": "e125d84d062e55990acaab0c8a00fdd1",
+    "semantic_hash": "e125d84d062e55990acaab0c8a00fdd1"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-ns-01.png": {
+    "mtime": 1781976332.7177246,
+    "ast_hash": "b98d42d15ead5de1ba57a015f3c0bb3d",
+    "semantic_hash": "b98d42d15ead5de1ba57a015f3c0bb3d"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-ns-02.png": {
+    "mtime": 1781976332.7752802,
+    "ast_hash": "b8f9d502fae62ffa4a8ecd4a8a5b3059",
+    "semantic_hash": "b8f9d502fae62ffa4a8ecd4a8a5b3059"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-ns-03.png": {
+    "mtime": 1781976332.833831,
+    "ast_hash": "e9e5536260f7cf19cd6a8bfeaf119a2a",
+    "semantic_hash": "e9e5536260f7cf19cd6a8bfeaf119a2a"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-ns-04.png": {
+    "mtime": 1781976332.8962452,
+    "ast_hash": "4212503b58ec8dcfacca7003c98aa35d",
+    "semantic_hash": "4212503b58ec8dcfacca7003c98aa35d"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-ns-05.png": {
+    "mtime": 1781976332.9534464,
+    "ast_hash": "92c088383bdd7a86515ae0f46a9ed00a",
+    "semantic_hash": "92c088383bdd7a86515ae0f46a9ed00a"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-ns-06.png": {
+    "mtime": 1781976333.0062973,
+    "ast_hash": "d19fa8b25fda44da7815a22a3d170ba2",
+    "semantic_hash": "d19fa8b25fda44da7815a22a3d170ba2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-s-01.png": {
+    "mtime": 1781976333.0747092,
+    "ast_hash": "89f47d0fde838dd570826fa386efb5eb",
+    "semantic_hash": "89f47d0fde838dd570826fa386efb5eb"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-s-02.png": {
+    "mtime": 1781976333.1768825,
+    "ast_hash": "434e8198614a31cfb2f6dc172be176ef",
+    "semantic_hash": "434e8198614a31cfb2f6dc172be176ef"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-s-03.png": {
+    "mtime": 1781976333.276814,
+    "ast_hash": "57eb185687b0286249101759fec1c20e",
+    "semantic_hash": "57eb185687b0286249101759fec1c20e"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-s-04.png": {
+    "mtime": 1781976333.3966646,
+    "ast_hash": "c88019d392bbe5887f53c36218f1d84a",
+    "semantic_hash": "c88019d392bbe5887f53c36218f1d84a"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-w-01.png": {
+    "mtime": 1781976333.0410435,
+    "ast_hash": "3924ff830b7eec354cafab057b7f3280",
+    "semantic_hash": "3924ff830b7eec354cafab057b7f3280"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-w-02.png": {
+    "mtime": 1781976333.1316628,
+    "ast_hash": "47fec8488bc037c9afa5d597b3ba11fa",
+    "semantic_hash": "47fec8488bc037c9afa5d597b3ba11fa"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-w-03.png": {
+    "mtime": 1781976333.230651,
+    "ast_hash": "45b6c959e73ab37067c50b1d337298bc",
+    "semantic_hash": "45b6c959e73ab37067c50b1d337298bc"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-auto-w-04.png": {
+    "mtime": 1781976333.3383029,
+    "ast_hash": "e257963172e7ddbfcf86ac5d7308d39f",
+    "semantic_hash": "e257963172e7ddbfcf86ac5d7308d39f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r01-c01.png": {
+    "mtime": 1781973834.9660728,
+    "ast_hash": "ac564e8363856e89ad3d303d9a071d23",
+    "semantic_hash": "ac564e8363856e89ad3d303d9a071d23"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r01-c02.png": {
+    "mtime": 1781973834.9941032,
+    "ast_hash": "723dc04b395d5a0661cab5cb96bef4b1",
+    "semantic_hash": "723dc04b395d5a0661cab5cb96bef4b1"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r01-c03.png": {
+    "mtime": 1781973835.0189567,
+    "ast_hash": "1c0f9dd7037fb091bbb41c1e043a757b",
+    "semantic_hash": "1c0f9dd7037fb091bbb41c1e043a757b"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r01-c04.png": {
+    "mtime": 1781973835.0431306,
+    "ast_hash": "0a8c238a3342edc50d160b7b63127296",
+    "semantic_hash": "0a8c238a3342edc50d160b7b63127296"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r01-c05.png": {
+    "mtime": 1781973835.066927,
+    "ast_hash": "ba3421984b396fcc2ed5d6ca8d117ece",
+    "semantic_hash": "ba3421984b396fcc2ed5d6ca8d117ece"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r01-c06.png": {
+    "mtime": 1781973835.0966852,
+    "ast_hash": "eb964b5520b5b9c9818001e1b4dc73da",
+    "semantic_hash": "eb964b5520b5b9c9818001e1b4dc73da"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r01-c07.png": {
+    "mtime": 1781973835.1232357,
+    "ast_hash": "0a7b796278daf8ae257e95f075bd332d",
+    "semantic_hash": "0a7b796278daf8ae257e95f075bd332d"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r01-c08.png": {
+    "mtime": 1781973835.1531317,
+    "ast_hash": "84d45cb02f092dddd5b89789603eb5f7",
+    "semantic_hash": "84d45cb02f092dddd5b89789603eb5f7"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r01-c09.png": {
+    "mtime": 1781973835.1567826,
+    "ast_hash": "728cc92106d583bf07eae7143656bdf9",
+    "semantic_hash": "728cc92106d583bf07eae7143656bdf9"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r01-c10.png": {
+    "mtime": 1781973835.1597264,
+    "ast_hash": "801e608e8cba3886ab33fcf58d3c4e82",
+    "semantic_hash": "801e608e8cba3886ab33fcf58d3c4e82"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r01-c11.png": {
+    "mtime": 1781973835.162411,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r01-c12.png": {
+    "mtime": 1781973835.1650915,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r01-c13.png": {
+    "mtime": 1781973835.1884801,
+    "ast_hash": "cc42871353b1af1a33d30259bd7f7652",
+    "semantic_hash": "cc42871353b1af1a33d30259bd7f7652"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r01-c14.png": {
+    "mtime": 1781973835.2094524,
+    "ast_hash": "161813310b8927ead15d36131a57e0e6",
+    "semantic_hash": "161813310b8927ead15d36131a57e0e6"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r02-c01.png": {
+    "mtime": 1781973835.237162,
+    "ast_hash": "a3a5dab37d409e4e1e26c24250048c9d",
+    "semantic_hash": "a3a5dab37d409e4e1e26c24250048c9d"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r02-c02.png": {
+    "mtime": 1781973835.2405772,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r02-c03.png": {
+    "mtime": 1781973835.2433965,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r02-c04.png": {
+    "mtime": 1781973835.2461638,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r02-c05.png": {
+    "mtime": 1781973835.2489674,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r02-c06.png": {
+    "mtime": 1781973835.275606,
+    "ast_hash": "ce9fb2fdb4d737de2842584fd014e401",
+    "semantic_hash": "ce9fb2fdb4d737de2842584fd014e401"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r02-c07.png": {
+    "mtime": 1781973835.3024006,
+    "ast_hash": "8c824a06abb97d126437551868efc8d3",
+    "semantic_hash": "8c824a06abb97d126437551868efc8d3"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r02-c08.png": {
+    "mtime": 1781973835.3283315,
+    "ast_hash": "e9a595a632eee6c15eeeceb4d4e16d67",
+    "semantic_hash": "e9a595a632eee6c15eeeceb4d4e16d67"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r02-c09.png": {
+    "mtime": 1781973835.3505738,
+    "ast_hash": "588a816250a8bd1e546825b8b963e405",
+    "semantic_hash": "588a816250a8bd1e546825b8b963e405"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r02-c10.png": {
+    "mtime": 1781973835.3800495,
+    "ast_hash": "5639ecee576cc5f9ea6671fbbb99d5d9",
+    "semantic_hash": "5639ecee576cc5f9ea6671fbbb99d5d9"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r02-c11.png": {
+    "mtime": 1781973835.4048634,
+    "ast_hash": "db7185eedbfb711c2fd6219a5fab57b2",
+    "semantic_hash": "db7185eedbfb711c2fd6219a5fab57b2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r02-c12.png": {
+    "mtime": 1781973835.4085047,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r02-c13.png": {
+    "mtime": 1781973835.411227,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r02-c14.png": {
+    "mtime": 1781973835.4138641,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r03-c01.png": {
+    "mtime": 1781973835.4367957,
+    "ast_hash": "e96976ec90b3f57217af6c00b07febfc",
+    "semantic_hash": "e96976ec90b3f57217af6c00b07febfc"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r03-c02.png": {
+    "mtime": 1781973835.439767,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r03-c03.png": {
+    "mtime": 1781973835.4424794,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r03-c04.png": {
+    "mtime": 1781973835.4451747,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r03-c05.png": {
+    "mtime": 1781973835.448064,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r03-c06.png": {
+    "mtime": 1781973835.4732919,
+    "ast_hash": "d4abc33a5f691cea1ee1f3170b4e22c2",
+    "semantic_hash": "d4abc33a5f691cea1ee1f3170b4e22c2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r03-c07.png": {
+    "mtime": 1781973835.4987004,
+    "ast_hash": "b04f8ffdc43a152d5246b1f9d16e03d0",
+    "semantic_hash": "b04f8ffdc43a152d5246b1f9d16e03d0"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r03-c08.png": {
+    "mtime": 1781973835.524395,
+    "ast_hash": "27a51c80175a12bccefbdc329237a1e9",
+    "semantic_hash": "27a51c80175a12bccefbdc329237a1e9"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r03-c09.png": {
+    "mtime": 1781973835.527911,
+    "ast_hash": "b394ef346d05403667c5e94ca848abd1",
+    "semantic_hash": "b394ef346d05403667c5e94ca848abd1"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r03-c10.png": {
+    "mtime": 1781973835.5489872,
+    "ast_hash": "f81be0ad7192ff7569e49376d453cee4",
+    "semantic_hash": "f81be0ad7192ff7569e49376d453cee4"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r03-c11.png": {
+    "mtime": 1781973835.573148,
+    "ast_hash": "cc42871353b1af1a33d30259bd7f7652",
+    "semantic_hash": "cc42871353b1af1a33d30259bd7f7652"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r03-c12.png": {
+    "mtime": 1781973835.5761893,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r03-c13.png": {
+    "mtime": 1781973835.6013505,
+    "ast_hash": "cc42871353b1af1a33d30259bd7f7652",
+    "semantic_hash": "cc42871353b1af1a33d30259bd7f7652"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r03-c14.png": {
+    "mtime": 1781973835.6047437,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r04-c01.png": {
+    "mtime": 1781973835.6283085,
+    "ast_hash": "1d000daa6fa2ec91bb5355bb70625bc3",
+    "semantic_hash": "1d000daa6fa2ec91bb5355bb70625bc3"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r04-c02.png": {
+    "mtime": 1781973835.6313522,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r04-c03.png": {
+    "mtime": 1781973835.6343899,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r04-c04.png": {
+    "mtime": 1781973835.6375284,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r04-c05.png": {
+    "mtime": 1781973835.6409252,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r04-c06.png": {
+    "mtime": 1781973835.6663198,
+    "ast_hash": "efa46aa1af4617c332ab58321cffcf14",
+    "semantic_hash": "efa46aa1af4617c332ab58321cffcf14"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r04-c07.png": {
+    "mtime": 1781973835.6921685,
+    "ast_hash": "e4151dea78c85e988f6d9c08912cfeec",
+    "semantic_hash": "e4151dea78c85e988f6d9c08912cfeec"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r04-c08.png": {
+    "mtime": 1781973835.7193208,
+    "ast_hash": "d4a183ef2485df5d82a819168d3a1ae6",
+    "semantic_hash": "d4a183ef2485df5d82a819168d3a1ae6"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r04-c09.png": {
+    "mtime": 1781973835.7228615,
+    "ast_hash": "feda12f5d33e4b7a8dd975006930adb8",
+    "semantic_hash": "feda12f5d33e4b7a8dd975006930adb8"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r04-c10.png": {
+    "mtime": 1781973835.725902,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r04-c11.png": {
+    "mtime": 1781973835.7287705,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r04-c12.png": {
+    "mtime": 1781973835.7315493,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r04-c13.png": {
+    "mtime": 1781973835.7563238,
+    "ast_hash": "db7185eedbfb711c2fd6219a5fab57b2",
+    "semantic_hash": "db7185eedbfb711c2fd6219a5fab57b2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r04-c14.png": {
+    "mtime": 1781973835.7592132,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r05-c01.png": {
+    "mtime": 1781973835.786463,
+    "ast_hash": "24e0043f7c8951fb85c095e38181321c",
+    "semantic_hash": "24e0043f7c8951fb85c095e38181321c"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r05-c02.png": {
+    "mtime": 1781973835.789738,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r05-c03.png": {
+    "mtime": 1781973835.7924964,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r05-c04.png": {
+    "mtime": 1781973835.795169,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r05-c05.png": {
+    "mtime": 1781973835.7977643,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r05-c06.png": {
+    "mtime": 1781973835.8246717,
+    "ast_hash": "1d60bdb5c39117134ad110a0c9e41ca8",
+    "semantic_hash": "1d60bdb5c39117134ad110a0c9e41ca8"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r05-c07.png": {
+    "mtime": 1781973835.8511982,
+    "ast_hash": "747efbe1d829af23a08e4c64d786d481",
+    "semantic_hash": "747efbe1d829af23a08e4c64d786d481"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r05-c08.png": {
+    "mtime": 1781973835.8771086,
+    "ast_hash": "8ea01f523734b943b5dc6e0f05751296",
+    "semantic_hash": "8ea01f523734b943b5dc6e0f05751296"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r05-c09.png": {
+    "mtime": 1781973835.9003224,
+    "ast_hash": "cc42871353b1af1a33d30259bd7f7652",
+    "semantic_hash": "cc42871353b1af1a33d30259bd7f7652"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r05-c10.png": {
+    "mtime": 1781973835.9215298,
+    "ast_hash": "161813310b8927ead15d36131a57e0e6",
+    "semantic_hash": "161813310b8927ead15d36131a57e0e6"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r05-c11.png": {
+    "mtime": 1781973835.9446273,
+    "ast_hash": "cc42871353b1af1a33d30259bd7f7652",
+    "semantic_hash": "cc42871353b1af1a33d30259bd7f7652"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r05-c12.png": {
+    "mtime": 1781973835.9474304,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r05-c13.png": {
+    "mtime": 1781973835.9506588,
+    "ast_hash": "b394ef346d05403667c5e94ca848abd1",
+    "semantic_hash": "b394ef346d05403667c5e94ca848abd1"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r05-c14.png": {
+    "mtime": 1781973835.9717996,
+    "ast_hash": "f81be0ad7192ff7569e49376d453cee4",
+    "semantic_hash": "f81be0ad7192ff7569e49376d453cee4"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r06-c01.png": {
+    "mtime": 1781973835.9875531,
+    "ast_hash": "be5b195727182d63b86644515362bb23",
+    "semantic_hash": "be5b195727182d63b86644515362bb23"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r06-c02.png": {
+    "mtime": 1781973836.0135663,
+    "ast_hash": "8a25fa853229a5514c1735778dd4fb95",
+    "semantic_hash": "8a25fa853229a5514c1735778dd4fb95"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r06-c03.png": {
+    "mtime": 1781973836.0365262,
+    "ast_hash": "0e1ea87b7a53225971b5d5e2d4263e26",
+    "semantic_hash": "0e1ea87b7a53225971b5d5e2d4263e26"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r06-c04.png": {
+    "mtime": 1781973836.0608602,
+    "ast_hash": "b101e53674116cc1bee63998d8d1bd77",
+    "semantic_hash": "b101e53674116cc1bee63998d8d1bd77"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r06-c05.png": {
+    "mtime": 1781973836.085437,
+    "ast_hash": "cbc5bf433df370533b996ae5c50b6961",
+    "semantic_hash": "cbc5bf433df370533b996ae5c50b6961"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r06-c06.png": {
+    "mtime": 1781973836.103884,
+    "ast_hash": "ceb26eed3e039f64199cc656913f520f",
+    "semantic_hash": "ceb26eed3e039f64199cc656913f520f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r06-c07.png": {
+    "mtime": 1781973836.119994,
+    "ast_hash": "7530f590456471d7f3d5c44b975f9e98",
+    "semantic_hash": "7530f590456471d7f3d5c44b975f9e98"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r06-c08.png": {
+    "mtime": 1781973836.1388109,
+    "ast_hash": "6ae6d8e61d95eed1e3aa4ee78885c3fd",
+    "semantic_hash": "6ae6d8e61d95eed1e3aa4ee78885c3fd"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r06-c09.png": {
+    "mtime": 1781973836.141933,
+    "ast_hash": "feda12f5d33e4b7a8dd975006930adb8",
+    "semantic_hash": "feda12f5d33e4b7a8dd975006930adb8"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r06-c10.png": {
+    "mtime": 1781973836.1705492,
+    "ast_hash": "5639ecee576cc5f9ea6671fbbb99d5d9",
+    "semantic_hash": "5639ecee576cc5f9ea6671fbbb99d5d9"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r06-c11.png": {
+    "mtime": 1781973836.194325,
+    "ast_hash": "db7185eedbfb711c2fd6219a5fab57b2",
+    "semantic_hash": "db7185eedbfb711c2fd6219a5fab57b2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r06-c12.png": {
+    "mtime": 1781973836.223777,
+    "ast_hash": "5639ecee576cc5f9ea6671fbbb99d5d9",
+    "semantic_hash": "5639ecee576cc5f9ea6671fbbb99d5d9"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r06-c13.png": {
+    "mtime": 1781973836.2272236,
+    "ast_hash": "588a816250a8bd1e546825b8b963e405",
+    "semantic_hash": "588a816250a8bd1e546825b8b963e405"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r06-c14.png": {
+    "mtime": 1781973836.256392,
+    "ast_hash": "5639ecee576cc5f9ea6671fbbb99d5d9",
+    "semantic_hash": "5639ecee576cc5f9ea6671fbbb99d5d9"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r07-c01.png": {
+    "mtime": 1781973836.259283,
+    "ast_hash": "12b2512ba51648cabdbe39e563f0e364",
+    "semantic_hash": "12b2512ba51648cabdbe39e563f0e364"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r07-c02.png": {
+    "mtime": 1781973836.2914727,
+    "ast_hash": "005a83ac242491863363ef73f45ef6f0",
+    "semantic_hash": "005a83ac242491863363ef73f45ef6f0"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r07-c03.png": {
+    "mtime": 1781973836.3149004,
+    "ast_hash": "1c0f9dd7037fb091bbb41c1e043a757b",
+    "semantic_hash": "1c0f9dd7037fb091bbb41c1e043a757b"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r07-c04.png": {
+    "mtime": 1781973836.339399,
+    "ast_hash": "0a8c238a3342edc50d160b7b63127296",
+    "semantic_hash": "0a8c238a3342edc50d160b7b63127296"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r07-c05.png": {
+    "mtime": 1781973836.3706732,
+    "ast_hash": "67085eb19e23b54c1c59c3e9ab17d5c3",
+    "semantic_hash": "67085eb19e23b54c1c59c3e9ab17d5c3"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r07-c06.png": {
+    "mtime": 1781973836.3754225,
+    "ast_hash": "91a305618396ddef64e7ce5cfc77f3df",
+    "semantic_hash": "91a305618396ddef64e7ce5cfc77f3df"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r07-c07.png": {
+    "mtime": 1781973836.4082544,
+    "ast_hash": "b643312d32126b753e9c3f0c37ec5c05",
+    "semantic_hash": "b643312d32126b753e9c3f0c37ec5c05"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r07-c08.png": {
+    "mtime": 1781973836.4395888,
+    "ast_hash": "736dc8d7d71bcfc25ec6534216dac691",
+    "semantic_hash": "736dc8d7d71bcfc25ec6534216dac691"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r07-c09.png": {
+    "mtime": 1781973836.442552,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r07-c10.png": {
+    "mtime": 1781973836.463036,
+    "ast_hash": "f81be0ad7192ff7569e49376d453cee4",
+    "semantic_hash": "f81be0ad7192ff7569e49376d453cee4"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r07-c11.png": {
+    "mtime": 1781973836.485614,
+    "ast_hash": "cc42871353b1af1a33d30259bd7f7652",
+    "semantic_hash": "cc42871353b1af1a33d30259bd7f7652"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r07-c12.png": {
+    "mtime": 1781973836.5073407,
+    "ast_hash": "f81be0ad7192ff7569e49376d453cee4",
+    "semantic_hash": "f81be0ad7192ff7569e49376d453cee4"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r07-c13.png": {
+    "mtime": 1781973836.510203,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r07-c14.png": {
+    "mtime": 1781973836.5131013,
+    "ast_hash": "801e608e8cba3886ab33fcf58d3c4e82",
+    "semantic_hash": "801e608e8cba3886ab33fcf58d3c4e82"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r08-c01.png": {
+    "mtime": 1781973836.5148647,
+    "ast_hash": "555b0012af75af383218cd89f38bca29",
+    "semantic_hash": "555b0012af75af383218cd89f38bca29"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r08-c02.png": {
+    "mtime": 1781973836.5391493,
+    "ast_hash": "00e5bb0713e1954086588586eb3a97be",
+    "semantic_hash": "00e5bb0713e1954086588586eb3a97be"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r08-c03.png": {
+    "mtime": 1781973836.5626163,
+    "ast_hash": "65475eaae845d504f29ebebfb88ac0ee",
+    "semantic_hash": "65475eaae845d504f29ebebfb88ac0ee"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r08-c04.png": {
+    "mtime": 1781973836.58763,
+    "ast_hash": "bb724379336c12d6223c3d332290c4c4",
+    "semantic_hash": "bb724379336c12d6223c3d332290c4c4"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r08-c05.png": {
+    "mtime": 1781973836.613886,
+    "ast_hash": "c7f30c8be995b7b5d97a96d1118fe64b",
+    "semantic_hash": "c7f30c8be995b7b5d97a96d1118fe64b"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r08-c06.png": {
+    "mtime": 1781973836.6160924,
+    "ast_hash": "089e0dede0dbaa6cdc4ee52dc2f01d30",
+    "semantic_hash": "089e0dede0dbaa6cdc4ee52dc2f01d30"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r08-c07.png": {
+    "mtime": 1781973836.6387691,
+    "ast_hash": "2aca4bbbb5081bc698880d14979e253f",
+    "semantic_hash": "2aca4bbbb5081bc698880d14979e253f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r08-c08.png": {
+    "mtime": 1781973836.6651642,
+    "ast_hash": "926596b0974d053088b60c679cb6e87b",
+    "semantic_hash": "926596b0974d053088b60c679cb6e87b"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r08-c09.png": {
+    "mtime": 1781973836.6902087,
+    "ast_hash": "db7185eedbfb711c2fd6219a5fab57b2",
+    "semantic_hash": "db7185eedbfb711c2fd6219a5fab57b2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r08-c10.png": {
+    "mtime": 1781973836.7194612,
+    "ast_hash": "5639ecee576cc5f9ea6671fbbb99d5d9",
+    "semantic_hash": "5639ecee576cc5f9ea6671fbbb99d5d9"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r08-c11.png": {
+    "mtime": 1781973836.7439651,
+    "ast_hash": "db7185eedbfb711c2fd6219a5fab57b2",
+    "semantic_hash": "db7185eedbfb711c2fd6219a5fab57b2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r08-c12.png": {
+    "mtime": 1781973836.7469137,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r08-c13.png": {
+    "mtime": 1781973836.7712066,
+    "ast_hash": "db7185eedbfb711c2fd6219a5fab57b2",
+    "semantic_hash": "db7185eedbfb711c2fd6219a5fab57b2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r08-c14.png": {
+    "mtime": 1781973836.8004138,
+    "ast_hash": "5639ecee576cc5f9ea6671fbbb99d5d9",
+    "semantic_hash": "5639ecee576cc5f9ea6671fbbb99d5d9"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r09-c01.png": {
+    "mtime": 1781973836.8258326,
+    "ast_hash": "e96976ec90b3f57217af6c00b07febfc",
+    "semantic_hash": "e96976ec90b3f57217af6c00b07febfc"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r09-c02.png": {
+    "mtime": 1781973836.828739,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r09-c03.png": {
+    "mtime": 1781973836.832231,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r09-c04.png": {
+    "mtime": 1781973836.8578517,
+    "ast_hash": "d4abc33a5f691cea1ee1f3170b4e22c2",
+    "semantic_hash": "d4abc33a5f691cea1ee1f3170b4e22c2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r09-c05.png": {
+    "mtime": 1781973836.8857164,
+    "ast_hash": "1c0f9dd7037fb091bbb41c1e043a757b",
+    "semantic_hash": "1c0f9dd7037fb091bbb41c1e043a757b"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r09-c06.png": {
+    "mtime": 1781973836.9140947,
+    "ast_hash": "0a8c238a3342edc50d160b7b63127296",
+    "semantic_hash": "0a8c238a3342edc50d160b7b63127296"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r09-c07.png": {
+    "mtime": 1781973836.937865,
+    "ast_hash": "1c0f9dd7037fb091bbb41c1e043a757b",
+    "semantic_hash": "1c0f9dd7037fb091bbb41c1e043a757b"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r09-c08.png": {
+    "mtime": 1781973836.9616132,
+    "ast_hash": "0a8c238a3342edc50d160b7b63127296",
+    "semantic_hash": "0a8c238a3342edc50d160b7b63127296"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r09-c09.png": {
+    "mtime": 1781973836.987099,
+    "ast_hash": "ac564e8363856e89ad3d303d9a071d23",
+    "semantic_hash": "ac564e8363856e89ad3d303d9a071d23"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r09-c10.png": {
+    "mtime": 1781973837.0133464,
+    "ast_hash": "723dc04b395d5a0661cab5cb96bef4b1",
+    "semantic_hash": "723dc04b395d5a0661cab5cb96bef4b1"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r09-c11.png": {
+    "mtime": 1781973837.0369675,
+    "ast_hash": "1c0f9dd7037fb091bbb41c1e043a757b",
+    "semantic_hash": "1c0f9dd7037fb091bbb41c1e043a757b"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r09-c12.png": {
+    "mtime": 1781973837.0610738,
+    "ast_hash": "0a8c238a3342edc50d160b7b63127296",
+    "semantic_hash": "0a8c238a3342edc50d160b7b63127296"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r09-c13.png": {
+    "mtime": 1781973837.0843337,
+    "ast_hash": "ba3421984b396fcc2ed5d6ca8d117ece",
+    "semantic_hash": "ba3421984b396fcc2ed5d6ca8d117ece"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r09-c14.png": {
+    "mtime": 1781973837.1127458,
+    "ast_hash": "eb964b5520b5b9c9818001e1b4dc73da",
+    "semantic_hash": "eb964b5520b5b9c9818001e1b4dc73da"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r10-c01.png": {
+    "mtime": 1781973837.1359527,
+    "ast_hash": "1d000daa6fa2ec91bb5355bb70625bc3",
+    "semantic_hash": "1d000daa6fa2ec91bb5355bb70625bc3"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r10-c02.png": {
+    "mtime": 1781973837.1655128,
+    "ast_hash": "a2dcbf95565c2292b3b213aa9c1a8492",
+    "semantic_hash": "a2dcbf95565c2292b3b213aa9c1a8492"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r10-c03.png": {
+    "mtime": 1781973837.1901224,
+    "ast_hash": "f7e012402cd9bf9a0d542485bc498e58",
+    "semantic_hash": "f7e012402cd9bf9a0d542485bc498e58"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r10-c04.png": {
+    "mtime": 1781973837.214697,
+    "ast_hash": "efa46aa1af4617c332ab58321cffcf14",
+    "semantic_hash": "efa46aa1af4617c332ab58321cffcf14"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r10-c05.png": {
+    "mtime": 1781973837.2179768,
+    "ast_hash": "fee34318ee3f2bb21e0143e49a41b454",
+    "semantic_hash": "fee34318ee3f2bb21e0143e49a41b454"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r10-c06.png": {
+    "mtime": 1781973837.2472405,
+    "ast_hash": "b4ec4ac7351c42d1e2b4bda6b3794ab4",
+    "semantic_hash": "b4ec4ac7351c42d1e2b4bda6b3794ab4"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r10-c07.png": {
+    "mtime": 1781973837.2734218,
+    "ast_hash": "b56614346aaaa246b763e0efe41aa57c",
+    "semantic_hash": "b56614346aaaa246b763e0efe41aa57c"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r10-c08.png": {
+    "mtime": 1781973837.2763925,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r10-c09.png": {
+    "mtime": 1781973837.3032098,
+    "ast_hash": "a3a5dab37d409e4e1e26c24250048c9d",
+    "semantic_hash": "a3a5dab37d409e4e1e26c24250048c9d"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r10-c10.png": {
+    "mtime": 1781973837.3323884,
+    "ast_hash": "5639ecee576cc5f9ea6671fbbb99d5d9",
+    "semantic_hash": "5639ecee576cc5f9ea6671fbbb99d5d9"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r10-c11.png": {
+    "mtime": 1781973837.3578475,
+    "ast_hash": "db7185eedbfb711c2fd6219a5fab57b2",
+    "semantic_hash": "db7185eedbfb711c2fd6219a5fab57b2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r10-c12.png": {
+    "mtime": 1781973837.3879642,
+    "ast_hash": "5639ecee576cc5f9ea6671fbbb99d5d9",
+    "semantic_hash": "5639ecee576cc5f9ea6671fbbb99d5d9"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r10-c13.png": {
+    "mtime": 1781973837.4116516,
+    "ast_hash": "db7185eedbfb711c2fd6219a5fab57b2",
+    "semantic_hash": "db7185eedbfb711c2fd6219a5fab57b2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r10-c14.png": {
+    "mtime": 1781973837.4375165,
+    "ast_hash": "ce9fb2fdb4d737de2842584fd014e401",
+    "semantic_hash": "ce9fb2fdb4d737de2842584fd014e401"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r11-c01.png": {
+    "mtime": 1781973837.4603326,
+    "ast_hash": "e96976ec90b3f57217af6c00b07febfc",
+    "semantic_hash": "e96976ec90b3f57217af6c00b07febfc"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r11-c02.png": {
+    "mtime": 1781973837.4812071,
+    "ast_hash": "419f5c3d1d65fbd5297b89510d89f9f6",
+    "semantic_hash": "419f5c3d1d65fbd5297b89510d89f9f6"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r11-c03.png": {
+    "mtime": 1781973837.5045435,
+    "ast_hash": "cc42871353b1af1a33d30259bd7f7652",
+    "semantic_hash": "cc42871353b1af1a33d30259bd7f7652"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r11-c04.png": {
+    "mtime": 1781973837.5290537,
+    "ast_hash": "d4abc33a5f691cea1ee1f3170b4e22c2",
+    "semantic_hash": "d4abc33a5f691cea1ee1f3170b4e22c2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r11-c05.png": {
+    "mtime": 1781973837.5322049,
+    "ast_hash": "b394ef346d05403667c5e94ca848abd1",
+    "semantic_hash": "b394ef346d05403667c5e94ca848abd1"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r11-c06.png": {
+    "mtime": 1781973837.553004,
+    "ast_hash": "f81be0ad7192ff7569e49376d453cee4",
+    "semantic_hash": "f81be0ad7192ff7569e49376d453cee4"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r11-c07.png": {
+    "mtime": 1781973837.575912,
+    "ast_hash": "cc42871353b1af1a33d30259bd7f7652",
+    "semantic_hash": "cc42871353b1af1a33d30259bd7f7652"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r11-c08.png": {
+    "mtime": 1781973837.5787768,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r11-c09.png": {
+    "mtime": 1781973837.6019287,
+    "ast_hash": "7757cdfbcd0071188bb2b106491558ea",
+    "semantic_hash": "7757cdfbcd0071188bb2b106491558ea"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r11-c10.png": {
+    "mtime": 1781973837.6228545,
+    "ast_hash": "f81be0ad7192ff7569e49376d453cee4",
+    "semantic_hash": "f81be0ad7192ff7569e49376d453cee4"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r11-c11.png": {
+    "mtime": 1781973837.6453552,
+    "ast_hash": "cc42871353b1af1a33d30259bd7f7652",
+    "semantic_hash": "cc42871353b1af1a33d30259bd7f7652"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r11-c12.png": {
+    "mtime": 1781973837.6660538,
+    "ast_hash": "161813310b8927ead15d36131a57e0e6",
+    "semantic_hash": "161813310b8927ead15d36131a57e0e6"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r11-c13.png": {
+    "mtime": 1781973837.6892166,
+    "ast_hash": "cc42871353b1af1a33d30259bd7f7652",
+    "semantic_hash": "cc42871353b1af1a33d30259bd7f7652"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r11-c14.png": {
+    "mtime": 1781973837.7135816,
+    "ast_hash": "d4abc33a5f691cea1ee1f3170b4e22c2",
+    "semantic_hash": "d4abc33a5f691cea1ee1f3170b4e22c2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r12-c01.png": {
+    "mtime": 1781973837.7364845,
+    "ast_hash": "1d000daa6fa2ec91bb5355bb70625bc3",
+    "semantic_hash": "1d000daa6fa2ec91bb5355bb70625bc3"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r12-c02.png": {
+    "mtime": 1781973837.7395363,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r12-c03.png": {
+    "mtime": 1781973837.7422776,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r12-c04.png": {
+    "mtime": 1781973837.7662778,
+    "ast_hash": "efa46aa1af4617c332ab58321cffcf14",
+    "semantic_hash": "efa46aa1af4617c332ab58321cffcf14"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r12-c05.png": {
+    "mtime": 1781973837.788983,
+    "ast_hash": "0e1ea87b7a53225971b5d5e2d4263e26",
+    "semantic_hash": "0e1ea87b7a53225971b5d5e2d4263e26"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r12-c06.png": {
+    "mtime": 1781973837.8125484,
+    "ast_hash": "b101e53674116cc1bee63998d8d1bd77",
+    "semantic_hash": "b101e53674116cc1bee63998d8d1bd77"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r12-c07.png": {
+    "mtime": 1781973837.835368,
+    "ast_hash": "0e1ea87b7a53225971b5d5e2d4263e26",
+    "semantic_hash": "0e1ea87b7a53225971b5d5e2d4263e26"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r12-c08.png": {
+    "mtime": 1781973837.8595967,
+    "ast_hash": "b101e53674116cc1bee63998d8d1bd77",
+    "semantic_hash": "b101e53674116cc1bee63998d8d1bd77"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r12-c09.png": {
+    "mtime": 1781973837.8831434,
+    "ast_hash": "46769808eb45cd5ea9b1289bf6b59942",
+    "semantic_hash": "46769808eb45cd5ea9b1289bf6b59942"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r12-c10.png": {
+    "mtime": 1781973837.9117653,
+    "ast_hash": "473037de576d3e9a29dcb164a1610f2c",
+    "semantic_hash": "473037de576d3e9a29dcb164a1610f2c"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r12-c11.png": {
+    "mtime": 1781973837.9352882,
+    "ast_hash": "db7185eedbfb711c2fd6219a5fab57b2",
+    "semantic_hash": "db7185eedbfb711c2fd6219a5fab57b2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r12-c12.png": {
+    "mtime": 1781973837.9642236,
+    "ast_hash": "5639ecee576cc5f9ea6671fbbb99d5d9",
+    "semantic_hash": "5639ecee576cc5f9ea6671fbbb99d5d9"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r12-c13.png": {
+    "mtime": 1781973837.9886868,
+    "ast_hash": "db7185eedbfb711c2fd6219a5fab57b2",
+    "semantic_hash": "db7185eedbfb711c2fd6219a5fab57b2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r12-c14.png": {
+    "mtime": 1781973838.0127456,
+    "ast_hash": "efa46aa1af4617c332ab58321cffcf14",
+    "semantic_hash": "efa46aa1af4617c332ab58321cffcf14"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r13-c01.png": {
+    "mtime": 1781973838.041806,
+    "ast_hash": "5639ecee576cc5f9ea6671fbbb99d5d9",
+    "semantic_hash": "5639ecee576cc5f9ea6671fbbb99d5d9"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r13-c02.png": {
+    "mtime": 1781973838.0653508,
+    "ast_hash": "db7185eedbfb711c2fd6219a5fab57b2",
+    "semantic_hash": "db7185eedbfb711c2fd6219a5fab57b2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r13-c03.png": {
+    "mtime": 1781973838.0880299,
+    "ast_hash": "de070428b41d3bcfb58e7cf54656851b",
+    "semantic_hash": "de070428b41d3bcfb58e7cf54656851b"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r13-c04.png": {
+    "mtime": 1781973838.108408,
+    "ast_hash": "105ed2a3b6f9cc8c55e7c7ce76647bd8",
+    "semantic_hash": "105ed2a3b6f9cc8c55e7c7ce76647bd8"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r13-c05.png": {
+    "mtime": 1781973838.1112635,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r13-c06.png": {
+    "mtime": 1781973838.131953,
+    "ast_hash": "f81be0ad7192ff7569e49376d453cee4",
+    "semantic_hash": "f81be0ad7192ff7569e49376d453cee4"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r13-c07.png": {
+    "mtime": 1781973838.1548398,
+    "ast_hash": "cc42871353b1af1a33d30259bd7f7652",
+    "semantic_hash": "cc42871353b1af1a33d30259bd7f7652"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r13-c08.png": {
+    "mtime": 1781973838.1577785,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r13-c09.png": {
+    "mtime": 1781973838.1843386,
+    "ast_hash": "24e0043f7c8951fb85c095e38181321c",
+    "semantic_hash": "24e0043f7c8951fb85c095e38181321c"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r13-c10.png": {
+    "mtime": 1781973838.2055275,
+    "ast_hash": "f81be0ad7192ff7569e49376d453cee4",
+    "semantic_hash": "f81be0ad7192ff7569e49376d453cee4"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r13-c11.png": {
+    "mtime": 1781973838.2283282,
+    "ast_hash": "cc42871353b1af1a33d30259bd7f7652",
+    "semantic_hash": "cc42871353b1af1a33d30259bd7f7652"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r13-c12.png": {
+    "mtime": 1781973838.249289,
+    "ast_hash": "f81be0ad7192ff7569e49376d453cee4",
+    "semantic_hash": "f81be0ad7192ff7569e49376d453cee4"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r13-c13.png": {
+    "mtime": 1781973838.272339,
+    "ast_hash": "cc42871353b1af1a33d30259bd7f7652",
+    "semantic_hash": "cc42871353b1af1a33d30259bd7f7652"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r13-c14.png": {
+    "mtime": 1781973838.2988882,
+    "ast_hash": "1d60bdb5c39117134ad110a0c9e41ca8",
+    "semantic_hash": "1d60bdb5c39117134ad110a0c9e41ca8"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r14-c01.png": {
+    "mtime": 1781973838.320485,
+    "ast_hash": "f81be0ad7192ff7569e49376d453cee4",
+    "semantic_hash": "f81be0ad7192ff7569e49376d453cee4"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r14-c02.png": {
+    "mtime": 1781973838.343227,
+    "ast_hash": "cc42871353b1af1a33d30259bd7f7652",
+    "semantic_hash": "cc42871353b1af1a33d30259bd7f7652"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r14-c03.png": {
+    "mtime": 1781973838.3689594,
+    "ast_hash": "d771c6b786716848d38853b1308ed097",
+    "semantic_hash": "d771c6b786716848d38853b1308ed097"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r14-c04.png": {
+    "mtime": 1781973838.3977468,
+    "ast_hash": "f52721503ee8232d70bad3cce9c4686b",
+    "semantic_hash": "f52721503ee8232d70bad3cce9c4686b"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r14-c05.png": {
+    "mtime": 1781973838.4218376,
+    "ast_hash": "db7185eedbfb711c2fd6219a5fab57b2",
+    "semantic_hash": "db7185eedbfb711c2fd6219a5fab57b2"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r14-c06.png": {
+    "mtime": 1781973838.424793,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r14-c07.png": {
+    "mtime": 1781973838.427651,
+    "ast_hash": "cc7b179b7a93528f1310ef0a24caff4f",
+    "semantic_hash": "cc7b179b7a93528f1310ef0a24caff4f"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r14-c08.png": {
+    "mtime": 1781973838.456049,
+    "ast_hash": "5639ecee576cc5f9ea6671fbbb99d5d9",
+    "semantic_hash": "5639ecee576cc5f9ea6671fbbb99d5d9"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r14-c09.png": {
+    "mtime": 1781973838.4712498,
+    "ast_hash": "be5b195727182d63b86644515362bb23",
+    "semantic_hash": "be5b195727182d63b86644515362bb23"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r14-c10.png": {
+    "mtime": 1781973838.496582,
+    "ast_hash": "8a25fa853229a5514c1735778dd4fb95",
+    "semantic_hash": "8a25fa853229a5514c1735778dd4fb95"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r14-c11.png": {
+    "mtime": 1781973838.5189576,
+    "ast_hash": "0e1ea87b7a53225971b5d5e2d4263e26",
+    "semantic_hash": "0e1ea87b7a53225971b5d5e2d4263e26"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r14-c12.png": {
+    "mtime": 1781973838.5426443,
+    "ast_hash": "b101e53674116cc1bee63998d8d1bd77",
+    "semantic_hash": "b101e53674116cc1bee63998d8d1bd77"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r14-c13.png": {
+    "mtime": 1781973838.5669258,
+    "ast_hash": "cbc5bf433df370533b996ae5c50b6961",
+    "semantic_hash": "cbc5bf433df370533b996ae5c50b6961"
+  },
+  "SharedGameData/Tiles/Mossy/terrain-256/mossy-terrain-r14-c14.png": {
+    "mtime": 1781973838.585527,
+    "ast_hash": "ceb26eed3e039f64199cc656913f520f",
+    "semantic_hash": "ceb26eed3e039f64199cc656913f520f"
+  },
+  "Ester/Audio/Ambience/ambient_abyss_hum.mp3": {
+    "mtime": 1781276374.0991566,
+    "ast_hash": "d581a84edf308a53cded50748dd2df9f",
+    "semantic_hash": "d581a84edf308a53cded50748dd2df9f"
+  },
+  "Ester/Audio/Ambience/ambient_clear_water.mp3": {
+    "mtime": 1781276332.6815689,
+    "ast_hash": "0073d5cf3a0a4d74fe4e0f02e20992cf",
+    "semantic_hash": "0073d5cf3a0a4d74fe4e0f02e20992cf"
+  },
+  "Ester/Audio/Ambience/ambient_deep_sea.mp3": {
+    "mtime": 1781276366.3757744,
+    "ast_hash": "7f7b0e7c21c9b30b093f7249f64fdf02",
+    "semantic_hash": "7f7b0e7c21c9b30b093f7249f64fdf02"
+  },
+  "Ester/Audio/Ambience/ambient_mid_water.mp3": {
+    "mtime": 1781276357.5954697,
+    "ast_hash": "5cc9c08d5f01ef9a192bf90d9aa955c4",
+    "semantic_hash": "5cc9c08d5f01ef9a192bf90d9aa955c4"
+  },
+  "Ester/Audio/Ambience/ambient_refuge_soft.mp3": {
+    "mtime": 1781276377.7952878,
+    "ast_hash": "48ee425c690925fcd03fa56524f53868",
+    "semantic_hash": "48ee425c690925fcd03fa56524f53868"
+  },
+  "Ester/Audio/Ambience/ambient_shallow_reef.mp3": {
+    "mtime": 1781276348.3692455,
+    "ast_hash": "b019952a3472629eec6d2d2b23582758",
+    "semantic_hash": "b019952a3472629eec6d2d2b23582758"
+  },
+  "Ester/Audio/Mermaid/mermaid_eat_soft.mp3": {
+    "mtime": 1781276001.1310914,
+    "ast_hash": "839ba4975efad7183ac01c71b63b44be",
+    "semantic_hash": "839ba4975efad7183ac01c71b63b44be"
+  },
+  "Ester/Audio/Mermaid/mermaid_fish_play.mp3": {
+    "mtime": 1781276019.9675157,
+    "ast_hash": "890d7d17406b7bd82200b99011d8f4b5",
+    "semantic_hash": "890d7d17406b7bd82200b99011d8f4b5"
+  },
+  "Ester/Audio/Mermaid/mermaid_rest_sigh.mp3": {
+    "mtime": 1781276022.232497,
+    "ast_hash": "890d7d17406b7bd82200b99011d8f4b5",
+    "semantic_hash": "890d7d17406b7bd82200b99011d8f4b5"
+  },
+  "Ester/Audio/Mermaid/mermaid_scared_swish.mp3": {
+    "mtime": 1781276020.971046,
+    "ast_hash": "84c5ff5feb5f6faabe5059a5fe094c73",
+    "semantic_hash": "84c5ff5feb5f6faabe5059a5fe094c73"
+  },
+  "Ester/Audio/Minigames/challenge_fail_soft.mp3": {
+    "mtime": 1781276199.329651,
+    "ast_hash": "4914b819c1cbd98a9f3890878a01dbc0",
+    "semantic_hash": "4914b819c1cbd98a9f3890878a01dbc0"
+  },
+  "Ester/Audio/Minigames/challenge_open.mp3": {
+    "mtime": 1781276196.9785087,
+    "ast_hash": "81e9354f684d3bfefd04e3556082fbb5",
+    "semantic_hash": "81e9354f684d3bfefd04e3556082fbb5"
+  },
+  "Ester/Audio/Minigames/challenge_success.mp3": {
+    "mtime": 1781283748.7205827,
+    "ast_hash": "08c51616f1d30b9dfbd644df62aa2884",
+    "semantic_hash": "08c51616f1d30b9dfbd644df62aa2884"
+  },
+  "Ester/Audio/Minigames/climb_bounce_pop.mp3": {
+    "mtime": 1781276202.8188887,
+    "ast_hash": "abeb09e911294f01ae8f3b613356fcda",
+    "semantic_hash": "abeb09e911294f01ae8f3b613356fcda"
+  },
+  "Ester/Audio/Minigames/climb_goal_complete.mp3": {
+    "mtime": 1781283748.8106978,
+    "ast_hash": "ada597c4b25fc32b597ff27e65325932",
+    "semantic_hash": "ada597c4b25fc32b597ff27e65325932"
+  },
+  "Ester/Audio/Minigames/climb_land_bubble.mp3": {
+    "mtime": 1781276201.75654,
+    "ast_hash": "abeb09e911294f01ae8f3b613356fcda",
+    "semantic_hash": "abeb09e911294f01ae8f3b613356fcda"
+  },
+  "Ester/Audio/Minigames/climb_platform_pop.mp3": {
+    "mtime": 1781276203.9419386,
+    "ast_hash": "abeb09e911294f01ae8f3b613356fcda",
+    "semantic_hash": "abeb09e911294f01ae8f3b613356fcda"
+  },
+  "Ester/Audio/Minigames/climb_start_bubble.mp3": {
+    "mtime": 1781276200.7655177,
+    "ast_hash": "929b9015a51af211a02b9ae4c704265f",
+    "semantic_hash": "929b9015a51af211a02b9ae4c704265f"
+  },
+  "Ester/Audio/Minigames/tide_cascade_chime.mp3": {
+    "mtime": 1781283748.7130744,
+    "ast_hash": "d6c565cb7573d27b3f681f8d8c78fa61",
+    "semantic_hash": "d6c565cb7573d27b3f681f8d8c78fa61"
+  },
+  "Ester/Audio/Minigames/tide_goal_complete.mp3": {
+    "mtime": 1781283748.7983205,
+    "ast_hash": "5726447c41a14a44d4b548d1e4ad3ebd",
+    "semantic_hash": "5726447c41a14a44d4b548d1e4ad3ebd"
+  },
+  "Ester/Audio/Minigames/tide_invalid_soft.mp3": {
+    "mtime": 1781276192.5691726,
+    "ast_hash": "4914b819c1cbd98a9f3890878a01dbc0",
+    "semantic_hash": "4914b819c1cbd98a9f3890878a01dbc0"
+  },
+  "Ester/Audio/Minigames/tide_match_pop.mp3": {
+    "mtime": 1781276193.5598097,
+    "ast_hash": "abeb09e911294f01ae8f3b613356fcda",
+    "semantic_hash": "abeb09e911294f01ae8f3b613356fcda"
+  },
+  "Ester/Audio/Minigames/tide_select_shell.mp3": {
+    "mtime": 1781276189.9257858,
+    "ast_hash": "db75e7d35dcb489eff2fade3766233d8",
+    "semantic_hash": "db75e7d35dcb489eff2fade3766233d8"
+  },
+  "Ester/Audio/Minigames/tide_swap_water.mp3": {
+    "mtime": 1781276191.596429,
+    "ast_hash": "ed31a4c7bacc7c2a66dedf472db29ff8",
+    "semantic_hash": "ed31a4c7bacc7c2a66dedf472db29ff8"
+  },
+  "Ester/Audio/Progression/egg_crack_soft.mp3": {
+    "mtime": 1781276050.2400835,
+    "ast_hash": "1572dc4435d6e71dda4139cea3cb083f",
+    "semantic_hash": "1572dc4435d6e71dda4139cea3cb083f"
+  },
+  "Ester/Audio/Progression/egg_tap_warm.mp3": {
+    "mtime": 1781276049.200828,
+    "ast_hash": "d408f6d7f3614587f54c75b21c73d06c",
+    "semantic_hash": "d408f6d7f3614587f54c75b21c73d06c"
+  },
+  "Ester/Audio/Progression/evolution_shimmer.mp3": {
+    "mtime": 1781276053.208397,
+    "ast_hash": "15054c0713514faa2363c15f9dfeebe0",
+    "semantic_hash": "15054c0713514faa2363c15f9dfeebe0"
+  },
+  "Ester/Audio/Progression/hatch_birth_shimmer.mp3": {
+    "mtime": 1781276051.726961,
+    "ast_hash": "15054c0713514faa2363c15f9dfeebe0",
+    "semantic_hash": "15054c0713514faa2363c15f9dfeebe0"
+  },
+  "Ester/Audio/Progression/little_siren_birth.mp3": {
+    "mtime": 1781285840.4342732,
+    "ast_hash": "2f3a38862645459517b9ea2dd9fd4afb",
+    "semantic_hash": "2f3a38862645459517b9ea2dd9fd4afb"
+  },
+  "Ester/Audio/Refuge/refuge_portal_enter.mp3": {
+    "mtime": 1781276148.7753916,
+    "ast_hash": "2ebff5df28b0e8947ce4d5731fade216",
+    "semantic_hash": "2ebff5df28b0e8947ce4d5731fade216"
+  },
+  "Ester/Audio/Refuge/refuge_portal_open.mp3": {
+    "mtime": 1781276147.7704074,
+    "ast_hash": "2ebff5df28b0e8947ce4d5731fade216",
+    "semantic_hash": "2ebff5df28b0e8947ce4d5731fade216"
+  },
+  "Ester/Audio/UI/ui_confirm_chime.mp3": {
+    "mtime": 1781275878.355614,
+    "ast_hash": "79be3838aac4a587953e10c2872d604d",
+    "semantic_hash": "79be3838aac4a587953e10c2872d604d"
+  },
+  "Ester/Audio/UI/ui_panel_close.mp3": {
+    "mtime": 1781275931.7155242,
+    "ast_hash": "84c5ff5feb5f6faabe5059a5fe094c73",
+    "semantic_hash": "84c5ff5feb5f6faabe5059a5fe094c73"
+  },
+  "Ester/Audio/UI/ui_panel_open.mp3": {
+    "mtime": 1781275930.4009829,
+    "ast_hash": "cd48c2fd0daefc5f4c8656001c7898d4",
+    "semantic_hash": "cd48c2fd0daefc5f4c8656001c7898d4"
+  },
+  "Ester/Audio/UI/ui_reject_soft.mp3": {
+    "mtime": 1781275906.2101858,
+    "ast_hash": "4914b819c1cbd98a9f3890878a01dbc0",
+    "semantic_hash": "4914b819c1cbd98a9f3890878a01dbc0"
+  },
+  "Ester/Audio/UI/ui_tap_soft.mp3": {
+    "mtime": 1781275866.134515,
+    "ast_hash": "db75e7d35dcb489eff2fade3766233d8",
+    "semantic_hash": "db75e7d35dcb489eff2fade3766233d8"
+  },
+  "Ester/Audio/UI/ui_upgrade_buy.mp3": {
+    "mtime": 1781275944.830238,
+    "ast_hash": "79be3838aac4a587953e10c2872d604d",
+    "semantic_hash": "79be3838aac4a587953e10c2872d604d"
+  },
+  "Ester/Audio/UI/ui_upgrade_fail.mp3": {
+    "mtime": 1781275945.8282452,
+    "ast_hash": "4914b819c1cbd98a9f3890878a01dbc0",
+    "semantic_hash": "4914b819c1cbd98a9f3890878a01dbc0"
+  },
+  "Ester/Audio/UI/world_tap_accept.mp3": {
+    "mtime": 1781275972.715322,
+    "ast_hash": "002ef72b0ed56894d3fdece0c9005751",
+    "semantic_hash": "002ef72b0ed56894d3fdece0c9005751"
+  },
+  "Ester/Audio/UI/world_tap_reject.mp3": {
+    "mtime": 1781275973.6971393,
+    "ast_hash": "4914b819c1cbd98a9f3890878a01dbc0",
+    "semantic_hash": "4914b819c1cbd98a9f3890878a01dbc0"
+  },
+  "Ester/Audio/World/big_shadow_rumble.mp3": {
+    "mtime": 1781276144.074953,
+    "ast_hash": "847ae25063da394186f83774b4d9b137",
+    "semantic_hash": "847ae25063da394186f83774b4d9b137"
+  },
+  "Ester/Audio/World/boat_muffled_pass.mp3": {
+    "mtime": 1781276145.7051733,
+    "ast_hash": "fb86223d1bdadc98326db75897c5848b",
+    "semantic_hash": "fb86223d1bdadc98326db75897c5848b"
+  },
+  "Ester/Audio/World/bubble_burst_cluster.mp3": {
+    "mtime": 1781276140.641696,
+    "ast_hash": "890d7d17406b7bd82200b99011d8f4b5",
+    "semantic_hash": "890d7d17406b7bd82200b99011d8f4b5"
+  },
+  "Ester/Audio/World/current_rush_short.mp3": {
+    "mtime": 1781276142.034029,
+    "ast_hash": "2777c6691af8384d1559fa07e7dd3b7f",
+    "semantic_hash": "2777c6691af8384d1559fa07e7dd3b7f"
+  },
+  "Ester/Audio/World/depth_record_low_chime.mp3": {
+    "mtime": 1781276078.4206903,
+    "ast_hash": "c221fd36bc1952fc17acba723a950a37",
+    "semantic_hash": "c221fd36bc1952fc17acba723a950a37"
+  },
+  "Ester/Audio/World/falling_object_splash.mp3": {
+    "mtime": 1781276146.7462418,
+    "ast_hash": "ff94f3393840661187efd154f86d74c8",
+    "semantic_hash": "ff94f3393840661187efd154f86d74c8"
+  },
+  "Ester/Audio/World/food_rare_shimmer.mp3": {
+    "mtime": 1781276076.2103949,
+    "ast_hash": "6852b324d6592077c59376e1801c1aaf",
+    "semantic_hash": "6852b324d6592077c59376e1801c1aaf"
+  },
+  "Ester/Audio/World/pearl_reward_chime.mp3": {
+    "mtime": 1781276077.178422,
+    "ast_hash": "79be3838aac4a587953e10c2872d604d",
+    "semantic_hash": "79be3838aac4a587953e10c2872d604d"
+  },
+  "Ester/Audio/World/rare_fish_pass.mp3": {
+    "mtime": 1781276143.0141191,
+    "ast_hash": "84c5ff5feb5f6faabe5059a5fe094c73",
+    "semantic_hash": "84c5ff5feb5f6faabe5059a5fe094c73"
+  },
+  "Ester/Audio/World/region_discover_chime.mp3": {
+    "mtime": 1781276080.97493,
+    "ast_hash": "79be3838aac4a587953e10c2872d604d",
+    "semantic_hash": "79be3838aac4a587953e10c2872d604d"
+  },
+  "Ester/Audio/World/travel_arrive_chime.mp3": {
+    "mtime": 1781276083.2344975,
+    "ast_hash": "79be3838aac4a587953e10c2872d604d",
+    "semantic_hash": "79be3838aac4a587953e10c2872d604d"
+  },
+  "Ester/Audio/World/travel_start_current.mp3": {
+    "mtime": 1781276082.2540529,
+    "ast_hash": "40b939b63733c8f48a5de853b5ea5d41",
+    "semantic_hash": "40b939b63733c8f48a5de853b5ea5d41"
+  },
+  "Ester/Audio/World/zone_unlock_wave.mp3": {
+    "mtime": 1781276079.985516,
+    "ast_hash": "d637d4179103dc8b841992f00c902006",
+    "semantic_hash": "d637d4179103dc8b841992f00c902006"
+  },
+  "Ester/Assets.xcassets/ProfessorOctopus.imageset/Contents.json": {
+    "mtime": 1783538642.908355,
+    "ast_hash": "271f5e306fdcb02ab34e2642fc3a8c5b",
+    "semantic_hash": "271f5e306fdcb02ab34e2642fc3a8c5b"
+  },
+  "Ester/Assets.xcassets/SellerSardines.imageset/Contents.json": {
+    "mtime": 1783540714.033418,
+    "ast_hash": "bf428bd89959679032a1dce505ec0c9f",
+    "semantic_hash": "bf428bd89959679032a1dce505ec0c9f"
+  },
+  "Ester/Assets.xcassets/refuge-diorama.imageset/Contents.json": {
+    "mtime": 1783543714.7232654,
+    "ast_hash": "c2070a2a4df4250551dd974593011644",
+    "semantic_hash": "c2070a2a4df4250551dd974593011644"
+  },
+  "Ester/Game/MermaidHouseSystem.swift": {
+    "mtime": 1783630762.1323166,
+    "ast_hash": "fc954d778b08915a906f2d1eea7f7ed1",
+    "semantic_hash": ""
+  },
+  "Ester/Game/RefugeFlowController.swift": {
+    "mtime": 1783555530.83968,
+    "ast_hash": "78f3496d15f4fc4809457858af104eda",
+    "semantic_hash": "78f3496d15f4fc4809457858af104eda"
+  },
+  "Ester/Game/RefugeScene.swift": {
+    "mtime": 1783555462.424255,
+    "ast_hash": "5ee45b041f6268da81e43e321ae5e94c",
+    "semantic_hash": "5ee45b041f6268da81e43e321ae5e94c"
+  },
+  "docs/CHARACTER_ART_GUIDE.md": {
+    "mtime": 1783538943.1560318,
+    "ast_hash": "b28098346eb57b8ea224f443a4d43b27",
+    "semantic_hash": "b28098346eb57b8ea224f443a4d43b27"
+  },
+  "Ester/Assets.xcassets/ProfessorOctopus.imageset/professor-octopus.png": {
+    "mtime": 1783538633.1940095,
+    "ast_hash": "916fbc7dfa6167e5ea485e63a3d98ba5",
+    "semantic_hash": "916fbc7dfa6167e5ea485e63a3d98ba5"
+  },
+  "Ester/Assets.xcassets/SellerSardines.imageset/seller-sardines.png": {
+    "mtime": 1783540686.1919289,
+    "ast_hash": "883640eb365baf14f4fef195e5ac729c",
+    "semantic_hash": "883640eb365baf14f4fef195e5ac729c"
+  },
+  "Ester/Assets.xcassets/refuge-diorama.imageset/refuge-diorama.png": {
+    "mtime": 1783544844.2395961,
+    "ast_hash": "6c355a54812b5685ae5ec2e46f7b1062",
+    "semantic_hash": "6c355a54812b5685ae5ec2e46f7b1062"
+  },
+  "docs/storyboard/ref-seller/Mermay 01 _ PERSONAL WORK.jpeg": {
+    "mtime": 1783539918.5692194,
+    "ast_hash": "c2f8a2f9a562101b3d6e9a683076b646",
+    "semantic_hash": "c2f8a2f9a562101b3d6e9a683076b646"
+  },
+  "docs/storyboard/ref-seller/_ (12).jpeg": {
+    "mtime": 1783539528.69471,
+    "ast_hash": "a0ce09e0eeb3490ae20e72b17de99623",
+    "semantic_hash": "a0ce09e0eeb3490ae20e72b17de99623"
+  },
+  "docs/storyboard/ref-seller/_ (13).jpeg": {
+    "mtime": 1783539555.4701574,
+    "ast_hash": "31c379c0d7cda6f556e21beda62f28b9",
+    "semantic_hash": "31c379c0d7cda6f556e21beda62f28b9"
+  },
+  "docs/storyboard/ref-seller/generated/seller-sardines.png": {
+    "mtime": 1783540654.3183362,
+    "ast_hash": "50acd16e5e19ecf65be3a76e8a6b10f8",
+    "semantic_hash": "50acd16e5e19ecf65be3a76e8a6b10f8"
+  },
+  "docs/storyboard/ref-teacher/Octo Sheriff.jpeg": {
+    "mtime": 1783537144.9667716,
+    "ast_hash": "375c51620f109aa808f082f5d19389a0",
+    "semantic_hash": "375c51620f109aa808f082f5d19389a0"
+  },
+  "docs/storyboard/ref-teacher/Postcard designs - Barbara Dziadosz.jpeg": {
+    "mtime": 1783537149.820005,
+    "ast_hash": "8e72514d787717cac294cf235e125fc3",
+    "semantic_hash": "8e72514d787717cac294cf235e125fc3"
+  },
+  "docs/storyboard/ref-teacher/_ (12).jpeg": {
+    "mtime": 1783536917.0859115,
+    "ast_hash": "b93068604b0400c5586a717ced16424a",
+    "semantic_hash": "b93068604b0400c5586a717ced16424a"
+  },
+  "docs/storyboard/ref-teacher/_ (13).jpeg": {
+    "mtime": 1783537139.056308,
+    "ast_hash": "1b6cefe093e31f5db2ad44f67d567f36",
+    "semantic_hash": "1b6cefe093e31f5db2ad44f67d567f36"
+  },
+  "docs/storyboard/ref-teacher/adult-siren.png": {
+    "mtime": 1783537423.1181772,
+    "ast_hash": "bcf57415559bcae65e7c6894bb54923b",
+    "semantic_hash": "bcf57415559bcae65e7c6894bb54923b"
+  },
+  "docs/storyboard/ref-teacher/baby-siren.png": {
+    "mtime": 1783537423.1190617,
+    "ast_hash": "2fcfc5d59789193f3ba457facbdb0283",
+    "semantic_hash": "2fcfc5d59789193f3ba457facbdb0283"
+  },
+  "docs/storyboard/ref-teacher/child-siren.png": {
+    "mtime": 1783537423.1186488,
+    "ast_hash": "21779a7ac8dfa2c361a8df8de2302cfe",
+    "semantic_hash": "21779a7ac8dfa2c361a8df8de2302cfe"
+  },
+  "docs/storyboard/ref-teacher/generated/professor-octopus.png": {
+    "mtime": 1783537768.0930257,
+    "ast_hash": "229778660a1032f3097333467e1a3b3a",
+    "semantic_hash": "229778660a1032f3097333467e1a3b3a"
+  },
+  "docs/storyboard/ref-teacher/young-siren.png": {
+    "mtime": 1783537423.1193671,
+    "ast_hash": "ffa1edb28e22d7c4b7146a6951b6821f",
+    "semantic_hash": "ffa1edb28e22d7c4b7146a6951b6821f"
+  },
+  "Ester/Game/RoomSurfaceMapper.swift": {
+    "mtime": 1783630668.5481417,
+    "ast_hash": "efb7b049287a1f5f5482fc95c59210b2",
+    "semantic_hash": ""
+  },
+  "Ester/Game/HouseObjectPlacementSystem.swift": {
+    "mtime": 1783630720.8014493,
+    "ast_hash": "041c3d3503c8c191d2fddd37cbf2873d",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSideboard.imageset/Contents.json": {
+    "mtime": 1783566856.439004,
+    "ast_hash": "973e9339177d28730db3f7f684619eb5",
+    "semantic_hash": ""
+  },
+  "Ester/Game/HouseObjectCatalog.swift": {
+    "mtime": 1783630248.5442305,
+    "ast_hash": "8ebf61ff21615d967027ccc6926d4fb8",
+    "semantic_hash": ""
+  },
+  "docs/FURNITURE_ART_GUIDE.md": {
+    "mtime": 1783611538.8640976,
+    "ast_hash": "8cb50a32b352a856409d89e4883536ae",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSideboard.imageset/mermaid-sideboard.png": {
+    "mtime": 1783572890.0227923,
+    "ast_hash": "346d710700e52ef28e4240ab453ec550",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidAncientAmphora.imageset/Contents.json": {
+    "mtime": 1783573861.2032375,
+    "ast_hash": "3783568fa17225398e32c266efd0f826",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidBookStack.imageset/Contents.json": {
+    "mtime": 1783573862.1533365,
+    "ast_hash": "d36c277c360afd18c01c5ff983c03bd6",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoffeeTable.imageset/Contents.json": {
+    "mtime": 1783573855.962737,
+    "ast_hash": "f059598175f0ca350622053f31e9661f",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoralPouf.imageset/Contents.json": {
+    "mtime": 1783573849.6701577,
+    "ast_hash": "454032a6309c40e9347bda49e0abac1d",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoralVase.imageset/Contents.json": {
+    "mtime": 1783573858.620691,
+    "ast_hash": "fc07a0f4239ee0e9974a87f9094d05c8",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidDecorativeChest.imageset/Contents.json": {
+    "mtime": 1783573851.5989528,
+    "ast_hash": "9218190b1f260a2c182be34c4dd10caa",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidDresser.imageset/Contents.json": {
+    "mtime": 1783573841.2636237,
+    "ast_hash": "864d16e977dbfde8391a479a9fbca0cf",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidLargeSeaweedVase.imageset/Contents.json": {
+    "mtime": 1783573857.2104342,
+    "ast_hash": "8aae2f120146a6c88c2e24698c22fe8b",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidLowBookcase.imageset/Contents.json": {
+    "mtime": 1783573843.2328737,
+    "ast_hash": "0ea2571f220ed4affd2872effdd454f9",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidMarineGlobe.imageset/Contents.json": {
+    "mtime": 1783573863.4195623,
+    "ast_hash": "1b47430a828b792e62f33a8a787a8967",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidNightstand.imageset/Contents.json": {
+    "mtime": 1783573846.5798514,
+    "ast_hash": "502108a6f4154c7321d1011b35a214f5",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidOrnamentalAquarium.imageset/Contents.json": {
+    "mtime": 1783573868.8968008,
+    "ast_hash": "c78f275ac5ebdb5ab6d0965f828f5e1a",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidPearlStand.imageset/Contents.json": {
+    "mtime": 1783573866.8443224,
+    "ast_hash": "589f2bedfb65a78598de9d3fe91dc1ba",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSeaLyre.imageset/Contents.json": {
+    "mtime": 1783573867.9851267,
+    "ast_hash": "598381dd95a98f5cdddcd48075ddd69d",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidShellBasket.imageset/Contents.json": {
+    "mtime": 1783573865.3271616,
+    "ast_hash": "98e8c515ce3240e6d46cbeaf46a2d777",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidShellCoatRack.imageset/Contents.json": {
+    "mtime": 1783573853.8880458,
+    "ast_hash": "65204c63c70b94a9d9e7e1fb291f279f",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSmallStatue.imageset/Contents.json": {
+    "mtime": 1783573869.8091192,
+    "ast_hash": "4fe5c0fd50ad25cf041aa0cd7a44d221",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidStoneSculpture.imageset/Contents.json": {
+    "mtime": 1783573859.9040408,
+    "ast_hash": "189ef29edd2d1203bb44310bf7fe7304",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidWoodenBench.imageset/Contents.json": {
+    "mtime": 1783573848.650981,
+    "ast_hash": "d2b9c877c2812f51306a598bf78a82ee",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidAncientAmphora.imageset/mermaid-ancient-amphora.png": {
+    "mtime": 1783613502.97632,
+    "ast_hash": "356e0db4e69d949a056d92632e1a42d1",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidBookStack.imageset/mermaid-book-stack.png": {
+    "mtime": 1783613503.8946054,
+    "ast_hash": "1a0cfc4e6aaba46cf638b45456897395",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoffeeTable.imageset/mermaid-coffee-table.png": {
+    "mtime": 1783613499.611108,
+    "ast_hash": "d35e84ad7b352ebb35be493d986f9194",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoralPouf.imageset/mermaid-coral-pouf.png": {
+    "mtime": 1783613497.1471097,
+    "ast_hash": "83d028f89fe01ec6d8f1128e49a8c364",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoralVase.imageset/mermaid-coral-vase.png": {
+    "mtime": 1783613501.3450673,
+    "ast_hash": "56235b9a5a8c951907163a5c94bf125c",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidDecorativeChest.imageset/mermaid-decorative-chest.png": {
+    "mtime": 1783613498.0074077,
+    "ast_hash": "8d0be29a2c71818ab96aa6dbfef1cffb",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidDresser.imageset/mermaid-dresser.png": {
+    "mtime": 1783611175.292603,
+    "ast_hash": "52221851015331daa2ff14ee06cc3bfc",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidLargeSeaweedVase.imageset/mermaid-large-seaweed-vase.png": {
+    "mtime": 1783613500.5499952,
+    "ast_hash": "8aceea0dc93123badd2c072c3661138f",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidLowBookcase.imageset/mermaid-low-bookcase.png": {
+    "mtime": 1783613494.6072924,
+    "ast_hash": "892c938194f034158a9b30c66ffda90f",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidMarineGlobe.imageset/mermaid-marine-globe.png": {
+    "mtime": 1783613504.7676523,
+    "ast_hash": "6c166db896043fb5228dc83d2b142144",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidNightstand.imageset/mermaid-nightstand.png": {
+    "mtime": 1783613495.482236,
+    "ast_hash": "e095145ef7cc361f58db958e9ea0dc8d",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidOrnamentalAquarium.imageset/mermaid-ornamental-aquarium.png": {
+    "mtime": 1783613508.2024145,
+    "ast_hash": "959054b34cda392af9a7a7b378e5cbbf",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidPearlStand.imageset/mermaid-pearl-stand.png": {
+    "mtime": 1783613506.4643583,
+    "ast_hash": "d4779e9ef203cb5ccf2a6efe7674eef7",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSeaLyre.imageset/mermaid-sea-lyre.png": {
+    "mtime": 1783613507.3143034,
+    "ast_hash": "43da37c85d475dbac7fb5cbcbeb22856",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidShellBasket.imageset/mermaid-shell-basket.png": {
+    "mtime": 1783613505.6352313,
+    "ast_hash": "1b0919cd601a084c3b21127e09f05b4e",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidShellCoatRack.imageset/mermaid-shell-coat-rack.png": {
+    "mtime": 1783613498.7778187,
+    "ast_hash": "e56a96a97be4e273957122636fb4fee4",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSmallStatue.imageset/mermaid-small-statue.png": {
+    "mtime": 1783613509.0247533,
+    "ast_hash": "036f2bc98ab292aa2ab8759672a8aef8",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidStoneSculpture.imageset/mermaid-stone-sculpture.png": {
+    "mtime": 1783613502.1328106,
+    "ast_hash": "e1c6350e1bd469cd22afc4a08b2c247d",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidWoodenBench.imageset/mermaid-wooden-bench.png": {
+    "mtime": 1783613496.3080983,
+    "ast_hash": "9a7e43e92be5e5b673152cb61d768888",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-floor-objects-contact-sheet.png": {
+    "mtime": 1783573871.2683766,
+    "ast_hash": "26b0ac0947b4909d0201346763378f54",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-ancient-amphora-recrop.json": {
+    "mtime": 1783607383.9692156,
+    "ast_hash": "f805d5d14b5e4bbdec06f00a6a52751d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-ancient-amphora.json": {
+    "mtime": 1783575254.442874,
+    "ast_hash": "d4296a125beab46446db6ffecfdd0b85",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-book-stack-recrop.json": {
+    "mtime": 1783607384.8966653,
+    "ast_hash": "aebffac61bfbfb92c795db7d92daee27",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-book-stack.json": {
+    "mtime": 1783575255.3945253,
+    "ast_hash": "7ea54a5675d9c1a2d76b742bf51a061f",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-coffee-table-recrop.json": {
+    "mtime": 1783607380.3056834,
+    "ast_hash": "f19eca404efe69d9a399eb845276e8ea",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-coffee-table.json": {
+    "mtime": 1783575250.7670577,
+    "ast_hash": "81187b9f256e43a4e445128f00874a5d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-coral-pouf-recrop.json": {
+    "mtime": 1783607377.7405767,
+    "ast_hash": "234154839f8335e5564a57eda5fce15c",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-coral-pouf.json": {
+    "mtime": 1783575248.1336012,
+    "ast_hash": "585a971115a9c2d6e22b0de655090705",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-coral-vase-recrop.json": {
+    "mtime": 1783607382.224445,
+    "ast_hash": "f8db79002695a136de04056887777b14",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-coral-vase.json": {
+    "mtime": 1783575252.636021,
+    "ast_hash": "fba4d423c2ca282e0efdefd3a7feb161",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-decorative-chest-recrop.json": {
+    "mtime": 1783607378.679109,
+    "ast_hash": "f79800406215f57e20976bd6c5ae8695",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-decorative-chest.json": {
+    "mtime": 1783575249.058183,
+    "ast_hash": "4a8a3d7537cb36171bd4e44530c73dce",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-dresser-recrop.json": {
+    "mtime": 1783607374.128893,
+    "ast_hash": "3d189c14bac0520fa50b6f3390786de2",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-dresser.json": {
+    "mtime": 1783575244.4717815,
+    "ast_hash": "eda091552bec2a11ded65db533feffd9",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-large-seaweed-vase-recrop.json": {
+    "mtime": 1783607381.2327983,
+    "ast_hash": "71aab73b3aab81a51a4a99cf7d5595e6",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-large-seaweed-vase.json": {
+    "mtime": 1783575251.7293253,
+    "ast_hash": "d8e886ac612b6bae2df5a4c636d893bd",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-low-bookcase-recrop.json": {
+    "mtime": 1783607375.0397568,
+    "ast_hash": "03502f4a48c7773e3ebd7599caf95d0a",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-low-bookcase.json": {
+    "mtime": 1783575245.391313,
+    "ast_hash": "1ced0f88aa140509cb6a0b520c2f4ac0",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-marine-globe-recrop.json": {
+    "mtime": 1783607385.8011394,
+    "ast_hash": "13e425abc44517fb39ad08eba7d17dac",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-marine-globe.json": {
+    "mtime": 1783575256.3294759,
+    "ast_hash": "34b2fc7c3beaa344183b256e0d12db47",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-nightstand-recrop.json": {
+    "mtime": 1783607375.9451823,
+    "ast_hash": "4955d4f0b50001a5a1591ec162a4ac9d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-nightstand.json": {
+    "mtime": 1783575246.2861195,
+    "ast_hash": "e8d29c30ff0f9142e2d1b037e9624031",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-ornamental-aquarium-recrop.json": {
+    "mtime": 1783607389.381151,
+    "ast_hash": "805ffbd9a7b612f40afbad1e095f0359",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-ornamental-aquarium.json": {
+    "mtime": 1783575259.988616,
+    "ast_hash": "ca262dc173f119f974c04bd6951ca7de",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-pearl-stand-recrop.json": {
+    "mtime": 1783607387.497417,
+    "ast_hash": "683a9dc666d04f20c0f1c8400588a057",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-pearl-stand.json": {
+    "mtime": 1783575258.0635352,
+    "ast_hash": "d0f6e872cdbd965d59d2fd9663e2cae8",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-sea-lyre-recrop.json": {
+    "mtime": 1783607388.3725502,
+    "ast_hash": "f8c1baa009046e0c80d49dabd7b4db40",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-sea-lyre.json": {
+    "mtime": 1783575258.9625335,
+    "ast_hash": "b691b2c776a95a91488f09fd8d2de3f4",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-shell-basket-recrop.json": {
+    "mtime": 1783607386.657169,
+    "ast_hash": "1f8ff953180d146f84da8c8567e4ce74",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-shell-basket.json": {
+    "mtime": 1783575257.1843798,
+    "ast_hash": "a7c64ba459ef8a71ef4058ac28907313",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-shell-coat-rack-recrop.json": {
+    "mtime": 1783607379.4602249,
+    "ast_hash": "9c9f8d331ed090173054ebcf3e2da7e9",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-shell-coat-rack.json": {
+    "mtime": 1783575249.8944612,
+    "ast_hash": "afe6ec3d51b2530736c50b30e92616d0",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-small-statue-recrop.json": {
+    "mtime": 1783607390.1935349,
+    "ast_hash": "da30db1f5f6839251c4a1b5e762d4765",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-small-statue.json": {
+    "mtime": 1783575260.792831,
+    "ast_hash": "a71ab3507a03806573a05f851714b44a",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-stone-sculpture-recrop.json": {
+    "mtime": 1783607383.0804808,
+    "ast_hash": "4ed8c7433f72cbbfc04f994423abbbb3",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-stone-sculpture.json": {
+    "mtime": 1783575253.5389915,
+    "ast_hash": "fcb8117fa619c2f682910dbd9126e2ea",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-wooden-bench-recrop.json": {
+    "mtime": 1783607376.8460402,
+    "ast_hash": "dfb9c9c7ee5474b8887344a45c97c37d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-wooden-bench.json": {
+    "mtime": 1783575247.2165084,
+    "ast_hash": "68c268c4bfeca07a2d41378b281cf589",
+    "semantic_hash": ""
+  },
+  "docs/storyboard/ref-shop/ref1.jpeg": {
+    "mtime": 1783607749.3130188,
+    "ast_hash": "37e93d3d306cd3895d16b8bd380d50f4",
+    "semantic_hash": ""
+  },
+  "docs/storyboard/ref-shop/ref2.jpeg": {
+    "mtime": 1783607796.8810232,
+    "ast_hash": "fe6c792fc8d0bcdb131bdc3e07852475",
+    "semantic_hash": ""
+  },
+  "docs/storyboard/ref-shop/ref3.jpeg": {
+    "mtime": 1783607918.269564,
+    "ast_hash": "0c45e72ebec753167af9053b801d8348",
+    "semantic_hash": ""
+  },
+  "docs/storyboard/ref-shop/ref4.jpeg": {
+    "mtime": 1783607725.9150913,
+    "ast_hash": "2135d7cb79f16d58102600242ddd6b7c",
+    "semantic_hash": ""
+  },
+  "docs/storyboard/ref-shop/ref5.jpeg": {
+    "mtime": 1783607720.756272,
+    "ast_hash": "98074f4847be38c89c12391d281fcb38",
+    "semantic_hash": ""
+  },
+  "docs/storyboard/ref-shop/ref6.jpeg": {
+    "mtime": 1783607828.1081402,
+    "ast_hash": "75d35f52fe48457c1b6d00f5e6c1255f",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-floor-objects-imagegen-contact-sheet.png": {
+    "mtime": 1783575411.0705924,
+    "ast_hash": "8105af5b28f358794a401fda3053c3a0",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-floor-objects-recrop-contact-sheet.png": {
+    "mtime": 1783607439.2580948,
+    "ast_hash": "f3f91daee6f49cf472054c482e5eb76a",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-ancient-amphora-chroma.png": {
+    "mtime": 1783575253.544202,
+    "ast_hash": "db4fc0d5b8266aeff27dd8f98e4f8633",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-book-stack-chroma.png": {
+    "mtime": 1783575254.448426,
+    "ast_hash": "ab68bed027dc3ad38f60a8dc5542ca48",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-coffee-table-chroma.png": {
+    "mtime": 1783575249.9000652,
+    "ast_hash": "4f298ea2739811434781b85594639159",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-coral-pouf-chroma.png": {
+    "mtime": 1783575247.2294855,
+    "ast_hash": "08b49abd6fd179ab09e62c1df6e4ce66",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-coral-vase-chroma.png": {
+    "mtime": 1783575251.7344759,
+    "ast_hash": "1273c979ab37b03c9c98637af162ee11",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-decorative-chest-chroma.png": {
+    "mtime": 1783575248.1388903,
+    "ast_hash": "1d539f4a3e398393a5c94b8742d42839",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-dresser-chroma.png": {
+    "mtime": 1783575243.1376894,
+    "ast_hash": "668968a078fdaf5d37f7fd89df8b2625",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-large-seaweed-vase-chroma.png": {
+    "mtime": 1783575250.7719781,
+    "ast_hash": "8ab19f4448e6a3fe1321364688315580",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-low-bookcase-chroma.png": {
+    "mtime": 1783575244.4774072,
+    "ast_hash": "8d7eb42b2e7746ab650a2b43c7b4e90d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-marine-globe-chroma.png": {
+    "mtime": 1783575255.4002259,
+    "ast_hash": "78df42840427ac5bb89d5bf3539a7f56",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-nightstand-chroma.png": {
+    "mtime": 1783575245.4128256,
+    "ast_hash": "3a613ec5520023c4e3dbd1404a65596c",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-ornamental-aquarium-chroma.png": {
+    "mtime": 1783575258.967591,
+    "ast_hash": "472d22e63e0ef13d69eebdbf9871c2c5",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-pearl-stand-chroma.png": {
+    "mtime": 1783575257.18977,
+    "ast_hash": "f64ceb21278bda7b99e1915816e8dbd6",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-sea-lyre-chroma.png": {
+    "mtime": 1783575258.06884,
+    "ast_hash": "8b0fa74e1a87109b5e4a933b09c1e923",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-shell-basket-chroma.png": {
+    "mtime": 1783575256.3355148,
+    "ast_hash": "646177156212353bb7b5b25993328287",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-shell-coat-rack-chroma.png": {
+    "mtime": 1783575249.064051,
+    "ast_hash": "d9d077a51c600eb88cdfeee5440274f7",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-small-statue-chroma.png": {
+    "mtime": 1783575259.993877,
+    "ast_hash": "8ebd0b8cb95d9f016305afdbdc2dda4d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-stone-sculpture-chroma.png": {
+    "mtime": 1783575252.6427133,
+    "ast_hash": "b2b86a456adb93fd1f074b86e56692e0",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-wooden-bench-chroma.png": {
+    "mtime": 1783575246.291298,
+    "ast_hash": "be0ee318f6b4208b91f47d327aa5ed03",
+    "semantic_hash": ""
+  },
+  "Ester/Game/VendorScreen.swift": {
+    "mtime": 1783625122.8679028,
+    "ast_hash": "d55e7e180e72e221e50df82d36dd2a50",
+    "semantic_hash": ""
+  },
+  "Ester/Game/HouseFurnitureScaleCatalog.swift": {
+    "mtime": 1783630278.3333168,
+    "ast_hash": "4673f30806e2ab8c40dd70bd2b969d48",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-chroma.png": {
+    "mtime": 1783610839.857448,
+    "ast_hash": "3094f44530bc5d230e3abe9217259924",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-final.png": {
+    "mtime": 1783610844.6818419,
+    "ast_hash": "bcd14cb73cc4fdee041cb03b37ee9dd8",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-no-texture.png": {
+    "mtime": 1783610898.632874,
+    "ast_hash": "5543f613a40ee0e21ad30bc6a8841163",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-raw.png": {
+    "mtime": 1783610841.3823802,
+    "ast_hash": "b570e163b0f9d440d6c8ac835041f68c",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-flat-chroma.png": {
+    "mtime": 1783610437.247854,
+    "ast_hash": "041cd1e6542e45ab7d3ab2ad068b2f4c",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-flat-final.png": {
+    "mtime": 1783610462.302423,
+    "ast_hash": "848c11be367a93875cd76e35c8670085",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-flat-raw.png": {
+    "mtime": 1783610438.6478016,
+    "ast_hash": "bc4ac5cd9aa90ba9b0e21422c33f7648",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/sideboard-vs-clean-top-dresser-no-texture.png": {
+    "mtime": 1783610898.7048264,
+    "ast_hash": "ad68ee505be53685e931504ffa76c4fc",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/sideboard-vs-clean-top-dresser.png": {
+    "mtime": 1783610864.5086179,
+    "ast_hash": "38df5ac43e6d67e976d8e01c52fd53f5",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/sideboard-vs-new-dresser.png": {
+    "mtime": 1783610486.7247891,
+    "ast_hash": "6e104905073a6f564e970b19f353a951",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-ancient-amphora.json": {
+    "mtime": 1783613502.9828317,
+    "ast_hash": "41eda75569c891795420516bed956215",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-book-stack.json": {
+    "mtime": 1783613503.901086,
+    "ast_hash": "75b1de3650c86656fc342e85cd38ca67",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-coffee-table.json": {
+    "mtime": 1783613499.617529,
+    "ast_hash": "96bbcc257d21bd0f27625ae750ed23dc",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-coral-pouf.json": {
+    "mtime": 1783613497.1535473,
+    "ast_hash": "bb13bd43f31ae83f255eb4e7d626db16",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-coral-vase.json": {
+    "mtime": 1783613501.3514636,
+    "ast_hash": "7d570084cff7728b037bc24da780d9b7",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-decorative-chest.json": {
+    "mtime": 1783613498.0146127,
+    "ast_hash": "216c680a4bf7cde27a7ca641c7036baa",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-large-seaweed-vase.json": {
+    "mtime": 1783613500.556129,
+    "ast_hash": "0919d3f3b444df5bdb54e156ddd99434",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-low-bookcase.json": {
+    "mtime": 1783613494.6146255,
+    "ast_hash": "a824ff6c920f5a49ad5ff00d37a40a8f",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-marine-globe.json": {
+    "mtime": 1783613504.7737794,
+    "ast_hash": "977713ec3d33200e8e62e43e4ede93ab",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-nightstand.json": {
+    "mtime": 1783613495.4891071,
+    "ast_hash": "5a687f1335531c7b26127fd7c88635b7",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-ornamental-aquarium.json": {
+    "mtime": 1783613508.2088408,
+    "ast_hash": "7b5125692de99c88bde696a30fbf9096",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-pearl-stand.json": {
+    "mtime": 1783613506.4708793,
+    "ast_hash": "f053f4cead709d3ff79464f2ebfd2e8f",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-sea-lyre.json": {
+    "mtime": 1783613507.320867,
+    "ast_hash": "3bf5006adff39a3c0d5fc4c5b2a99733",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-shell-basket.json": {
+    "mtime": 1783613505.6417558,
+    "ast_hash": "72f155334eab0f6c5153ec232d70c434",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-shell-coat-rack.json": {
+    "mtime": 1783613498.7841027,
+    "ast_hash": "2308f6fcb33dcf25a09f7a65aafbefe2",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-small-statue.json": {
+    "mtime": 1783613509.0312276,
+    "ast_hash": "7e26606598c7b09d21ef412f5783c64e",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-stone-sculpture.json": {
+    "mtime": 1783613502.139537,
+    "ast_hash": "c82abe0da7916b91490dc1f56dd01e1d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-wooden-bench.json": {
+    "mtime": 1783613496.3140924,
+    "ast_hash": "971592276c5339bbf4b31c0520d2029d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-v2-chroma.png": {
+    "mtime": 1783611059.761201,
+    "ast_hash": "018196d01d4621d0fee459c063bed5ad",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-v2-final.png": {
+    "mtime": 1783611063.4121504,
+    "ast_hash": "3ba61b7b1d64fbdcb94f8d688062f329",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-v2-raw.png": {
+    "mtime": 1783611061.0027711,
+    "ast_hash": "52221851015331daa2ff14ee06cc3bfc",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/sideboard-vs-clean-top-dresser-v2.png": {
+    "mtime": 1783611063.4698853,
+    "ast_hash": "10db0ac65eb97fbcd2434b73c4868ab8",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/sideboard-vs-dresser-no-postprocess.png": {
+    "mtime": 1783611175.4244998,
+    "ast_hash": "d2bc9389aa8aa39e62cb34499775e807",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-contact-sheet.png": {
+    "mtime": 1783613565.0412679,
+    "ast_hash": "5f9da67aabcc2e6406c93b06c2494117",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-ancient-amphora-chroma.png": {
+    "mtime": 1783613502.1453624,
+    "ast_hash": "213cb654e1507a9a02a3cb2e3641c0dc",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-book-stack-chroma.png": {
+    "mtime": 1783613502.9883451,
+    "ast_hash": "8b7ee0b7b6c46afd5d5c07d0384e5fa6",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-coffee-table-chroma.png": {
+    "mtime": 1783613498.7896755,
+    "ast_hash": "a3ac7f38f841714dddd96fd124164f33",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-coral-pouf-chroma.png": {
+    "mtime": 1783613496.3195817,
+    "ast_hash": "f002122519471834677987b820ce4b8d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-coral-vase-chroma.png": {
+    "mtime": 1783613500.5613332,
+    "ast_hash": "1c74b9d4a3f03b915df25b1485904f6c",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-decorative-chest-chroma.png": {
+    "mtime": 1783613497.1585405,
+    "ast_hash": "a01df586a2984d35f18c67998b5e17ab",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-large-seaweed-vase-chroma.png": {
+    "mtime": 1783613499.6231623,
+    "ast_hash": "1eb9601a8b8688969a26fa324ab44b8c",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-low-bookcase-chroma.png": {
+    "mtime": 1783613493.3326871,
+    "ast_hash": "07e69df9dfb1098323e2cb7a18ac12dd",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-marine-globe-chroma.png": {
+    "mtime": 1783613503.9075239,
+    "ast_hash": "758bd059ed1aef4a463d044bc4337f57",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-nightstand-chroma.png": {
+    "mtime": 1783613494.6200209,
+    "ast_hash": "12e7de6c5da2244c677a72423b3c5b7f",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-ornamental-aquarium-chroma.png": {
+    "mtime": 1783613507.3269563,
+    "ast_hash": "ecfe390bdcbe2c8b55ac54cca1ac1cfe",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-pearl-stand-chroma.png": {
+    "mtime": 1783613505.6470778,
+    "ast_hash": "e4502a148a7f4a19683ed7a9c3816072",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-sea-lyre-chroma.png": {
+    "mtime": 1783613506.4763985,
+    "ast_hash": "c306f256ddf7d172550c93ab63de109a",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-shell-basket-chroma.png": {
+    "mtime": 1783613504.780605,
+    "ast_hash": "2fd2c46a105544c3564a5694562b267a",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-shell-coat-rack-chroma.png": {
+    "mtime": 1783613498.0205379,
+    "ast_hash": "5a7b791602f058b0b98a0d9c45825a06",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-small-statue-chroma.png": {
+    "mtime": 1783613508.2138975,
+    "ast_hash": "425f042b4513b0722ac3e7bfc6632ddc",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-stone-sculpture-chroma.png": {
+    "mtime": 1783613501.3567607,
+    "ast_hash": "71f69554fb722865798bb47fae46ca6f",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-wooden-bench-chroma.png": {
+    "mtime": 1783613495.4945524,
+    "ast_hash": "8d8321d711b1324177e763bec8d50bc1",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidBirthdayWallArt.imageset/Contents.json": {
+    "mtime": 1783630150.2137291,
+    "ast_hash": "dd73fbb5a247868df2622b9e382b9d02",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidBirthdayWallArt.imageset/mermaid-birthday-wall-art.png": {
+    "mtime": 1783630138.4247503,
+    "ast_hash": "a11b63e27bc09aadddbca37a71d392b8",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/birthday-wall-art-chroma.png": {
+    "mtime": 1783630085.6717796,
+    "ast_hash": "f992a6bea8ecedcf8e406c5e801900cb",
+    "semantic_hash": ""
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-regenerated-sources/mermaid-shell-coat-rack-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidShellCoatRack.imageset/mermaid-shell-coat-rack.png",
+  "key": "#0dd719",
+  "source_size": [
+    1024,
+    1536
+  ],
+  "crop_box": [
+    273,
+    57,
+    752,
+    1454
+  ],
+  "output_size": [
+    479,
+    1397
+  ],
+  "transparent_pixels": 1313998,
+  "partial_pixels": 7740,
+  "corner_alpha": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

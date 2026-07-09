@@ -24,6 +24,7 @@ enum CheatSystem {
         Suggestion(code: "normalspeed", description: "Desliga supervelocidade"),
         Suggestion(code: "alwaysaccept", description: "Aceita todos os comandos"),
         Suggestion(code: "normalaccept", description: "Volta ao aceite normal"),
+        Suggestion(code: "saveon", description: "Reativa saves da sessao"),
         Suggestion(code: "fullstatus", description: "Status cheio"),
         Suggestion(code: "addpearls500", description: "Adiciona conchas"),
         Suggestion(code: "sethunger0", description: "Define fome"),
@@ -103,12 +104,18 @@ enum CheatSystem {
 
         switch code {
         case "help":
-            return "Cheats de sessao: superspeed, alwaysaccept, fullstatus, addpearls500, sethunger0, setenergy100, setmood100, settrust100, phaseadult, unlockdepths, unlockmaps, revealmap, revealallmaps, unlockall."
+            return "Cheats de sessao: superspeed, alwaysaccept, fullstatus, addpearls500, sethunger0, setenergy100, setmood100, settrust100, phaseadult, unlockdepths, unlockmaps, revealmap, revealallmaps, unlockall. Use /c saveon para salvar o estado atual e reativar saves."
+        case "saveon":
+            guard stats.isCheatSessionPersistenceBlocked else {
+                return "Saves ja estavam ativos."
+            }
+            stats.resumePersistenceAfterCheatSessionSavingCurrentState()
+            return "Saves reativados: estado atual salvo."
         case "superspeed":
             stats.beginCheatSessionIfNeeded()
             stats.cheatSuperSpeedEnabled = true
             stats.addMemory("Cheat usado: super speed")
-            return "Cheat de sessao aplicado: super speed."
+            return sessionCheatResult("Cheat de sessao aplicado: super speed.")
         case "normalspeed":
             stats.cheatSuperSpeedEnabled = false
             return "Cheat de sessao desligado: super speed."
@@ -116,7 +123,7 @@ enum CheatSystem {
             stats.beginCheatSessionIfNeeded()
             stats.cheatAlwaysAcceptCommandsEnabled = true
             stats.addMemory("Cheat usado: always accept")
-            return "Cheat de sessao aplicado: always accept."
+            return sessionCheatResult("Cheat de sessao aplicado: always accept.")
         case "normalaccept":
             stats.cheatAlwaysAcceptCommandsEnabled = false
             return "Cheat de sessao desligado: always accept."
@@ -124,30 +131,30 @@ enum CheatSystem {
             stats.beginCheatSessionIfNeeded()
             applyPerfectStatus(to: stats)
             stats.addMemory("Cheat usado: status")
-            return "Cheat de sessao aplicado: status cheio."
+            return sessionCheatResult("Cheat de sessao aplicado: status cheio.")
         case "unlockdepths":
             stats.beginCheatSessionIfNeeded()
             applyAllDepthAccess(to: stats)
             stats.addMemory("Cheat usado: camadas liberadas")
-            return "Cheat de sessao aplicado: todas as profundidades liberadas sem mudar fase."
+            return sessionCheatResult("Cheat de sessao aplicado: todas as profundidades liberadas sem mudar fase.")
         case "unlockmaps":
             stats.beginCheatSessionIfNeeded()
             discoverAllRegions(stats)
-            return "Cheat de sessao aplicado: todos os mapas descobertos."
+            return sessionCheatResult("Cheat de sessao aplicado: todos os mapas descobertos.")
         case "revealmap":
             let region = ctx.activeRegion ?? RegionDiscoverySystem.region(withId: stats.currentRegionId)
             guard let region else { return "Nenhum mapa ativo para revelar." }
             stats.beginCheatSessionIfNeeded()
             reveal(region, stats: stats)
-            return "Cheat de sessao aplicado: minimapa atual revelado."
+            return sessionCheatResult("Cheat de sessao aplicado: minimapa atual revelado.")
         case "revealallmaps":
             stats.beginCheatSessionIfNeeded()
             revealAllMaps(stats)
-            return "Cheat de sessao aplicado: todos os minimapas revelados."
+            return sessionCheatResult("Cheat de sessao aplicado: todos os minimapas revelados.")
         case "unlockall":
             stats.beginCheatSessionIfNeeded()
             applyEverything(context: ctx)
-            return "Cheat de sessao aplicado: tudo liberado."
+            return sessionCheatResult("Cheat de sessao aplicado: tudo liberado.")
         default:
             return runParameterized(code, context: ctx)
         }
@@ -161,47 +168,51 @@ enum CheatSystem {
             stats.beginCheatSessionIfNeeded()
             stats.pearls += clamped
             stats.addMemory("Cheat usado: conchas +\(GameUI.shellAmountText(clamped))")
-            return "Cheat de sessao aplicado: conchas +\(GameUI.shellAmountText(clamped))."
+            return sessionCheatResult("Cheat de sessao aplicado: conchas +\(GameUI.shellAmountText(clamped)).")
         }
         if let value = numberSuffix(in: code, prefix: "sethunger", fallback: 0) {
             stats.beginCheatSessionIfNeeded()
             stats.hunger = value.clamped(to: 0...100)
-            return "Cheat de sessao aplicado: fome \(Int(stats.hunger))."
+            return sessionCheatResult("Cheat de sessao aplicado: fome \(Int(stats.hunger)).")
         }
         if let value = numberSuffix(in: code, prefix: "setenergy", fallback: 100) {
             stats.beginCheatSessionIfNeeded()
             stats.energy = value.clamped(to: 0...100)
-            return "Cheat de sessao aplicado: energia \(Int(stats.energy))."
+            return sessionCheatResult("Cheat de sessao aplicado: energia \(Int(stats.energy)).")
         }
         if let value = numberSuffix(in: code, prefix: "setmood", fallback: 100) {
             stats.beginCheatSessionIfNeeded()
             stats.mood = value.clamped(to: 0...100)
-            return "Cheat de sessao aplicado: disposicao \(Int(stats.mood))."
+            return sessionCheatResult("Cheat de sessao aplicado: disposicao \(Int(stats.mood)).")
         }
         if let value = numberSuffix(in: code, prefix: "settrust", fallback: 100) {
             stats.beginCheatSessionIfNeeded()
             stats.trust = value.clamped(to: 0...100)
-            return "Cheat de sessao aplicado: confianca \(Int(stats.trust))."
+            return sessionCheatResult("Cheat de sessao aplicado: confianca \(Int(stats.trust)).")
         }
         if let phase = phaseCode(code) {
             stats.beginCheatSessionIfNeeded()
             applyPhase(phase, context: ctx)
             stats.addMemory("Cheat usado: fase \(phase.displayName)")
-            return "Cheat de sessao aplicado: fase \(phase.displayName)."
+            return sessionCheatResult("Cheat de sessao aplicado: fase \(phase.displayName).")
         }
         if let region = regionCode(code, prefix: "unlockmap") {
             stats.beginCheatSessionIfNeeded()
             discover(region, stats: stats)
-            return "Cheat de sessao aplicado: \(region.name) descoberto."
+            return sessionCheatResult("Cheat de sessao aplicado: \(region.name) descoberto.")
         }
         if let region = regionCode(code, prefix: "revealmap") {
             stats.beginCheatSessionIfNeeded()
             discover(region, stats: stats)
             reveal(region, stats: stats)
-            return "Cheat de sessao aplicado: \(region.name) revelado."
+            return sessionCheatResult("Cheat de sessao aplicado: \(region.name) revelado.")
         }
 
         return "Cheat desconhecido. Use /c help."
+    }
+
+    private static func sessionCheatResult(_ message: String) -> String {
+        "\(message) Saves pausados; use /c saveon para salvar o estado atual."
     }
 
     private static func applyEverything(context ctx: GameContext) {

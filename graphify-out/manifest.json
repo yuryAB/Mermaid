@@ -835,9 +835,9 @@
     "semantic_hash": "5031a88a22ce9c6a4967d931d26cbb20"
   },
   "Ester/Game/CheatSystem.swift": {
-    "mtime": 1782177289.354499,
-    "ast_hash": "563690a4e3460129756c73790a93c222",
-    "semantic_hash": "563690a4e3460129756c73790a93c222"
+    "mtime": 1783624527.2522109,
+    "ast_hash": "389951734844c1332bf56c53d916555d",
+    "semantic_hash": ""
   },
   "Ester/Game/CrystalFieldsGameScene.swift": {
     "mtime": 1782177182.1521733,
@@ -1000,9 +1000,9 @@
     "semantic_hash": "2da093b4cb882b07e6f6c1b677218c66"
   },
   "Ester/Game/MermaidStats.swift": {
-    "mtime": 1783553319.443211,
-    "ast_hash": "b9e29b4306377a3acadee9e05e08638f",
-    "semantic_hash": "b9e29b4306377a3acadee9e05e08638f"
+    "mtime": 1783624420.9399493,
+    "ast_hash": "687432ab740229ae091803fda430a497",
+    "semantic_hash": ""
   },
   "Ester/Game/OfflineProgressSystem.swift": {
     "mtime": 1782177199.5785768,
@@ -1035,8 +1035,8 @@
     "semantic_hash": "f96e3b14a592c50cb9d0ff6cc7b68c0c"
   },
   "Ester/Game/ResourceSupportSystem.swift": {
-    "mtime": 1783573804.7076848,
-    "ast_hash": "9007f76b5672172726157a1feb011e48",
+    "mtime": 1783632357.78161,
+    "ast_hash": "639cb016e176151a8f456516f2b2f0dc",
     "semantic_hash": ""
   },
   "Ester/Game/ShellSnapSystem.swift": {
@@ -1045,8 +1045,8 @@
     "semantic_hash": "865ccc8ff1aade9a3528a45c37141226"
   },
   "Ester/Game/ShelterSystem.swift": {
-    "mtime": 1783573915.1294818,
-    "ast_hash": "651a86456b2bbc13f047f618e88183b7",
+    "mtime": 1783610304.6089754,
+    "ast_hash": "2184a382acf4e193b9d438cccaccd6cd",
     "semantic_hash": ""
   },
   "Ester/Game/TideMemorySystem.swift": {
@@ -1125,9 +1125,9 @@
     "semantic_hash": "b49e97b6789bcaa9e10c0021ead39653"
   },
   "Ester/GameScene.swift": {
-    "mtime": 1783555692.762499,
-    "ast_hash": "072d7c8951c8f5de0b553e439900e1b9",
-    "semantic_hash": "072d7c8951c8f5de0b553e439900e1b9"
+    "mtime": 1783609669.8133457,
+    "ast_hash": "a192ebd718303b9c7aa62762e8fb261b",
+    "semantic_hash": ""
   },
   "Ester/GameViewController.swift": {
     "mtime": 1781399204.5123413,
@@ -3040,8 +3040,8 @@
     "semantic_hash": "c2070a2a4df4250551dd974593011644"
   },
   "Ester/Game/MermaidHouseSystem.swift": {
-    "mtime": 1783569458.7907658,
-    "ast_hash": "691dc0dd92a12d48ea8353eb68538bca",
+    "mtime": 1783633659.30433,
+    "ast_hash": "db6dd0ad8a02e4fb9eedea9e492e9648",
     "semantic_hash": ""
   },
   "Ester/Game/RefugeFlowController.swift": {
@@ -3140,13 +3140,13 @@
     "semantic_hash": "ffa1edb28e22d7c4b7146a6951b6821f"
   },
   "Ester/Game/RoomSurfaceMapper.swift": {
-    "mtime": 1783562741.8203745,
-    "ast_hash": "b63c6a19b9d7f38baba0b57035ea21f5",
+    "mtime": 1783630668.5481417,
+    "ast_hash": "efb7b049287a1f5f5482fc95c59210b2",
     "semantic_hash": ""
   },
   "Ester/Game/HouseObjectPlacementSystem.swift": {
-    "mtime": 1783561921.489889,
-    "ast_hash": "b7222fd42821132625c53831a73255fb",
+    "mtime": 1783630720.8014493,
+    "ast_hash": "041c3d3503c8c191d2fddd37cbf2873d",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidSideboard.imageset/Contents.json": {
@@ -3155,13 +3155,13 @@
     "semantic_hash": ""
   },
   "Ester/Game/HouseObjectCatalog.swift": {
-    "mtime": 1783569379.295171,
-    "ast_hash": "19d3c3f42a1ed30d5583e940e20cd662",
+    "mtime": 1783632297.580992,
+    "ast_hash": "7edea84309eccb47b25624a99e89e460",
     "semantic_hash": ""
   },
   "docs/FURNITURE_ART_GUIDE.md": {
-    "mtime": 1783573117.284112,
-    "ast_hash": "df08288aaacb4b0fe964bd99388d45a2",
+    "mtime": 1783611538.8640976,
+    "ast_hash": "8cb50a32b352a856409d89e4883536ae",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidSideboard.imageset/mermaid-sideboard.png": {
@@ -3265,103 +3265,848 @@
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidAncientAmphora.imageset/mermaid-ancient-amphora.png": {
-    "mtime": 1783573861.1924307,
-    "ast_hash": "e58537ee01c7a25fc37f35f784f50e07",
+    "mtime": 1783613502.97632,
+    "ast_hash": "356e0db4e69d949a056d92632e1a42d1",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidBookStack.imageset/mermaid-book-stack.png": {
-    "mtime": 1783573862.1523407,
-    "ast_hash": "0a99cc564e02756e907f9946528096d2",
+    "mtime": 1783613503.8946054,
+    "ast_hash": "1a0cfc4e6aaba46cf638b45456897395",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidCoffeeTable.imageset/mermaid-coffee-table.png": {
-    "mtime": 1783573855.9616075,
-    "ast_hash": "e6d931600ddff6f129da3e42d7e7bf4d",
+    "mtime": 1783613499.611108,
+    "ast_hash": "d35e84ad7b352ebb35be493d986f9194",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidCoralPouf.imageset/mermaid-coral-pouf.png": {
-    "mtime": 1783573849.668953,
-    "ast_hash": "9c3eedac8bcbb8849d5c9a3b4a735048",
+    "mtime": 1783613497.1471097,
+    "ast_hash": "83d028f89fe01ec6d8f1128e49a8c364",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidCoralVase.imageset/mermaid-coral-vase.png": {
-    "mtime": 1783573858.615733,
-    "ast_hash": "c4545d741870f9b3748da95344984776",
+    "mtime": 1783613501.3450673,
+    "ast_hash": "56235b9a5a8c951907163a5c94bf125c",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidDecorativeChest.imageset/mermaid-decorative-chest.png": {
-    "mtime": 1783573851.5886135,
-    "ast_hash": "d2e0df542f8abcfa5bcf8f924dfe1a4a",
+    "mtime": 1783613498.0074077,
+    "ast_hash": "8d0be29a2c71818ab96aa6dbfef1cffb",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidDresser.imageset/mermaid-dresser.png": {
-    "mtime": 1783573841.2614057,
-    "ast_hash": "e1b6eac2f9fc1c1241984dbeffc796ab",
+    "mtime": 1783611175.292603,
+    "ast_hash": "52221851015331daa2ff14ee06cc3bfc",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidLargeSeaweedVase.imageset/mermaid-large-seaweed-vase.png": {
-    "mtime": 1783573857.20827,
-    "ast_hash": "93ee70ff16c1804d605e52af261a923e",
+    "mtime": 1783613500.5499952,
+    "ast_hash": "8aceea0dc93123badd2c072c3661138f",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidLowBookcase.imageset/mermaid-low-bookcase.png": {
-    "mtime": 1783573843.2317142,
-    "ast_hash": "443b0fc22176588fe66b5f1f84849164",
+    "mtime": 1783613494.6072924,
+    "ast_hash": "892c938194f034158a9b30c66ffda90f",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidMarineGlobe.imageset/mermaid-marine-globe.png": {
-    "mtime": 1783573863.4184248,
-    "ast_hash": "d0ed368a35982d106ddbab266954e051",
+    "mtime": 1783613504.7676523,
+    "ast_hash": "6c166db896043fb5228dc83d2b142144",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidNightstand.imageset/mermaid-nightstand.png": {
-    "mtime": 1783573846.5782442,
-    "ast_hash": "dd69e29bb58facd0ea757b006810e4af",
+    "mtime": 1783613495.482236,
+    "ast_hash": "e095145ef7cc361f58db958e9ea0dc8d",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidOrnamentalAquarium.imageset/mermaid-ornamental-aquarium.png": {
-    "mtime": 1783573868.8956451,
-    "ast_hash": "446c88e35ff2f53318834fd709f293ac",
+    "mtime": 1783613508.2024145,
+    "ast_hash": "959054b34cda392af9a7a7b378e5cbbf",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidPearlStand.imageset/mermaid-pearl-stand.png": {
-    "mtime": 1783573866.8433998,
-    "ast_hash": "2653ce4d30aef26cd491a89c8deac668",
+    "mtime": 1783613506.4643583,
+    "ast_hash": "d4779e9ef203cb5ccf2a6efe7674eef7",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidSeaLyre.imageset/mermaid-sea-lyre.png": {
-    "mtime": 1783573867.9841053,
-    "ast_hash": "5844e5b0dde1531fc65d67b72fa97cf0",
+    "mtime": 1783613507.3143034,
+    "ast_hash": "43da37c85d475dbac7fb5cbcbeb22856",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidShellBasket.imageset/mermaid-shell-basket.png": {
-    "mtime": 1783573865.3212066,
-    "ast_hash": "2fab6d636506cb12003a25504ae1ea4d",
+    "mtime": 1783613505.6352313,
+    "ast_hash": "1b0919cd601a084c3b21127e09f05b4e",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidShellCoatRack.imageset/mermaid-shell-coat-rack.png": {
-    "mtime": 1783573853.8432572,
-    "ast_hash": "c298e4f1154c52bc3e47996e8b328cdf",
+    "mtime": 1783613498.7778187,
+    "ast_hash": "e56a96a97be4e273957122636fb4fee4",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidSmallStatue.imageset/mermaid-small-statue.png": {
-    "mtime": 1783573869.8031886,
-    "ast_hash": "647a54072a46dd686bebc896d5f6d566",
+    "mtime": 1783613509.0247533,
+    "ast_hash": "036f2bc98ab292aa2ab8759672a8aef8",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidStoneSculpture.imageset/mermaid-stone-sculpture.png": {
-    "mtime": 1783573859.9028656,
-    "ast_hash": "9094b8fb4ef0ca72293e2ff61015845a",
+    "mtime": 1783613502.1328106,
+    "ast_hash": "e1c6350e1bd469cd22afc4a08b2c247d",
     "semantic_hash": ""
   },
   "Ester/Assets.xcassets/MermaidWoodenBench.imageset/mermaid-wooden-bench.png": {
-    "mtime": 1783573848.6488104,
-    "ast_hash": "5743b78f78e2f07ebe01ee22cf51e331",
+    "mtime": 1783613496.3080983,
+    "ast_hash": "9a7e43e92be5e5b673152cb61d768888",
     "semantic_hash": ""
   },
   "tmp/furniture-floor-objects-contact-sheet.png": {
     "mtime": 1783573871.2683766,
     "ast_hash": "26b0ac0947b4909d0201346763378f54",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-ancient-amphora-recrop.json": {
+    "mtime": 1783607383.9692156,
+    "ast_hash": "f805d5d14b5e4bbdec06f00a6a52751d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-ancient-amphora.json": {
+    "mtime": 1783575254.442874,
+    "ast_hash": "d4296a125beab46446db6ffecfdd0b85",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-book-stack-recrop.json": {
+    "mtime": 1783607384.8966653,
+    "ast_hash": "aebffac61bfbfb92c795db7d92daee27",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-book-stack.json": {
+    "mtime": 1783575255.3945253,
+    "ast_hash": "7ea54a5675d9c1a2d76b742bf51a061f",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-coffee-table-recrop.json": {
+    "mtime": 1783607380.3056834,
+    "ast_hash": "f19eca404efe69d9a399eb845276e8ea",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-coffee-table.json": {
+    "mtime": 1783575250.7670577,
+    "ast_hash": "81187b9f256e43a4e445128f00874a5d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-coral-pouf-recrop.json": {
+    "mtime": 1783607377.7405767,
+    "ast_hash": "234154839f8335e5564a57eda5fce15c",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-coral-pouf.json": {
+    "mtime": 1783575248.1336012,
+    "ast_hash": "585a971115a9c2d6e22b0de655090705",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-coral-vase-recrop.json": {
+    "mtime": 1783607382.224445,
+    "ast_hash": "f8db79002695a136de04056887777b14",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-coral-vase.json": {
+    "mtime": 1783575252.636021,
+    "ast_hash": "fba4d423c2ca282e0efdefd3a7feb161",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-decorative-chest-recrop.json": {
+    "mtime": 1783607378.679109,
+    "ast_hash": "f79800406215f57e20976bd6c5ae8695",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-decorative-chest.json": {
+    "mtime": 1783575249.058183,
+    "ast_hash": "4a8a3d7537cb36171bd4e44530c73dce",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-dresser-recrop.json": {
+    "mtime": 1783607374.128893,
+    "ast_hash": "3d189c14bac0520fa50b6f3390786de2",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-dresser.json": {
+    "mtime": 1783575244.4717815,
+    "ast_hash": "eda091552bec2a11ded65db533feffd9",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-large-seaweed-vase-recrop.json": {
+    "mtime": 1783607381.2327983,
+    "ast_hash": "71aab73b3aab81a51a4a99cf7d5595e6",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-large-seaweed-vase.json": {
+    "mtime": 1783575251.7293253,
+    "ast_hash": "d8e886ac612b6bae2df5a4c636d893bd",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-low-bookcase-recrop.json": {
+    "mtime": 1783607375.0397568,
+    "ast_hash": "03502f4a48c7773e3ebd7599caf95d0a",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-low-bookcase.json": {
+    "mtime": 1783575245.391313,
+    "ast_hash": "1ced0f88aa140509cb6a0b520c2f4ac0",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-marine-globe-recrop.json": {
+    "mtime": 1783607385.8011394,
+    "ast_hash": "13e425abc44517fb39ad08eba7d17dac",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-marine-globe.json": {
+    "mtime": 1783575256.3294759,
+    "ast_hash": "34b2fc7c3beaa344183b256e0d12db47",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-nightstand-recrop.json": {
+    "mtime": 1783607375.9451823,
+    "ast_hash": "4955d4f0b50001a5a1591ec162a4ac9d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-nightstand.json": {
+    "mtime": 1783575246.2861195,
+    "ast_hash": "e8d29c30ff0f9142e2d1b037e9624031",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-ornamental-aquarium-recrop.json": {
+    "mtime": 1783607389.381151,
+    "ast_hash": "805ffbd9a7b612f40afbad1e095f0359",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-ornamental-aquarium.json": {
+    "mtime": 1783575259.988616,
+    "ast_hash": "ca262dc173f119f974c04bd6951ca7de",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-pearl-stand-recrop.json": {
+    "mtime": 1783607387.497417,
+    "ast_hash": "683a9dc666d04f20c0f1c8400588a057",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-pearl-stand.json": {
+    "mtime": 1783575258.0635352,
+    "ast_hash": "d0f6e872cdbd965d59d2fd9663e2cae8",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-sea-lyre-recrop.json": {
+    "mtime": 1783607388.3725502,
+    "ast_hash": "f8c1baa009046e0c80d49dabd7b4db40",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-sea-lyre.json": {
+    "mtime": 1783575258.9625335,
+    "ast_hash": "b691b2c776a95a91488f09fd8d2de3f4",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-shell-basket-recrop.json": {
+    "mtime": 1783607386.657169,
+    "ast_hash": "1f8ff953180d146f84da8c8567e4ce74",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-shell-basket.json": {
+    "mtime": 1783575257.1843798,
+    "ast_hash": "a7c64ba459ef8a71ef4058ac28907313",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-shell-coat-rack-recrop.json": {
+    "mtime": 1783607379.4602249,
+    "ast_hash": "9c9f8d331ed090173054ebcf3e2da7e9",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-shell-coat-rack.json": {
+    "mtime": 1783575249.8944612,
+    "ast_hash": "afe6ec3d51b2530736c50b30e92616d0",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-small-statue-recrop.json": {
+    "mtime": 1783607390.1935349,
+    "ast_hash": "da30db1f5f6839251c4a1b5e762d4765",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-small-statue.json": {
+    "mtime": 1783575260.792831,
+    "ast_hash": "a71ab3507a03806573a05f851714b44a",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-stone-sculpture-recrop.json": {
+    "mtime": 1783607383.0804808,
+    "ast_hash": "4ed8c7433f72cbbfc04f994423abbbb3",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-stone-sculpture.json": {
+    "mtime": 1783575253.5389915,
+    "ast_hash": "fcb8117fa619c2f682910dbd9126e2ea",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-wooden-bench-recrop.json": {
+    "mtime": 1783607376.8460402,
+    "ast_hash": "dfb9c9c7ee5474b8887344a45c97c37d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-wooden-bench.json": {
+    "mtime": 1783575247.2165084,
+    "ast_hash": "68c268c4bfeca07a2d41378b281cf589",
+    "semantic_hash": ""
+  },
+  "docs/storyboard/ref-shop/ref1.jpeg": {
+    "mtime": 1783607749.3130188,
+    "ast_hash": "37e93d3d306cd3895d16b8bd380d50f4",
+    "semantic_hash": ""
+  },
+  "docs/storyboard/ref-shop/ref2.jpeg": {
+    "mtime": 1783607796.8810232,
+    "ast_hash": "fe6c792fc8d0bcdb131bdc3e07852475",
+    "semantic_hash": ""
+  },
+  "docs/storyboard/ref-shop/ref3.jpeg": {
+    "mtime": 1783607918.269564,
+    "ast_hash": "0c45e72ebec753167af9053b801d8348",
+    "semantic_hash": ""
+  },
+  "docs/storyboard/ref-shop/ref4.jpeg": {
+    "mtime": 1783607725.9150913,
+    "ast_hash": "2135d7cb79f16d58102600242ddd6b7c",
+    "semantic_hash": ""
+  },
+  "docs/storyboard/ref-shop/ref5.jpeg": {
+    "mtime": 1783607720.756272,
+    "ast_hash": "98074f4847be38c89c12391d281fcb38",
+    "semantic_hash": ""
+  },
+  "docs/storyboard/ref-shop/ref6.jpeg": {
+    "mtime": 1783607828.1081402,
+    "ast_hash": "75d35f52fe48457c1b6d00f5e6c1255f",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-floor-objects-imagegen-contact-sheet.png": {
+    "mtime": 1783575411.0705924,
+    "ast_hash": "8105af5b28f358794a401fda3053c3a0",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-floor-objects-recrop-contact-sheet.png": {
+    "mtime": 1783607439.2580948,
+    "ast_hash": "f3f91daee6f49cf472054c482e5eb76a",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-ancient-amphora-chroma.png": {
+    "mtime": 1783575253.544202,
+    "ast_hash": "db4fc0d5b8266aeff27dd8f98e4f8633",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-book-stack-chroma.png": {
+    "mtime": 1783575254.448426,
+    "ast_hash": "ab68bed027dc3ad38f60a8dc5542ca48",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-coffee-table-chroma.png": {
+    "mtime": 1783575249.9000652,
+    "ast_hash": "4f298ea2739811434781b85594639159",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-coral-pouf-chroma.png": {
+    "mtime": 1783575247.2294855,
+    "ast_hash": "08b49abd6fd179ab09e62c1df6e4ce66",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-coral-vase-chroma.png": {
+    "mtime": 1783575251.7344759,
+    "ast_hash": "1273c979ab37b03c9c98637af162ee11",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-decorative-chest-chroma.png": {
+    "mtime": 1783575248.1388903,
+    "ast_hash": "1d539f4a3e398393a5c94b8742d42839",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-dresser-chroma.png": {
+    "mtime": 1783575243.1376894,
+    "ast_hash": "668968a078fdaf5d37f7fd89df8b2625",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-large-seaweed-vase-chroma.png": {
+    "mtime": 1783575250.7719781,
+    "ast_hash": "8ab19f4448e6a3fe1321364688315580",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-low-bookcase-chroma.png": {
+    "mtime": 1783575244.4774072,
+    "ast_hash": "8d7eb42b2e7746ab650a2b43c7b4e90d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-marine-globe-chroma.png": {
+    "mtime": 1783575255.4002259,
+    "ast_hash": "78df42840427ac5bb89d5bf3539a7f56",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-nightstand-chroma.png": {
+    "mtime": 1783575245.4128256,
+    "ast_hash": "3a613ec5520023c4e3dbd1404a65596c",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-ornamental-aquarium-chroma.png": {
+    "mtime": 1783575258.967591,
+    "ast_hash": "472d22e63e0ef13d69eebdbf9871c2c5",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-pearl-stand-chroma.png": {
+    "mtime": 1783575257.18977,
+    "ast_hash": "f64ceb21278bda7b99e1915816e8dbd6",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-sea-lyre-chroma.png": {
+    "mtime": 1783575258.06884,
+    "ast_hash": "8b0fa74e1a87109b5e4a933b09c1e923",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-shell-basket-chroma.png": {
+    "mtime": 1783575256.3355148,
+    "ast_hash": "646177156212353bb7b5b25993328287",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-shell-coat-rack-chroma.png": {
+    "mtime": 1783575249.064051,
+    "ast_hash": "d9d077a51c600eb88cdfeee5440274f7",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-small-statue-chroma.png": {
+    "mtime": 1783575259.993877,
+    "ast_hash": "8ebd0b8cb95d9f016305afdbdc2dda4d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-stone-sculpture-chroma.png": {
+    "mtime": 1783575252.6427133,
+    "ast_hash": "b2b86a456adb93fd1f074b86e56692e0",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-wooden-bench-chroma.png": {
+    "mtime": 1783575246.291298,
+    "ast_hash": "be0ee318f6b4208b91f47d327aa5ed03",
+    "semantic_hash": ""
+  },
+  "Ester/Game/VendorScreen.swift": {
+    "mtime": 1783625122.8679028,
+    "ast_hash": "d55e7e180e72e221e50df82d36dd2a50",
+    "semantic_hash": ""
+  },
+  "Ester/Game/HouseFurnitureScaleCatalog.swift": {
+    "mtime": 1783632401.6248827,
+    "ast_hash": "1c58214a28705635edd3f2c674566a51",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-chroma.png": {
+    "mtime": 1783610839.857448,
+    "ast_hash": "3094f44530bc5d230e3abe9217259924",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-final.png": {
+    "mtime": 1783610844.6818419,
+    "ast_hash": "bcd14cb73cc4fdee041cb03b37ee9dd8",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-no-texture.png": {
+    "mtime": 1783610898.632874,
+    "ast_hash": "5543f613a40ee0e21ad30bc6a8841163",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-raw.png": {
+    "mtime": 1783610841.3823802,
+    "ast_hash": "b570e163b0f9d440d6c8ac835041f68c",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-flat-chroma.png": {
+    "mtime": 1783610437.247854,
+    "ast_hash": "041cd1e6542e45ab7d3ab2ad068b2f4c",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-flat-final.png": {
+    "mtime": 1783610462.302423,
+    "ast_hash": "848c11be367a93875cd76e35c8670085",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-flat-raw.png": {
+    "mtime": 1783610438.6478016,
+    "ast_hash": "bc4ac5cd9aa90ba9b0e21422c33f7648",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/sideboard-vs-clean-top-dresser-no-texture.png": {
+    "mtime": 1783610898.7048264,
+    "ast_hash": "ad68ee505be53685e931504ffa76c4fc",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/sideboard-vs-clean-top-dresser.png": {
+    "mtime": 1783610864.5086179,
+    "ast_hash": "38df5ac43e6d67e976d8e01c52fd53f5",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/sideboard-vs-new-dresser.png": {
+    "mtime": 1783610486.7247891,
+    "ast_hash": "6e104905073a6f564e970b19f353a951",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-ancient-amphora.json": {
+    "mtime": 1783613502.9828317,
+    "ast_hash": "41eda75569c891795420516bed956215",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-book-stack.json": {
+    "mtime": 1783613503.901086,
+    "ast_hash": "75b1de3650c86656fc342e85cd38ca67",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-coffee-table.json": {
+    "mtime": 1783613499.617529,
+    "ast_hash": "96bbcc257d21bd0f27625ae750ed23dc",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-coral-pouf.json": {
+    "mtime": 1783613497.1535473,
+    "ast_hash": "bb13bd43f31ae83f255eb4e7d626db16",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-coral-vase.json": {
+    "mtime": 1783613501.3514636,
+    "ast_hash": "7d570084cff7728b037bc24da780d9b7",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-decorative-chest.json": {
+    "mtime": 1783613498.0146127,
+    "ast_hash": "216c680a4bf7cde27a7ca641c7036baa",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-large-seaweed-vase.json": {
+    "mtime": 1783613500.556129,
+    "ast_hash": "0919d3f3b444df5bdb54e156ddd99434",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-low-bookcase.json": {
+    "mtime": 1783613494.6146255,
+    "ast_hash": "a824ff6c920f5a49ad5ff00d37a40a8f",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-marine-globe.json": {
+    "mtime": 1783613504.7737794,
+    "ast_hash": "977713ec3d33200e8e62e43e4ede93ab",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-nightstand.json": {
+    "mtime": 1783613495.4891071,
+    "ast_hash": "5a687f1335531c7b26127fd7c88635b7",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-ornamental-aquarium.json": {
+    "mtime": 1783613508.2088408,
+    "ast_hash": "7b5125692de99c88bde696a30fbf9096",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-pearl-stand.json": {
+    "mtime": 1783613506.4708793,
+    "ast_hash": "f053f4cead709d3ff79464f2ebfd2e8f",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-sea-lyre.json": {
+    "mtime": 1783613507.320867,
+    "ast_hash": "3bf5006adff39a3c0d5fc4c5b2a99733",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-shell-basket.json": {
+    "mtime": 1783613505.6417558,
+    "ast_hash": "72f155334eab0f6c5153ec232d70c434",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-shell-coat-rack.json": {
+    "mtime": 1783613498.7841027,
+    "ast_hash": "2308f6fcb33dcf25a09f7a65aafbefe2",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-small-statue.json": {
+    "mtime": 1783613509.0312276,
+    "ast_hash": "7e26606598c7b09d21ef412f5783c64e",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-stone-sculpture.json": {
+    "mtime": 1783613502.139537,
+    "ast_hash": "c82abe0da7916b91490dc1f56dd01e1d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/process-wooden-bench.json": {
+    "mtime": 1783613496.3140924,
+    "ast_hash": "971592276c5339bbf4b31c0520d2029d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-v2-chroma.png": {
+    "mtime": 1783611059.761201,
+    "ast_hash": "018196d01d4621d0fee459c063bed5ad",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-v2-final.png": {
+    "mtime": 1783611063.4121504,
+    "ast_hash": "3ba61b7b1d64fbdcb94f8d688062f329",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-v2-raw.png": {
+    "mtime": 1783611061.0027711,
+    "ast_hash": "52221851015331daa2ff14ee06cc3bfc",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/sideboard-vs-clean-top-dresser-v2.png": {
+    "mtime": 1783611063.4698853,
+    "ast_hash": "10db0ac65eb97fbcd2434b73c4868ab8",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-comoda-style-test/sideboard-vs-dresser-no-postprocess.png": {
+    "mtime": 1783611175.4244998,
+    "ast_hash": "d2bc9389aa8aa39e62cb34499775e807",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-contact-sheet.png": {
+    "mtime": 1783613565.0412679,
+    "ast_hash": "5f9da67aabcc2e6406c93b06c2494117",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-ancient-amphora-chroma.png": {
+    "mtime": 1783613502.1453624,
+    "ast_hash": "213cb654e1507a9a02a3cb2e3641c0dc",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-book-stack-chroma.png": {
+    "mtime": 1783613502.9883451,
+    "ast_hash": "8b7ee0b7b6c46afd5d5c07d0384e5fa6",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-coffee-table-chroma.png": {
+    "mtime": 1783613498.7896755,
+    "ast_hash": "a3ac7f38f841714dddd96fd124164f33",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-coral-pouf-chroma.png": {
+    "mtime": 1783613496.3195817,
+    "ast_hash": "f002122519471834677987b820ce4b8d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-coral-vase-chroma.png": {
+    "mtime": 1783613500.5613332,
+    "ast_hash": "1c74b9d4a3f03b915df25b1485904f6c",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-decorative-chest-chroma.png": {
+    "mtime": 1783613497.1585405,
+    "ast_hash": "a01df586a2984d35f18c67998b5e17ab",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-large-seaweed-vase-chroma.png": {
+    "mtime": 1783613499.6231623,
+    "ast_hash": "1eb9601a8b8688969a26fa324ab44b8c",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-low-bookcase-chroma.png": {
+    "mtime": 1783613493.3326871,
+    "ast_hash": "07e69df9dfb1098323e2cb7a18ac12dd",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-marine-globe-chroma.png": {
+    "mtime": 1783613503.9075239,
+    "ast_hash": "758bd059ed1aef4a463d044bc4337f57",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-nightstand-chroma.png": {
+    "mtime": 1783613494.6200209,
+    "ast_hash": "12e7de6c5da2244c677a72423b3c5b7f",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-ornamental-aquarium-chroma.png": {
+    "mtime": 1783613507.3269563,
+    "ast_hash": "ecfe390bdcbe2c8b55ac54cca1ac1cfe",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-pearl-stand-chroma.png": {
+    "mtime": 1783613505.6470778,
+    "ast_hash": "e4502a148a7f4a19683ed7a9c3816072",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-sea-lyre-chroma.png": {
+    "mtime": 1783613506.4763985,
+    "ast_hash": "c306f256ddf7d172550c93ab63de109a",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-shell-basket-chroma.png": {
+    "mtime": 1783613504.780605,
+    "ast_hash": "2fd2c46a105544c3564a5694562b267a",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-shell-coat-rack-chroma.png": {
+    "mtime": 1783613498.0205379,
+    "ast_hash": "5a7b791602f058b0b98a0d9c45825a06",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-small-statue-chroma.png": {
+    "mtime": 1783613508.2138975,
+    "ast_hash": "425f042b4513b0722ac3e7bfc6632ddc",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-stone-sculpture-chroma.png": {
+    "mtime": 1783613501.3567607,
+    "ast_hash": "71f69554fb722865798bb47fae46ca6f",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-regenerated-sources/mermaid-wooden-bench-chroma.png": {
+    "mtime": 1783613495.4945524,
+    "ast_hash": "8d8321d711b1324177e763bec8d50bc1",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidBirthdayWallArt.imageset/Contents.json": {
+    "mtime": 1783630150.2137291,
+    "ast_hash": "dd73fbb5a247868df2622b9e382b9d02",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidBirthdayWallArt.imageset/mermaid-birthday-wall-art.png": {
+    "mtime": 1783630138.4247503,
+    "ast_hash": "a11b63e27bc09aadddbca37a71d392b8",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/birthday-wall-art-chroma.png": {
+    "mtime": 1783630085.6717796,
+    "ast_hash": "f992a6bea8ecedcf8e406c5e801900cb",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidBirthdayTable.imageset/Contents.json": {
+    "mtime": 1783632089.2218292,
+    "ast_hash": "eefe841e6d5d9b54f040ab4e46e37320",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoralWallShelf.imageset/Contents.json": {
+    "mtime": 1783632146.8068857,
+    "ast_hash": "182b126ffd48943713013939ff090488",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidJellyfishSconce.imageset/Contents.json": {
+    "mtime": 1783632146.8075643,
+    "ast_hash": "950514368c4a0b1cb2720ddcb6cb6702",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidPearlClock.imageset/Contents.json": {
+    "mtime": 1783632146.806314,
+    "ast_hash": "c63a539567e5302e8d34b31cd2dcefcf",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSeaMapFrame.imageset/Contents.json": {
+    "mtime": 1783632146.8065722,
+    "ast_hash": "42944cdc429d36ed6bccca7171f3736c",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidShellMirror.imageset/Contents.json": {
+    "mtime": 1783632146.805955,
+    "ast_hash": "3f3bd09d1e0d98a39b23cf5eec9a279a",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidStarfishGarland.imageset/Contents.json": {
+    "mtime": 1783632146.807134,
+    "ast_hash": "cb69a381eee78bba78de14d8d724f9ea",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidWaveTapestry.imageset/Contents.json": {
+    "mtime": 1783632146.807824,
+    "ast_hash": "cf90d06d8dd7f5da86b00bbcb819185d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-birthday-table.json": {
+    "mtime": 1783631836.1289887,
+    "ast_hash": "c18c318b46e5f606aee4d410105d6c9f",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidBirthdayTable.imageset/mermaid-birthday-table.png": {
+    "mtime": 1783632113.188081,
+    "ast_hash": "8f19edc13ba0761be9245ea4bdf2ca0b",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoralWallShelf.imageset/mermaid-coral-wall-shelf.png": {
+    "mtime": 1783632045.1722271,
+    "ast_hash": "d04205a33026d8e6163293f4d481eb3c",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidJellyfishSconce.imageset/mermaid-jellyfish-sconce.png": {
+    "mtime": 1783632045.5357869,
+    "ast_hash": "99290f73fbd653e7df3f5095479ec867",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidPearlClock.imageset/mermaid-pearl-clock.png": {
+    "mtime": 1783632044.7292469,
+    "ast_hash": "68cbe08c3fd026a76bf9e0edee2d825e",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSeaMapFrame.imageset/mermaid-sea-map-frame.png": {
+    "mtime": 1783632045.0230372,
+    "ast_hash": "708169956c8b35a531b48f74f7521c6b",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidShellMirror.imageset/mermaid-shell-mirror.png": {
+    "mtime": 1783632044.5090172,
+    "ast_hash": "c675f67100e2112e422bab32671a05aa",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidStarfishGarland.imageset/mermaid-starfish-garland.png": {
+    "mtime": 1783632045.3515835,
+    "ast_hash": "ef6332225345fe9c7777a23fe883d512",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidWaveTapestry.imageset/mermaid-wave-tapestry.png": {
+    "mtime": 1783632045.7796192,
+    "ast_hash": "3d1434d45bfe6202b9ff7b2a808dd453",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/coral-wall-shelf-chroma.png": {
+    "mtime": 1783631994.581149,
+    "ast_hash": "b5e16486825b54f46475f9dbdaadb184",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/jellyfish-sconce-chroma.png": {
+    "mtime": 1783631994.5896368,
+    "ast_hash": "44def0c3891b5a337072781f3d861d76",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-birthday-table-alpha-preview.png": {
+    "mtime": 1783632113.4231536,
+    "ast_hash": "abdd0fecd187a840f94982f80d39f3fb",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-birthday-table-chroma.png": {
+    "mtime": 1783631835.0924888,
+    "ast_hash": "207d8f20a59a3b284a9b68791c4ab42a",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/pearl-clock-chroma.png": {
+    "mtime": 1783631994.573394,
+    "ast_hash": "39929eabc591a0f46a2546ee9e7d2b25",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/sea-map-frame-chroma.png": {
+    "mtime": 1783631994.577813,
+    "ast_hash": "e54628f37f2d1419781ddef9c34cdb08",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/shell-mirror-chroma.png": {
+    "mtime": 1783631994.5675788,
+    "ast_hash": "3f50d4dc2edaebeba02d6dccbd57e7da",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/starfish-garland-chroma.png": {
+    "mtime": 1783631994.5861413,
+    "ast_hash": "672fa345715d8634910f0c5d6dcf1722",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/wave-tapestry-chroma.png": {
+    "mtime": 1783631994.6102004,
+    "ast_hash": "427839abafe8efd44e367f460ba18f9c",
+    "semantic_hash": ""
+  },
+  "tmp/wall-decorations-contact-sheet.png": {
+    "mtime": 1783632045.904324,
+    "ast_hash": "85babe9bf36789c331d9cc0dff039801",
     "semantic_hash": ""
   }
 }

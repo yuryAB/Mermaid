@@ -2,14 +2,14 @@
 //  HouseObjectPlacementSystem.swift
 //  Ester
 //
-//  Architecture foundation for future Mermaid House object placement.
+//  Architecture foundation for Mermaid House object placement.
 //  Defines models for object definitions, placement rules, attachment
 //  sides, surface compatibility, placed object instances, and a
 //  placement resolver that validates and computes final positions.
 //
-//  No real furniture, decorations, purchasable objects, inventory, or
-//  drag‑and‑drop is implemented yet. This file only establishes the
-//  types and resolver that future features will build on.
+//  The focused miniroom house has two active placement surfaces: floor
+//  and back wall. Older ceiling/side-wall values remain decodable only
+//  as legacy surface data.
 //
 
 import Foundation
@@ -23,11 +23,11 @@ import SpriteKit
 enum HouseObjectAttachmentSide: String, Codable, CaseIterable {
     /// Object sits on top of the floor (bottom edge touches floor top).
     case bottom
-    /// Object hangs from the ceiling (top edge touches ceiling bottom).
+    /// Legacy attachment side for old ceiling debug objects.
     case top
-    /// Object attaches to the left edge of a surface (e.g. left‑wall decor).
+    /// Legacy attachment side for old side-wall debug objects.
     case left
-    /// Object attaches to the right edge of a surface.
+    /// Legacy attachment side for old side-wall debug objects.
     case right
     /// Object lies flat against the back wall (faces the camera).
     case back
@@ -46,8 +46,9 @@ struct HouseObjectSurfaceCompatibility: Codable {
 
 enum HouseObjectCategory: String, Codable, CaseIterable {
     case floorFurniture
-    case ceilingDecoration
     case backWallDecoration
+    // Legacy debug categories kept for decode/source compatibility.
+    case ceilingDecoration
     case leftWallDecoration
     case rightWallDecoration
     case functional
@@ -150,20 +151,18 @@ struct HouseObjectDefinition: Codable, Identifiable {
 struct PlacedHouseObject: Codable, Identifiable {
     let id: UUID
     let definitionID: String
-    let roomPosition: HouseGridPosition
+    let roomPosition: HouseRoomSceneID
     let surface: HouseSurfaceKind
     var localPosition: CGPoint
-    var rotation: CGFloat
     var scale: CGFloat
     var zLayerOverride: CGFloat?
     var statePayload: Data?         // future Codable state
 
     init(id: UUID = UUID(),
          definitionID: String,
-         roomPosition: HouseGridPosition,
+         roomPosition: HouseRoomSceneID,
          surface: HouseSurfaceKind,
          localPosition: CGPoint,
-         rotation: CGFloat = 0,
          scale: CGFloat = 1,
          zLayerOverride: CGFloat? = nil,
          statePayload: Data? = nil) {
@@ -172,7 +171,6 @@ struct PlacedHouseObject: Codable, Identifiable {
         self.roomPosition = roomPosition
         self.surface = surface
         self.localPosition = localPosition
-        self.rotation = rotation
         self.scale = scale
         self.zLayerOverride = zLayerOverride
         self.statePayload = statePayload
@@ -192,17 +190,20 @@ struct HouseObjectPlacementResult {
     let attachmentSide: HouseObjectAttachmentSide
     let surface: HouseSurfaceKind
     let zLayer: CGFloat
+    let depthZone: HouseObjectDepthZone
 
     static func success(position: CGPoint,
                         attachmentSide: HouseObjectAttachmentSide,
                         surface: HouseSurfaceKind,
-                        zLayer: CGFloat) -> HouseObjectPlacementResult {
+                        zLayer: CGFloat,
+                        depthZone: HouseObjectDepthZone) -> HouseObjectPlacementResult {
         HouseObjectPlacementResult(isValid: true,
                                    validationError: nil,
                                    finalPosition: position,
                                    attachmentSide: attachmentSide,
                                    surface: surface,
-                                   zLayer: zLayer)
+                                   zLayer: zLayer,
+                                   depthZone: depthZone)
     }
 
     static func failure(reason: String,
@@ -212,7 +213,25 @@ struct HouseObjectPlacementResult {
                                    finalPosition: .zero,
                                    attachmentSide: .back,
                                    surface: surface,
-                                   zLayer: 0)
+                                   zLayer: 0,
+                                   depthZone: .behindMermaid)
+    }
+}
+
+// MARK: - Depth zone (which parent layer the object lives in)
+
+enum HouseObjectDepthZone {
+    /// Behind the mermaid — same depth as the back wall.
+    case behindMermaid
+    /// In front of the mermaid — between the mermaid and the front frame.
+    case inFrontOfMermaid
+
+    /// Parent‑layer zPosition inside `camera.worldNode` for this zone.
+    var layerZPosition: CGFloat {
+        switch self {
+        case .behindMermaid:     return 3
+        case .inFrontOfMermaid:  return 9_500
+        }
     }
 }
 
@@ -224,16 +243,47 @@ final class HouseObjectPlacementResolver {
 
     // MARK: Z‑layer defaults per surface
 
-    /// Sensible default z‑positions per surface kind so objects render
-    /// in the correct depth order relative to the room layers.
+    /// Default z‑positions per surface kind. These are used as hints by
+    /// the scene controller; the final parent layer is chosen by
+    /// `depthZone(surface:centerY:roomSize:)`.
     static func defaultZLayer(for surface: HouseSurfaceKind) -> CGFloat {
-        switch surface {
+        switch surface.activeMiniroomSurface {
         case .floor:     return 10
         case .backWall:  return 3
-        case .ceiling:   return 10_010
-        case .leftWall:  return 10_010
-        case .rightWall: return 10_010
+        case .ceiling, .leftWall, .rightWall:
+            return 3
         }
+    }
+
+    /// Determines which parent layer a placed object belongs in so the
+    /// mermaid correctly passes in front of or behind furniture.
+    ///
+    /// For floor objects, `anchorY` is the bottom edge of the object;
+    /// for ceiling it's the top edge; for walls it's the centre.
+    /// The comparison uses the midpoint of the placement zone so the
+    /// result is independent of object height.
+    static func depthZone(surface: HouseSurfaceKind,
+                          anchorY: CGFloat,
+                          roomSize: CGSize) -> HouseObjectDepthZone {
+        switch surface.activeMiniroomSurface {
+        case .floor:
+            let threshold = floorAnchorThreshold(roomSize: roomSize)
+            return anchorY > threshold ? .behindMermaid : .inFrontOfMermaid
+        case .backWall:
+            return .behindMermaid
+        case .ceiling, .leftWall, .rightWall:
+            return .behindMermaid
+        }
+    }
+
+    // MARK: Floor depth sorting
+
+    /// Y‑axis midpoint of the floor surface band (room‑local).
+    /// Used as the split‑point: anchor above this → behind mermaid,
+    /// anchor at or below → in front.
+    static func floorAnchorThreshold(roomSize: CGSize) -> CGFloat {
+        let floorHeight = max(80, roomSize.height * 0.32)
+        return -roomSize.height / 2 + floorHeight / 2 + 4
     }
 
     // MARK: Resolve
@@ -253,12 +303,14 @@ final class HouseObjectPlacementResolver {
                  point: CGPoint,
                  slotID: String? = nil) -> HouseObjectPlacementResult {
 
+        let activeSurface = surface.activeMiniroomSurface
+
         // ---- 1. Find a compatible placement rule ---------------------------
-        guard let rule = definition.placementRules.first(where: { $0.isCompatible(with: surface) }),
-              let attachmentSide = rule.attachmentSide(for: surface) else {
+        guard let rule = definition.placementRules.first(where: { $0.isCompatible(with: activeSurface) }),
+              let attachmentSide = rule.attachmentSide(for: activeSurface) else {
             return .failure(
-                reason: "\(definition.displayName) não pode ser colocado em \(surface.debugLabel).",
-                surface: surface
+                reason: "\(definition.displayName) não pode ser colocado em \(activeSurface.debugLabel).",
+                surface: activeSurface
             )
         }
 
@@ -266,80 +318,148 @@ final class HouseObjectPlacementResolver {
         if rule.requiresSlot && slotID == nil {
             return .failure(
                 reason: "\(definition.displayName) precisa de um espaço específico.",
-                surface: surface
+                surface: activeSurface
             )
         }
 
-        // ---- 3. Clamp point to surface bounds when free‑positioning --------
-        let surfaceRect = mapping.surfaces[surface]!.localRect
+        // ---- 3. Compute two containers ------------------------------------
+        //
+        //  anchorZone    – where the attachment edge may be placed. Floor
+        //                  objects keep their bottom edge on the floor band;
+        //                  back‑wall objects anchor anywhere on the room
+        //                  interior.
+        //  visualBounds  – room interior used to keep the full visible asset
+        //                  inside the room frame (applied on top of the
+        //                  anchor zone for objects that extend beyond it).
+        let roomRect = mapping.backWall.localRect
+        guard let surfaceRect = mapping.surfaces[activeSurface]?.localRect else {
+            return .failure(
+                reason: "\(definition.displayName) não pode ser colocado em \(activeSurface.debugLabel).",
+                surface: activeSurface
+            )
+        }
+
+        let anchorZone: CGRect = {
+            switch activeSurface {
+            case .floor:
+                return surfaceRect
+            case .backWall:
+                return roomRect
+            case .ceiling, .leftWall, .rightWall:
+                return roomRect
+            }
+        }()
+        let visualBounds = roomRect
+
+        // ---- 4. Clamp: first to anchor zone, then visual containment ------
+        let objectSize = definition.displaySize
         let clampedPoint: CGPoint
         if rule.allowsFreePositioning {
-            clampedPoint = CGPoint(
-                x: point.x.clamped(to: surfaceRect.minX...surfaceRect.maxX),
-                y: point.y.clamped(to: surfaceRect.minY...surfaceRect.maxY)
+            clampedPoint = resolveAnchor(
+                rawPoint: point,
+                objectSize: objectSize,
+                attachmentSide: attachmentSide,
+                anchorZone: anchorZone,
+                visualBounds: visualBounds
             )
         } else {
             clampedPoint = CGPoint(x: surfaceRect.midX, y: surfaceRect.midY)
         }
 
-        // ---- 4. Compute final position based on attachment side ------------
-        let objectSize = definition.defaultSize
+        // ---- 5. Compute final position based on attachment side ------------
         let finalLocalPosition = alignedCenter(
             attachmentSide: attachmentSide,
             objectSize: objectSize,
-            surfaceRect: surfaceRect,
-            point: clampedPoint,
-            offset: rule.defaultOffset
+            point: clampedPoint
         )
 
-        // ---- 5. Determine z‑layer -----------------------------------------
-        let zLayer = rule.preferredZLayer ?? Self.defaultZLayer(for: surface)
+        let offset = rule.defaultOffset
+        let offsetPosition = CGPoint(x: finalLocalPosition.x + offset.x,
+                                     y: finalLocalPosition.y + offset.y)
 
-        // ---- 6. Log for debug / validation --------------------------------
+        // ---- 6. Determine z‑layer and depth zone --------------------------
+        let depthZone = Self.depthZone(surface: activeSurface,
+                                        anchorY: clampedPoint.y,
+                                        roomSize: mapping.roomSize)
+        let baseZLayer = rule.preferredZLayer ?? Self.defaultZLayer(for: activeSurface)
+        let zLayer = baseZLayer
+
+        // ---- 7. Log for debug / validation --------------------------------
         Self.logPlacement(definition: definition,
                           attachmentSide: attachmentSide,
-                          surface: surface,
-                          finalPosition: finalLocalPosition,
+                          surface: activeSurface,
+                          finalPosition: offsetPosition,
                           zLayer: zLayer)
 
-        return .success(position: finalLocalPosition,
+        return .success(position: offsetPosition,
                         attachmentSide: attachmentSide,
-                        surface: surface,
-                        zLayer: zLayer)
+                        surface: activeSurface,
+                        zLayer: zLayer,
+                        depthZone: depthZone)
+    }
+
+    // MARK: Anchor‑point resolution (two‑stage clamping)
+
+    /// First clamps the anchor point to the allowed placement zone, then
+    /// further restricts it so the full object bounding rect stays inside
+    /// `visualBounds`. Returns the safe anchor point.
+    private func resolveAnchor(rawPoint: CGPoint,
+                               objectSize: CGSize,
+                               attachmentSide: HouseObjectAttachmentSide,
+                               anchorZone: CGRect,
+                               visualBounds: CGRect) -> CGPoint {
+        let hw = objectSize.width / 2
+        let hh = objectSize.height / 2
+
+        // Stage A — anchor is free to move within the placement zone.
+        let clampedX = rawPoint.x.clamped(to: anchorZone.minX...anchorZone.maxX)
+        let clampedY = rawPoint.y.clamped(to: anchorZone.minY...anchorZone.maxY)
+        var result = CGPoint(x: clampedX, y: clampedY)
+
+        // Stage B — tighten so the full object stays inside visualBounds.
+        switch attachmentSide {
+        case .back:
+            result.x = result.x.clamped(to: visualBounds.minX + hw ... visualBounds.maxX - hw)
+            result.y = result.y.clamped(to: visualBounds.minY + hh ... visualBounds.maxY - hh)
+        case .bottom:
+            result.x = result.x.clamped(to: visualBounds.minX + hw ... visualBounds.maxX - hw)
+            result.y = result.y.clamped(to: visualBounds.minY ... visualBounds.maxY - 2 * hh)
+        case .top:
+            result.x = result.x.clamped(to: visualBounds.minX + hw ... visualBounds.maxX - hw)
+            result.y = result.y.clamped(to: visualBounds.minY + 2 * hh ... visualBounds.maxY)
+        case .left:
+            result.x = result.x.clamped(to: visualBounds.minX ... visualBounds.maxX - 2 * hw)
+            result.y = result.y.clamped(to: visualBounds.minY + hh ... visualBounds.maxY - hh)
+        case .right:
+            result.x = result.x.clamped(to: visualBounds.minX + 2 * hw ... visualBounds.maxX)
+            result.y = result.y.clamped(to: visualBounds.minY + hh ... visualBounds.maxY - hh)
+        }
+
+        return result
     }
 
     // MARK: Alignment helpers
 
-    /// Computes the center point of the object so its attachment side
-    /// aligns flush against the target surface edge.
+    /// Converts the clamped anchor point to the object's center position
+    /// based on attachment side.
     private func alignedCenter(attachmentSide: HouseObjectAttachmentSide,
-                               objectSize: CGSize,
-                               surfaceRect: CGRect,
-                               point: CGPoint,
-                               offset: CGPoint) -> CGPoint {
+                                objectSize: CGSize,
+                                point: CGPoint) -> CGPoint {
         let hw = objectSize.width / 2
         let hh = objectSize.height / 2
 
-        let base: CGPoint
         switch attachmentSide {
         case .bottom:
-            // Bottom edge of object sits on top edge of floor surface.
-            base = CGPoint(x: point.x, y: surfaceRect.maxY + hh)
+            return CGPoint(x: point.x, y: point.y + hh)
         case .top:
-            // Top edge of object touches bottom edge of ceiling surface.
-            base = CGPoint(x: point.x, y: surfaceRect.minY - hh)
+            return CGPoint(x: point.x, y: point.y - hh)
         case .left:
-            // Left edge of object touches right edge of left‑wall surface.
-            base = CGPoint(x: surfaceRect.maxX + hw, y: point.y)
+            return CGPoint(x: point.x + hw, y: point.y)
         case .right:
-            // Right edge of object touches left edge of right‑wall surface.
-            base = CGPoint(x: surfaceRect.minX - hw, y: point.y)
+            return CGPoint(x: point.x - hw, y: point.y)
         case .back:
-            // Object lies flat against the back wall at the tapped point.
-            base = CGPoint(x: point.x, y: point.y)
+            return CGPoint(x: point.x, y: point.y)
         }
-
-        return CGPoint(x: base.x + offset.x, y: base.y + offset.y)
     }
 
     // MARK: Debug logging
@@ -374,8 +494,8 @@ extension HouseObjectDefinition {
     /// are available. Toggle off before shipping.
     static var debugSamplesEnabled = true
 
-    /// A handful of representative definitions covering every surface
-    /// kind and attachment side so we can validate the resolver.
+    /// A handful of representative definitions covering the active miniroom
+    /// surfaces so we can validate the resolver.
     static var sampleDefinitions: [HouseObjectDefinition] {
         guard debugSamplesEnabled else { return [] }
         return [
@@ -463,53 +583,6 @@ extension HouseObjectDefinition {
                 isInteractive: false,
                 needsPhysics: false
             ),
-            HouseObjectDefinition(
-                id: "sample_ceiling_lamp",
-                name: "Ceiling Lamp",
-                displayName: "Luminária de teto",
-                assetName: nil,
-                category: .ceilingDecoration,
-                placementRules: [
-                    HouseObjectPlacementRule(
-                        surfaceCompatibilities: [
-                            HouseObjectSurfaceCompatibility(
-                                supportedSurfaces: [.ceiling],
-                                attachmentSide: .top
-                            )
-                        ],
-                        allowsFreePositioning: false,
-                        defaultOffset: .zero
-                    )
-                ],
-                defaultSize: CGSize(width: 22, height: 28),
-                isInteractive: false,
-                needsPhysics: false
-            ),
-            HouseObjectDefinition(
-                id: "sample_side_ornament",
-                name: "Side Ornament",
-                displayName: "Ornamento lateral",
-                assetName: nil,
-                category: .leftWallDecoration,
-                placementRules: [
-                    HouseObjectPlacementRule(
-                        surfaceCompatibilities: [
-                            HouseObjectSurfaceCompatibility(
-                                supportedSurfaces: [.leftWall],
-                                attachmentSide: .left
-                            ),
-                            HouseObjectSurfaceCompatibility(
-                                supportedSurfaces: [.rightWall],
-                                attachmentSide: .right
-                            )
-                        ],
-                        defaultOffset: .zero
-                    )
-                ],
-                defaultSize: CGSize(width: 8, height: 36),
-                isInteractive: false,
-                needsPhysics: false
-            )
         ]
     }
 
@@ -528,6 +601,7 @@ extension HouseObjectDefinition {
         container.name = "debug_placed_\(definition.id)"
         container.position = position
         container.zPosition = zLayer
+        container.setScale(definition.displayScale)
 
         let rect = SKShapeNode(rectOf: definition.defaultSize, cornerRadius: 6)
         rect.fillColor = definition.category.debugPlaceholderFill
@@ -554,10 +628,9 @@ extension HouseObjectCategory {
     var debugPlaceholderFill: UIColor {
         switch self {
         case .floorFurniture:     return UIColor(red: 0.36, green: 0.42, blue: 0.28, alpha: 0.80)
-        case .ceilingDecoration:  return UIColor(red: 0.60, green: 0.54, blue: 0.22, alpha: 0.80)
         case .backWallDecoration: return UIColor(red: 0.30, green: 0.50, blue: 0.56, alpha: 0.80)
-        case .leftWallDecoration: return UIColor(red: 0.54, green: 0.28, blue: 0.38, alpha: 0.80)
-        case .rightWallDecoration:return UIColor(red: 0.28, green: 0.52, blue: 0.40, alpha: 0.80)
+        case .ceilingDecoration, .leftWallDecoration, .rightWallDecoration:
+            return UIColor(red: 0.30, green: 0.50, blue: 0.56, alpha: 0.80)
         case .functional:         return UIColor(red: 0.50, green: 0.50, blue: 0.50, alpha: 0.80)
         case .container:          return UIColor(red: 0.44, green: 0.36, blue: 0.22, alpha: 0.80)
         }
@@ -573,9 +646,8 @@ private extension HouseSurfaceKind {
         switch self {
         case .floor:     return "chão"
         case .backWall:  return "parede"
-        case .ceiling:   return "teto"
-        case .leftWall:  return "parede esquerda"
-        case .rightWall: return "parede direita"
+        case .ceiling, .leftWall, .rightWall:
+            return "parede"
         }
     }
 }
@@ -587,7 +659,7 @@ extension RoomSurfaceMapping {
     /// Returns all surface kinds this room currently maps, for
     /// quick runtime introspection (e.g. UI surface‑filter lists).
     var availableSurfaceKinds: [HouseSurfaceKind] {
-        Array(surfaces.keys)
+        HouseSurfaceKind.activeMiniroomSurfaces.filter { surfaces[$0] != nil }
     }
 
     /// Quick check: does this room support the given surface kind?

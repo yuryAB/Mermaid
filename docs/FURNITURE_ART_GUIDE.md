@@ -23,6 +23,11 @@ quando a imagem esta grande, provavelmente e detalhe demais.
 
 ## Resultado De Referencia
 
+Assets aprovados como referencia direta:
+
+- `Ester/Assets.xcassets/MermaidSideboard.imageset/mermaid-sideboard.png`
+- `Ester/Assets.xcassets/MermaidDresser.imageset/mermaid-dresser.png`
+
 O aparador de sala com tematica de sereia funcionou porque combinou estas escolhas:
 
 - corpo principal coral/pessego, grande e arredondado
@@ -36,8 +41,14 @@ O aparador de sala com tematica de sereia funcionou porque combinou estas escolh
 - paleta pequena: coral/pessego, lavanda suave, branco perola e acento dourado
 - sem textura de madeira, sem brilho realista, sem sombra no chao
 
-O ponto principal: primeiro o asset precisa ler como movel; depois, a tematica de
-sereia aparece em curvas, conchas, perolas, ondas e nadadeiras.
+A comoda funcionou quando manteve o topo livre. Para moveis que podem receber
+outros objetos no futuro, a superficie superior deve ficar limpa e usavel. A
+tematica de sereia deve aparecer nas gavetas, puxadores, pes, bordas e frente,
+nao como props soltos apoiados no tampo.
+
+O ponto principal: primeiro o asset precisa ler como movel funcional; depois, a
+tematica de sereia aparece em curvas, conchas, perolas, ondas e nadadeiras.
+Ornamento nunca deve atrapalhar a funcao do objeto.
 
 ## Padrao Visual Do Jogo
 
@@ -59,6 +70,10 @@ Nuances importantes para moveis:
 - A silhueta deve explicar a funcao do movel antes dos detalhes.
 - Evite renderizacao realista, pixel art, pintura com textura, sombras complexas,
   highlights brilhantes e madeira com veios realistas.
+- Evite aspecto 3D. O asset pode ter leves variacoes internas de cor, mas nao
+  deve parecer iluminado por uma luz real nem modelado em volume.
+- Se a imagem gerada ja parece pertencer ao jogo, preserve essa saida. Nao tente
+  deixar o asset "mais flat" com filtros depois da geracao.
 
 ## Como Traduzir Tema De Sereia Para Moveis
 
@@ -74,6 +89,7 @@ Bom:
 - detalhe unico de coral, estrela-do-mar ou concha bem simplificado
 - laterais levemente onduladas
 - detalhes lavanda, perola ou dourado em areas pequenas
+- tampo vazio quando o movel puder servir de apoio para outros objetos
 
 Ruim:
 
@@ -82,8 +98,38 @@ Ruim:
 - arabescos finos
 - veios de madeira realistas
 - brilho metalico detalhado
-- varias decoracoes soltas em cima do movel
+- concha, coral, vaso, perola, estatua ou qualquer prop solto em cima de moveis
+  que devem ter tampo usavel
 - fundo de sala, parede, tapete ou outros moveis quando o pedido for asset isolado
+
+## Funcao Antes Do Ornamento
+
+Antes de gerar, decida se o movel tem uma superficie que pode receber outros
+objetos no jogo.
+
+Moveis que geralmente precisam de topo livre:
+
+- aparador
+- comoda
+- criado-mudo
+- mesa de centro
+- estante baixa
+- banco
+- bau
+- bancada
+
+Para esses moveis:
+
+- nao coloque objetos em cima do tampo
+- nao use conchas, vasos, corais, livros ou perolas como props apoiados no topo
+- use o tema marinho integrado a estrutura: gaveta-concha, puxador-perola,
+  pe-nadadeira, borda em onda, painel frontal com coral simples
+- o topo pode ter curva ou acabamento de onda, mas deve continuar vazio e
+  visualmente disponivel para receber itens depois
+
+Para objetos que sao decorativos por natureza, como vaso, escultura, globo,
+cesta ou instrumento, o proprio objeto pode ter ornamento. Mesmo assim, evite
+varios props soltos competindo com a silhueta principal.
 
 ## Checklist Antes De Gerar
 
@@ -96,6 +142,7 @@ Defina:
 - Tema marinho principal: concha, onda, perola, coral, nadadeira, escama grande.
 - Um detalhe de leitura rapida: puxador-perola, topo-onda, gaveta-concha,
   pe-nadadeira, broche-coral.
+- Superficie util: o topo precisa ficar livre ou o objeto e decorativo por si so?
 - Paleta dominante: 2 ou 3 cores principais.
 - Nivel de detalhe: formas grandes, sem textura fina.
 - Enquadramento: objeto inteiro, centralizado, sem corte.
@@ -117,10 +164,21 @@ Para aparadores especificamente:
 
 - proporcao horizontal, mais largo do que alto
 - tampo claro e levemente curvo
+- tampo livre, sem props colocados em cima
 - duas portas ou gavetas grandes
 - pes curtos visiveis
 - uma decoracao marinha principal integrada ao movel
 - frente limpa, sem muitas divisorias
+
+Para comodas especificamente:
+
+- proporcao vertical moderada, mais alta que aparador mas ainda larga e estavel
+- tampo livre, limpo e usavel
+- duas ou tres gavetas horizontais grandes
+- gavetas podem ter frente inspirada em concha, mas como parte da gaveta
+- puxadores como perolas grandes
+- pes curtos arredondados ou em forma de nadadeira
+- ornamento principal na frente inferior ou nas gavetas, nunca apoiado no topo
 
 ## Prompt Base
 
@@ -150,6 +208,8 @@ One [tipo de movel], centered, full object visible.
 Use [paleta].
 Include only these readable mermaid/furniture cues: [1 a 3 elementos grandes].
 Keep details large and readable at small game scale.
+If this furniture has a usable top surface, keep the top empty with no props on it.
+Integrate mermaid cues into the drawers, doors, legs, edges, handles, or front panel.
 
 Composition/framing:
 Straight front view or gentle 3/4 front view, centered, generous padding, no cropping.
@@ -163,8 +223,10 @@ no shadow, no texture.
 Constraints:
 Do not use #00ff00 anywhere in the furniture.
 No text, no watermark, no other objects, no scenery, no UI frame.
+No loose props sitting on top of furniture that should have a usable surface.
 Avoid realistic wood grain, avoid tiny decorative carvings, avoid complex shell detail,
-avoid shiny highlights, avoid ornate furniture realism.
+avoid shiny highlights, avoid ornate furniture realism, avoid 3D volume,
+avoid realistic lighting.
 The final result should be simpler and flatter than a children's book illustration.
 ```
 
@@ -194,6 +256,7 @@ One sideboard cabinet / aparador for a living room, centered, full object visibl
 Rounded coral-peach wooden body, soft scallop-shell drawer fronts, pearl-like round knobs,
 gentle wave-shaped top edge, two rounded cabinet doors, short curved legs like little fins,
 one large readable shell ornament or small coral motif integrated into the furniture design.
+Keep the top surface empty; do not place loose objects on top of the sideboard.
 Use 2 to 3 dominant colors: coral-peach, soft lavender, pearl white, with tiny warm gold accents.
 Keep details large and readable.
 
@@ -209,9 +272,60 @@ no shadow, no texture.
 Constraints:
 Do not use #00ff00 anywhere in the furniture.
 No text, no watermark, no other objects, no scenery, no UI frame.
+No loose props sitting on top of the furniture.
 Avoid realistic wood grain, avoid tiny decorative carvings, avoid complex shell detail,
-avoid shiny highlights, avoid ornate furniture realism.
+avoid shiny highlights, avoid ornate furniture realism, avoid 3D volume,
+avoid realistic lighting.
 The final result should be simpler and flatter than a children's book illustration.
+```
+
+## Prompt Exemplo: Comoda Sereia Com Topo Livre
+
+```text
+Use case: stylized-concept
+Asset type: final 2D game furniture prop sprite, transparent-background workflow source
+
+Primary request:
+Create ONLY one complete mermaid-themed dresser / comoda for a cozy mermaid game.
+It should feel gentle, warm, handmade, and magical.
+
+Critical functional requirement:
+This is a dresser with a usable top surface. Do not put any shell, coral, pearl,
+vase, statue, ornament, object, prop, or decoration sitting on top of the dresser.
+The top must stay clean and empty so future game objects can be placed there.
+
+Style/medium:
+Ultra-simple flat 2D game art, matching the approved MermaidSideboard style.
+Use clean rounded forms, broad color areas, minimal internal lines, no cast shadow,
+no contact shadow, no realistic lighting, no 3D volume, no glossy highlights.
+
+Reference style to match:
+Coral-peach body, soft lavender shell-shaped drawer fronts, pearl white knobs,
+warm gold accents, short fin-like legs, simple mobile game sprite readability.
+
+Subject details:
+One compact dresser, centered, full object visible. Rounded coral-peach body.
+Two or three large horizontal drawers. Drawer fronts may use simple lavender
+scallop-shell curves integrated into the drawers. Use large pearl knobs.
+Use a gentle wave-shaped empty top edge and short rounded fin-like legs.
+Any shell or coral motif must be integrated into the drawer/front design, never
+placed as a loose object on top.
+
+Composition/framing:
+Straight front view or very gentle 3/4 front view, centered, generous padding,
+no cropping. No room scene, no floor, no wall, no extra furniture.
+
+Background:
+Perfectly flat solid #00ff00 chroma-key background for later removal.
+Absolutely uniform green fill from edge to edge, no gradient, no vignette,
+no shadow, no texture.
+
+Constraints:
+Do not use #00ff00 anywhere in the furniture.
+No text, no watermark, no other objects, no scenery, no UI frame.
+No loose props on top. Avoid realistic wood grain, tiny decorative carvings,
+complex shell detail, shiny highlights, ornate furniture realism, 3D volume,
+realistic lighting, texture, grain, speckles, and painterly shading.
 ```
 
 ## Paleta Recomendada
@@ -284,6 +398,8 @@ Ruim:
 - sombras complexas
 - varios objetos decorativos em cima
 - linhas internas muito finas
+- ornamento que prejudica a funcao do movel, como uma concha grande ocupando o
+  topo de uma comoda ou mesa
 
 ## Negativos Uteis
 
@@ -292,7 +408,8 @@ Inclua quando o gerador insistir em detalhar demais:
 ```text
 Avoid realistic rendering, avoid painterly texture, avoid grain, avoid heavy outlines,
 avoid complex shadows, avoid glossy highlights, avoid tiny details, avoid extra props,
-avoid background scenery, avoid text, avoid watermark, avoid UI frame.
+avoid background scenery, avoid text, avoid watermark, avoid UI frame, avoid 3D volume,
+avoid realistic lighting.
 ```
 
 Inclua quando o movel ficar fora do estilo:
@@ -309,6 +426,7 @@ Inclua quando a tematica de sereia virar excesso:
 Use only one to three large mermaid-themed cues.
 Integrate the shell, pearl, wave, coral, fin, or scale motif into the furniture shape.
 Do not add many small ocean decorations.
+Do not place loose decorative objects on top of furniture with a usable surface.
 ```
 
 ## Fundo Transparente
@@ -330,6 +448,22 @@ O asset final deve ser PNG RGBA com fundo transparente.
 A imagem final nao deve manter a area verde nem a sobra transparente do canvas
 original. Depois de remover o chroma-key, faca um recorte pelo limite real da
 ilustracao, usando o bounding box dos pixels com alpha visivel.
+
+Nao use pos-processamento para alterar o estilo da arte gerada. Nao aplique
+quantizacao de paleta, filtro de textura, blur, mode filter, posterizacao,
+sharpen, recolor automatico ou qualquer transformacao estetica. Se a imagem
+gerada esta boa no chroma-key, o pos-processamento deve fazer somente:
+
+- remocao do fundo verde
+- limpeza de pixels soltos de chroma-key quando necessario
+- recorte do canvas transparente
+
+Se a arte estiver com estilo errado, gere novamente com prompt melhor. Nao tente
+"consertar" estilo ruim com filtro.
+
+Importante: "flat" e uma direcao para o prompt de geracao, nao uma autorizacao
+para achatar a imagem depois. Filtros de paleta ou textura podem criar manchas,
+ruido e artefatos que quebram o estilo mesmo quando a fonte chroma-key estava boa.
 
 Use sempre o helper local quando o asset vier de geracao com chroma-key:
 

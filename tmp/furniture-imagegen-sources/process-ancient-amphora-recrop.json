@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-ancient-amphora-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidAncientAmphora.imageset/mermaid-ancient-amphora.png",
+  "key": "#06f205",
+  "source_size": [
+    1088,
+    1446
+  ],
+  "crop_box": [
+    169,
+    186,
+    913,
+    1288
+  ],
+  "output_size": [
+    744,
+    1102
+  ],
+  "transparent_pixels": 997608,
+  "partial_pixels": 4716,
+  "corner_alpha": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

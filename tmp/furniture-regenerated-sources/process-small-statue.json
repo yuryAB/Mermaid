@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-regenerated-sources/mermaid-small-statue-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidSmallStatue.imageset/mermaid-small-statue.png",
+  "key": "#16cc1c",
+  "source_size": [
+    1085,
+    1450
+  ],
+  "crop_box": [
+    220,
+    117,
+    867,
+    1326
+  ],
+  "output_size": [
+    647,
+    1209
+  ],
+  "transparent_pixels": 1117386,
+  "partial_pixels": 3699,
+  "corner_alpha": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

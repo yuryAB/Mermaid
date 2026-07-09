@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-large-seaweed-vase-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidLargeSeaweedVase.imageset/mermaid-large-seaweed-vase.png",
+  "key": "#10e50f",
+  "source_size": [
+    1254,
+    1254
+  ],
+  "crop_box": [
+    296,
+    48,
+    897,
+    1190
+  ],
+  "output_size": [
+    601,
+    1142
+  ],
+  "transparent_pixels": 1165330,
+  "partial_pixels": 172912,
+  "corner_alpha": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

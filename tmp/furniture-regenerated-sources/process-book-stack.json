@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-regenerated-sources/mermaid-book-stack-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidBookStack.imageset/mermaid-book-stack.png",
+  "key": "#1bcf17",
+  "source_size": [
+    1254,
+    1254
+  ],
+  "crop_box": [
+    160,
+    114,
+    1116,
+    1126
+  ],
+  "output_size": [
+    956,
+    1012
+  ],
+  "transparent_pixels": 827897,
+  "partial_pixels": 102663,
+  "corner_alpha": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

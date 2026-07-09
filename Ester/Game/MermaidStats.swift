@@ -116,6 +116,10 @@ final class MermaidStats: Codable {
     private var cheatSessionBaselineData: Data?
     private var cheatSessionPersistenceBlocked = false
 
+    var isCheatSessionPersistenceBlocked: Bool {
+        cheatSessionPersistenceBlocked
+    }
+
     enum CodingKeys: String, CodingKey {
         case mermaidName, hunger, energy, mood, courage, trust, curiosity, pearls
         case phase, birthDate, phaseStartedAt, adaptationByZone, unlockedZoneKeys
@@ -1000,6 +1004,12 @@ final class MermaidStats: Codable {
         if let cheatSessionBaselineData {
             UserDefaults.standard.set(cheatSessionBaselineData, forKey: MermaidStats.saveKey)
         }
+    }
+
+    func resumePersistenceAfterCheatSessionSavingCurrentState() {
+        cheatSessionBaselineData = nil
+        cheatSessionPersistenceBlocked = false
+        save(immediately: true)
     }
 
     func save(immediately: Bool = false) {

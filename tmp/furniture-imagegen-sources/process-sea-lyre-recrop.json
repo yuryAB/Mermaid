@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-sea-lyre-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidSeaLyre.imageset/mermaid-sea-lyre.png",
+  "key": "#08e811",
+  "source_size": [
+    1132,
+    1389
+  ],
+  "crop_box": [
+    166,
+    75,
+    965,
+    1309
+  ],
+  "output_size": [
+    799,
+    1234
+  ],
+  "transparent_pixels": 1074494,
+  "partial_pixels": 14813,
+  "corner_alpha": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

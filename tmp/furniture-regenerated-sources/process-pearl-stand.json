@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-regenerated-sources/mermaid-pearl-stand-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidPearlStand.imageset/mermaid-pearl-stand.png",
+  "key": "#11d61c",
+  "source_size": [
+    1024,
+    1536
+  ],
+  "crop_box": [
+    109,
+    153,
+    902,
+    1332
+  ],
+  "output_size": [
+    793,
+    1179
+  ],
+  "transparent_pixels": 1115356,
+  "partial_pixels": 5022,
+  "corner_alpha": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

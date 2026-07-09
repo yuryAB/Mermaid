@@ -2,18 +2,15 @@
 //  RoomSurfaceMapper.swift
 //  Ester
 //
-//  Automatic surface mapping for every room in the Mermaid House.
-//  Identifies the five placement surfaces (floor, back wall, ceiling,
-//  left wall, right wall) from a room's bounds and visual components.
+//  Automatic surface mapping for every miniroom in the Mermaid House.
+//  Identifies the active placement surfaces from the room scene:
+//  floor and back wall.
 //
-//  Floor   = darker blue lower band inside the room  (static physics body)
+//  Floor   = broad lower living area inside the room  (static physics body)
 //  Back wall = lighter blue background area             (attachment-only, no physics)
-//  Ceiling = top frame/moldura bar                     (attachment surface)
-//  Left wall  = left frame/moldura bar                 (attachment surface)
-//  Right wall = right frame/moldura bar                (attachment surface)
 //
 //  All mapping is computed deterministically from the room size so every
-//  room — built at game start or created later — maps automatically.
+//  room scene maps automatically.
 //
 //  Debug outlines can be toggled with the `debugEnabled` flag.
 //
@@ -34,9 +31,27 @@ enum HousePhysicsCategory {
 enum HouseSurfaceKind: String, Codable, CaseIterable {
     case floor
     case backWall
+
+    // Legacy values kept so old saves/debug data can still decode. They are
+    // not active placement surfaces in the focused miniroom house.
     case ceiling
     case leftWall
     case rightWall
+
+    static let activeMiniroomSurfaces: [HouseSurfaceKind] = [.floor, .backWall]
+
+    var activeMiniroomSurface: HouseSurfaceKind {
+        switch self {
+        case .floor:
+            return .floor
+        case .backWall, .ceiling, .leftWall, .rightWall:
+            return .backWall
+        }
+    }
+
+    var isActiveMiniroomSurface: Bool {
+        self == .floor || self == .backWall
+    }
 }
 
 // MARK: - Single surface description
@@ -59,9 +74,8 @@ struct HouseSurface {
         switch kind {
         case .floor:     return UIColor(red: 0.94, green: 0.68, blue: 0.30, alpha: Self.debugAlpha)
         case .backWall:  return UIColor(red: 0.40, green: 0.70, blue: 0.90, alpha: Self.debugAlpha)
-        case .ceiling:   return UIColor(red: 0.98, green: 0.92, blue: 0.40, alpha: Self.debugAlpha)
-        case .leftWall:  return UIColor(red: 0.96, green: 0.42, blue: 0.52, alpha: Self.debugAlpha)
-        case .rightWall: return UIColor(red: 0.42, green: 0.80, blue: 0.56, alpha: Self.debugAlpha)
+        case .ceiling, .leftWall, .rightWall:
+            return UIColor.gray.withAlphaComponent(Self.debugAlpha)
         }
     }
 
@@ -69,9 +83,8 @@ struct HouseSurface {
         switch kind {
         case .floor:     return UIColor(red: 0.94, green: 0.68, blue: 0.30, alpha: 0.55)
         case .backWall:  return UIColor(red: 0.40, green: 0.70, blue: 0.90, alpha: 0.45)
-        case .ceiling:   return UIColor(red: 0.98, green: 0.92, blue: 0.40, alpha: 0.50)
-        case .leftWall:  return UIColor(red: 0.96, green: 0.42, blue: 0.52, alpha: 0.50)
-        case .rightWall: return UIColor(red: 0.42, green: 0.80, blue: 0.56, alpha: 0.50)
+        case .ceiling, .leftWall, .rightWall:
+            return UIColor.gray.withAlphaComponent(0.35)
         }
     }
 
@@ -79,9 +92,8 @@ struct HouseSurface {
         switch kind {
         case .floor:     return "chão"
         case .backWall:  return "parede"
-        case .ceiling:   return "teto"
-        case .leftWall:  return "esq."
-        case .rightWall: return "dir."
+        case .ceiling, .leftWall, .rightWall:
+            return "legado"
         }
     }
 
@@ -109,7 +121,7 @@ struct HouseSurface {
     }
 }
 
-// MARK: - Room surface mapping (all five surfaces for one room)
+// MARK: - Room surface mapping
 
 struct RoomSurfaceMapping {
     let roomSize: CGSize
@@ -117,19 +129,16 @@ struct RoomSurfaceMapping {
 
     var floor:     HouseSurface { surfaces[.floor]! }
     var backWall:  HouseSurface { surfaces[.backWall]! }
-    var ceiling:   HouseSurface { surfaces[.ceiling]! }
-    var leftWall:  HouseSurface { surfaces[.leftWall]! }
-    var rightWall: HouseSurface { surfaces[.rightWall]! }
 
     /// Creates the mapping for a room of the given size. All surfaces are
     /// computed deterministically — the same visual-node logic used by
-    /// `HouseRoomNode` and `HouseRoomFrontFrameNode` is replicated here.
+    /// `HouseRoomNode` is replicated here.
     init(roomSize: CGSize) {
         self.roomSize = roomSize
 
-        // --- Floor (darker blue band inside the room) -----------------------
-        let floorHeight      = max(10, roomSize.height * 0.10)
-        let floorWidth       = roomSize.width - 8
+        // --- Floor (broad lower living area inside the miniroom) ------------
+        let floorHeight      = max(80, roomSize.height * 0.32)
+        let floorWidth       = roomSize.width - 14
         let floorCenterY     = -roomSize.height / 2 + floorHeight / 2 + 4
         let floorRect = CGRect(x: -floorWidth / 2,
                                y: floorCenterY - floorHeight / 2,
@@ -142,35 +151,9 @@ struct RoomSurfaceMapping {
                               width: roomSize.width,
                               height: roomSize.height)
 
-        // --- Frame bar geometry (copied from HouseRoomFrontFrameNode) --------
-        let thickness = max(7, roomSize.width * 0.026)
-        let halfW     = roomSize.width / 2
-        let halfH     = roomSize.height / 2
-
-        // Ceiling: top bar of the frame.
-        let ceilingRect = CGRect(x: -(roomSize.width + thickness) / 2,
-                                 y: halfH - thickness,
-                                 width: roomSize.width + thickness,
-                                 height: thickness)
-
-        // Left wall: left bar of the frame (spans full room height).
-        let leftWallRect = CGRect(x: -halfW,
-                                  y: -halfH,
-                                  width: thickness,
-                                  height: roomSize.height)
-
-        // Right wall: right bar of the frame.
-        let rightWallRect = CGRect(x: halfW - thickness,
-                                   y: -halfH,
-                                   width: thickness,
-                                   height: roomSize.height)
-
         self.surfaces = [
             .floor:     HouseSurface(kind: .floor,     localRect: floorRect),
-            .backWall:  HouseSurface(kind: .backWall,  localRect: wallRect),
-            .ceiling:   HouseSurface(kind: .ceiling,   localRect: ceilingRect),
-            .leftWall:  HouseSurface(kind: .leftWall,  localRect: leftWallRect),
-            .rightWall: HouseSurface(kind: .rightWall, localRect: rightWallRect)
+            .backWall:  HouseSurface(kind: .backWall,  localRect: wallRect)
         ]
     }
 
@@ -195,7 +178,7 @@ struct RoomSurfaceMapping {
 final class RoomSurfaceMapper {
 
     /// When `true`, rooms render translucent debug overlays showing the
-    /// five mapped surfaces. Set to `false` to disable all visualisation.
+    /// active mapped surfaces. Set to `false` to disable all visualisation.
     static var debugEnabled = false
 
     /// Builds a `RoomSurfaceMapping` for the given room size. If debug
@@ -213,12 +196,8 @@ final class RoomSurfaceMapper {
         return kinds.map { mapping.surfaces[$0]!.makeDebugNode() }
     }
 
-    /// Returns debug overlay nodes for the frame surfaces (ceiling, left wall,
-    /// right wall). These should be added to the room's front‑layer node so they
-    /// sit on top of the solid frame/moldura bars.
+    /// The focused miniroom no longer exposes frame surfaces for placement.
     static func makeFrameDebugNodes(for mapping: RoomSurfaceMapping) -> [SKNode] {
-        guard debugEnabled else { return [] }
-        let kinds: [HouseSurfaceKind] = [.ceiling, .leftWall, .rightWall]
-        return kinds.map { mapping.surfaces[$0]!.makeDebugNode() }
+        []
     }
 }

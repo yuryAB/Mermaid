@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-decorative-chest-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidDecorativeChest.imageset/mermaid-decorative-chest.png",
+  "key": "#05e60e",
+  "source_size": [
+    1345,
+    1169
+  ],
+  "crop_box": [
+    139,
+    165,
+    1204,
+    1007
+  ],
+  "output_size": [
+    1065,
+    842
+  ],
+  "transparent_pixels": 771379,
+  "partial_pixels": 3860,
+  "corner_alpha": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

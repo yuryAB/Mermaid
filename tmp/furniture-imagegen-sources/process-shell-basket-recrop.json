@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-shell-basket-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidShellBasket.imageset/mermaid-shell-basket.png",
+  "key": "#0be10e",
+  "source_size": [
+    1343,
+    1171
+  ],
+  "crop_box": [
+    233,
+    136,
+    1100,
+    961
+  ],
+  "output_size": [
+    867,
+    825
+  ],
+  "transparent_pixels": 1127981,
+  "partial_pixels": 6264,
+  "corner_alpha": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-regenerated-sources/mermaid-stone-sculpture-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidStoneSculpture.imageset/mermaid-stone-sculpture.png",
+  "key": "#11d919",
+  "source_size": [
+    1168,
+    1346
+  ],
+  "crop_box": [
+    320,
+    102,
+    895,
+    1240
+  ],
+  "output_size": [
+    575,
+    1138
+  ],
+  "transparent_pixels": 1189708,
+  "partial_pixels": 3466,
+  "corner_alpha": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

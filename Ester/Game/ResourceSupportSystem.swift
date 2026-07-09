@@ -235,6 +235,13 @@ enum RefugeShopCatalog {
                       tint: UIColor(red: 0.92, green: 0.62, blue: 0.47, alpha: 1),
                       symbolName: "table.furniture.fill",
                       fallbackGlyph: "T"),
+        furnitureItem(id: HouseObjectCatalog.mermaidBirthdayTableID,
+                      title: "Mesa feliz aniversário",
+                      blurb: "Mesa de festa com bolo e vela de 25 anos.",
+                      cost: 1_650,
+                      tint: UIColor(red: 0.97, green: 0.58, blue: 0.45, alpha: 1),
+                      symbolName: "birthday.cake.fill",
+                      fallbackGlyph: "25"),
         furnitureItem(id: "mermaid_large_seaweed_vase",
                       title: "Vaso grande com alga",
                       blurb: "Vaso alto com algas decorativas.",
@@ -311,7 +318,63 @@ enum RefugeShopCatalog {
                       cost: 1_000,
                       tint: UIColor(red: 0.70, green: 0.58, blue: 0.78, alpha: 1),
                       symbolName: "person.crop.artframe",
-                      fallbackGlyph: "N")
+                      fallbackGlyph: "N"),
+        furnitureItem(id: HouseObjectCatalog.mermaidBirthdayWallArtID,
+                      title: "Quadro feliz aniversário",
+                      blurb: "Quadro de parede com mensagem de festa.",
+                      cost: 1_250,
+                      tint: UIColor(red: 0.95, green: 0.47, blue: 0.43, alpha: 1),
+                      symbolName: "photo.artframe",
+                      fallbackGlyph: "F"),
+        furnitureItem(id: HouseObjectCatalog.mermaidShellMirrorID,
+                      title: "Espelho de concha",
+                      blurb: "Espelho de parede com moldura de concha.",
+                      cost: 1_450,
+                      tint: UIColor(red: 0.95, green: 0.55, blue: 0.49, alpha: 1),
+                      symbolName: "sparkle.magnifyingglass",
+                      fallbackGlyph: "E"),
+        furnitureItem(id: HouseObjectCatalog.mermaidPearlClockID,
+                      title: "Relógio de pérolas",
+                      blurb: "Relógio de parede com marcadores perolados.",
+                      cost: 1_200,
+                      tint: UIColor(red: 0.85, green: 0.58, blue: 0.89, alpha: 1),
+                      symbolName: "clock.fill",
+                      fallbackGlyph: "R"),
+        furnitureItem(id: HouseObjectCatalog.mermaidSeaMapFrameID,
+                      title: "Mapa dos mares",
+                      blurb: "Mapa decorativo para sonhar com rotas.",
+                      cost: 1_600,
+                      tint: UIColor(red: 0.86, green: 0.63, blue: 0.43, alpha: 1),
+                      symbolName: "map.fill",
+                      fallbackGlyph: "M"),
+        furnitureItem(id: HouseObjectCatalog.mermaidCoralWallShelfID,
+                      title: "Prateleira coral",
+                      blurb: "Prateleira de parede com suportes de concha.",
+                      cost: 1_100,
+                      tint: UIColor(red: 0.95, green: 0.52, blue: 0.47, alpha: 1),
+                      symbolName: "rectangle.split.3x1.fill",
+                      fallbackGlyph: "P"),
+        furnitureItem(id: HouseObjectCatalog.mermaidStarfishGarlandID,
+                      title: "Guirlanda de estrelas",
+                      blurb: "Cordão festivo com estrelas-do-mar e pérolas.",
+                      cost: 850,
+                      tint: UIColor(red: 0.96, green: 0.63, blue: 0.45, alpha: 1),
+                      symbolName: "sparkles",
+                      fallbackGlyph: "G"),
+        furnitureItem(id: HouseObjectCatalog.mermaidJellyfishSconceID,
+                      title: "Arandela medusa",
+                      blurb: "Luminária decorativa em forma de medusa.",
+                      cost: 1_550,
+                      tint: UIColor(red: 0.76, green: 0.58, blue: 0.92, alpha: 1),
+                      symbolName: "lightbulb.fill",
+                      fallbackGlyph: "J"),
+        furnitureItem(id: HouseObjectCatalog.mermaidWaveTapestryID,
+                      title: "Tapeçaria de ondas",
+                      blurb: "Tapeçaria macia com ondas e concha.",
+                      cost: 1_300,
+                      tint: UIColor(red: 0.72, green: 0.59, blue: 0.91, alpha: 1),
+                      symbolName: "scroll.fill",
+                      fallbackGlyph: "T")
     ]
 
     static let items: [RefugeShopItem] = [
@@ -984,40 +1047,16 @@ enum SupportResourceVisualFactory {
     }
 }
 
+/// The refuge shop, presented by the "seller sardines" NPC. Resources and house
+/// furniture are exposed as scalable categories; new categories can be added by
+/// extending `RefugeShopCatalog` and appending a `VendorCategory` below without
+/// any layout changes. Rendering, scrolling and the NPC idle-breath live in the
+/// shared `VendorScreenNode`.
 final class RefugeStoreOverlay: SKNode {
-    private enum StoreSection {
-        case resources
-        case furniture
-
-        var title: String {
-            switch self {
-            case .resources: return "Recursos"
-            case .furniture: return "Móveis"
-            }
-        }
-
-        var actionName: String {
-            switch self {
-            case .resources: return "store_section_resources"
-            case .furniture: return "store_section_furniture"
-            }
-        }
-    }
-
-    private let size: CGSize
-    private let insets: UIEdgeInsets
     private let stats: MermaidStats
-    private let closeTitle: String
     private let onClose: (() -> Void)?
     private let onPurchase: ((RefugeShopItem) -> Void)?
-    private var selectedSection: StoreSection = .resources
-    private let sectionSwitchLayer = SKNode()
-    private let itemLayer = SKNode()
-    private var sectionSwitchWidth: CGFloat = 0
-    private var sectionSwitchCenterY: CGFloat = 0
-    private var itemRowWidth: CGFloat = 0
-    private var itemListTopY: CGFloat = 0
-    private var itemListAvailableHeight: CGFloat = 0
+    private var screen: VendorScreenNode?
 
     init(size: CGSize,
          insets: UIEdgeInsets,
@@ -1026,304 +1065,83 @@ final class RefugeStoreOverlay: SKNode {
          handlesTouches: Bool = false,
          onClose: (() -> Void)? = nil,
          onPurchase: ((RefugeShopItem) -> Void)? = nil) {
-        self.size = size
-        self.insets = insets
         self.stats = stats
-        self.closeTitle = closeTitle
         self.onClose = onClose
         self.onPurchase = onPurchase
         super.init()
         isUserInteractionEnabled = handlesTouches
-        build()
+
+        let config = VendorScreenConfig(
+            title: "Loja",
+            description: "Troque suas conchas por recursos e móveis para o refúgio.",
+            npcAssetName: "SellerSardines",
+            breath: .sway,
+            closeTitle: closeTitle,
+            categories: [
+                VendorCategory(id: "resources",
+                               title: "Recursos",
+                               entries: { RefugeStoreOverlay.entries(from: RefugeShopCatalog.resources()) }),
+                VendorCategory(id: "furniture",
+                               title: "Móveis",
+                               entries: { RefugeStoreOverlay.entries(from: RefugeShopCatalog.furniture()) })
+            ],
+            balance: { [weak stats] in Int(stats?.pearls ?? 0) })
+
+        let screen = VendorScreenNode(size: size,
+                                      insets: insets,
+                                      config: config,
+                                      onClose: { [weak self] in self?.onClose?() },
+                                      onSelect: { [weak self] _, entryId in
+                                          guard let item = RefugeShopCatalog.item(withId: entryId) else { return }
+                                          self?.onPurchase?(item)
+                                      })
+        addChild(screen)
+        self.screen = screen
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    private func build() {
-        let backdrop = SKShapeNode(rectOf: CGSize(width: size.width * 2, height: size.height * 2))
-        backdrop.fillColor = GameUI.palePaper
-        backdrop.strokeColor = GameUI.accent.withAlphaComponent(0.2)
-        backdrop.zPosition = 0
-        addChild(backdrop)
-
-        let top = size.height / 2 - insets.top
-        let rowWidth = min(size.width - 28, 420)
-        let title = makeLabel(text: "Loja", fontSize: 21, bold: true, color: GameUI.ink)
-        title.position = CGPoint(x: 0, y: top - 38)
-        title.zPosition = 2
-        addChild(title)
-
-        let seller = SKSpriteNode(imageNamed: "SellerSardines")
-        seller.size = CGSize(width: 58, height: 92)
-        seller.position = CGPoint(x: -rowWidth / 2 + 52, y: top - 94)
-        seller.zPosition = 2
-        addChild(seller)
-
-        let greeting = makeLabel(text: "Tenho recursos fresquinhos para ajudar a sereia.",
-                                 fontSize: 12,
-                                 color: GameUI.mutedInk)
-        greeting.horizontalAlignmentMode = .left
-        greeting.preferredMaxLayoutWidth = rowWidth - 118
-        greeting.numberOfLines = 2
-        greeting.lineBreakMode = .byWordWrapping
-        greeting.position = CGPoint(x: -rowWidth / 2 + 96, y: top - 72)
-        greeting.zPosition = 2
-        addChild(greeting)
-
-        let pearlLine = makeLabel(text: "Conchas \(GameUI.shellAmountText(stats.pearls))", fontSize: 13, bold: true, color: GameUI.gold)
-        pearlLine.horizontalAlignmentMode = .left
-        pearlLine.position = CGPoint(x: -rowWidth / 2 + 96, y: top - 114)
-        pearlLine.zPosition = 2
-        addChild(pearlLine)
-
-        sectionSwitchWidth = rowWidth
-        sectionSwitchCenterY = top - 152
-        sectionSwitchLayer.zPosition = 3
-        addChild(sectionSwitchLayer)
-        renderSectionSwitch()
-
-        itemRowWidth = rowWidth
-        itemListTopY = top - 198
-        itemListAvailableHeight = max(330, size.height - insets.top - insets.bottom - 280)
-        itemLayer.zPosition = 2
-        addChild(itemLayer)
-        renderSelectedItems()
-
-        let closeButton = SKNode()
-        closeButton.name = "store_close"
-        closeButton.position = CGPoint(x: 0, y: -size.height / 2 + insets.bottom + 48)
-        closeButton.zPosition = 4
-        let closeCard = GameUI.card(size: CGSize(width: min(220, size.width - 80), height: 44),
-                                    cornerRadius: 9,
-                                    tint: GameUI.accent)
-        closeCard.name = "store_close"
-        closeButton.addChild(closeCard)
-        let closeLabel = makeLabel(text: closeTitle, fontSize: 13, bold: true, color: GameUI.ink)
-        closeLabel.name = "store_close"
-        closeLabel.verticalAlignmentMode = .center
-        closeLabel.zPosition = 5
-        closeButton.addChild(closeLabel)
-        addChild(closeButton)
+    /// Refreshes prices, the Shell balance and item availability in place while
+    /// preserving the selected category and scroll position.
+    func reload() {
+        screen?.reload()
     }
 
-    private func selectedItems() -> [RefugeShopItem] {
-        switch selectedSection {
-        case .resources:
-            return RefugeShopCatalog.resources()
-        case .furniture:
-            return RefugeShopCatalog.furniture()
+    // MARK: - Model mapping
+
+    private static func entries(from items: [RefugeShopItem]) -> [VendorEntry] {
+        items.map { item in
+            VendorEntry(id: item.id,
+                        title: item.title,
+                        subtitle: item.blurb,
+                        actionText: "\(GameUI.shellAmountText(item.cost))\nconchas",
+                        actionEnabled: true,
+                        tint: item.tint,
+                        makeIcon: { diameter in RefugeStoreOverlay.iconNode(for: item, diameter: diameter) })
         }
     }
 
-    private func selectStoreSection(_ section: StoreSection) {
-        guard selectedSection != section else { return }
-        selectedSection = section
-        renderSectionSwitch()
-        renderSelectedItems()
-        GameAudio.shared.play(.uiOpenPanel)
-    }
-
-    private func renderSectionSwitch() {
-        sectionSwitchLayer.removeAllChildren()
-
-        let width = sectionSwitchWidth
-        let centerY = sectionSwitchCenterY
-        guard width > 0 else { return }
-
-        let height: CGFloat = 34
-        let gap: CGFloat = 8
-        let segmentWidth = (width - gap) / 2
-        let sections: [StoreSection] = [.resources, .furniture]
-
-        for (index, section) in sections.enumerated() {
-            let active = section == selectedSection
-            let centerX = -width / 2 + segmentWidth / 2 + CGFloat(index) * (segmentWidth + gap)
-            let name = section.actionName
-
-            let node = SKNode()
-            node.name = name
-            node.position = CGPoint(x: centerX, y: centerY)
-            node.zPosition = 3
-            sectionSwitchLayer.addChild(node)
-
-            let bg = GameUI.card(size: CGSize(width: segmentWidth, height: height),
-                                 cornerRadius: 9,
-                                 tint: active ? GameUI.accent : GameUI.mutedInk.withAlphaComponent(0.34),
-                                 baseColors: active ? GameUI.tintedColors(GameUI.accent) : [UIColor.white.withAlphaComponent(0.24)])
-            bg.name = name
-            node.addChild(bg)
-
-            let label = makeLabel(text: section.title,
-                                  fontSize: 12.5,
-                                  bold: true,
-                                  color: active ? GameUI.ink : GameUI.mutedInk)
-            label.name = name
-            label.verticalAlignmentMode = .center
-            label.zPosition = 4
-            node.addChild(label)
-        }
-    }
-
-    private func renderSelectedItems() {
-        itemLayer.removeAllChildren()
-
-        let items = selectedItems()
-        let itemCount = max(1, items.count)
-        let rowGap: CGFloat = 8
-        let reservedForRows = CGFloat(max(0, itemCount - 1)) * rowGap
-        let rowHeight = min(76, max(56, (itemListAvailableHeight - reservedForRows) / CGFloat(itemCount)))
-
-        if items.isEmpty {
-            let empty = makeLabel(text: selectedSection == .furniture ? "Nenhum móvel disponível." : "Nenhum recurso disponível.",
-                                  fontSize: 13,
-                                  color: GameUI.mutedInk)
-            empty.position = CGPoint(x: 0, y: itemListTopY - 18)
-            empty.zPosition = 2
-            itemLayer.addChild(empty)
-            return
-        }
-
-        for (index, item) in items.enumerated() {
-            addRow(item: item,
-                   width: itemRowWidth,
-                   height: rowHeight,
-                   centerY: itemListTopY - CGFloat(index) * (rowHeight + rowGap))
-        }
-    }
-
-    private func addRow(item: RefugeShopItem,
-                        width: CGFloat,
-                        height: CGFloat,
-                        centerY: CGFloat) {
-        let actionName = "store_item_\(item.id)"
-        let row = SKNode()
-        row.name = actionName
-        row.position = CGPoint(x: 0, y: centerY)
-        row.zPosition = 2
-        itemLayer.addChild(row)
-
-        let bg = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 10)
-        bg.fillColor = UIColor.white.withAlphaComponent(0.36)
-        bg.strokeColor = item.tint.withAlphaComponent(0.25)
-        bg.lineWidth = 1
-        bg.name = actionName
-        row.addChild(bg)
-
-        let iconRing = SKShapeNode(circleOfRadius: 20)
-        iconRing.fillColor = item.tint.withAlphaComponent(0.14)
-        iconRing.strokeColor = item.tint.withAlphaComponent(0.58)
-        iconRing.lineWidth = 1
-        iconRing.position = CGPoint(x: -width / 2 + 34, y: 6)
-        iconRing.name = actionName
-        row.addChild(iconRing)
-
-        addStoreIcon(for: item, in: row, at: iconRing.position, tint: item.tint)
-
-        let title = makeLabel(text: item.title, fontSize: 13, bold: true, color: GameUI.ink)
-        title.horizontalAlignmentMode = .left
-        title.position = CGPoint(x: -width / 2 + 66, y: height / 2 - 21)
-        title.preferredMaxLayoutWidth = width - 172
-        title.numberOfLines = 1
-        title.name = actionName
-        row.addChild(title)
-
-        let description = makeLabel(text: item.blurb, fontSize: 10.3, color: GameUI.mutedInk)
-        description.horizontalAlignmentMode = .left
-        description.preferredMaxLayoutWidth = width - 180
-        description.numberOfLines = 2
-        description.lineBreakMode = .byWordWrapping
-        description.position = CGPoint(x: -width / 2 + 66, y: -8)
-        description.name = actionName
-        row.addChild(description)
-
-        let button = SKNode()
-        button.name = actionName
-        button.position = CGPoint(x: width / 2 - 56, y: -2)
-        button.zPosition = 4
-        row.addChild(button)
-
-        let buttonBg = GameUI.card(size: CGSize(width: 92, height: 46),
-                                   cornerRadius: 8,
-                                   tint: item.tint)
-        buttonBg.name = actionName
-        button.addChild(buttonBg)
-
-        let label = makeLabel(text: "\(GameUI.shellAmountText(item.cost))\nconchas",
-                              fontSize: 10.5,
-                              bold: true,
-                              color: GameUI.ink)
-        label.name = actionName
-        label.numberOfLines = 2
-        label.verticalAlignmentMode = .center
-        label.zPosition = 5
-        button.addChild(label)
-    }
-
-    private func addStoreIcon(for item: RefugeShopItem,
-                              in row: SKNode,
-                              at position: CGPoint,
-                              tint: UIColor) {
+    /// Shop items always show an icon: a scaled furniture thumbnail when the item
+    /// maps to a house object with artwork, otherwise the item's SF Symbol glyph.
+    private static func iconNode(for item: RefugeShopItem, diameter: CGFloat) -> SKNode {
         if case .houseObject(let definitionID, _) = item.purchase,
            let definition = HouseObjectCatalog.definition(id: definitionID),
            let assetName = definition.assetName {
+            let container = SKNode()
             let thumbnail = SKSpriteNode(imageNamed: assetName)
-            thumbnail.position = position
-            thumbnail.zPosition = 4
-            let maxSize = CGSize(width: 42, height: 30)
+            let maxSize = CGSize(width: diameter * 1.25, height: diameter * 0.9)
             let textureSize = thumbnail.texture?.size() ?? thumbnail.size
             let scale = min(maxSize.width / max(1, textureSize.width),
                             maxSize.height / max(1, textureSize.height))
             thumbnail.size = CGSize(width: textureSize.width * scale,
                                     height: textureSize.height * scale)
-            row.addChild(thumbnail)
-            return
+            container.addChild(thumbnail)
+            return container
         }
 
-        let icon = GameUI.symbolIconNode(named: item.symbolName,
-                                         fallback: item.fallbackGlyph,
-                                         color: tint,
-                                         size: 21)
-        icon.position = position
-        icon.zPosition = 4
-        row.addChild(icon)
-    }
-
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else { return }
-        var node: SKNode? = atPoint(touch.location(in: self))
-        while let current = node {
-            switch current.name {
-            case "store_close":
-                onClose?()
-                return
-            case StoreSection.resources.actionName:
-                selectStoreSection(.resources)
-                return
-            case StoreSection.furniture.actionName:
-                selectStoreSection(.furniture)
-                return
-            case let name? where name.hasPrefix("store_item_"):
-                let itemId = String(name.dropFirst("store_item_".count))
-                guard let item = RefugeShopCatalog.item(withId: itemId) else { return }
-                onPurchase?(item)
-                return
-            default:
-                break
-            }
-            node = current.parent
-        }
-    }
-
-    private func makeLabel(text: String,
-                           fontSize: CGFloat,
-                           bold: Bool = false,
-                           color: UIColor) -> SKLabelNode {
-        let label = SKLabelNode(text: text)
-        label.fontName = bold ? "AvenirNext-DemiBold" : "AvenirNext-Regular"
-        label.fontSize = fontSize
-        label.fontColor = color
-        label.horizontalAlignmentMode = .center
-        label.verticalAlignmentMode = .center
-        return label
+        return GameUI.symbolIconNode(named: item.symbolName,
+                                     fallback: item.fallbackGlyph,
+                                     color: item.tint,
+                                     size: diameter * 0.62)
     }
 }

@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-marine-globe-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidMarineGlobe.imageset/mermaid-marine-globe.png",
+  "key": "#16df17",
+  "source_size": [
+    1254,
+    1254
+  ],
+  "crop_box": [
+    280,
+    43,
+    1002,
+    1196
+  ],
+  "output_size": [
+    722,
+    1153
+  ],
+  "transparent_pixels": 1058168,
+  "partial_pixels": 115508,
+  "corner_alpha": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

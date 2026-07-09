@@ -54,8 +54,10 @@
 		FAB1E1010000000000000008 /* ShelterSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000008 /* ShelterSystem.swift */; };
 		FAB1E1010000000000000099 /* MermaidHouseSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000099 /* MermaidHouseSystem.swift */; };
 		FAB1E1010000000000000100 /* RefugeScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000100 /* RefugeScene.swift */; };
+		FAB1E1010000000000000104 /* VendorScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000104 /* VendorScreen.swift */; };
 		FAB1E1010000000000000101 /* RoomSurfaceMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000101 /* RoomSurfaceMapper.swift */; };
 		FAB1E1010000000000000102 /* HouseObjectPlacementSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000102 /* HouseObjectPlacementSystem.swift */; };
+		FAB1E1010000000000000105 /* HouseFurnitureScaleCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000105 /* HouseFurnitureScaleCatalog.swift */; };
 		FAB1E1010000000000000103 /* HouseObjectCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000103 /* HouseObjectCatalog.swift */; };
 		FAB1E1010000000000000036 /* RefugeFlowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000036 /* RefugeFlowController.swift */; };
 		FAB1E1010000000000000009 /* EventSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E0010000000000000009 /* EventSystem.swift */; };
@@ -175,8 +177,10 @@
 		FAB1E0010000000000000008 /* ShelterSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelterSystem.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000099 /* MermaidHouseSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidHouseSystem.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000100 /* RefugeScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefugeScene.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000104 /* VendorScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VendorScreen.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000101 /* RoomSurfaceMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomSurfaceMapper.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000102 /* HouseObjectPlacementSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseObjectPlacementSystem.swift; sourceTree = "<group>"; };
+		FAB1E0010000000000000105 /* HouseFurnitureScaleCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseFurnitureScaleCatalog.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000103 /* HouseObjectCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseObjectCatalog.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000036 /* RefugeFlowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefugeFlowController.swift; sourceTree = "<group>"; };
 		FAB1E0010000000000000009 /* EventSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSystem.swift; sourceTree = "<group>"; };
@@ -415,8 +419,10 @@
 				FAB1E0010000000000000099 /* MermaidHouseSystem.swift */,
 				FAB1E0010000000000000101 /* RoomSurfaceMapper.swift */,
 				FAB1E0010000000000000102 /* HouseObjectPlacementSystem.swift */,
+				FAB1E0010000000000000105 /* HouseFurnitureScaleCatalog.swift */,
 				FAB1E0010000000000000103 /* HouseObjectCatalog.swift */,
 				FAB1E0010000000000000100 /* RefugeScene.swift */,
+				FAB1E0010000000000000104 /* VendorScreen.swift */,
 				FAB1E0010000000000000036 /* RefugeFlowController.swift */,
 				FAB1E0010000000000000009 /* EventSystem.swift */,
 				FAB1E001000000000000000A /* GrowthSystem.swift */,
@@ -605,8 +611,10 @@
 				FAB1E1010000000000000099 /* MermaidHouseSystem.swift in Sources */,
 				FAB1E1010000000000000101 /* RoomSurfaceMapper.swift in Sources */,
 				FAB1E1010000000000000102 /* HouseObjectPlacementSystem.swift in Sources */,
+				FAB1E1010000000000000105 /* HouseFurnitureScaleCatalog.swift in Sources */,
 				FAB1E1010000000000000103 /* HouseObjectCatalog.swift in Sources */,
 				FAB1E1010000000000000100 /* RefugeScene.swift in Sources */,
+				FAB1E1010000000000000104 /* VendorScreen.swift in Sources */,
 				FAB1E1010000000000000036 /* RefugeFlowController.swift in Sources */,
 				FAB1E1010000000000000009 /* EventSystem.swift in Sources */,
 				FAB1E101000000000000000A /* GrowthSystem.swift in Sources */,

@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-birthday-table-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidBirthdayTable.imageset/mermaid-birthday-table.png",
+  "key": "#15d014",
+  "source_size": [
+    1448,
+    1086
+  ],
+  "crop_box": [
+    159,
+    22,
+    1281,
+    1048
+  ],
+  "output_size": [
+    1122,
+    1026
+  ],
+  "transparent_pixels": 948926,
+  "partial_pixels": 4684,
+  "corner_alpha": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

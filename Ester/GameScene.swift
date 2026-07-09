@@ -1260,8 +1260,7 @@ class GameScene: SKScene {
 
     private func purchaseRefugeStoreItem(_ item: RefugeShopItem) {
         if ctx.supportResources.purchase(item) {
-            closeRefugeStore(playSound: false)
-            openRefugeStore(playSound: false)
+            refugeStoreOverlay?.reload()
         } else {
             GameAudio.shared.play(.uiUpgradeFail)
         }

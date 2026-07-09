@@ -1,0 +1,27 @@
+{
+  "input": "/Users/yuryantony/Developer/Mermaid/tmp/furniture-imagegen-sources/mermaid-wooden-bench-chroma.png",
+  "out": "/Users/yuryantony/Developer/Mermaid/Ester/Assets.xcassets/MermaidWoodenBench.imageset/mermaid-wooden-bench.png",
+  "key": "#0de512",
+  "source_size": [
+    1536,
+    1024
+  ],
+  "crop_box": [
+    120,
+    299,
+    1416,
+    744
+  ],
+  "output_size": [
+    1296,
+    445
+  ],
+  "transparent_pixels": 1218728,
+  "partial_pixels": 4339,
+  "corner_alpha": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

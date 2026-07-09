@@ -2695,7 +2695,7 @@ private final class RefugeDioramaController {
         case .store:
             behaviorTextValue = "comprando na loja"
         case .professor:
-            behaviorTextValue = "visitando o professor"
+            behaviorTextValue = "visitando a professora"
         }
         GameAudio.shared.play(.uiConfirm)
         onSelect(location)
@@ -2724,7 +2724,7 @@ private final class RefugeDioramaController {
                    tint: GameUI.coral)
         addHotspot(location: .professor,
                    name: "refuge_diorama_professor",
-                   title: "Professor",
+                   title: "Professora",
                    icon: "graduationcap.fill",
                    fallback: "P",
                    placement: RefugeHubLayout.professor,
@@ -3169,7 +3169,7 @@ final class RefugeOverlay: SKNode {
         case .store:
             return "Comprando na loja"
         case .professor:
-            return "Visitando o professor"
+            return "Visitando a professora"
         }
     }
 
@@ -3227,10 +3227,35 @@ final class RefugeOverlay: SKNode {
         syncObservationRecordVisibility()
         let overlay = RefugeEnhancementsOverlay(size: overlaySize,
                                                 insets: safeAreaInsets,
-                                                stats: ctx.stats)
+                                                stats: ctx.stats,
+                                                onClose: { [weak self] in
+                                                    self?.returnToMap()
+                                                },
+                                                onBuy: { [weak self] kind in
+                                                    self?.purchaseUpgrade(kind)
+                                                })
         overlay.zPosition = 50
         addChild(overlay)
         enhancementsOverlay = overlay
+    }
+
+    private func purchaseUpgrade(_ kind: MermaidStats.UpgradeKind) {
+        guard let cost = ctx.stats.upgradeCost(for: kind) else {
+            GameAudio.shared.play(.uiUpgradeFail)
+            ctx.say("\(kind.title) já chegou ao nível máximo.")
+            return
+        }
+        guard ctx.stats.pearls >= cost else {
+            GameAudio.shared.play(.uiUpgradeFail)
+            ctx.say("\(kind.title) custa \(GameUI.shellAmountText(cost)) conchas. Faltam \(GameUI.shellAmountText(cost - ctx.stats.pearls)) conchas.")
+            return
+        }
+        if ctx.stats.buyUpgrade(kind) {
+            GameAudio.shared.play(.uiUpgradeBuy)
+            ctx.say("\(kind.title) melhorado para o nível \(ctx.stats.upgradeLevel(for: kind)).")
+            enhancementsOverlay?.reload()
+            refreshLabels()
+        }
     }
 
     private func openStore() {
@@ -3259,9 +3284,7 @@ final class RefugeOverlay: SKNode {
 
     private func purchaseStoreItem(_ item: RefugeShopItem) {
         if ctx.supportResources.purchase(item) {
-            storeOverlay?.removeFromParent()
-            storeOverlay = nil
-            openStore()
+            storeOverlay?.reload()
         } else {
             GameAudio.shared.play(.uiUpgradeFail)
         }
@@ -3308,42 +3331,13 @@ final class RefugeOverlay: SKNode {
             return
         }
 
+        // The store and professor overlays are self-contained modals that own
+        // their own touch handling (scrolling, tabs, purchases, close). When one
+        // of them is open it sits on top and consumes touches, so the only names
+        // routed here are the map-level controls.
         var node: SKNode? = atPoint(location)
         while let current = node {
             switch current.name {
-            case "enhancements_close":
-                returnToMap()
-                return
-            case "store_close":
-                returnToMap()
-                return
-            case let name? where name.hasPrefix("store_item_"):
-                let itemId = String(name.dropFirst("store_item_".count))
-                guard let item = RefugeShopCatalog.item(withId: itemId) else { return }
-                purchaseStoreItem(item)
-                return
-            case let name? where name.hasPrefix("upgrade_"):
-                guard let raw = name.split(separator: "_").last,
-                      let kind = MermaidStats.UpgradeKind(rawValue: String(raw)) else { return }
-                if let cost = ctx.stats.upgradeCost(for: kind) {
-                    guard ctx.stats.pearls >= cost else {
-                        GameAudio.shared.play(.uiUpgradeFail)
-                        ctx.say("\(kind.title) custa \(GameUI.shellAmountText(cost)) conchas. Faltam \(GameUI.shellAmountText(cost - ctx.stats.pearls)) conchas.")
-                        return
-                    }
-                    if ctx.stats.buyUpgrade(kind) {
-                        GameAudio.shared.play(.uiUpgradeBuy)
-                        ctx.say("\(kind.title) melhorado para o nível \(ctx.stats.upgradeLevel(for: kind)).")
-                        enhancementsOverlay?.removeFromParent()
-                        enhancementsOverlay = nil
-                        openEnhancements()
-                        refreshLabels()
-                    }
-                } else {
-                    GameAudio.shared.play(.uiUpgradeFail)
-                    ctx.say("\(kind.title) já chegou ao nível máximo.")
-                }
-                return
             case "refuge_close":
                 switch mode {
                 case .map:
@@ -3378,152 +3372,81 @@ final class RefugeOverlay: SKNode {
     }
 }
 
+/// The professor's room, presented by the "professor octopus" NPC. Entries are
+/// mermaid upgrades rather than purchasable goods, so — per design — they carry a
+/// title and description but no icon. Rendering, scrolling and the NPC
+/// idle-breath live in the shared `VendorScreenNode`; the owner reacts to a
+/// selected upgrade through `onBuy` and calls `reload()` to refresh in place.
 final class RefugeEnhancementsOverlay: SKNode {
     private let stats: MermaidStats
-    private let insets: UIEdgeInsets
+    private let onClose: () -> Void
+    private let onBuy: (MermaidStats.UpgradeKind) -> Void
+    private var screen: VendorScreenNode?
 
-    init(size: CGSize, insets: UIEdgeInsets, stats: MermaidStats) {
+    private static let maximumUpgradeLevel = 100
+
+    init(size: CGSize,
+         insets: UIEdgeInsets,
+         stats: MermaidStats,
+         onClose: @escaping () -> Void,
+         onBuy: @escaping (MermaidStats.UpgradeKind) -> Void) {
         self.stats = stats
-        self.insets = insets
+        self.onClose = onClose
+        self.onBuy = onBuy
         super.init()
-        isUserInteractionEnabled = false
-        build(size: size)
+        isUserInteractionEnabled = true
+
+        let config = VendorScreenConfig(
+            title: "Sala da professora",
+            description: "Invista conchas para aprimorar, com calma, as habilidades da sereia.",
+            npcAssetName: "ProfessorOctopus",
+            breath: .gentle,
+            closeTitle: "Voltar ao refúgio",
+            categories: [
+                VendorCategory(id: "upgrades",
+                               title: "Melhorias",
+                               entries: { [weak self] in self?.upgradeEntries() ?? [] })
+            ],
+            balance: { [weak stats] in Int(stats?.pearls ?? 0) })
+
+        let screen = VendorScreenNode(size: size,
+                                      insets: insets,
+                                      config: config,
+                                      onClose: { [weak self] in self?.onClose() },
+                                      onSelect: { [weak self] _, entryId in
+                                          guard let kind = MermaidStats.UpgradeKind(rawValue: entryId) else { return }
+                                          self?.onBuy(kind)
+                                      })
+        addChild(screen)
+        self.screen = screen
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    private func build(size: CGSize) {
-        let backdrop = SKShapeNode(rectOf: CGSize(width: size.width * 2, height: size.height * 2))
-        backdrop.fillColor = GameUI.palePaper
-        backdrop.strokeColor = GameUI.accent.withAlphaComponent(0.2)
-        backdrop.zPosition = 0
-        addChild(backdrop)
-
-        let top = size.height / 2 - insets.top
-        let title = makeLabel(text: "Sala do professor", fontSize: 21, bold: true, color: GameUI.ink)
-        title.position = CGPoint(x: 0, y: top - 38)
-        title.zPosition = 2
-        addChild(title)
-
-        let rowWidth = min(size.width - 28, 420)
-        let professor = SKSpriteNode(imageNamed: "ProfessorOctopus")
-        professor.size = CGSize(width: 58, height: 82)
-        professor.position = CGPoint(x: -rowWidth / 2 + 52, y: top - 92)
-        professor.zPosition = 2
-        addChild(professor)
-
-        let greeting = makeLabel(text: "Vamos cuidar dos seus avanços com calma.",
-                                 fontSize: 12,
-                                 color: GameUI.mutedInk)
-        greeting.horizontalAlignmentMode = .left
-        greeting.preferredMaxLayoutWidth = rowWidth - 118
-        greeting.numberOfLines = 2
-        greeting.lineBreakMode = .byWordWrapping
-        greeting.position = CGPoint(x: -rowWidth / 2 + 96, y: top - 72)
-        greeting.zPosition = 2
-        addChild(greeting)
-
-        let pearlLine = makeLabel(text: "Conchas \(GameUI.shellAmountText(stats.pearls))", fontSize: 13, bold: true, color: GameUI.gold)
-        pearlLine.horizontalAlignmentMode = .left
-        pearlLine.position = CGPoint(x: -rowWidth / 2 + 96, y: top - 112)
-        pearlLine.zPosition = 2
-        addChild(pearlLine)
-
-        let rowCount = MermaidStats.UpgradeKind.allCases.count
-        let availableHeight = max(330, size.height - insets.top - insets.bottom - 280)
-        let rowHeight = min(84, max(68, availableHeight / CGFloat(rowCount)))
-        let firstY = top - 170
-
-        for (index, kind) in MermaidStats.UpgradeKind.allCases.enumerated() {
-            addRow(kind: kind,
-                   width: rowWidth,
-                   height: rowHeight - 8,
-                   centerY: firstY - CGFloat(index) * rowHeight)
-        }
-
-        let closeButton = SKNode()
-        closeButton.name = "enhancements_close"
-        closeButton.position = CGPoint(x: 0, y: -size.height / 2 + insets.bottom + 48)
-        closeButton.zPosition = 4
-        let closeCard = GameUI.card(size: CGSize(width: min(220, size.width - 80), height: 44),
-                                    cornerRadius: 9,
-                                    tint: GameUI.accent)
-        closeCard.name = "enhancements_close"
-        closeButton.addChild(closeCard)
-        let closeLabel = makeLabel(text: "Voltar ao refúgio", fontSize: 13, bold: true, color: GameUI.ink)
-        closeLabel.name = "enhancements_close"
-        closeLabel.verticalAlignmentMode = .center
-        closeLabel.zPosition = 5
-        closeButton.addChild(closeLabel)
-        addChild(closeButton)
-    }
-    private func addRow(kind: MermaidStats.UpgradeKind,
-                        width: CGFloat,
-                        height: CGFloat,
-                        centerY: CGFloat) {
-        let level = stats.upgradeLevel(for: kind)
-        let row = SKNode()
-        row.position = CGPoint(x: 0, y: centerY)
-        row.zPosition = 2
-        addChild(row)
-
-        let bg = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 10)
-        bg.fillColor = UIColor.white.withAlphaComponent(0.36)
-        bg.strokeColor = GameUI.accent.withAlphaComponent(0.22)
-        bg.lineWidth = 1
-        row.addChild(bg)
-
-        let title = makeLabel(text: "\(kind.title)  \(level)/100", fontSize: 13, bold: true, color: GameUI.ink)
-        title.horizontalAlignmentMode = .left
-        title.position = CGPoint(x: -width / 2 + 14, y: height / 2 - 22)
-        row.addChild(title)
-
-        let description = makeLabel(text: kind.description, fontSize: 10.5, color: GameUI.mutedInk)
-        description.horizontalAlignmentMode = .left
-        description.preferredMaxLayoutWidth = width - 126
-        description.numberOfLines = 2
-        description.lineBreakMode = .byWordWrapping
-        description.position = CGPoint(x: -width / 2 + 14, y: -4)
-        row.addChild(description)
-
-        let actionName = "upgrade_\(kind.rawValue)"
-        let button = SKNode()
-        button.name = actionName
-        button.position = CGPoint(x: width / 2 - 56, y: -4)
-        button.zPosition = 4
-        row.addChild(button)
-
-        let buttonColor: UIColor = stats.upgradeCost(for: kind) == nil ? GameUI.mutedInk : GameUI.gold
-        let buttonBg = GameUI.card(size: CGSize(width: 92, height: 48),
-                                   cornerRadius: 8,
-                                   tint: buttonColor)
-        buttonBg.name = actionName
-        button.addChild(buttonBg)
-
-        let buttonText: String
-        if let cost = stats.upgradeCost(for: kind) {
-            buttonText = "comprar\n\(GameUI.shellAmountText(cost)) conchas"
-        } else {
-            buttonText = "nível\nmáximo"
-        }
-        let label = makeLabel(text: buttonText, fontSize: 10.5, bold: true, color: GameUI.ink)
-        label.name = actionName
-        label.numberOfLines = 2
-        label.verticalAlignmentMode = .center
-        label.zPosition = 5
-        button.addChild(label)
+    /// Refreshes levels, costs and the Shell balance in place while preserving the
+    /// scroll position (called after a successful upgrade purchase).
+    func reload() {
+        screen?.reload()
     }
 
-    private func makeLabel(text: String,
-                           fontSize: CGFloat,
-                           bold: Bool = false,
-                           color: UIColor) -> SKLabelNode {
-        let label = SKLabelNode(text: text)
-        label.fontName = bold ? "AvenirNext-DemiBold" : "AvenirNext-Regular"
-        label.fontSize = fontSize
-        label.fontColor = color
-        label.horizontalAlignmentMode = .center
-        label.verticalAlignmentMode = .center
-        return label
+    private func upgradeEntries() -> [VendorEntry] {
+        MermaidStats.UpgradeKind.allCases.map { kind in
+            let level = stats.upgradeLevel(for: kind)
+            let cost = stats.upgradeCost(for: kind)
+            let actionText: String
+            if let cost = cost {
+                actionText = "comprar\n\(GameUI.shellAmountText(cost)) conchas"
+            } else {
+                actionText = "nível\nmáximo"
+            }
+            return VendorEntry(id: kind.rawValue,
+                               title: kind.title,
+                               subtitle: kind.description,
+                               actionText: actionText,
+                               actionEnabled: cost != nil,
+                               tint: cost != nil ? GameUI.gold : GameUI.mutedInk,
+                               progress: CGFloat(level) / CGFloat(Self.maximumUpgradeLevel),
+                               makeIcon: nil)
+        }
     }
 }
