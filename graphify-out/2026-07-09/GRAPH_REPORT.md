@@ -1,12 +1,12 @@
 # Graph Report - Mermaid  (2026-07-09)
 
 ## Corpus Check
-- 349 files · ~3,504,748 words
+- 358 files · ~4,234,439 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4108 nodes · 14909 edges · 248 communities (159 shown, 89 thin omitted)
-- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 1972 edges (avg confidence: 0.73)
+- 4112 nodes · 14931 edges · 246 communities (151 shown, 95 thin omitted)
+- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 1968 edges (avg confidence: 0.73)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
@@ -109,7 +109,6 @@
 - Managers
 - Appdelegate
 - Components
-- Ester Game
 - Ester Game
 - Tools Verify
 - Ester Game
@@ -259,18 +258,16 @@
 - EditorLayer
 - ChildMermaidRig
 - Orientation
-- BabyMermaidRig
 - GridLines
 - Mermaid
-- floor
 
 ## God Nodes (most connected - your core abstractions)
 1. `CGFloat` - 795 edges
-2. `CGPoint` - 691 edges
+2. `CGPoint` - 693 edges
 3. `SKNode` - 493 edges
 4. `String` - 393 edges
 5. `CGSize` - 344 edges
-6. `Int` - 297 edges
+6. `Int` - 299 edges
 7. `DepthZone` - 168 edges
 8. `GameContext` - 160 edges
 9. `MermaidStats` - 136 edges
@@ -291,59 +288,59 @@
 ## Import Cycles
 - None detected.
 
-## Communities (248 total, 89 thin omitted)
+## Communities (246 total, 95 thin omitted)
 
 ### Community 0 - "Map Tiles — Mossy Terrain"
 Cohesion: 0.13
-Nodes (15): HouseFurnitureInventoryPanelItem, HouseFurniturePanelMode, inventory, placed, HouseFurniturePlacedPanelItem, HouseFurnitureTrayCategory, all, furniture (+7 more)
+Nodes (14): HouseFurnitureInventoryPanelItem, HouseFurniturePanelMode, inventory, placed, HouseFurniturePlacedPanelItem, HouseFurnitureTrayCategory, all, floor (+6 more)
 
 ### Community 1 - "Mermaid House System"
-Cohesion: 0.06
-Nodes (21): SKNode, NSCoder, SupportResourceVisualFactory, UIColor, Interaction, enterHome, enterItemShop, enterUpgradeShop (+13 more)
+Cohesion: 0.07
+Nodes (16): CGPoint, Interaction, enterHome, enterItemShop, enterUpgradeShop, restInBedroom, returnToVillage, talkToItemShopNpc (+8 more)
 
 ### Community 2 - "Map Tiles — Mossy Autotile"
-Cohesion: 0.10
-Nodes (14): MermaidNameEditorViewController, GameViewController, Bool, IndexPath, Notification, NSLayoutConstraint, UIInterfaceOrientationMask, UITableView (+6 more)
+Cohesion: 0.13
+Nodes (10): MermaidNameEditorViewController, IndexPath, Notification, NSLayoutConstraint, UITableView, UITableViewCell, UITableViewDataSource, UITableViewDelegate (+2 more)
 
 ### Community 3 - "Gameplay Models & Scene Construction"
-Cohesion: 0.08
-Nodes (6): AutonomySystem, HorizontalBoundarySide, left, right, ClosedRange, Mermaid
+Cohesion: 0.09
+Nodes (9): AutonomySystem, play, HorizontalBoundaryBalance, HorizontalBoundarySide, left, right, ClosedRange, Mermaid (+1 more)
 
 ### Community 4 - "Challenge Flow Controller"
-Cohesion: 0.09
-Nodes (88): SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r03 c12, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r03 c13, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r03 c14, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r04 c01, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r04 c02, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r04 c03, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r04 c04, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r04 c05 (+80 more)
+Cohesion: 0.27
+Nodes (5): RefugeStoreOverlay, RefugeEnhancementsOverlay, RefugeHouseInteriorController, RefugeOverlay, SKLabelNode
 
 ### Community 5 - "World Point & Rendering Primitives"
-Cohesion: 0.10
-Nodes (22): Decodable, Int, TimeInterval, TideMemoryRules, TideMemoryTimeRecovery, WorldTextureKey, Hashable, Hasher (+14 more)
+Cohesion: 0.12
+Nodes (24): Decodable, Int, WorldTextureKey, Hashable, Hasher, Identifiable, AutotileSet, Color (+16 more)
 
 ### Community 6 - "Depth Environment & Ocean Parallax"
 Cohesion: 0.13
-Nodes (10): CGLineCap, CGPoint, Bool, SKShapeNode, SKTexture, TimeInterval, UIBezierPath, UIColor (+2 more)
+Nodes (8): CGLineCap, SKShapeNode, SKTexture, TimeInterval, UIBezierPath, UIColor, UIImage, WorldPOIArtworkFactory
 
 ### Community 7 - "Banquet of Tides Minigame"
-Cohesion: 0.18
-Nodes (9): ReefAsteroidsEngine, ReefFeedback, ReefFrame, ReefPlayer, ReefProjectile, ReefRock, UUID, Visual (+1 more)
+Cohesion: 0.05
+Nodes (29): CGPath, ReefAsteroidsEngine, ReefAsteroidsOverlay, ReefAsteroidsRules, ReefFeedback, ReefFrame, ReefPlayer, ReefProjectile (+21 more)
 
 ### Community 8 - "Event System"
-Cohesion: 0.07
-Nodes (14): CoreMotion, BubbleClimbOverlay, ClimbBubble, ClimbVisual, Bool, Mermaid, NSCoder, Set (+6 more)
+Cohesion: 0.08
+Nodes (12): CoreMotion, BubbleClimbOverlay, ClimbBubble, ClimbVisual, Bool, Mermaid, NSCoder, Set (+4 more)
 
 ### Community 9 - "Species Registry & Mermaid Progression"
-Cohesion: 0.11
-Nodes (16): Bool, NSCoder, Set, SKLabelNode, SKShapeNode, UIColor, UIEvent, UITouch (+8 more)
+Cohesion: 0.08
+Nodes (23): Bool, NSCoder, Set, SKLabelNode, SKShapeNode, TimeInterval, UIColor, UIEvent (+15 more)
 
 ### Community 10 - "Tide Memory Minigame"
-Cohesion: 0.13
-Nodes (11): CGSize, GameUI, CGRect, NSCache, NSString, SKSpriteNode, SKTexture, UIImage (+3 more)
+Cohesion: 0.06
+Nodes (20): SKNode, UIColor, CGSize, GameUI, CGRect, NSCache, NSString, SKSpriteNode (+12 more)
 
 ### Community 11 - "Refuge Village Controller"
-Cohesion: 0.12
-Nodes (15): HUDTypography, String, AquaticSpecies, AquaticSpeciesCatalog, EntryTextCatalog, AquaticAnimalGroup, RegistroCatalog, RegistroMermaidObservationDefinition (+7 more)
+Cohesion: 0.15
+Nodes (10): AquaticSpecies, AquaticAnimalGroup, RegistroCatalog, RegistroMermaidObservationDefinition, RegistroProgressSnapshot, RegistroSpeciesDefinition, RegistroUnlockRequirement, challengeFromSpecies (+2 more)
 
 ### Community 12 - "Shelter System"
-Cohesion: 0.11
-Nodes (73): SharedGameData → Tiles → Mossy → terrain 256 → autotile preview, SharedGameData → Tiles → Mossy → terrain 256 → contact sheet, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain auto e 01, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain auto e 02, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain auto e 03, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain auto e 04, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain auto ew 01, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain auto ew 02 (+65 more)
+Cohesion: 0.07
+Nodes (118): SharedGameData → Tiles → Mossy → terrain 256 → autotile preview, SharedGameData → Tiles → Mossy → terrain 256 → contact sheet, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain auto e 01, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain auto e 02, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain auto e 03, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain auto e 04, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain auto ew 01, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain auto ew 02 (+110 more)
 
 ### Community 13 - "Bubble Climb Minigame Overlay"
 Cohesion: 0.11
@@ -354,36 +351,32 @@ Cohesion: 0.08
 Nodes (26): EchoMelodyEngine, EchoMelodyInputResult, EchoMelodyNote, coral, kelp, moon, pearl, EchoMelodyOverlay (+18 more)
 
 ### Community 15 - "Echo Melody Minigame"
-Cohesion: 0.10
-Nodes (17): GridPos, Bool, NSCoder, Set, SKLabelNode, SKShapeNode, UIColor, UIEvent (+9 more)
+Cohesion: 0.11
+Nodes (14): GridPos, Bool, Set, UIEvent, UITouch, Void, TideSessionType, basic (+6 more)
 
 ### Community 16 - "Mermaid Stats & Inventory"
-Cohesion: 0.20
-Nodes (5): discoveryPointByRegion, StableMapRNG, ClosedRange, UInt64, OfflineProgressSystem
+Cohesion: 0.11
+Nodes (15): PlayerCommand, challenge, explore, goDown, goLeft, goRight, goUp, objective (+7 more)
 
 ### Community 17 - "Resource Support & Shop"
-Cohesion: 0.08
-Nodes (11): WorldChunkManager, GameScene, Bool, Set, SKCameraNode, SKView, TimeInterval, UIColor (+3 more)
+Cohesion: 0.09
+Nodes (8): GameScene, Bool, Set, SKCameraNode, SKView, UIEvent, UITouch, Void
 
 ### Community 19 - "Game Scene Entries & Birth Waters"
-Cohesion: 0.10
-Nodes (13): RegistroMermaidObservation, RegistroOverlay, Bool, CGRect, ClosedRange, NSCoder, Set, SKLabelNode (+5 more)
+Cohesion: 0.11
+Nodes (11): RegistroMermaidObservation, RegistroOverlay, Bool, CGRect, ClosedRange, Set, SKLabelNode, UIColor (+3 more)
 
 ### Community 20 - "Challenge Goals & Spawning"
-Cohesion: 0.09
-Nodes (9): EventSystem, UIColor, Void, WorldObjective, CGVector, GameContext, RewardSystem, TravelSystem (+1 more)
-
-### Community 21 - "Mermaid Stats — Balance & Buffs"
-Cohesion: 0.15
-Nodes (5): CGPath, ReefAsteroidsOverlay, SKLabelNode, SKShapeNode, UIColor
+Cohesion: 0.13
+Nodes (6): EventSystem, UIColor, Void, WorldObjective, GameContext, TravelSystem
 
 ### Community 22 - "Audio Manager & Sound Effects"
-Cohesion: 0.18
-Nodes (14): CGContext, CGRect, UIBezierPath, UIColor, WorldStampRenderer, CGContext, CGContext, UIColor (+6 more)
+Cohesion: 0.14
+Nodes (19): SeededGenerator, Bool, ClosedRange, CGContext, CGRect, UIBezierPath, UIColor, WorldStampRenderer (+11 more)
 
 ### Community 23 - "Bubble Climb Controls"
 Cohesion: 0.07
-Nodes (9): CoreText, UIColor, WorldStampRenderer, WorldStampRenderer, WorldTextureKey, OceanPalette, Foundation, SpriteKit (+1 more)
+Nodes (12): CoreGraphics, UIColor, MermaidFigurePart, WorldChunkManager, WorldStampRenderer, WorldStampRenderer, SKTexture, WorldTextureKey (+4 more)
 
 ### Community 24 - "Tide Weaving System"
 Cohesion: 0.08
@@ -394,44 +387,44 @@ Cohesion: 0.04
 Nodes (48): GameSound, ambientBubbleBurst, bigShadow, boatMuffled, challengeFail, challengeOpen, challengeSuccess, climbBounce (+40 more)
 
 ### Community 26 - "Mermaid Arms & Animation"
-Cohesion: 0.16
-Nodes (7): BanquetOfTidesOverlay, Mermaid, NSCoder, SKLabelNode, SKShapeNode, UIColor, Void
+Cohesion: 0.19
+Nodes (5): BanquetOfTidesOverlay, Mermaid, SKLabelNode, SKShapeNode, UIColor
 
 ### Community 27 - "Challenge Giver Component"
 Cohesion: 0.10
-Nodes (11): CGFloat, HouseFurnitureScaleCatalog, HouseObjectDefinition, MermaidRigTransform, Decoder, OceanParallaxBackdrop, SKSpriteNode, SKTexture (+3 more)
+Nodes (15): DepthZone, abyss, blue, clear, deep, mid, shallow, surface (+7 more)
 
 ### Community 28 - "Autonomy — Fish Play & Guidance"
-Cohesion: 0.09
-Nodes (26): CaseIterable, InteractionBalance, POIChallenge, POIDefinition, POIVisual, RepeatablePOIReward, StableRNG, ClosedRange (+18 more)
+Cohesion: 0.16
+Nodes (10): StableRNG, ClosedRange, UInt64, WorldPOICatalog, WorldPOIKind, minigame, npc, pet (+2 more)
 
 ### Community 29 - "Mermaid Figures — Baby"
-Cohesion: 0.11
-Nodes (16): Equatable, BoundaryPaletteEffect, DepthBoundaryEdge, lower, upper, DepthEnvironment, DepthSystem, MermaidPaletteTransition (+8 more)
+Cohesion: 0.08
+Nodes (19): Equatable, CameraController, SKCameraNode, UIColor, BoundaryPaletteEffect, DepthBoundaryEdge, lower, upper (+11 more)
 
 ### Community 30 - "Reef Asteroids Minigame Engine"
-Cohesion: 0.05
-Nodes (44): CodingKeys, activeBuffs, adaptationByZone, babyGuaranteedRequestsUsed, balanceVersion, birthDate, collectedPOIRewardKeys, courage (+36 more)
+Cohesion: 0.04
+Nodes (45): CodingKeys, activeBuffs, adaptationByZone, babyGuaranteedRequestsUsed, balanceVersion, birthDate, challengeHighScores, collectedPOIRewardKeys (+37 more)
 
 ### Community 31 - "Region System"
-Cohesion: 0.12
-Nodes (21): Codable, HouseObjectAttachmentSide, back, bottom, left, right, top, HouseObjectDefinition (+13 more)
+Cohesion: 0.09
+Nodes (29): HouseObjectAttachmentSide, back, bottom, left, right, top, HouseObjectCategory, backWallDecoration (+21 more)
 
 ### Community 32 - "Reef Asteroids Overlay"
-Cohesion: 0.16
-Nodes (4): ActiveHouseObjectPlacement, MermaidHouseSceneController, HouseSurfaceKind, SKSpriteNode
+Cohesion: 0.12
+Nodes (8): HouseCameraController, MermaidHouseSceneController, CGRect, ObjectIdentifier, Set, UIEdgeInsets, UITouch, Void
 
 ### Community 33 - "Map Tiles — JSON Manifest"
-Cohesion: 0.09
-Nodes (20): ShellSnapBoard, ShellSnapFall, ShellSnapOverlay, ShellSnapPop, ShellSnapPosition, ShellSnapRules, ShellSnapSpawn, ShellSnapTheme (+12 more)
+Cohesion: 0.10
+Nodes (19): ShellSnapBoard, ShellSnapFall, ShellSnapOverlay, ShellSnapPop, ShellSnapPosition, ShellSnapRules, ShellSnapSpawn, ShellSnapTheme (+11 more)
 
 ### Community 34 - "Depth System"
-Cohesion: 0.10
-Nodes (18): CodingKey, PlacedHouseObject, Data, UUID, CodingKeys, placedObjects, rooms, HouseLayoutData (+10 more)
+Cohesion: 0.19
+Nodes (8): PlacedHouseObject, Data, UUID, HouseLayoutData, HouseRoomScene, Decoder, Encoder, UUID
 
 ### Community 35 - "Gameplay Reward Models"
-Cohesion: 0.26
-Nodes (5): FishDrawingFactory, Bool, SKShapeNode, UIBezierPath, UIColor
+Cohesion: 0.11
+Nodes (18): NSCoder, FishDrawingFactory, Bool, SKShapeNode, UIBezierPath, UIColor, UIColor, FishSilhouette (+10 more)
 
 ### Community 36 - "Ecosystem Biome Catalog"
 Cohesion: 0.05
@@ -443,23 +436,23 @@ Nodes (17): WorldStampKind, coralBranch, coralFan, coralTube, crystalCluster, cu
 
 ### Community 38 - "World Chunk Factory"
 Cohesion: 0.10
-Nodes (22): Array, EcosystemBiomeCatalog, EcosystemBiomeID, estuario, florestaKelp, manguezal, marAbertoTemperado, marAbertoTropical (+14 more)
+Nodes (23): Array, EcosystemBiomeCatalog, EcosystemBiomeID, estuario, florestaKelp, manguezal, marAbertoTemperado, marAbertoTropical (+15 more)
 
 ### Community 39 - "Growth System"
-Cohesion: 0.18
+Cohesion: 0.19
 Nodes (4): POISystem, Bool, Date, WorldPOI
 
 ### Community 40 - "Mermaid Figures — Child"
-Cohesion: 0.24
-Nodes (7): HouseMermaidAutonomyController, HouseRoomSceneID, HouseSceneMetrics, Mermaid, NSCoder, UIEdgeInsets, Void
+Cohesion: 0.26
+Nodes (9): ActiveHouseObjectPlacement, HouseMermaidAutonomyController, HouseRoomSceneID, HouseSceneDefaults, HouseSceneMetrics, Source, existing, inventory (+1 more)
 
 ### Community 41 - "World Chunk — Detail Rendering"
-Cohesion: 0.14
+Cohesion: 0.10
 Nodes (5): CheatSystem, Suggestion, Bool, ClosedRange, Set
 
 ### Community 42 - "Documentation — Design Decisions"
-Cohesion: 0.18
-Nodes (6): ChallengeFlowController, Bool, SKCameraNode, Void, ChallengeResult, ResourceChoiceOverlay
+Cohesion: 0.17
+Nodes (6): ChallengeFlowController, Bool, SKCameraNode, Void, ChallengeChoiceOverlay, ResourceChoiceOverlay
 
 ### Community 43 - "Movement Vector Utilities"
 Cohesion: 0.15
@@ -474,115 +467,107 @@ Cohesion: 0.17
 Nodes (12): EcosystemVegetationCategory, algae, chemosyntheticMat, coral, iceAlgae, kelp, macrophyte, mangroveRoot (+4 more)
 
 ### Community 46 - "Cheat System"
-Cohesion: 0.12
-Nodes (18): Bool, CGRect, NSCoder, Set, SKLabelNode, SKShapeNode, UIColor, UIEdgeInsets (+10 more)
+Cohesion: 0.16
+Nodes (15): Bool, CGRect, NSCoder, SKLabelNode, SKShapeNode, UIColor, UIEdgeInsets, Void (+7 more)
 
 ### Community 47 - "Fish Visual Models"
-Cohesion: 0.17
-Nodes (7): ReefAsteroidsRules, ReefRockSize, large, medium, small, Bool, floor
+Cohesion: 0.14
+Nodes (17): BadgePlacement, LayoutPoint, Mode, house, map, professor, store, NpcKind (+9 more)
 
 ### Community 48 - "Food System"
-Cohesion: 0.11
-Nodes (69): SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r10 c02, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r10 c03, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r10 c04, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r10 c05, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r10 c06, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r10 c07, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r10 c08, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r10 c09 (+61 more)
+Cohesion: 0.07
+Nodes (112): SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r07 c01, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r07 c02, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r07 c03, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r07 c04, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r07 c05, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r07 c06, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r07 c07, SharedGameData → Tiles → Mossy → terrain 256 → mossy terrain r07 c08 (+104 more)
 
 ### Community 49 - "Region Map Cues & Expedition"
-Cohesion: 0.08
-Nodes (26): FishBehaviorComponent, FishSpecies, Bool, NSCoder, UIColor, FoodComponent, Bool, NSCoder (+18 more)
+Cohesion: 0.09
+Nodes (23): ExpressionComponent, NSCoder, FoodComponent, Bool, HealthComponent, NSCoder, IntentComponent, NSCoder (+15 more)
 
 ### Community 50 - "Movement Enums & Animation Modes"
-Cohesion: 0.09
-Nodes (10): AnyObject, ChallengeGiver, ChallengeSystem, FishNode, Bool, NSCoder, TimeInterval, UIColor (+2 more)
+Cohesion: 0.14
+Nodes (6): FishNode, Bool, NSCoder, TimeInterval, FishSystem, Bool
 
 ### Community 51 - "Fish Drawing Factory"
-Cohesion: 0.16
-Nodes (4): BabyMermaidFigure, Bool, Double, MermaidFigurePart
+Cohesion: 0.20
+Nodes (3): BabyMermaidFigure, Bool, Double
 
 ### Community 52 - "HUD Layer"
-Cohesion: 0.16
-Nodes (4): ChildMermaidFigure, Bool, Double, MermaidFigurePart
+Cohesion: 0.19
+Nodes (4): ChildMermaidFigure, Bool, Double, SKAction
 
 ### Community 53 - "Expedition Grid Math"
-Cohesion: 0.17
-Nodes (6): DirectionalCore, MermaidBody, MotionProfile, Bool, Double, SKSpriteNode
+Cohesion: 0.14
+Nodes (8): DirectionalCore, MermaidBody, MotionProfile, Bool, Double, SKSpriteNode, MovementDirectionProtocol, MovementTypeProtocol
 
 ### Community 54 - "World Stamp Drawing"
-Cohesion: 0.06
-Nodes (35): Calendar, RefugeShopCatalog, RefugeShopItem, RefugeShopPurchase, houseObject, resource, RefugeStoreOverlay, SupportResourceKind (+27 more)
+Cohesion: 0.10
+Nodes (22): Calendar, RefugeShopCatalog, RefugeShopItem, RefugeShopPurchase, houseObject, resource, ResourceSupportSystem, SupportResourceKind (+14 more)
 
 ### Community 55 - "Pearl Economy"
-Cohesion: 0.12
-Nodes (18): MermaidEmotion, adventurous, curious, eating, focused, happy, hungry, neutral (+10 more)
+Cohesion: 0.13
+Nodes (14): MermaidEmotion, adventurous, curious, eating, focused, happy, hungry, neutral (+6 more)
 
 ### Community 56 - "HUD — Biology Meter & Commands"
-Cohesion: 0.09
-Nodes (26): FaceTextureCache, MermaidExpressionLibrary, MermaidExpressionPreset, MermaidEyeAsset, closed, half, open, wide (+18 more)
+Cohesion: 0.13
+Nodes (19): MermaidExpressionLibrary, MermaidExpressionPreset, MermaidEyeAsset, closed, half, open, wide, MermaidEyebrowExpression (+11 more)
 
 ### Community 57 - "Buff Coding Keys"
-Cohesion: 0.10
-Nodes (16): PlayerCommand, challenge, explore, goDown, goLeft, goRight, goUp, objective (+8 more)
+Cohesion: 0.17
+Nodes (6): HUDLayer, Bool, SKLabelNode, TimeInterval, UIBezierPath, Void
 
 ### Community 58 - "Mermaid Name Editor"
-Cohesion: 0.11
-Nodes (16): UInt64, PlacedReefCluster, ReefCluster, Bool, CGRect, CGRect, WorldChunkCoord, WorldLayerSeed (+8 more)
+Cohesion: 0.08
+Nodes (22): AquaticBiome, abyssPlain, ancientRuins, cavernMouth, coralGarden, crystalField, deepVents, kelpForest (+14 more)
 
 ### Community 59 - "Discovery & Depth Ranges"
-Cohesion: 0.36
-Nodes (4): MermaidFigurePart, Set, UIEvent, UITouch
+Cohesion: 0.42
+Nodes (3): Set, UIEvent, UITouch
 
 ### Community 60 - "Depth Zone Colors"
 Cohesion: 0.08
 Nodes (25): App, AppKit, AutotileSummary, ContentView, DepthRow, EditorToolbar, GridLines, MapCanvasView (+17 more)
 
 ### Community 61 - "Mermaid Emotion Component"
-Cohesion: 0.21
-Nodes (7): FoodKind, FoodNode, FoodSystem, Bool, NSCoder, SKTexture, UIColor
-
-### Community 62 - "Command & Touch System"
-Cohesion: 0.08
-Nodes (13): CoreGraphics, ExpressionComponent, NSCoder, HealthComponent, NSCoder, IntentComponent, NSCoder, WorldPOIArtworkSize (+5 more)
+Cohesion: 0.18
+Nodes (8): NSCoder, FoodKind, FoodNode, FoodSystem, Bool, NSCoder, SKTexture, UIColor
 
 ### Community 63 - "Mermaid Rig Debug Tool"
-Cohesion: 0.13
-Nodes (14): AdultMermaidRig, MermaidFigurePart, MermaidRigPosition, BabyMermaidRig, MermaidFigurePart, MermaidRigPosition, ChildMermaidRig, MermaidFigurePart (+6 more)
+Cohesion: 0.15
+Nodes (10): MermaidRigAxis, scale, x, y, z, MermaidRigTransform, Decoder, MermaidFigurePart (+2 more)
 
 ### Community 64 - "Mermaid Core Entity"
-Cohesion: 0.13
-Nodes (9): SKAction, MermaidArms, Rotation, down, up, SKSpriteNode, MermaidHead, MovementDirectionProtocol (+1 more)
+Cohesion: 0.21
+Nodes (8): MermaidArms, Orientation, horizontal, vertical, Rotation, down, up, SKSpriteNode
 
 ### Community 65 - "Game Sound Enum Values"
-Cohesion: 0.10
-Nodes (21): DepthZone, abyss, blue, clear, deep, mid, shallow, surface (+13 more)
+Cohesion: 0.30
+Nodes (4): ExpeditionMapNode, SKShapeNode, UIColor, WarmCurrentEnvironment
 
 ### Community 66 - "Encoding Utilities"
 Cohesion: 0.16
 Nodes (11): A, B, C, EntityManager, GKComponent, GKEntity, ObjectIdentifier, Set (+3 more)
 
+### Community 67 - "Autonomy — Bond Recovery"
+Cohesion: 0.17
+Nodes (9): ChallengeChrome, ChallengeResult, Bool, SKLabelNode, ChallengeVictoryReward, none, resource, shellBonus (+1 more)
+
 ### Community 68 - "Mermaid Intent & Acceptance"
-Cohesion: 0.10
-Nodes (20): FishCompanionAction, guide, MermaidIntent, avoidingDanger, eating, enteringRefuge, followingFish, goingDeeper (+12 more)
+Cohesion: 0.11
+Nodes (18): MermaidIntent, avoidingDanger, eating, enteringRefuge, followingFish, goingDeeper, goingToObjective, goingUp (+10 more)
 
 ### Community 69 - "Autotile Set Hashing"
-Cohesion: 0.26
-Nodes (5): HUDPalette, SKShapeNode, SKSpriteNode, UIBezierPath, UIColor
+Cohesion: 0.35
+Nodes (3): HUDPalette, SKShapeNode, UIColor
 
 ### Community 70 - "Mermaid Rig Models"
-Cohesion: 0.21
-Nodes (8): MermaidRigDebugTool, PreviewFit, Bool, MermaidFigurePart, NSCoder, SKLabelNode, UIEdgeInsets, Void
-
-### Community 71 - "HUD — Active Effects Shelf"
-Cohesion: 0.46
-Nodes (3): ObjectIdentifier, Set, UITouch
-
-### Community 72 - "Aquatic Biomes"
-Cohesion: 0.18
-Nodes (4): BanquetEngine, BanquetPlayer, Bool, CGRect
+Cohesion: 0.22
+Nodes (7): MermaidRigDebugTool, Bool, MermaidFigurePart, NSCoder, SKLabelNode, UIEdgeInsets, Void
 
 ### Community 73 - "Mermaid Figure Part Positioning"
-Cohesion: 0.07
-Nodes (21): Reward, RewardKind, item, pearls, regionMap, story, supportResource, temporaryEffect (+13 more)
+Cohesion: 0.05
+Nodes (43): CaseIterable, Codable, Reward, RewardKind, item, pearls, regionMap, story (+35 more)
 
 ### Community 74 - "Map Editor — SwiftUI Content View"
-Cohesion: 0.32
+Cohesion: 0.28
 Nodes (3): AdultMermaidFigure, MermaidFigurePart, Bool
 
 ### Community 75 - "Map Editor — Depth Save"
@@ -590,8 +575,8 @@ Cohesion: 0.11
 Nodes (18): Chegada em Mapa Novo, Conchas (Moeda), Coragem, Decisões Abertas, Desbloqueio Global vs Por Mapa, Energia e Exploração, Estrutura de Cada Mapa, Fases da Sereia (+10 more)
 
 ### Community 76 - "Event Bus"
-Cohesion: 0.29
-Nodes (6): FishSwimPattern, flee, guide, school, wander, GKEntity
+Cohesion: 0.21
+Nodes (11): FishBehaviorComponent, FishSpecies, FishSwimPattern, flee, guide, school, wander, Bool (+3 more)
 
 ### Community 77 - "Mermaid Body Dimensions"
 Cohesion: 0.12
@@ -602,60 +587,60 @@ Cohesion: 0.11
 Nodes (18): Anatomia De Um Bom Movel, Checklist Antes De Gerar, Como Traduzir Tema De Sereia Para Moveis, Composicao, Funcao Antes Do Ornamento, Fundo Transparente, FURNITURE_ART_GUIDE, Integracao No Jogo (+10 more)
 
 ### Community 79 - "Refuge Entry & Energy"
-Cohesion: 0.23
-Nodes (5): SeededGenerator, Bool, ClosedRange, RandomNumberGenerator, UInt64
+Cohesion: 0.31
+Nodes (4): MermaidEmotionComponent, Bool, Mermaid, NSCoder
 
 ### Community 80 - "Ester Game"
 Cohesion: 0.18
 Nodes (13): ChallengeCompletedEvent, EventBus, FoodCollectedEvent, GameEvent, MermaidStateChangedEvent, RegionDiscoveredEvent, Any, GKEntity (+5 more)
 
 ### Community 81 - "Ester Game"
-Cohesion: 0.27
-Nodes (6): SKSpriteNode, WorldChunkFactory, NSCache, NSString, SKTexture, WorldTextureCache
+Cohesion: 0.15
+Nodes (11): PlacedReefCluster, ReefCluster, Bool, CGRect, SKSpriteNode, WorldChunkFactory, NSCache, NSString (+3 more)
 
 ### Community 82 - "Components"
-Cohesion: 0.10
-Nodes (18): ChallengeGiverComponent, Bool, NSCoder, ChallengeGoalRange, CodingKeys, buffKind, duration, expiresAt (+10 more)
+Cohesion: 0.07
+Nodes (29): CodingKey, CodingKeys, buffKind, duration, expiresAt, itemId, kind, pearlAmount (+21 more)
 
 ### Community 83 - "Managers"
 Cohesion: 0.13
 Nodes (14): CHARACTER_ART_GUIDE, Checklist Antes De Gerar, Como Usar Concept Arts, Composicao, Fundo Transparente, Integracao No Jogo, Negativos Uteis, Nivel De Detalhe (+6 more)
 
 ### Community 84 - "Ester Game"
-Cohesion: 0.17
-Nodes (9): Mermaid, MermaidFigure, MermaidFormKind, adult, baby, child, young, Bool (+1 more)
+Cohesion: 0.20
+Nodes (8): Mermaid, MermaidFigure, MermaidFormKind, adult, baby, child, young, SKSpriteNode
 
 ### Community 85 - "Components"
-Cohesion: 0.14
-Nodes (14): HousePhysicsCategory, HouseSurface, HouseSurfaceKind, backWall, ceiling, leftWall, rightWall, RoomSurfaceMapper (+6 more)
+Cohesion: 0.13
+Nodes (15): HousePhysicsCategory, HouseSurface, HouseSurfaceKind, backWall, ceiling, floor, leftWall, rightWall (+7 more)
 
 ### Community 86 - "Components"
-Cohesion: 0.14
-Nodes (14): MermaidExpressionName, adventurous, curious, eating, focused, happy, hungry, neutral (+6 more)
+Cohesion: 0.12
+Nodes (15): MermaidExpressionName, adventurous, curious, eating, focused, happy, hungry, neutral (+7 more)
 
 ### Community 87 - "Ester Game"
-Cohesion: 0.10
+Cohesion: 0.11
 Nodes (19): AVAudioPCMBuffer, AVAudioPlayer, AVFoundation, AmbienceSpec, GameAmbience, abyss, clear, deep (+11 more)
 
 ### Community 88 - "Ester Game"
-Cohesion: 0.23
-Nodes (8): NSCoder, SKLabelNode, VisualStyle, environment, npc, object, warmCurrentEnvironment, WorldPOINode
+Cohesion: 0.15
+Nodes (14): Bool, NSCoder, SKLabelNode, VisualStyle, environment, npc, object, warmCurrentEnvironment (+6 more)
 
 ### Community 89 - "Managers"
 Cohesion: 0.21
 Nodes (7): AppDelegate, Any, Bool, UIApplication, UIApplicationDelegate, UIResponder, UIWindow
 
 ### Community 90 - "Managers"
-Cohesion: 0.33
-Nodes (5): ReefRockMotif, algaeStone, basalt, goldenCoral, roseCoral
+Cohesion: 0.20
+Nodes (3): HUDTypography, NSCoder, UIEdgeInsets
 
 ### Community 91 - "Managers"
-Cohesion: 0.22
-Nodes (7): AmbientLifeNode, Style, jelly, needleFish, ovalFish, ray, NSCoder
+Cohesion: 0.15
+Nodes (11): AmbientLifeNode, OceanPalette, Style, jelly, needleFish, ovalFish, ray, NSCoder (+3 more)
 
 ### Community 92 - "Appdelegate"
 Cohesion: 0.07
-Nodes (12): inventoryItems, regionProgress, repeatablePOIRewardAvailableAtByKey, MermaidStats, Bool, Data, Date, Decoder (+4 more)
+Nodes (15): expeditionRevealByRegion, inventoryItems, repeatablePOIRewardAvailableAtByKey, MermaidStats, Bool, Data, Date, Decoder (+7 more)
 
 ### Community 93 - "Components"
 Cohesion: 0.33
@@ -665,25 +650,21 @@ Nodes (12): connection_mask(), fail(), inner_corner_mask(), main(), png_size(), 
 Cohesion: 0.07
 Nodes (16): AncientRuinsGameScene, BirthWatersGameScene, CalmGardenGameScene, CaveMouthGameScene, CrystalFieldsGameScene, DistantSurfaceGameScene, EmeraldReefGameScene, GreatDeltaGameScene (+8 more)
 
-### Community 95 - "Ester Game"
-Cohesion: 0.17
-Nodes (5): BondRecoveryHUDState, available, hidden, ready, waiting
-
 ### Community 96 - "Tools Verify"
 Cohesion: 0.18
 Nodes (11): Conceito, Coordenadas, Descoberta, Estrutura de Dados, Eventos Aleatórios — Upgrade, Pontos de Interesse (POIs), Retorno a POIs Descobertos, Sistema de Recompensas (+3 more)
 
 ### Community 97 - "Ester Game"
-Cohesion: 0.13
-Nodes (7): expeditionRevealByRegion, ExpeditionMapNode, Region, RegionDiscoverySystem, NSCoder, SKShapeNode, UIColor
+Cohesion: 0.09
+Nodes (10): ClosedRange, discoveryPointByRegion, mapEntryPointByRegion, mapPositionByRegion, StableMapRNG, ClosedRange, UInt64, OfflineProgressSystem (+2 more)
 
 ### Community 98 - "Ester Game"
 Cohesion: 0.25
 Nodes (6): Channel, caustics, fog, particles, shader, OceanVisualTuning
 
 ### Community 99 - "Ester Game"
-Cohesion: 0.18
-Nodes (7): FishSilhouette, diamond, moon, needle, oval, ray, turtle
+Cohesion: 0.36
+Nodes (3): SupportResourceVisualFactory, SKLabelNode, UIColor
 
 ### Community 100 - "Ester Game"
 Cohesion: 0.20
@@ -694,40 +675,36 @@ Cohesion: 0.10
 Nodes (17): MermaidEmotionalState, MermaidMoodCue, currentLift, currentStrain, encouraged, none, MermaidMoodTone, danger (+9 more)
 
 ### Community 102 - "Managers"
-Cohesion: 0.39
-Nodes (4): HUDTexture, NSCache, NSString, SKTexture
+Cohesion: 0.29
+Nodes (5): HUDTexture, NSCache, NSString, SKSpriteNode, SKTexture
 
 ### Community 103 - "Ester Game"
-Cohesion: 0.13
-Nodes (12): CodingKeys, scale, x, y, z, MermaidRigDocument, MermaidRigStore, Any (+4 more)
+Cohesion: 0.20
+Nodes (7): MermaidRigDocument, MermaidRigStore, Any, Data, MermaidFigurePart, MermaidRigPosition, URL
 
 ### Community 104 - "Ester Game"
-Cohesion: 0.10
-Nodes (21): BadgePlacement, LayoutPoint, Location, house, professor, store, RefugeDioramaController, RefugeHubLayout (+13 more)
-
-### Community 105 - "Ester Game"
-Cohesion: 0.26
-Nodes (5): MermaidFigurePart, YoungMermaidFigure, MermaidFigurePart, MermaidRigPosition, YoungMermaidRig
+Cohesion: 0.21
+Nodes (8): Location, house, professor, store, RefugeDioramaController, NSCoder, UIEdgeInsets, Void
 
 ### Community 106 - "Components"
-Cohesion: 0.16
-Nodes (5): ClosedRange, mapPositionByRegion, RefugeFlowController, Bool, Void
+Cohesion: 0.14
+Nodes (7): RefugeFlowController, Bool, Void, RefugeScene, SKView, TimeInterval, SKScene
 
 ### Community 107 - "Ester Game"
-Cohesion: 0.11
-Nodes (19): ChallengeChoiceOverlay, ChallengeKind, ascent, banquet, echoMelody, memory, plot, reefAsteroids (+11 more)
+Cohesion: 0.25
+Nodes (7): POIChallengeOfferOverlay, NSCoder, Set, UIColor, UIEvent, UITouch, Void
 
 ### Community 108 - "Ester Game"
-Cohesion: 0.40
-Nodes (5): LabelStyle, body, bodyBold, note, noteBold
+Cohesion: 0.15
+Nodes (10): CoreText, IconKind, plankton, shell, wave, LabelStyle, body, bodyBold (+2 more)
 
 ### Community 109 - "Storyboard"
 Cohesion: 0.79
 Nodes (8): docs → storyboard → ref teacher →   (12), docs → storyboard → ref teacher →   (13), docs → storyboard → ref teacher → adult siren, docs → storyboard → ref teacher → baby siren, docs → storyboard → ref teacher → child siren, docs → storyboard → ref teacher → Octo Sheriff, docs → storyboard → ref teacher → Postcard designs   Barbara Dziadosz, docs → storyboard → ref teacher → young siren
 
 ### Community 110 - "Components"
-Cohesion: 0.15
-Nodes (6): MermaidEyes, SKSpriteNode, MermaidFace, SKSpriteNode, MermaidMouth, SKSpriteNode
+Cohesion: 0.21
+Nodes (7): MermaidEyebrows, SKSpriteNode, MermaidEyes, SKSpriteNode, SKSpriteNode, MermaidMouth, SKSpriteNode
 
 ### Community 111 - "Ester Game"
 Cohesion: 0.25
@@ -741,25 +718,25 @@ Nodes (8): Adaptação para Ester, Como o Terraria faz (referência), Mini-mapa 
 Cohesion: 0.35
 Nodes (6): RegionMenuOverlay, CGRect, Set, UIEvent, UITouch, Void
 
-### Community 114 - "ColorManager"
-Cohesion: 0.29
-Nodes (5): ColorManager, UIColor, MermaidEyebrows, SKSpriteNode, SKSpriteNode
-
 ### Community 115 - "Managers"
-Cohesion: 0.20
+Cohesion: 0.18
 Nodes (9): MovementDirection, down, left, right, up, MovementType, fast, idle (+1 more)
+
+### Community 116 - "Mapeditor Mapeditor"
+Cohesion: 0.49
+Nodes (3): Set, UIEvent, UITouch
 
 ### Community 117 - "ChallengeGiverComponent"
 Cohesion: 0.47
 Nodes (3): Set, UIEvent, UITouch
 
 ### Community 118 - "Mapeditor Mapeditor"
-Cohesion: 0.46
+Cohesion: 0.33
 Nodes (4): RegistroFlowController, Bool, UIEdgeInsets, Void
 
 ### Community 119 - "Ester Game"
-Cohesion: 0.44
-Nodes (4): FloorFurnitureSpec, HouseObjectCatalog, HouseObjectDefinition, WallDecorationSpec
+Cohesion: 0.17
+Nodes (6): FloorFurnitureSpec, HouseObjectCatalog, HouseObjectDefinition, WallDecorationSpec, HouseSurfaceKind, SKSpriteNode
 
 ### Community 120 - "FoodComponent"
 Cohesion: 0.14
@@ -774,19 +751,19 @@ Cohesion: 0.29
 Nodes (6): Adding A New Resource, Concept, Current Resources, Refuge Shop, Resource Flow, Resource Support System
 
 ### Community 123 - "Orientation"
-Cohesion: 0.29
-Nodes (5): HouseMiniroomTheme, HouseRoomFrontFrameNode, HouseRoomNode, RoomSurfaceMapping, UIColor
+Cohesion: 0.24
+Nodes (6): HouseMiniroomTheme, HouseRoomFrontFrameNode, HouseRoomNode, NSCoder, RoomSurfaceMapping, UIColor
 
 ### Community 124 - "Ester Game"
 Cohesion: 0.29
 Nodes (5): ObjectiveComponent, Bool, NSCoder, TimeInterval, Void
 
 ### Community 125 - ".touchesBegan"
-Cohesion: 0.32
-Nodes (7): BondRecoveryBalance, FishPlayBalance, HorizontalBoundaryBalance, PassiveBondBalance, TimeInterval, TouchDirectionBalance, TrustBalance
+Cohesion: 0.12
+Nodes (18): BondRecoveryBalance, BondRecoveryHUDState, available, hidden, ready, waiting, BondRecoveryState, idle (+10 more)
 
 ### Community 126 - "Ester Game"
-Cohesion: 0.20
+Cohesion: 0.22
 Nodes (7): TimeInterval, VisualEffect, bob, fadeIn, fadeOut, glow, pulse
 
 ### Community 127 - "Gamescene"
@@ -798,16 +775,16 @@ Cohesion: 0.33
 Nodes (6): FishMotionMode, gatheringForPlay, guiding, normal, playing, Date
 
 ### Community 129 - "SupportResourceKind"
-Cohesion: 0.22
-Nodes (9): HouseObjectCategory, backWallDecoration, ceilingDecoration, container, floorFurniture, functional, leftWallDecoration, rightWallDecoration (+1 more)
+Cohesion: 0.36
+Nodes (3): Set, UIEvent, UITouch
 
 ### Community 130 - "Agents"
-Cohesion: 0.29
-Nodes (3): CameraController, SKCameraNode, UIColor
+Cohesion: 0.42
+Nodes (3): RefugePortalNode, SKTexture, SKEmitterNode
 
 ### Community 131 - ".touchesBegan"
-Cohesion: 0.42
-Nodes (3): Set, UIEvent, UITouch
+Cohesion: 0.32
+Nodes (6): FaceTextureCache, SKSpriteNode, SKTexture, NSCache, NSString, SKTexture
 
 ### Community 132 - "Storyboard"
 Cohesion: 1.00
@@ -858,8 +835,8 @@ Cohesion: 0.40
 Nodes (4): Complete Event Mapping, Design Direction, Ester Sound Effect Map, Intentionally Silent
 
 ### Community 189 - "LabelStyle"
-Cohesion: 0.33
-Nodes (6): POIComponent, POIState, active, completed, dormant, interacting
+Cohesion: 0.25
+Nodes (7): POIComponent, POIState, active, completed, dormant, interacting, NSCoder
 
 ### Community 190 - "FoodStyle"
 Cohesion: 0.29
@@ -870,12 +847,8 @@ Cohesion: 0.43
 Nodes (5): NSCache, URL, TileImageCache, NSImage, NSURL
 
 ### Community 230 - "CodingKeys"
-Cohesion: 0.33
-Nodes (6): CodingKeys, goal, goalMultiplier, introText, kind, special
-
-### Community 231 - "BondRecoveryState"
-Cohesion: 0.40
-Nodes (5): BondRecoveryState, idle, ready, waiting, Date
+Cohesion: 0.29
+Nodes (5): BanquetPlayer, Bool, CGRect, NSCoder, Void
 
 ### Community 232 - ".texture"
 Cohesion: 0.39
@@ -893,56 +866,44 @@ Nodes (7): ReefFeedbackEffect, combo, crack, hit, score, surge, wave
 Cohesion: 0.50
 Nodes (3): SharedGameData, Tilesets, Verificacao
 
-### Community 237 - ".addCommandButton"
-Cohesion: 0.14
-Nodes (7): HUDLayer, NSCoder, Set, UIEdgeInsets, UIEvent, UITouch, Void
-
-### Community 238 - "IconKind"
-Cohesion: 0.50
-Nodes (4): IconKind, plankton, shell, wave
-
 ### Community 239 - "TideMemoryCardState"
-Cohesion: 0.50
-Nodes (4): TideMemoryCardState, faceDown, faceUp, matched
+Cohesion: 0.47
+Nodes (3): ChildMermaidRig, MermaidFigurePart, MermaidRigPosition
 
 ### Community 240 - ".touchesEnded"
-Cohesion: 0.11
-Nodes (16): Comparable, ChallengeRewardProfile, ChallengeVictoryReward, none, resource, shellBonus, GameBalance, MermaidPhase (+8 more)
+Cohesion: 0.06
+Nodes (29): AnyObject, Comparable, ChallengeGiverComponent, Bool, NSCoder, ChallengeGiver, ChallengeKind, ascent (+21 more)
 
 ### Community 241 - "EditorLayer"
-Cohesion: 0.50
-Nodes (4): EditorLayer, decoration, spawn, terrain
+Cohesion: 0.60
+Nodes (3): AdultMermaidRig, MermaidFigurePart, MermaidRigPosition
 
-### Community 243 - "Orientation"
-Cohesion: 0.67
-Nodes (3): Orientation, horizontal, vertical
+### Community 242 - "ChildMermaidRig"
+Cohesion: 0.60
+Nodes (3): BabyMermaidRig, MermaidFigurePart, MermaidRigPosition
 
 ### Community 246 - "GridLines"
-Cohesion: 0.47
+Cohesion: 0.50
 Nodes (4): MermaidEntity, Mermaid, NSCoder, GKEntity
 
 ### Community 247 - "Mermaid"
 Cohesion: 0.20
 Nodes (7): Mermaid, Direction, down, left, none, right, up
 
-### Community 259 - "floor"
-Cohesion: 0.29
-Nodes (4): CGRect, Mermaid, NSCoder, Void
-
 ## Knowledge Gaps
-- **767 isolated node(s):** `wander`, `school`, `flee`, `guide`, `open` (+762 more)
+- **768 isolated node(s):** `wander`, `school`, `flee`, `guide`, `open` (+763 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **89 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **95 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `CGFloat` connect `Challenge Giver Component` to `Map Tiles — Mossy Terrain`, `Mermaid House System`, `Gameplay Models & Scene Construction`, `World Point & Rendering Primitives`, `Depth Environment & Ocean Parallax`, `Banquet of Tides Minigame`, `Event System`, `Species Registry & Mermaid Progression`, `Tide Memory Minigame`, `Refuge Village Controller`, `Bubble Climb Minigame Overlay`, `Shell Snap Minigame`, `Echo Melody Minigame`, `Mermaid Stats & Inventory`, `Resource Support & Shop`, `Entity Components — Visual Effects`, `Game Scene Entries & Birth Waters`, `Challenge Goals & Spawning`, `Mermaid Stats — Balance & Buffs`, `Audio Manager & Sound Effects`, `Tide Weaving System`, `Mermaid Arms & Animation`, `Autonomy — Fish Play & Guidance`, `Mermaid Figures — Baby`, `Region System`, `Reef Asteroids Overlay`, `Map Tiles — JSON Manifest`, `Depth System`, `Gameplay Reward Models`, `World Chunk Factory`, `Growth System`, `Mermaid Figures — Child`, `World Chunk — Detail Rendering`, `Documentation — Design Decisions`, `Movement Vector Utilities`, `Component Base Classes`, `Cheat System`, `Fish Visual Models`, `Region Map Cues & Expedition`, `Movement Enums & Animation Modes`, `Fish Drawing Factory`, `HUD Layer`, `Expedition Grid Math`, `World Stamp Drawing`, `Pearl Economy`, `HUD — Biology Meter & Commands`, `Buff Coding Keys`, `Mermaid Name Editor`, `Depth Zone Colors`, `Mermaid Emotion Component`, `Command & Touch System`, `Mermaid Rig Debug Tool`, `Mermaid Core Entity`, `Game Sound Enum Values`, `Autonomy — Bond Recovery`, `Autotile Set Hashing`, `Mermaid Rig Models`, `Aquatic Biomes`, `Mermaid Figure Part Positioning`, `Map Editor — SwiftUI Content View`, `Refuge Entry & Energy`, `Ester Game`, `Components`, `Ester Game`, `Components`, `Ester Game`, `Managers`, `Appdelegate`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Managers`, `Ester Game`, `Ester Game`, `Ester Game`, `Components`, `Ester Game`, `Components`, `Ester Game`, `Mapeditor Mapeditor`, `Ester Game`, `Ester Game`, `.touchesBegan`, `Ester Game`, `Agents`, `.texture`, `.addCommandButton`, `.touchesEnded`, `ChildMermaidRig`, `floor`?**
-  _High betweenness centrality (0.216) - this node is a cross-community bridge._
-- **Why does `String` connect `Refuge Village Controller` to `Map Tiles — Mossy Terrain`, `Mermaid House System`, `Map Tiles — Mossy Autotile`, `Gameplay Models & Scene Construction`, `World Point & Rendering Primitives`, `Depth Environment & Ocean Parallax`, `Banquet of Tides Minigame`, `Event System`, `Species Registry & Mermaid Progression`, `Tide Memory Minigame`, `Bubble Climb Minigame Overlay`, `Shell Snap Minigame`, `Echo Melody Minigame`, `Mermaid Stats & Inventory`, `Resource Support & Shop`, `Entity Components — Visual Effects`, `Game Scene Entries & Birth Waters`, `Challenge Goals & Spawning`, `Mermaid Stats — Balance & Buffs`, `Bubble Climb Controls`, `Tide Weaving System`, `World Stamp Rendering`, `Mermaid Arms & Animation`, `Challenge Giver Component`, `Autonomy — Fish Play & Guidance`, `Mermaid Figures — Baby`, `Reef Asteroids Minigame Engine`, `Region System`, `Reef Asteroids Overlay`, `Map Tiles — JSON Manifest`, `Depth System`, `Gameplay Reward Models`, `World Chunk Factory`, `Growth System`, `World Chunk — Detail Rendering`, `Documentation — Design Decisions`, `Movement Vector Utilities`, `Component Base Classes`, `Autonomy — Eating Behavior`, `Cheat System`, `Region Map Cues & Expedition`, `World Stamp Drawing`, `HUD — Biology Meter & Commands`, `Buff Coding Keys`, `Discovery & Depth Ranges`, `Depth Zone Colors`, `Mermaid Emotion Component`, `Game Sound Enum Values`, `Autonomy — Bond Recovery`, `Mermaid Intent & Acceptance`, `Autotile Set Hashing`, `Mermaid Rig Models`, `Mermaid Figure Part Positioning`, `Mermaid Body Dimensions`, `Components`, `Ester Game`, `Components`, `Components`, `Ester Game`, `Ester Game`, `Managers`, `Appdelegate`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Managers`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `ColorManager`, `Ester Game`, `FoodComponent`, `Ester Game`, `SupportResourceKind`, `CodingKeys`, `.texture`, `.addCommandButton`, `.touchesEnded`, `EditorLayer`?**
-  _High betweenness centrality (0.179) - this node is a cross-community bridge._
-- **Why does `CGPoint` connect `Depth Environment & Ocean Parallax` to `Map Tiles — Mossy Terrain`, `Mermaid House System`, `Gameplay Models & Scene Construction`, `World Point & Rendering Primitives`, `Banquet of Tides Minigame`, `Event System`, `Species Registry & Mermaid Progression`, `Tide Memory Minigame`, `Shell Snap Minigame`, `Echo Melody Minigame`, `Mermaid Stats & Inventory`, `Resource Support & Shop`, `Entity Components — Visual Effects`, `Game Scene Entries & Birth Waters`, `Challenge Goals & Spawning`, `Mermaid Stats — Balance & Buffs`, `Audio Manager & Sound Effects`, `Mermaid Arms & Animation`, `Challenge Giver Component`, `Autonomy — Fish Play & Guidance`, `Region System`, `Reef Asteroids Overlay`, `Map Tiles — JSON Manifest`, `Depth System`, `Gameplay Reward Models`, `Growth System`, `Mermaid Figures — Child`, `Documentation — Design Decisions`, `Movement Vector Utilities`, `Component Base Classes`, `Cheat System`, `Fish Visual Models`, `Region Map Cues & Expedition`, `Movement Enums & Animation Modes`, `Fish Drawing Factory`, `HUD Layer`, `Expedition Grid Math`, `HUD — Biology Meter & Commands`, `Buff Coding Keys`, `Mermaid Name Editor`, `Depth Zone Colors`, `Mermaid Emotion Component`, `Command & Touch System`, `Mermaid Core Entity`, `Game Sound Enum Values`, `Encoding Utilities`, `Autonomy — Bond Recovery`, `Autotile Set Hashing`, `Mermaid Rig Models`, `HUD — Active Effects Shelf`, `Aquatic Biomes`, `Mermaid Figure Part Positioning`, `Mermaid Body Dimensions`, `Refuge Entry & Energy`, `Ester Game`, `Components`, `Components`, `Ester Game`, `Managers`, `Appdelegate`, `Ester Game`, `Managers`, `Ester Game`, `Components`, `Ester Game`, `Components`, `Ester Game`, `Mapeditor Mapeditor`, `ChallengeGiverComponent`, `Orientation`, `Ester Game`, `Ester Game`, `Mapeditor Mapeditor`, `Agents`, `.touchesBegan`, `.addCommandButton`, `.touchesEnded`, `ChildMermaidRig`, `floor`?**
-  _High betweenness centrality (0.131) - this node is a cross-community bridge._
+- **Why does `CGFloat` connect `Gameplay Reward Models` to `Map Tiles — Mossy Terrain`, `Mermaid House System`, `Map Tiles — Mossy Autotile`, `Gameplay Models & Scene Construction`, `Challenge Flow Controller`, `World Point & Rendering Primitives`, `Depth Environment & Ocean Parallax`, `Banquet of Tides Minigame`, `Event System`, `Species Registry & Mermaid Progression`, `Tide Memory Minigame`, `Refuge Village Controller`, `Bubble Climb Minigame Overlay`, `Shell Snap Minigame`, `Echo Melody Minigame`, `Resource Support & Shop`, `Entity Components — Visual Effects`, `Game Scene Entries & Birth Waters`, `Challenge Goals & Spawning`, `Mermaid Stats — Balance & Buffs`, `Audio Manager & Sound Effects`, `Tide Weaving System`, `Mermaid Arms & Animation`, `Challenge Giver Component`, `Autonomy — Fish Play & Guidance`, `Mermaid Figures — Baby`, `Region System`, `Reef Asteroids Overlay`, `Map Tiles — JSON Manifest`, `Depth System`, `World Chunk Factory`, `Growth System`, `Mermaid Figures — Child`, `World Chunk — Detail Rendering`, `Documentation — Design Decisions`, `Movement Vector Utilities`, `Component Base Classes`, `Cheat System`, `Fish Visual Models`, `Region Map Cues & Expedition`, `Movement Enums & Animation Modes`, `Fish Drawing Factory`, `HUD Layer`, `Expedition Grid Math`, `Pearl Economy`, `HUD — Biology Meter & Commands`, `Buff Coding Keys`, `Mermaid Name Editor`, `Depth Zone Colors`, `Mermaid Emotion Component`, `Command & Touch System`, `Mermaid Rig Debug Tool`, `Mermaid Core Entity`, `Game Sound Enum Values`, `Autonomy — Bond Recovery`, `Mermaid Intent & Acceptance`, `Autotile Set Hashing`, `Mermaid Rig Models`, `HUD — Active Effects Shelf`, `Aquatic Biomes`, `Mermaid Figure Part Positioning`, `Map Editor — SwiftUI Content View`, `Event Bus`, `Refuge Entry & Energy`, `Ester Game`, `Ester Game`, `Components`, `Ester Game`, `Managers`, `Managers`, `Appdelegate`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Managers`, `Ester Game`, `Ester Game`, `Ester Game`, `Components`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `.touchesBegan`, `Ester Game`, `Agents`, `CodingKeys`, `BondRecoveryState`, `.texture`, `.addCommandButton`, `IconKind`, `TideMemoryCardState`, `.touchesEnded`, `EditorLayer`, `ChildMermaidRig`?**
+  _High betweenness centrality (0.215) - this node is a cross-community bridge._
+- **Why does `String` connect `Mermaid Figure Part Positioning` to `Map Tiles — Mossy Terrain`, `Mermaid House System`, `Map Tiles — Mossy Autotile`, `Challenge Flow Controller`, `World Point & Rendering Primitives`, `Depth Environment & Ocean Parallax`, `Banquet of Tides Minigame`, `Event System`, `Species Registry & Mermaid Progression`, `Tide Memory Minigame`, `Refuge Village Controller`, `Bubble Climb Minigame Overlay`, `Shell Snap Minigame`, `Echo Melody Minigame`, `Mermaid Stats & Inventory`, `Resource Support & Shop`, `Entity Components — Visual Effects`, `Game Scene Entries & Birth Waters`, `Challenge Goals & Spawning`, `Bubble Climb Controls`, `Tide Weaving System`, `World Stamp Rendering`, `Mermaid Arms & Animation`, `Challenge Giver Component`, `Autonomy — Fish Play & Guidance`, `Mermaid Figures — Baby`, `Reef Asteroids Minigame Engine`, `Region System`, `Reef Asteroids Overlay`, `Map Tiles — JSON Manifest`, `Depth System`, `Gameplay Reward Models`, `World Chunk Factory`, `Growth System`, `World Chunk — Detail Rendering`, `Documentation — Design Decisions`, `Movement Vector Utilities`, `Component Base Classes`, `Autonomy — Eating Behavior`, `Cheat System`, `Region Map Cues & Expedition`, `World Stamp Drawing`, `HUD — Biology Meter & Commands`, `Buff Coding Keys`, `Mermaid Name Editor`, `Discovery & Depth Ranges`, `Depth Zone Colors`, `Mermaid Emotion Component`, `Game Sound Enum Values`, `Autonomy — Bond Recovery`, `Mermaid Intent & Acceptance`, `Autotile Set Hashing`, `Mermaid Rig Models`, `Event Bus`, `Mermaid Body Dimensions`, `Components`, `Ester Game`, `Components`, `Components`, `Ester Game`, `Ester Game`, `Managers`, `Managers`, `Appdelegate`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Managers`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `ColorManager`, `Ester Game`, `FoodComponent`, `Ester Game`, `SupportResourceKind`, `.touchesBegan`, `.texture`, `.addCommandButton`, `.touchesEnded`?**
+  _High betweenness centrality (0.201) - this node is a cross-community bridge._
+- **Why does `CGPoint` connect `Mermaid House System` to `Mapeditor Mapeditor`, `Map Tiles — Mossy Terrain`, `SupportResourceKind`, `Gameplay Models & Scene Construction`, `World Point & Rendering Primitives`, `Depth Environment & Ocean Parallax`, `Banquet of Tides Minigame`, `Event System`, `Species Registry & Mermaid Progression`, `Tide Memory Minigame`, `Shell Snap Minigame`, `Echo Melody Minigame`, `Resource Support & Shop`, `Entity Components — Visual Effects`, `Game Scene Entries & Birth Waters`, `Challenge Goals & Spawning`, `Mermaid Stats — Balance & Buffs`, `Audio Manager & Sound Effects`, `Mermaid Arms & Animation`, `Challenge Giver Component`, `Autonomy — Fish Play & Guidance`, `Mermaid Figures — Baby`, `Region System`, `Reef Asteroids Overlay`, `Map Tiles — JSON Manifest`, `Depth System`, `Gameplay Reward Models`, `Growth System`, `Mermaid Figures — Child`, `Documentation — Design Decisions`, `Movement Vector Utilities`, `Component Base Classes`, `Cheat System`, `Region Map Cues & Expedition`, `Movement Enums & Animation Modes`, `Fish Drawing Factory`, `HUD Layer`, `Expedition Grid Math`, `HUD — Biology Meter & Commands`, `Buff Coding Keys`, `Mermaid Name Editor`, `Depth Zone Colors`, `Mermaid Emotion Component`, `Mermaid Rig Debug Tool`, `Mermaid Core Entity`, `Game Sound Enum Values`, `Encoding Utilities`, `Autonomy — Bond Recovery`, `Autotile Set Hashing`, `Mermaid Rig Models`, `HUD — Active Effects Shelf`, `Aquatic Biomes`, `Event Bus`, `Mermaid Body Dimensions`, `Ester Game`, `Ester Game`, `Managers`, `Managers`, `Appdelegate`, `Ester Game`, `Ester Game`, `CodingKeys`, `Managers`, `Ester Game`, `Components`, `Ester Game`, `Ester Game`, `.addCommandButton`, `.touchesEnded`, `Ester Game`, `ChallengeGiverComponent`, `Ester Game`, `Orientation`, `Ester Game`, `Ester Game`?**
+  _High betweenness centrality (0.119) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `CGFloat` (e.g. with `.update()` and `.drawReefSkirt()`) actually correct?**
   _`CGFloat` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 34 inferred relationships involving `CGPoint` (e.g. with `.update()` and `.openChallengeChoiceMenu()`) actually correct?**

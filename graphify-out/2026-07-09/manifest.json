@@ -1035,8 +1035,8 @@
     "semantic_hash": "f96e3b14a592c50cb9d0ff6cc7b68c0c"
   },
   "Ester/Game/ResourceSupportSystem.swift": {
-    "mtime": 1783630266.0660992,
-    "ast_hash": "0a9c6409f17213f1f25d57acea3cd592",
+    "mtime": 1783632357.78161,
+    "ast_hash": "639cb016e176151a8f456516f2b2f0dc",
     "semantic_hash": ""
   },
   "Ester/Game/ShellSnapSystem.swift": {
@@ -3040,8 +3040,8 @@
     "semantic_hash": "c2070a2a4df4250551dd974593011644"
   },
   "Ester/Game/MermaidHouseSystem.swift": {
-    "mtime": 1783630762.1323166,
-    "ast_hash": "fc954d778b08915a906f2d1eea7f7ed1",
+    "mtime": 1783633659.30433,
+    "ast_hash": "db6dd0ad8a02e4fb9eedea9e492e9648",
     "semantic_hash": ""
   },
   "Ester/Game/RefugeFlowController.swift": {
@@ -3155,8 +3155,8 @@
     "semantic_hash": ""
   },
   "Ester/Game/HouseObjectCatalog.swift": {
-    "mtime": 1783630248.5442305,
-    "ast_hash": "8ebf61ff21615d967027ccc6926d4fb8",
+    "mtime": 1783632297.580992,
+    "ast_hash": "7edea84309eccb47b25624a99e89e460",
     "semantic_hash": ""
   },
   "docs/FURNITURE_ART_GUIDE.md": {
@@ -3695,8 +3695,8 @@
     "semantic_hash": ""
   },
   "Ester/Game/HouseFurnitureScaleCatalog.swift": {
-    "mtime": 1783630278.3333168,
-    "ast_hash": "4673f30806e2ab8c40dd70bd2b969d48",
+    "mtime": 1783632401.6248827,
+    "ast_hash": "1c58214a28705635edd3f2c674566a51",
     "semantic_hash": ""
   },
   "tmp/furniture-comoda-style-test/mermaid-dresser-clean-top-chroma.png": {
@@ -3972,6 +3972,141 @@
   "tmp/furniture-imagegen-sources/birthday-wall-art-chroma.png": {
     "mtime": 1783630085.6717796,
     "ast_hash": "f992a6bea8ecedcf8e406c5e801900cb",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidBirthdayTable.imageset/Contents.json": {
+    "mtime": 1783632089.2218292,
+    "ast_hash": "eefe841e6d5d9b54f040ab4e46e37320",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoralWallShelf.imageset/Contents.json": {
+    "mtime": 1783632146.8068857,
+    "ast_hash": "182b126ffd48943713013939ff090488",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidJellyfishSconce.imageset/Contents.json": {
+    "mtime": 1783632146.8075643,
+    "ast_hash": "950514368c4a0b1cb2720ddcb6cb6702",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidPearlClock.imageset/Contents.json": {
+    "mtime": 1783632146.806314,
+    "ast_hash": "c63a539567e5302e8d34b31cd2dcefcf",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSeaMapFrame.imageset/Contents.json": {
+    "mtime": 1783632146.8065722,
+    "ast_hash": "42944cdc429d36ed6bccca7171f3736c",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidShellMirror.imageset/Contents.json": {
+    "mtime": 1783632146.805955,
+    "ast_hash": "3f3bd09d1e0d98a39b23cf5eec9a279a",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidStarfishGarland.imageset/Contents.json": {
+    "mtime": 1783632146.807134,
+    "ast_hash": "cb69a381eee78bba78de14d8d724f9ea",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidWaveTapestry.imageset/Contents.json": {
+    "mtime": 1783632146.807824,
+    "ast_hash": "cf90d06d8dd7f5da86b00bbcb819185d",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/process-birthday-table.json": {
+    "mtime": 1783631836.1289887,
+    "ast_hash": "c18c318b46e5f606aee4d410105d6c9f",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidBirthdayTable.imageset/mermaid-birthday-table.png": {
+    "mtime": 1783632113.188081,
+    "ast_hash": "8f19edc13ba0761be9245ea4bdf2ca0b",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidCoralWallShelf.imageset/mermaid-coral-wall-shelf.png": {
+    "mtime": 1783632045.1722271,
+    "ast_hash": "d04205a33026d8e6163293f4d481eb3c",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidJellyfishSconce.imageset/mermaid-jellyfish-sconce.png": {
+    "mtime": 1783632045.5357869,
+    "ast_hash": "99290f73fbd653e7df3f5095479ec867",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidPearlClock.imageset/mermaid-pearl-clock.png": {
+    "mtime": 1783632044.7292469,
+    "ast_hash": "68cbe08c3fd026a76bf9e0edee2d825e",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidSeaMapFrame.imageset/mermaid-sea-map-frame.png": {
+    "mtime": 1783632045.0230372,
+    "ast_hash": "708169956c8b35a531b48f74f7521c6b",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidShellMirror.imageset/mermaid-shell-mirror.png": {
+    "mtime": 1783632044.5090172,
+    "ast_hash": "c675f67100e2112e422bab32671a05aa",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidStarfishGarland.imageset/mermaid-starfish-garland.png": {
+    "mtime": 1783632045.3515835,
+    "ast_hash": "ef6332225345fe9c7777a23fe883d512",
+    "semantic_hash": ""
+  },
+  "Ester/Assets.xcassets/MermaidWaveTapestry.imageset/mermaid-wave-tapestry.png": {
+    "mtime": 1783632045.7796192,
+    "ast_hash": "3d1434d45bfe6202b9ff7b2a808dd453",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/coral-wall-shelf-chroma.png": {
+    "mtime": 1783631994.581149,
+    "ast_hash": "b5e16486825b54f46475f9dbdaadb184",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/jellyfish-sconce-chroma.png": {
+    "mtime": 1783631994.5896368,
+    "ast_hash": "44def0c3891b5a337072781f3d861d76",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-birthday-table-alpha-preview.png": {
+    "mtime": 1783632113.4231536,
+    "ast_hash": "abdd0fecd187a840f94982f80d39f3fb",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/mermaid-birthday-table-chroma.png": {
+    "mtime": 1783631835.0924888,
+    "ast_hash": "207d8f20a59a3b284a9b68791c4ab42a",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/pearl-clock-chroma.png": {
+    "mtime": 1783631994.573394,
+    "ast_hash": "39929eabc591a0f46a2546ee9e7d2b25",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/sea-map-frame-chroma.png": {
+    "mtime": 1783631994.577813,
+    "ast_hash": "e54628f37f2d1419781ddef9c34cdb08",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/shell-mirror-chroma.png": {
+    "mtime": 1783631994.5675788,
+    "ast_hash": "3f50d4dc2edaebeba02d6dccbd57e7da",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/starfish-garland-chroma.png": {
+    "mtime": 1783631994.5861413,
+    "ast_hash": "672fa345715d8634910f0c5d6dcf1722",
+    "semantic_hash": ""
+  },
+  "tmp/furniture-imagegen-sources/wave-tapestry-chroma.png": {
+    "mtime": 1783631994.6102004,
+    "ast_hash": "427839abafe8efd44e367f460ba18f9c",
+    "semantic_hash": ""
+  },
+  "tmp/wall-decorations-contact-sheet.png": {
+    "mtime": 1783632045.904324,
+    "ast_hash": "85babe9bf36789c331d9cc0dff039801",
     "semantic_hash": ""
   }
 }

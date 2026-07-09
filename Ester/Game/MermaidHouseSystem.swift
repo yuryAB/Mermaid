@@ -1684,14 +1684,18 @@ final class MermaidHouseSceneController {
             let node = makeObjectNode(definition: definition)
             node.name = "placed_house_object_\(object.id.uuidString)"
             let roomCenter = metrics.worldCenter(for: object.roomPosition)
-            let size = CGSize(width: definition.displaySize.width * object.scale,
-                              height: definition.displaySize.height * object.scale)
-            node.size = size
+            var visualHeight = visualHeight(of: node, definition: definition)
+            if definition.assetName != nil, object.scale != 1 {
+                node.setScale(node.xScale * object.scale)
+                visualHeight = node.size.height * node.xScale
+            }
             node.position = CGPoint(x: roomCenter.x + object.localPosition.x,
-                                    y: roomCenter.y + object.localPosition.y - size.height / 2)
+                                    y: roomCenter.y + object.localPosition.y - visualHeight / 2)
             node.zPosition = object.zLayerOverride ?? 0
             if object.id == selectedPlacedObjectID {
-                node.addChild(makeSelectedObjectFrame(size: size))
+                let frameSize = CGSize(width: definition.displaySize.width * object.scale,
+                                       height: definition.displaySize.height * object.scale)
+                node.addChild(makeSelectedObjectFrame(size: frameSize))
             }
             let targetLayer = layerForPlacedObject(surface: object.surface,
                                                     localPosition: object.localPosition,
@@ -1715,13 +1719,26 @@ final class MermaidHouseSceneController {
         let node: SKSpriteNode
         if let assetName = definition.assetName {
             node = SKSpriteNode(imageNamed: assetName)
+            let textureSize = node.size
+            let targetSize = definition.displaySize
+            if textureSize.width > 0, textureSize.height > 0 {
+                let scaleX = targetSize.width / textureSize.width
+                let scaleY = targetSize.height / textureSize.height
+                node.setScale(Swift.min(scaleX, scaleY))
+            }
         } else {
             node = SKSpriteNode(color: GameUI.coral, size: definition.displaySize)
         }
         node.anchorPoint = CGPoint(x: 0.5, y: 0)
-        node.size = definition.displaySize
         node.name = "house_object_\(definition.id)"
         return node
+    }
+
+    private func visualHeight(of node: SKSpriteNode, definition: HouseObjectDefinition) -> CGFloat {
+        if definition.assetName != nil {
+            return node.size.height * node.xScale
+        }
+        return node.size.height
     }
 
     private func refreshHouseObjectPanel() {
@@ -2205,9 +2222,9 @@ final class MermaidHouseSceneController {
     private func updatePreviewNode(for placement: inout ActiveHouseObjectPlacement) {
         let roomCenter = metrics.worldCenter(for: placement.roomPosition)
         let position = placement.lastResult.isValid ? placement.lastResult.finalPosition : placement.localPoint
+        let usedHeight = visualHeight(of: placement.previewNode, definition: placement.definition)
         placement.previewNode.position = CGPoint(x: roomCenter.x + position.x,
-                                                 y: roomCenter.y + position.y - placement.definition.displaySize.height / 2)
-        placement.previewNode.size = placement.definition.displaySize
+                                                 y: roomCenter.y + position.y - usedHeight / 2)
         placement.previewNode.color = placement.lastResult.isValid ? .clear : UIColor.red
         placement.previewNode.colorBlendFactor = placement.lastResult.isValid ? 0 : 0.35
 

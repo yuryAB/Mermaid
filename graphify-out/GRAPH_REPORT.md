@@ -1,16 +1,16 @@
 # Graph Report - Mermaid  (2026-07-09)
 
 ## Corpus Check
-- 358 files · ~4,234,439 words
+- 358 files · ~4,234,493 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4112 nodes · 14931 edges · 246 communities (151 shown, 95 thin omitted)
+- 4112 nodes · 14931 edges · 243 communities (147 shown, 96 thin omitted)
 - Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 1968 edges (avg confidence: 0.73)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `7a30f586`
+- Built from commit: `341f96ad`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -43,7 +43,6 @@
 - World Stamp Rendering
 - Mermaid Arms & Animation
 - Challenge Giver Component
-- Autonomy — Fish Play & Guidance
 - Mermaid Figures — Baby
 - Reef Asteroids Minigame Engine
 - Region System
@@ -115,7 +114,6 @@
 - Ester Game
 - Ester Game
 - Ester Game
-- Ester Game
 - Managers
 - Ester Game
 - Ester Game
@@ -125,7 +123,6 @@
 - Ester Game
 - Storyboard
 - Components
-- Ester Game
 - Ester Game
 - Ester Game
 - ColorManager
@@ -288,7 +285,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (246 total, 95 thin omitted)
+## Communities (243 total, 96 thin omitted)
 
 ### Community 0 - "Map Tiles — Mossy Terrain"
 Cohesion: 0.13
@@ -320,7 +317,7 @@ Nodes (8): CGLineCap, SKShapeNode, SKTexture, TimeInterval, UIBezierPath, UIColo
 
 ### Community 7 - "Banquet of Tides Minigame"
 Cohesion: 0.05
-Nodes (29): CGPath, ReefAsteroidsEngine, ReefAsteroidsOverlay, ReefAsteroidsRules, ReefFeedback, ReefFrame, ReefPlayer, ReefProjectile (+21 more)
+Nodes (30): CGPath, ReefAsteroidsEngine, ReefAsteroidsOverlay, ReefAsteroidsRules, ReefFeedback, ReefFrame, ReefPlayer, ReefProjectile (+22 more)
 
 ### Community 8 - "Event System"
 Cohesion: 0.08
@@ -332,11 +329,11 @@ Nodes (23): Bool, NSCoder, Set, SKLabelNode, SKShapeNode, TimeInterval, UIColor,
 
 ### Community 10 - "Tide Memory Minigame"
 Cohesion: 0.06
-Nodes (20): SKNode, UIColor, CGSize, GameUI, CGRect, NSCache, NSString, SKSpriteNode (+12 more)
+Nodes (22): SKNode, UIColor, CGSize, GameUI, CGRect, NSCache, NSString, SKSpriteNode (+14 more)
 
 ### Community 11 - "Refuge Village Controller"
-Cohesion: 0.15
-Nodes (10): AquaticSpecies, AquaticAnimalGroup, RegistroCatalog, RegistroMermaidObservationDefinition, RegistroProgressSnapshot, RegistroSpeciesDefinition, RegistroUnlockRequirement, challengeFromSpecies (+2 more)
+Cohesion: 0.11
+Nodes (12): AquaticSpecies, AquaticAnimalGroup, RegistroCatalog, RegistroMermaidObservationDefinition, RegistroProgressSnapshot, RegistroSpeciesDefinition, RegistroUnlockRequirement, challengeFromSpecies (+4 more)
 
 ### Community 12 - "Shelter System"
 Cohesion: 0.07
@@ -394,17 +391,13 @@ Nodes (5): BanquetOfTidesOverlay, Mermaid, SKLabelNode, SKShapeNode, UIColor
 Cohesion: 0.10
 Nodes (15): DepthZone, abyss, blue, clear, deep, mid, shallow, surface (+7 more)
 
-### Community 28 - "Autonomy — Fish Play & Guidance"
-Cohesion: 0.16
-Nodes (10): StableRNG, ClosedRange, UInt64, WorldPOICatalog, WorldPOIKind, minigame, npc, pet (+2 more)
-
 ### Community 29 - "Mermaid Figures — Baby"
 Cohesion: 0.08
 Nodes (19): Equatable, CameraController, SKCameraNode, UIColor, BoundaryPaletteEffect, DepthBoundaryEdge, lower, upper (+11 more)
 
 ### Community 30 - "Reef Asteroids Minigame Engine"
 Cohesion: 0.04
-Nodes (45): CodingKeys, activeBuffs, adaptationByZone, babyGuaranteedRequestsUsed, balanceVersion, birthDate, challengeHighScores, collectedPOIRewardKeys (+37 more)
+Nodes (47): CodingKeys, activeBuffs, adaptationByZone, babyGuaranteedRequestsUsed, balanceVersion, birthDate, challengeHighScores, collectedPOIRewardKeys (+39 more)
 
 ### Community 31 - "Region System"
 Cohesion: 0.09
@@ -447,8 +440,8 @@ Cohesion: 0.26
 Nodes (9): ActiveHouseObjectPlacement, HouseMermaidAutonomyController, HouseRoomSceneID, HouseSceneDefaults, HouseSceneMetrics, Source, existing, inventory (+1 more)
 
 ### Community 41 - "World Chunk — Detail Rendering"
-Cohesion: 0.10
-Nodes (5): CheatSystem, Suggestion, Bool, ClosedRange, Set
+Cohesion: 0.12
+Nodes (4): CheatSystem, Suggestion, Bool, ClosedRange
 
 ### Community 42 - "Documentation — Design Decisions"
 Cohesion: 0.17
@@ -511,8 +504,8 @@ Cohesion: 0.13
 Nodes (19): MermaidExpressionLibrary, MermaidExpressionPreset, MermaidEyeAsset, closed, half, open, wide, MermaidEyebrowExpression (+11 more)
 
 ### Community 57 - "Buff Coding Keys"
-Cohesion: 0.17
-Nodes (6): HUDLayer, Bool, SKLabelNode, TimeInterval, UIBezierPath, Void
+Cohesion: 0.18
+Nodes (5): HUDLayer, Bool, SKLabelNode, TimeInterval, Void
 
 ### Community 58 - "Mermaid Name Editor"
 Cohesion: 0.08
@@ -555,8 +548,8 @@ Cohesion: 0.11
 Nodes (18): MermaidIntent, avoidingDanger, eating, enteringRefuge, followingFish, goingDeeper, goingToObjective, goingUp (+10 more)
 
 ### Community 69 - "Autotile Set Hashing"
-Cohesion: 0.35
-Nodes (3): HUDPalette, SKShapeNode, UIColor
+Cohesion: 0.30
+Nodes (4): HUDPalette, SKShapeNode, UIBezierPath, UIColor
 
 ### Community 70 - "Mermaid Rig Models"
 Cohesion: 0.22
@@ -564,7 +557,7 @@ Nodes (7): MermaidRigDebugTool, Bool, MermaidFigurePart, NSCoder, SKLabelNode, U
 
 ### Community 73 - "Mermaid Figure Part Positioning"
 Cohesion: 0.05
-Nodes (43): CaseIterable, Codable, Reward, RewardKind, item, pearls, regionMap, story (+35 more)
+Nodes (52): CaseIterable, Codable, Reward, RewardKind, item, pearls, regionMap, story (+44 more)
 
 ### Community 74 - "Map Editor — SwiftUI Content View"
 Cohesion: 0.28
@@ -630,17 +623,13 @@ Nodes (14): Bool, NSCoder, SKLabelNode, VisualStyle, environment, npc, object, w
 Cohesion: 0.21
 Nodes (7): AppDelegate, Any, Bool, UIApplication, UIApplicationDelegate, UIResponder, UIWindow
 
-### Community 90 - "Managers"
-Cohesion: 0.20
-Nodes (3): HUDTypography, NSCoder, UIEdgeInsets
-
 ### Community 91 - "Managers"
 Cohesion: 0.15
 Nodes (11): AmbientLifeNode, OceanPalette, Style, jelly, needleFish, ovalFish, ray, NSCoder (+3 more)
 
 ### Community 92 - "Appdelegate"
-Cohesion: 0.07
-Nodes (15): expeditionRevealByRegion, inventoryItems, repeatablePOIRewardAvailableAtByKey, MermaidStats, Bool, Data, Date, Decoder (+7 more)
+Cohesion: 0.06
+Nodes (15): ClosedRange, expeditionRevealByRegion, inventoryItems, mapPositionByRegion, repeatablePOIRewardAvailableAtByKey, MermaidStats, Bool, Data (+7 more)
 
 ### Community 93 - "Components"
 Cohesion: 0.33
@@ -655,24 +644,20 @@ Cohesion: 0.18
 Nodes (11): Conceito, Coordenadas, Descoberta, Estrutura de Dados, Eventos Aleatórios — Upgrade, Pontos de Interesse (POIs), Retorno a POIs Descobertos, Sistema de Recompensas (+3 more)
 
 ### Community 97 - "Ester Game"
-Cohesion: 0.09
-Nodes (10): ClosedRange, discoveryPointByRegion, mapEntryPointByRegion, mapPositionByRegion, StableMapRNG, ClosedRange, UInt64, OfflineProgressSystem (+2 more)
+Cohesion: 0.10
+Nodes (11): Set, Region, RegionDiscoverySystem, RegionMenuOverlay, CGRect, ClosedRange, NSCoder, Set (+3 more)
 
 ### Community 98 - "Ester Game"
 Cohesion: 0.25
 Nodes (6): Channel, caustics, fog, particles, shader, OceanVisualTuning
-
-### Community 99 - "Ester Game"
-Cohesion: 0.36
-Nodes (3): SupportResourceVisualFactory, SKLabelNode, UIColor
 
 ### Community 100 - "Ester Game"
 Cohesion: 0.20
 Nodes (9): 1. Required Context, 2. Size and Proportion, 3. Asset Catalog Location, 4. Tint and Color Configuration, 5. File and Asset Names, 6. Contents.json, 7. Code Integration, 8. Final Checklist (+1 more)
 
 ### Community 101 - "Ester Game"
-Cohesion: 0.10
-Nodes (17): MermaidEmotionalState, MermaidMoodCue, currentLift, currentStrain, encouraged, none, MermaidMoodTone, danger (+9 more)
+Cohesion: 0.09
+Nodes (20): MermaidEmotionalState, MermaidMoodCue, currentLift, currentStrain, encouraged, none, MermaidMoodTone, danger (+12 more)
 
 ### Community 102 - "Managers"
 Cohesion: 0.29
@@ -695,8 +680,8 @@ Cohesion: 0.25
 Nodes (7): POIChallengeOfferOverlay, NSCoder, Set, UIColor, UIEvent, UITouch, Void
 
 ### Community 108 - "Ester Game"
-Cohesion: 0.15
-Nodes (10): CoreText, IconKind, plankton, shell, wave, LabelStyle, body, bodyBold (+2 more)
+Cohesion: 0.14
+Nodes (11): CoreText, HUDTypography, IconKind, plankton, shell, wave, LabelStyle, body (+3 more)
 
 ### Community 109 - "Storyboard"
 Cohesion: 0.79
@@ -713,10 +698,6 @@ Nodes (6): Architecture And Ownership, Goal Mode Discipline, Icons And Assets, K
 ### Community 112 - "Ester Game"
 Cohesion: 0.25
 Nodes (8): Adaptação para Ester, Como o Terraria faz (referência), Mini-mapa de Expedição, O que aparece no mini-mapa, O que NÃO aparece, Porcentagem de descoberta, Raio de visão — decisão fechada, Regras propostas para o mini-mapa
-
-### Community 113 - "Ester Game"
-Cohesion: 0.35
-Nodes (6): RegionMenuOverlay, CGRect, Set, UIEvent, UITouch, Void
 
 ### Community 115 - "Managers"
 Cohesion: 0.18
@@ -893,16 +874,16 @@ Nodes (7): Mermaid, Direction, down, left, none, right, up
 ## Knowledge Gaps
 - **768 isolated node(s):** `wander`, `school`, `flee`, `guide`, `open` (+763 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **95 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **96 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `CGFloat` connect `Gameplay Reward Models` to `Map Tiles — Mossy Terrain`, `Mermaid House System`, `Map Tiles — Mossy Autotile`, `Gameplay Models & Scene Construction`, `Challenge Flow Controller`, `World Point & Rendering Primitives`, `Depth Environment & Ocean Parallax`, `Banquet of Tides Minigame`, `Event System`, `Species Registry & Mermaid Progression`, `Tide Memory Minigame`, `Refuge Village Controller`, `Bubble Climb Minigame Overlay`, `Shell Snap Minigame`, `Echo Melody Minigame`, `Resource Support & Shop`, `Entity Components — Visual Effects`, `Game Scene Entries & Birth Waters`, `Challenge Goals & Spawning`, `Mermaid Stats — Balance & Buffs`, `Audio Manager & Sound Effects`, `Tide Weaving System`, `Mermaid Arms & Animation`, `Challenge Giver Component`, `Autonomy — Fish Play & Guidance`, `Mermaid Figures — Baby`, `Region System`, `Reef Asteroids Overlay`, `Map Tiles — JSON Manifest`, `Depth System`, `World Chunk Factory`, `Growth System`, `Mermaid Figures — Child`, `World Chunk — Detail Rendering`, `Documentation — Design Decisions`, `Movement Vector Utilities`, `Component Base Classes`, `Cheat System`, `Fish Visual Models`, `Region Map Cues & Expedition`, `Movement Enums & Animation Modes`, `Fish Drawing Factory`, `HUD Layer`, `Expedition Grid Math`, `Pearl Economy`, `HUD — Biology Meter & Commands`, `Buff Coding Keys`, `Mermaid Name Editor`, `Depth Zone Colors`, `Mermaid Emotion Component`, `Command & Touch System`, `Mermaid Rig Debug Tool`, `Mermaid Core Entity`, `Game Sound Enum Values`, `Autonomy — Bond Recovery`, `Mermaid Intent & Acceptance`, `Autotile Set Hashing`, `Mermaid Rig Models`, `HUD — Active Effects Shelf`, `Aquatic Biomes`, `Mermaid Figure Part Positioning`, `Map Editor — SwiftUI Content View`, `Event Bus`, `Refuge Entry & Energy`, `Ester Game`, `Ester Game`, `Components`, `Ester Game`, `Managers`, `Managers`, `Appdelegate`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Managers`, `Ester Game`, `Ester Game`, `Ester Game`, `Components`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `.touchesBegan`, `Ester Game`, `Agents`, `CodingKeys`, `BondRecoveryState`, `.texture`, `.addCommandButton`, `IconKind`, `TideMemoryCardState`, `.touchesEnded`, `EditorLayer`, `ChildMermaidRig`?**
+- **Why does `CGFloat` connect `Gameplay Reward Models` to `Map Tiles — Mossy Terrain`, `Mermaid House System`, `Map Tiles — Mossy Autotile`, `Gameplay Models & Scene Construction`, `Challenge Flow Controller`, `World Point & Rendering Primitives`, `Depth Environment & Ocean Parallax`, `Banquet of Tides Minigame`, `Event System`, `Species Registry & Mermaid Progression`, `Tide Memory Minigame`, `Refuge Village Controller`, `Bubble Climb Minigame Overlay`, `Shell Snap Minigame`, `Echo Melody Minigame`, `Resource Support & Shop`, `Entity Components — Visual Effects`, `Game Scene Entries & Birth Waters`, `Challenge Goals & Spawning`, `Mermaid Stats — Balance & Buffs`, `Audio Manager & Sound Effects`, `Tide Weaving System`, `Mermaid Arms & Animation`, `Challenge Giver Component`, `Mermaid Figures — Baby`, `Region System`, `Reef Asteroids Overlay`, `Map Tiles — JSON Manifest`, `Depth System`, `World Chunk Factory`, `Growth System`, `Mermaid Figures — Child`, `World Chunk — Detail Rendering`, `Documentation — Design Decisions`, `Movement Vector Utilities`, `Component Base Classes`, `Cheat System`, `Fish Visual Models`, `Region Map Cues & Expedition`, `Movement Enums & Animation Modes`, `Fish Drawing Factory`, `HUD Layer`, `Expedition Grid Math`, `Pearl Economy`, `HUD — Biology Meter & Commands`, `Buff Coding Keys`, `Mermaid Name Editor`, `Depth Zone Colors`, `Mermaid Emotion Component`, `Command & Touch System`, `Mermaid Rig Debug Tool`, `Mermaid Core Entity`, `Game Sound Enum Values`, `Autonomy — Bond Recovery`, `Mermaid Intent & Acceptance`, `Autotile Set Hashing`, `Mermaid Rig Models`, `HUD — Active Effects Shelf`, `Aquatic Biomes`, `Mermaid Figure Part Positioning`, `Map Editor — SwiftUI Content View`, `Event Bus`, `Refuge Entry & Energy`, `Ester Game`, `Ester Game`, `Components`, `Ester Game`, `Managers`, `Managers`, `Appdelegate`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Managers`, `Ester Game`, `Ester Game`, `Ester Game`, `Components`, `Ester Game`, `Ester Game`, `Ester Game`, `.touchesBegan`, `Ester Game`, `Agents`, `CodingKeys`, `BondRecoveryState`, `.texture`, `.addCommandButton`, `IconKind`, `TideMemoryCardState`, `.touchesEnded`, `EditorLayer`, `ChildMermaidRig`?**
   _High betweenness centrality (0.215) - this node is a cross-community bridge._
-- **Why does `String` connect `Mermaid Figure Part Positioning` to `Map Tiles — Mossy Terrain`, `Mermaid House System`, `Map Tiles — Mossy Autotile`, `Challenge Flow Controller`, `World Point & Rendering Primitives`, `Depth Environment & Ocean Parallax`, `Banquet of Tides Minigame`, `Event System`, `Species Registry & Mermaid Progression`, `Tide Memory Minigame`, `Refuge Village Controller`, `Bubble Climb Minigame Overlay`, `Shell Snap Minigame`, `Echo Melody Minigame`, `Mermaid Stats & Inventory`, `Resource Support & Shop`, `Entity Components — Visual Effects`, `Game Scene Entries & Birth Waters`, `Challenge Goals & Spawning`, `Bubble Climb Controls`, `Tide Weaving System`, `World Stamp Rendering`, `Mermaid Arms & Animation`, `Challenge Giver Component`, `Autonomy — Fish Play & Guidance`, `Mermaid Figures — Baby`, `Reef Asteroids Minigame Engine`, `Region System`, `Reef Asteroids Overlay`, `Map Tiles — JSON Manifest`, `Depth System`, `Gameplay Reward Models`, `World Chunk Factory`, `Growth System`, `World Chunk — Detail Rendering`, `Documentation — Design Decisions`, `Movement Vector Utilities`, `Component Base Classes`, `Autonomy — Eating Behavior`, `Cheat System`, `Region Map Cues & Expedition`, `World Stamp Drawing`, `HUD — Biology Meter & Commands`, `Buff Coding Keys`, `Mermaid Name Editor`, `Discovery & Depth Ranges`, `Depth Zone Colors`, `Mermaid Emotion Component`, `Game Sound Enum Values`, `Autonomy — Bond Recovery`, `Mermaid Intent & Acceptance`, `Autotile Set Hashing`, `Mermaid Rig Models`, `Event Bus`, `Mermaid Body Dimensions`, `Components`, `Ester Game`, `Components`, `Components`, `Ester Game`, `Ester Game`, `Managers`, `Managers`, `Appdelegate`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Managers`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `ColorManager`, `Ester Game`, `FoodComponent`, `Ester Game`, `SupportResourceKind`, `.touchesBegan`, `.texture`, `.addCommandButton`, `.touchesEnded`?**
+- **Why does `String` connect `Mermaid Figure Part Positioning` to `Map Tiles — Mossy Terrain`, `Mermaid House System`, `Map Tiles — Mossy Autotile`, `Challenge Flow Controller`, `World Point & Rendering Primitives`, `Depth Environment & Ocean Parallax`, `Banquet of Tides Minigame`, `Event System`, `Species Registry & Mermaid Progression`, `Tide Memory Minigame`, `Refuge Village Controller`, `Bubble Climb Minigame Overlay`, `Shell Snap Minigame`, `Echo Melody Minigame`, `Mermaid Stats & Inventory`, `Resource Support & Shop`, `Entity Components — Visual Effects`, `Game Scene Entries & Birth Waters`, `Challenge Goals & Spawning`, `Bubble Climb Controls`, `Tide Weaving System`, `World Stamp Rendering`, `Mermaid Arms & Animation`, `Challenge Giver Component`, `Mermaid Figures — Baby`, `Reef Asteroids Minigame Engine`, `Region System`, `Reef Asteroids Overlay`, `Map Tiles — JSON Manifest`, `Depth System`, `Gameplay Reward Models`, `World Chunk Factory`, `Growth System`, `World Chunk — Detail Rendering`, `Documentation — Design Decisions`, `Movement Vector Utilities`, `Component Base Classes`, `Autonomy — Eating Behavior`, `Cheat System`, `Region Map Cues & Expedition`, `World Stamp Drawing`, `HUD — Biology Meter & Commands`, `Buff Coding Keys`, `Mermaid Name Editor`, `Discovery & Depth Ranges`, `Depth Zone Colors`, `Mermaid Emotion Component`, `Game Sound Enum Values`, `Autonomy — Bond Recovery`, `Mermaid Intent & Acceptance`, `Autotile Set Hashing`, `Mermaid Rig Models`, `Event Bus`, `Mermaid Body Dimensions`, `Components`, `Ester Game`, `Components`, `Components`, `Ester Game`, `Ester Game`, `Managers`, `Appdelegate`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `Managers`, `Ester Game`, `Ester Game`, `Ester Game`, `Ester Game`, `ColorManager`, `Ester Game`, `FoodComponent`, `Ester Game`, `SupportResourceKind`, `.touchesBegan`, `.texture`, `.addCommandButton`, `.touchesEnded`?**
   _High betweenness centrality (0.201) - this node is a cross-community bridge._
-- **Why does `CGPoint` connect `Mermaid House System` to `Mapeditor Mapeditor`, `Map Tiles — Mossy Terrain`, `SupportResourceKind`, `Gameplay Models & Scene Construction`, `World Point & Rendering Primitives`, `Depth Environment & Ocean Parallax`, `Banquet of Tides Minigame`, `Event System`, `Species Registry & Mermaid Progression`, `Tide Memory Minigame`, `Shell Snap Minigame`, `Echo Melody Minigame`, `Resource Support & Shop`, `Entity Components — Visual Effects`, `Game Scene Entries & Birth Waters`, `Challenge Goals & Spawning`, `Mermaid Stats — Balance & Buffs`, `Audio Manager & Sound Effects`, `Mermaid Arms & Animation`, `Challenge Giver Component`, `Autonomy — Fish Play & Guidance`, `Mermaid Figures — Baby`, `Region System`, `Reef Asteroids Overlay`, `Map Tiles — JSON Manifest`, `Depth System`, `Gameplay Reward Models`, `Growth System`, `Mermaid Figures — Child`, `Documentation — Design Decisions`, `Movement Vector Utilities`, `Component Base Classes`, `Cheat System`, `Region Map Cues & Expedition`, `Movement Enums & Animation Modes`, `Fish Drawing Factory`, `HUD Layer`, `Expedition Grid Math`, `HUD — Biology Meter & Commands`, `Buff Coding Keys`, `Mermaid Name Editor`, `Depth Zone Colors`, `Mermaid Emotion Component`, `Mermaid Rig Debug Tool`, `Mermaid Core Entity`, `Game Sound Enum Values`, `Encoding Utilities`, `Autonomy — Bond Recovery`, `Autotile Set Hashing`, `Mermaid Rig Models`, `HUD — Active Effects Shelf`, `Aquatic Biomes`, `Event Bus`, `Mermaid Body Dimensions`, `Ester Game`, `Ester Game`, `Managers`, `Managers`, `Appdelegate`, `Ester Game`, `Ester Game`, `CodingKeys`, `Managers`, `Ester Game`, `Components`, `Ester Game`, `Ester Game`, `.addCommandButton`, `.touchesEnded`, `Ester Game`, `ChallengeGiverComponent`, `Ester Game`, `Orientation`, `Ester Game`, `Ester Game`?**
+- **Why does `CGPoint` connect `Mermaid House System` to `Mapeditor Mapeditor`, `Map Tiles — Mossy Terrain`, `SupportResourceKind`, `Gameplay Models & Scene Construction`, `World Point & Rendering Primitives`, `Depth Environment & Ocean Parallax`, `Banquet of Tides Minigame`, `Event System`, `Species Registry & Mermaid Progression`, `Tide Memory Minigame`, `Shell Snap Minigame`, `Echo Melody Minigame`, `Resource Support & Shop`, `Entity Components — Visual Effects`, `Game Scene Entries & Birth Waters`, `Challenge Goals & Spawning`, `Mermaid Stats — Balance & Buffs`, `Audio Manager & Sound Effects`, `Mermaid Arms & Animation`, `Challenge Giver Component`, `Mermaid Figures — Baby`, `Region System`, `Reef Asteroids Overlay`, `Map Tiles — JSON Manifest`, `Depth System`, `Gameplay Reward Models`, `Growth System`, `Mermaid Figures — Child`, `Documentation — Design Decisions`, `Movement Vector Utilities`, `Component Base Classes`, `Cheat System`, `Region Map Cues & Expedition`, `Movement Enums & Animation Modes`, `Fish Drawing Factory`, `HUD Layer`, `Expedition Grid Math`, `HUD — Biology Meter & Commands`, `Buff Coding Keys`, `Mermaid Name Editor`, `Depth Zone Colors`, `Mermaid Emotion Component`, `Mermaid Rig Debug Tool`, `Mermaid Core Entity`, `Game Sound Enum Values`, `Encoding Utilities`, `Autonomy — Bond Recovery`, `Autotile Set Hashing`, `Mermaid Rig Models`, `HUD — Active Effects Shelf`, `Aquatic Biomes`, `Mermaid Figure Part Positioning`, `Event Bus`, `Mermaid Body Dimensions`, `Ester Game`, `Ester Game`, `Managers`, `Managers`, `Appdelegate`, `Ester Game`, `CodingKeys`, `Managers`, `Ester Game`, `Components`, `Ester Game`, `.addCommandButton`, `.touchesEnded`, `ChallengeGiverComponent`, `Ester Game`, `Orientation`, `Ester Game`, `Ester Game`?**
   _High betweenness centrality (0.119) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `CGFloat` (e.g. with `.update()` and `.drawReefSkirt()`) actually correct?**
   _`CGFloat` has 3 INFERRED edges - model-reasoned connections that need verification._
